@@ -187,6 +187,7 @@ export default function Home() {
         </section>
 
         {/* Projects */}
+
         <section className="section projects-section">
           <div className="container">
             <div className="projects-head">
@@ -196,19 +197,19 @@ export default function Home() {
                 text="A few spaces we have had the pleasure of helping take shape."
                 light
               />
-              <Reveal dir="up" delay={0.1}>
-                <Button href="/services" variant="light">
-                  View all projects
-                </Button>
-              </Reveal>
+              <Button href="/services" variant="light">
+                View all projects
+              </Button>
             </div>
-            <StaggerContainer className="project-grid">
+            <div className="project-grid">
               {projects.map((project, index) => (
-                <StaggerItem key={project.title}>
-                  <ProjectCard project={project} index={index} />
-                </StaggerItem>
+                <ProjectCard
+                  key={project.title}
+                  project={project}
+                  index={index}
+                />
               ))}
-            </StaggerContainer>
+            </div>
           </div>
         </section>
 
