@@ -1,4 +1,5 @@
 import ClientIsland from "@/components/client-island";
+import SmoothScroll from "@/components/smooth-scroll";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Fustat, Geist } from "next/font/google";
@@ -26,7 +27,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn("font-sans", geist.variable)}>
       <body>
-        {children} <ClientIsland />
+        <SmoothScroll>
+          {children} 
+          <ClientIsland />
+        </SmoothScroll>
       </body>
     </html>
   );
