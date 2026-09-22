@@ -1,9 +1,10 @@
+import ClientIsland from "@/components/client-island";
+import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Fustat, Geist } from "next/font/google";
 import "./globals.css";
-import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const fustat = Fustat({
   variable: "--font-fustat",
@@ -24,7 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={cn("font-sans", geist.variable)}>
-      <body>{children}</body>
+      <body>
+        {children} <ClientIsland />
+      </body>
     </html>
   );
 }
