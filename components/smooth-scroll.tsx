@@ -13,9 +13,10 @@ export default function SmoothScroll({
     <ReactLenis
       root
       options={{
-        lerp: 0.06,
-        duration: 1.4,
+        lerp: 0.025,
+        duration: 1.8,
         smoothWheel: true,
+        syncTouch: true,
         anchors: true,
       }}
     >
