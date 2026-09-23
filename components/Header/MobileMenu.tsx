@@ -1,12 +1,15 @@
 "use client";
 
 import { ArrowUpRight, X } from "lucide-react";
+
 import {
   AnimatePresence,
   motion,
   useReducedMotion,
 } from "motion/react";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { EASE } from "../animations/variants";
 import { Button } from "../Button";
@@ -29,6 +32,7 @@ export default function MobileMenu({
   onClose,
 }: MobileMenuProps) {
   const reduce = useReducedMotion();
+  const pathname = usePathname();
 
   return (
     <AnimatePresence>
@@ -44,7 +48,7 @@ export default function MobileMenu({
           />
 
           <motion.div
-            className="fixed right-0 top-0 bottom-0 z-50 w-[320px] max-w-[85vw] overflow-auto bg-white p-6"
+            className="fixed right-0 top-0 bottom-0 z-50 flex w-[320px] max-w-[85vw] flex-col overflow-y-auto overscroll-contain bg-white p-6"
             role="dialog"
             aria-modal="true"
             aria-label="Mobile navigation"
@@ -53,7 +57,7 @@ export default function MobileMenu({
             exit={{ x: "100%" }}
             transition={{ duration: 0.35, ease: EASE }}
           >
-            <div className="flex items-center justify-between">
+            <div className="flex shrink-0 items-center justify-between">
               <Logo />
 
               <button
@@ -66,7 +70,7 @@ export default function MobileMenu({
             </div>
 
             <motion.nav
-              className="mt-[50px] mb-[35px] grid"
+              className="mt-[50px] mb-[35px] grid shrink-0"
               initial="hidden"
               animate="visible"
               variants={{
@@ -80,34 +84,49 @@ export default function MobileMenu({
                 },
               }}
             >
-              {[{ label: "Home", href: "/" }, ...links].map((link) => (
-                <motion.div
-                  key={link.href}
-                  variants={{
-                    hidden: { opacity: 0, x: 30 },
-                    visible: {
-                      opacity: 1,
-                      x: 0,
-                      transition: {
-                        duration: 0.4,
-                        ease: EASE,
-                      },
-                    },
-                  }}
-                >
-                  <Link
-                    href={link.href}
-                    onClick={onClose}
-                    className="flex items-center justify-between border-b border-[#dfe5e9] py-[19px] text-[23px] font-bold text-navy"
-                  >
-                    {link.label}
-                    <ArrowUpRight size={17} />
-                  </Link>
-                </motion.div>
-              ))}
+              {links.map(
+                (link) => {
+                  const isActive =
+                    link.href === "/"
+                      ? pathname === "/"
+                      : pathname === link.href ||
+                        pathname.startsWith(`${link.href}/`);
+                        console.log(isActive, "isActive");
+
+                  return (
+                    <motion.div
+                      key={link.href}
+                      variants={{
+                        hidden: { opacity: 0, x: 30 },
+                        visible: {
+                          opacity: 1,
+                          x: 0,
+                          transition: {
+                            duration: 0.4,
+                            ease: EASE,
+                          },
+                        },
+                      }}
+                    >
+                      <Link
+                        href={link.href}
+                        onClick={onClose}
+                        className={`flex items-center justify-between border-b border-[#dfe5e9] py-[19px] text-[23px] font-bold transition-colors duration-200 ${
+                          isActive ? "!text-blue" : "!text-navy"
+                        }`}
+                      >
+                        {link.label}
+
+                        <ArrowUpRight size={17} />
+                      </Link>
+                    </motion.div>
+                  );
+                },
+              )}
             </motion.nav>
 
             <motion.div
+              className="shrink-0"
               initial={reduce ? false : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
