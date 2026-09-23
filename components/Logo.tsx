@@ -5,36 +5,24 @@ export function Logo({ light = false }: { light?: boolean }) {
   return (
     <Link
       href="/"
-      className={`logo flex items-center gap-2.5 ${light ? "logo-light" : ""}`}
+      className={`relative inline-flex items-center gap-2.5 ${
+        light ? "text-white" : "text-blue"
+      }`}
     >
       <Image
         src="/images/logo.png"
         alt="Enviroshield Logo"
         width={100}
         height={100}
-        className="w-18 h-auto"
+        className="h-auto w-18"
       />
-      <span
-        style={{
-          color: light ? "#fff" : "var(--blue)",
-          fontWeight: 700,
-          fontSize: "1.25rem",
-          letterSpacing: "-0.02em",
-          position: "relative",
-        }}
-      >
+
+      <span className="relative text-[1.25rem] font-bold tracking-[-0.02em]">
         EnviroShield
         <span
-          style={{
-            color: light ? "#fff" : "var(--ink)",
-            fontWeight: 600,
-            fontSize: ".8rem",
-            letterSpacing: "-0.02em",
-            position: "absolute",
-            display: "block",
-            bottom: light ? "-15px" : "-10px",
-            right: 0,
-          }}
+          className={`absolute right-0 block text-[0.8rem] font-semibold tracking-[-0.02em] ${
+            light ? "text-white" : "text-ink"
+          } ${light ? "bottom-[-15px]" : "bottom-[-10px]"}`}
         >
           Pvt. Ltd.
         </span>
