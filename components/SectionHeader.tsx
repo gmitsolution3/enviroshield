@@ -31,7 +31,7 @@ export function SectionHeader({
         {eyebrow}
       </div>
       <h2>{title}</h2>
-      {text && <p>{text}</p>}A
+      {text && <p>{text}</p>}
     </motion.div>
   );
 }
