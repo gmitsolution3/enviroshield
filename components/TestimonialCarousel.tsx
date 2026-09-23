@@ -53,8 +53,12 @@ export function TestimonialCarousel() {
 
   return (
     <div className="relative">
-      <div className="relative rounded-[18px] bg-white px-[50px] pb-[35px] pt-[45px] shadow-[0_12px_30px_rgba(0,51,78,0.05)] max-[600px]:px-[25px] max-[600px]:pb-[28px] max-[600px]:pt-[35px]">
-        <div className="absolute right-[36px] top-[18px] font-serif text-[92px] leading-none text-[#d9eaf9]">
+      {/* Outer Card with Liquid Glass Effect */}
+      <div className="group relative overflow-hidden rounded-[24px] border border-white/80 bg-gradient-to-br from-white/70 via-white/45 to-white/20 px-[50px] pb-[35px] pt-[45px] backdrop-blur-2xl backdrop-saturate-200 shadow-[0_20px_50px_-10px_rgba(0,51,78,0.12),_inset_0_1px_2px_0_rgba(255,255,255,1),_inset_0_-1px_1px_0_rgba(255,255,255,0.4)] max-[600px]:px-[25px] max-[600px]:pb-[28px] max-[600px]:pt-[35px]">
+        {/* Specular Liquid Sheen Overlay */}
+        <div className="pointer-events-none absolute -left-[50%] -top-[50%] h-[200%] w-[200%] bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.7)_0%,transparent_50%)] opacity-80" />
+
+        <div className="absolute right-[36px] top-[18px] font-serif text-[92px] leading-none text-[#d9eaf9]/60 select-none drop-shadow-sm">
           &ldquo;
         </div>
 
@@ -66,6 +70,7 @@ export function TestimonialCarousel() {
             animate={{ opacity: 1, x: 0 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, x: -30 }}
             transition={{ duration: 0.4, ease: EASE }}
+            className="relative z-10"
           >
             <div className="mb-[22px] flex gap-[5px] text-[#f4a623]">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -95,7 +100,7 @@ export function TestimonialCarousel() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.15, duration: 0.4 }}
             >
-              <div className="grid size-10 place-items-center rounded-full bg-[#cfe5f9] font-extrabold text-blue">
+              <div className="grid size-10 place-items-center rounded-full bg-gradient-to-br from-[#cfe5f9] to-[#a2cdf5] font-extrabold text-blue shadow-inner">
                 {current.name[0]}
               </div>
 
@@ -113,18 +118,19 @@ export function TestimonialCarousel() {
         </AnimatePresence>
       </div>
 
+      {/* Controls */}
       <div className="mt-[18px] flex items-center justify-end gap-[14px] text-[12px] text-ink">
         <motion.button
           aria-label="Previous testimonial"
           onClick={() => go(-1)}
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
-          className="grid size-[38px] place-items-center rounded-full border border-[#cdd6df] text-navy transition-colors duration-200 hover:border-blue hover:bg-blue hover:text-white"
+          className="grid size-[38px] place-items-center rounded-full border border-white/70 bg-white/50 text-navy backdrop-blur-md backdrop-saturate-150 shadow-[0_4px_12px_rgba(0,51,78,0.06),_inset_0_1px_1px_rgba(255,255,255,0.8)] transition-all duration-200 hover:border-blue hover:bg-blue hover:text-white"
         >
-          <ChevronLeft />
+          <ChevronLeft size={18} />
         </motion.button>
 
-        <span>
+        <span className="font-medium tracking-wider">
           0{index + 1}{" "}
           <i className="mx-[5px] not-italic text-[#b1bdc6]">/</i> 0
           {items.length}
@@ -133,11 +139,11 @@ export function TestimonialCarousel() {
         <motion.button
           aria-label="Next testimonial"
           onClick={() => go(1)}
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
-          className="grid size-[38px] place-items-center rounded-full border border-[#cdd6df] text-navy transition-colors duration-200 hover:border-blue hover:bg-blue hover:text-white"
+          className="grid size-[38px] place-items-center rounded-full border border-white/70 bg-white/50 text-navy backdrop-blur-md backdrop-saturate-150 shadow-[0_4px_12px_rgba(0,51,78,0.06),_inset_0_1px_1px_rgba(255,255,255,0.8)] transition-all duration-200 hover:border-blue hover:bg-blue hover:text-white"
         >
-          <ChevronRight />
+          <ChevronRight size={18} />
         </motion.button>
       </div>
     </div>
