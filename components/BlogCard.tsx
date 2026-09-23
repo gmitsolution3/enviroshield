@@ -1,10 +1,11 @@
 "use client";
+
 import { BlogPost } from "@/lib/data/content";
 import { ArrowUpRight } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
-import { fadeUp, viewportOnce } from "./animations/variants";
 import Link from "next/link";
+import { fadeUp, viewportOnce } from "./animations/variants";
 
 export function BlogCard({
   post,
@@ -14,9 +15,10 @@ export function BlogCard({
   index?: number;
 }) {
   const reduce = useReducedMotion();
+
   return (
     <motion.article
-      className="blog-card"
+      className="group"
       variants={fadeUp}
       initial="hidden"
       whileInView="visible"
@@ -26,12 +28,11 @@ export function BlogCard({
         reduce ? undefined : { y: -5, transition: { duration: 0.3 } }
       }
     >
-      <div className="blog-image">
+      <div className="relative mb-[20px] h-[240px] overflow-hidden rounded-[14px]">
         <motion.div
-          className="blog-image-inner"
+          className="absolute inset-0"
           whileHover={reduce ? undefined : { scale: 1.04 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          style={{ position: "absolute", inset: 0 }}
         >
           <Image
             src={post.image}
@@ -41,14 +42,30 @@ export function BlogCard({
           />
         </motion.div>
       </div>
-      <div className="blog-meta">
-        <span>{post.category}</span>
-        <span>{post.date}</span>
+
+      <div className="mb-[12px] flex items-center gap-[10px] text-[10px] font-extrabold uppercase tracking-[0.12em]">
+        <span className="text-blue">{post.category}</span>
+        <span className="h-[3px] w-[3px] rounded-full bg-[#aebcc3]" />
+        <span className="text-[#71838d]">{post.date}</span>
       </div>
-      <h3>{post.title}</h3>
-      <p>{post.excerpt}</p>
-      <Link href={`/blog/${post.slug}`} className="text-link">
-        Read article <ArrowUpRight size={16} />
+
+      <h3 className="mb-[10px] text-[22px] font-extrabold leading-[1.2] tracking-[-0.035em] text-navy">
+        {post.title}
+      </h3>
+
+      <p className="mb-[18px] text-[14px] leading-[1.7] text-ink">
+        {post.excerpt}
+      </p>
+
+      <Link
+        href={`/blog/${post.slug}`}
+        className="group/link inline-flex items-center gap-[7px] text-[13px] font-bold text-navy transition-colors duration-200 hover:text-blue"
+      >
+        Read article
+        <ArrowUpRight
+          size={16}
+          className="transition-transform duration-200 group-hover/link:translate-x-1"
+        />
       </Link>
     </motion.article>
   );

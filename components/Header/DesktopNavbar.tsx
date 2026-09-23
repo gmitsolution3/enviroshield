@@ -22,7 +22,7 @@ export default function DesktopNavbar({ links }: DesktopNavProps) {
   const pathname = usePathname();
 
   return (
-    <nav className="hidden items-center gap-[30px] text-[14px] font-semibold text-[#315366] min-[901px]:flex">
+    <nav className="hidden items-center gap-[30px] text-[14px] font-bold text-[#315366] min-[901px]:flex">
       {links.map((link, i) => {
         const isActive =
           link.href === "/"
