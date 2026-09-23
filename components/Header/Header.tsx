@@ -63,14 +63,25 @@ export default function Header() {
       <TopHeaderBar />
 
       <motion.header
-        className="sticky top-0 z-20 h-[82px] border-b border-transparent bg-white/95"
+        className="sticky top-0 z-20 h-[82px] border-b"
         animate={{
+          backgroundColor: scrolled
+            ? "rgba(255, 255, 255, 0.55)"
+            : "rgba(255, 255, 255, 1)",
+          backdropFilter: scrolled
+            ? "blur(16px) saturate(180%)"
+            : "blur(0px) saturate(100%)",
           boxShadow: scrolled
-            ? "0px 8px 30px rgba(0,51,78,0.08)"
-            : "0px 0px 0px rgba(0,51,78,0)",
+            ? "0px 10px 30px -5px rgba(0, 51, 78, 0.08), inset 0px 1px 0px 0px rgba(255, 255, 255, 0.8)"
+            : "0px 0px 0px rgba(0, 51, 78, 0), inset 0px 0px 0px 0px rgba(255, 255, 255, 0)",
           borderColor: scrolled
-            ? "rgba(223,229,233,1)"
-            : "rgba(223,229,233,0)",
+            ? "rgba(255, 255, 255, 0.4)"
+            : "rgba(223, 229, 233, 0)",
+        }}
+        style={{
+          WebkitBackdropFilter: scrolled
+            ? "blur(16px) saturate(180%)"
+            : "blur(0px) saturate(100%)",
         }}
         transition={{ duration: 0.3 }}
       >

@@ -2,7 +2,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { Button } from "@/components/Button";
-import { Footer } from "@/components/Footer";
+import Footer from "@/components/Footer";
 import Header from "@/components/Header/Header";
 import { PageHero } from "@/components/PageHero";
 import { Reveal } from "@/components/Reveal";

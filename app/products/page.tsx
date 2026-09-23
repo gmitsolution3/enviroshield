@@ -3,7 +3,7 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "@/components/animations/reveal";
-import { Footer } from "@/components/Footer";
+import Footer from "@/components/Footer";
 import Header from "@/components/Header/Header";
 import { PageHero } from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";

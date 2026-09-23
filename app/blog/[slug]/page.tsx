@@ -4,7 +4,7 @@ import {
   StaggerItem,
 } from "@/components/animations/reveal";
 import { Button } from "@/components/Button";
-import { Footer } from "@/components/Footer";
+import Footer from "@/components/Footer";
 import Header from "@/components/Header/Header";
 import { SectionHeader } from "@/components/SectionHeader";
 import { blogPosts } from "@/lib/data/content";

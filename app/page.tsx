@@ -1,4 +1,4 @@
-import { Footer } from "@/components/Footer";
+import Footer from "@/components/Footer";
 import Header from "@/components/Header/Header";
 import AboutSection from "@/components/home/AboutSection";
 import BlogSection from "@/components/home/BlogSection";
