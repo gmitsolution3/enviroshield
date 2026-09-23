@@ -9,7 +9,7 @@ import {
 } from "@/components/animations/reveal";
 import { Button } from "@/components/Button";
 import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
+import Header from "@/components/Header/Header";
 import { ContactSection } from "@/components/home/ContactSection";
 import { PageHero } from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";

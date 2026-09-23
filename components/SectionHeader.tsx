@@ -1,7 +1,9 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
+
 import { fadeUp, viewportOnce } from "./animations/variants";
+import { cn } from "@/lib/utils";
 
 export function SectionHeader({
   eyebrow,
@@ -20,9 +22,11 @@ export function SectionHeader({
 
   return (
     <motion.div
-      className={`max-w-[640px] ${
-        align === "center" ? "mx-auto text-center" : ""
-      } ${light ? "text-white" : ""}`}
+      className={cn(
+        "max-w-[640px]",
+        align === "center" && "mx-auto text-center",
+        light && "text-white",
+      )}
       variants={reduce ? undefined : fadeUp}
       initial={reduce ? false : "hidden"}
       whileInView="visible"
@@ -34,18 +38,20 @@ export function SectionHeader({
       </div>
 
       <h2
-        className={`mb-[19px] text-[clamp(35px,4vw,53px)] font-extrabold leading-[1.05] tracking-[-0.05em] ${
-          light ? "text-white" : "text-navy"
-        }`}
+        className={cn(
+          "mb-[19px] text-[clamp(35px,4vw,53px)] font-extrabold leading-[1.05] tracking-[-0.05em]",
+          light ? "text-white" : "text-navy",
+        )}
       >
         {title}
       </h2>
 
       {text && (
         <p
-          className={`text-[16px] leading-[1.7] mb-[24px] ${
-            light ? "text-white" : "text-ink"
-          }`}
+          className={cn(
+            "mb-[24px] text-[16px] leading-[1.7]",
+            light ? "text-white" : "text-ink",
+          )}
         >
           {text}
         </p>

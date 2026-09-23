@@ -4,7 +4,7 @@ import {
   StaggerItem,
 } from "@/components/animations/reveal";
 import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
+import Header from "@/components/Header/Header";
 import { PageHero } from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
 import { products } from "@/lib/data/content";

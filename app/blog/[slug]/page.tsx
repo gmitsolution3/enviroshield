@@ -3,11 +3,11 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "@/components/animations/reveal";
+import { Button } from "@/components/Button";
 import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
+import Header from "@/components/Header/Header";
 import { SectionHeader } from "@/components/SectionHeader";
 import { blogPosts } from "@/lib/data/content";
-import { Button } from "@/components/Button";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
