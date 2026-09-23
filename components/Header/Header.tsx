@@ -3,11 +3,10 @@
 import { Menu } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
-
 import { EASE } from "../animations/variants";
+import Container from "../Container";
 import { Logo } from "../Logo";
 import { ScrollProgress } from "../ScrollProgress";
-
 import DesktopNavbar from "./DesktopNavbar";
 import MobileMenu from "./MobileMenu";
 import TopHeaderBar from "./TopHeaderBar";
@@ -30,7 +29,6 @@ export default function Header() {
     const onScroll = () => setScrolled(window.scrollY > 20);
 
     window.addEventListener("scroll", onScroll, { passive: true });
-
     onScroll();
 
     return () => window.removeEventListener("scroll", onScroll);
@@ -85,7 +83,7 @@ export default function Header() {
         }}
         transition={{ duration: 0.3 }}
       >
-        <div className="container flex h-full items-center justify-between">
+        <Container className="flex h-full items-center justify-between">
           <motion.div
             initial={reduce ? false : { opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -103,7 +101,7 @@ export default function Header() {
           >
             <Menu />
           </button>
-        </div>
+        </Container>
       </motion.header>
 
       <MobileMenu

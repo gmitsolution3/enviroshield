@@ -1,9 +1,10 @@
 import { Mail, MapPin, Phone } from "lucide-react";
+import Container from "../Container";
 
 export default function TopHeaderBar() {
   return (
     <div className="hidden h-[38px] border-b border-[#e9eef1] bg-white text-[13px] text-ink min-[901px]:block">
-      <div className="container flex h-full items-center justify-between">
+      <Container className="flex h-full items-center justify-between">
         <span className="flex items-center gap-[7px] font-normal">
           <MapPin size={14} />
           Serving homes and businesses with care
@@ -26,7 +27,7 @@ export default function TopHeaderBar() {
             +1 123 456 7890
           </a>
         </span>
-      </div>
+      </Container>
     </div>
   );
 }
