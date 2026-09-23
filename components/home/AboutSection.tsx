@@ -1,10 +1,11 @@
 import { images } from "@/lib/data/content";
 import { CheckCircle2 } from "lucide-react";
+import Image from "next/image";
 import { AnimatedCounter } from "../animations/animated-counter";
 import { StaggerContainer, StaggerItem } from "../animations/reveal";
 import { Button } from "../Button";
 import { Reveal } from "../Reveal";
-import Image from "next/image";
+import { SectionHeader } from "../SectionHeader";
 
 export default function AboutSection() {
   return (
@@ -52,56 +53,45 @@ export default function AboutSection() {
             </Reveal>
           </div>
         </Reveal>
-        <Reveal dir="up" delay={0.15}>
-          <div className="about-copy">
-            <div className="eyebrow">
-              <span />
-              ABOUT US
+        <div className="about-copy">
+          <SectionHeader
+            eyebrow="ABOUT US"
+            title="We don’t just paint walls. We transform spaces."
+            text="At Enviroshield, we believe walls are more than surfaces. They are opportunities to express personality, comfort, and style. Our team combines professional craftsmanship with thoughtful design to create spaces that feel truly yours."
+          />
+          <StaggerContainer className="benefits">
+            {[
+              "Your vision, our expertise",
+              "Walls are our canvas",
+              "Premium materials & finishes",
+              "Your space is our inspiration",
+              "Built on trust",
+              "Passionate about quality",
+            ].map((item) => (
+              <StaggerItem key={item} className="benefit">
+                <CheckCircle2 size={16} />
+                {item}
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+          <div className="stats">
+            <div className="stat">
+              <strong>
+                <AnimatedCounter value={99} suffix="%" />
+              </strong>
+              <span>Customer satisfaction</span>
             </div>
-            <h2>
-              We don&rsquo;t just paint walls. We transform spaces.
-            </h2>
-            <p>
-              At Enviroshield, we believe walls are more than
-              surfaces. They are opportunities to express personality,
-              comfort, and style. Our team combines professional
-              craftsmanship with thoughtful design to create spaces
-              that feel truly yours.
-            </p>
-            <StaggerContainer className="benefits">
-              {[
-                "Your vision, our expertise",
-                "Walls are our canvas",
-                "Premium materials & finishes",
-                "Your space is our inspiration",
-                "Built on trust",
-                "Passionate about quality",
-              ].map((item) => (
-                <StaggerItem key={item} className="benefit">
-                  <CheckCircle2 size={16} />
-                  {item}
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-            <div className="stats">
-              <div className="stat">
-                <strong>
-                  <AnimatedCounter value={99} suffix="%" />
-                </strong>
-                <span>Customer satisfaction</span>
-              </div>
-              <div className="stat">
-                <strong>
-                  <AnimatedCounter value={500} suffix="+" />
-                </strong>
-                <span>Projects completed</span>
-              </div>
+            <div className="stat">
+              <strong>
+                <AnimatedCounter value={500} suffix="+" />
+              </strong>
+              <span>Projects completed</span>
             </div>
-            <Button href="/about" variant="outline">
-              More about us
-            </Button>
           </div>
-        </Reveal>
+          <Button href="/about" variant="outline">
+            More about us
+          </Button>
+        </div>
       </div>
     </section>
   );
