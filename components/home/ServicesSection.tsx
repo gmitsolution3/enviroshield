@@ -1,7 +1,6 @@
 "use client";
 
 import { EASE, viewportOnce } from "@/components/animations/variants";
-import { Button, SectionHeader } from "@/components/shared";
 import { services } from "@/lib/data/content";
 import {
   ArrowUpRight,
@@ -12,6 +11,8 @@ import {
 import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "../Button";
+import { SectionHeader } from "../SectionHeader";
 import styles from "./services-section.module.css";
 
 const cards = [
@@ -59,6 +60,7 @@ export default function ServicesSection() {
             title="Design-Driven Painting & Wallpapering Services"
             light
           />
+          
           <Button href="/services" variant="light">
             View all services
           </Button>

@@ -36,20 +36,7 @@
 }
 
 .header :global(.section-header .eyebrow) {
-  display: inline-flex;
-  padding: 7px 11px;
-  gap: 0;
-  margin-bottom: 16px;
-  border-radius: 7px;
-  background: rgba(255, 255, 255, 0.17);
-  color: #dbeeff;
-  font-size: 11px;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.header :global(.section-header .eyebrow span) {
-  display: none;
+  color: white;
 }
 
 .header > a {

@@ -1,7 +1,7 @@
 "use client";
 
 import { EASE } from "@/components/animations/variants";
-import { Button } from "@/components/shared";
+import { Button } from "@/components/Button";
 import {
   ArrowUpRight,
   ChevronLeft,

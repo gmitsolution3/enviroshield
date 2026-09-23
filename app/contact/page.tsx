@@ -1,14 +1,12 @@
 import {
+  Reveal,
   StaggerContainer,
   StaggerItem,
 } from "@/components/animations/reveal";
-import {
-  ContactSection,
-  Footer,
-  Header,
-  PageHero,
-  Reveal,
-} from "@/components/shared";
+import { Footer } from "@/components/Footer";
+import { Header } from "@/components/Header";
+import { ContactSection } from "@/components/home/ContactSection";
+import { PageHero } from "@/components/PageHero";
 
 export const metadata = {
   title: "Contact Enviroshield | Start your transformation",
@@ -61,9 +59,7 @@ export default function ContactPage() {
                 >
                   Frequently asked questions
                 </h2>
-                <p
-                  style={{ color: "var(--ink)", marginBottom: 36 }}
-                >
+                <p style={{ color: "var(--ink)", marginBottom: 36 }}>
                   A few things we are often asked. If your question is
                   not here, just send us a message.
                 </p>
