@@ -102,7 +102,10 @@ export default function AboutSection() {
                 key={item}
                 className="flex items-center gap-2 text-[13px] font-bold text-navy"
               >
-                <CheckCircle2 size={16} className="flex-none text-blue" />
+                <CheckCircle2
+                  size={16}
+                  className="flex-none text-blue"
+                />
                 {item}
               </StaggerItem>
             ))}

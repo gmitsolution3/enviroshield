@@ -16,6 +16,7 @@
   --color-mist: var(--mist);
   --color-line: var(--line);
   --color-white: var(--white);
+  --color-paste: var(--paste);
 
   /* keep all your existing shadcn mappings below */
   --color-sidebar-ring: var(--sidebar-ring);
@@ -72,6 +73,7 @@
   --navy: #00334e;
   --deep: #014284;
   --ink: #18384a;
+  --paste: #9bcfff;
   --muted: oklch(0.97 0 0);
   --mist: #f0f0fa;
   --line: #dfe5e9;

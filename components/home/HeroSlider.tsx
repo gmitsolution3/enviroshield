@@ -132,7 +132,7 @@ export default function Hero() {
               transition={{ duration: 0.35 }}
             >
               <motion.div
-                className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-[#9bcfff]"
+                className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste"
                 initial={reduce ? false : { opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{

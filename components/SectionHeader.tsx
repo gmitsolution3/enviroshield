@@ -2,8 +2,8 @@
 
 import { motion, useReducedMotion } from "motion/react";
 
-import { fadeUp, viewportOnce } from "./animations/variants";
 import { cn } from "@/lib/utils";
+import { fadeUp, viewportOnce } from "./animations/variants";
 
 export function SectionHeader({
   eyebrow,
@@ -32,7 +32,12 @@ export function SectionHeader({
       whileInView="visible"
       viewport={viewportOnce}
     >
-      <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
+      <div
+        className={cn(
+          "mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em]",
+          light ? "text-paste" : "text-blue",
+        )}
+      >
         <span className="h-[2px] w-7 bg-current" />
         {eyebrow}
       </div>
