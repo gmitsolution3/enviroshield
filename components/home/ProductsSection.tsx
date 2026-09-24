@@ -1,19 +1,16 @@
 import { products } from "@/lib/data/content";
 
 import { StaggerContainer, StaggerItem } from "../animations/reveal";
-
 import { Button } from "../Button";
-
+import Container from "../Container";
 import { ProductCard } from "../ProductCard";
-
 import { Reveal } from "../Reveal";
-
 import { SectionHeader } from "../SectionHeader";
 
 export default function ProductsSection() {
   return (
     <section className="py-[112px]">
-      <div className="container">
+      <Container>
         <div className="flex items-end justify-between gap-[25px] max-[900px]:flex-col max-[900px]:items-start">
           <SectionHeader
             eyebrow="OUR PRODUCTS"
@@ -27,7 +24,7 @@ export default function ProductsSection() {
           </Reveal>
         </div>
 
-        <StaggerContainer className="mt-[48px] grid grid-cols-2 gap-[25px] max-[600px]:grid-cols-1">
+        <StaggerContainer className="mt-12 grid grid-cols-2 gap-[25px] max-[600px]:grid-cols-1">
           {products.map((product) => (
             <StaggerItem
               key={product.slug}
@@ -37,7 +34,7 @@ export default function ProductsSection() {
             </StaggerItem>
           ))}
         </StaggerContainer>
-      </div>
+      </Container>
     </section>
   );
 }
