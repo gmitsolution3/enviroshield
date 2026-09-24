@@ -2,9 +2,9 @@
 
 import { Service } from "@/lib/data/content";
 import { ArrowUpRight } from "lucide-react";
-import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
+import Link from "next/link";
 import { fadeUp, viewportOnce } from "./animations/variants";
 
 function PaintIcon() {

@@ -4,6 +4,7 @@ import { images } from "@/lib/data/content";
 import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import { EASE } from "./animations/variants";
+import Container from './Container';
 
 export function PageHero({
   eyebrow,
@@ -20,6 +21,7 @@ export function PageHero({
 
   return (
     <section className="relative isolate min-h-[420px] overflow-hidden bg-navy text-white min-[601px]:min-h-[500px]">
+      <Container>
       <motion.div
         className="absolute inset-0"
         initial={reduce ? undefined : { scale: 1.05 }}
@@ -74,6 +76,7 @@ export function PageHero({
           </motion.p>
         </div>
       </div>
+      </Container>
     </section>
   );
 }
