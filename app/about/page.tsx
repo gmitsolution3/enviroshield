@@ -3,6 +3,7 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "@/components/animations/reveal";
+import Container from "@/components/Container";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header/Header";
 import { ContactSection } from "@/components/home/ContactSection";
@@ -62,16 +63,18 @@ export default function AboutPage() {
   return (
     <>
       <Header />
+
       <main>
         <PageHero
           eyebrow="ABOUT ENVIROSHIELD"
           title="A team that cares about the details others overlook."
           text="We are painters, finishers, and problem-solvers who believe a great wall transforms a room — and a great room changes how you feel at home."
         />
-        <section className="section">
-          <div className="container detail-grid">
+
+        <section className="py-[112px] max-[900px]:py-20 max-[600px]:py-16">
+          <Container className="grid grid-cols-2 items-center gap-[70px] max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
             <Reveal dir="image">
-              <div className="detail-photo">
+              <div className="relative h-[530px] overflow-hidden rounded-[18px] max-[600px]:h-[340px]">
                 <Image
                   src="https://images.pexels.com/photos/6473966/pexels-photo-6473966.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
                   alt="Craftsperson applying plaster to an interior wall"
@@ -80,67 +83,92 @@ export default function AboutPage() {
                 />
               </div>
             </Reveal>
+
             <Reveal dir="up" delay={0.15}>
-              <div className="detail-copy">
-                <div className="eyebrow">
-                  <span />
+              <div>
+                <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
+                  <span className="h-[2px] w-7 bg-current" />
                   OUR STORY
                 </div>
-                <h2>
+
+                <h2 className="mb-[18px] text-[clamp(34px,4vw,52px)] font-extrabold leading-[1.05] tracking-[-0.05em] text-navy">
                   Craft, care, and a love for well-finished walls.
                 </h2>
-                <p>
+
+                <p className="mb-[26px] text-base leading-[1.7] text-ink">
                   Enviroshield began with a simple idea: painting and
                   wall finishing should feel as considered as the rest
                   of your home. We are a small, dedicated team of
                   specialists who care about preparation as much as
                   the final coat.
                 </p>
-                <p>
+
+                <p className="mb-[26px] text-base leading-[1.7] text-ink">
                   From a single feature wall to a full commercial
                   refresh, we bring the same attention to detail — and
                   the same respect for your time and space.
                 </p>
-                <StaggerContainer className="benefits">
+
+                <StaggerContainer className="mb-[30px] grid grid-cols-2 gap-x-[22px] gap-y-[15px] max-[600px]:grid-cols-1 max-[600px]:gap-3">
                   {[
                     "Specialist wall finishing",
                     "Premium, long-lasting materials",
                     "Clear quotes and timelines",
                     "Respectful, tidy teams",
                   ].map((item) => (
-                    <StaggerItem key={item} className="benefit">
-                      <CheckCircle2 size={16} />
+                    <StaggerItem
+                      key={item}
+                      className="flex items-center gap-2 text-[13px] text-ink"
+                    >
+                      <CheckCircle2
+                        size={16}
+                        className="shrink-0 text-blue"
+                      />
                       {item}
                     </StaggerItem>
                   ))}
                 </StaggerContainer>
               </div>
             </Reveal>
-          </div>
+          </Container>
         </section>
-        <section className="section process-section">
-          <div className="container">
+
+        <section className="py-[112px] max-[900px]:py-20 max-[600px]:py-16">
+          <Container>
             <SectionHeader
               eyebrow="WHAT WE VALUE"
               title="The principles behind every project"
               text="Six things we never compromise on."
               align="center"
             />
-            <StaggerContainer className="values-grid">
-              {values.map((value) => (
-                <StaggerItem key={value.title}>
-                  <div className="value-card">
-                    <value.icon size={26} />
-                    <h3>{value.title}</h3>
-                    <p>{value.text}</p>
-                  </div>
-                </StaggerItem>
-              ))}
+
+            <StaggerContainer className="mt-12 grid grid-cols-3 gap-5 max-[600px]:grid-cols-1">
+              {values.map((value) => {
+                const Icon = value.icon;
+
+                return (
+                  <StaggerItem key={value.title}>
+                    <div className="rounded-[15px] border border-line p-7">
+                      <Icon size={26} className="mb-7 text-blue" />
+
+                      <h3 className="mb-[9px] text-[19px] text-navy">
+                        {value.title}
+                      </h3>
+
+                      <p className="text-[13px] leading-[1.6] text-ink">
+                        {value.text}
+                      </p>
+                    </div>
+                  </StaggerItem>
+                );
+              })}
             </StaggerContainer>
-          </div>
+          </Container>
         </section>
+
         <ContactSection />
       </main>
+
       <Footer />
     </>
   );

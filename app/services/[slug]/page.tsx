@@ -8,6 +8,7 @@ import {
   StaggerItem,
 } from "@/components/animations/reveal";
 import { Button } from "@/components/Button";
+import Container from "@/components/Container";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header/Header";
 import { ContactSection } from "@/components/home/ContactSection";
@@ -24,22 +25,28 @@ export function generateStaticParams() {
   return services.map((service) => ({ slug: service.slug }));
 }
 
-export default function ServiceDetailPage({
+export default async function ServiceDetailPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const service = services.find((s) => s.slug === params.slug);
+  const { slug } = await params;
+
+  const service = services.find((s) => s.slug === slug);
+
   if (!service) notFound();
+
   const benefits = [
     "Careful surface preparation",
     "Premium, low-odour materials",
     "Clean, respectful team",
     "Clear timeline and quote",
   ];
+
   return (
     <>
       <Header />
+
       <main>
         <PageHero
           eyebrow={service.category}
@@ -47,10 +54,11 @@ export default function ServiceDetailPage({
           text={service.description}
           image={service.image}
         />
-        <section className="section">
-          <div className="container detail-grid">
+
+        <section className="py-[112px] max-[900px]:py-20 max-[600px]:py-16">
+          <Container className="grid grid-cols-2 items-center gap-[70px] max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
             <Reveal dir="image">
-              <div className="detail-photo">
+              <div className="relative h-[530px] overflow-hidden rounded-[18px] max-[600px]:h-[340px]">
                 <Image
                   src={service.image}
                   alt={service.title}
@@ -59,30 +67,39 @@ export default function ServiceDetailPage({
                 />
               </div>
             </Reveal>
+
             <Reveal dir="up" delay={0.15}>
-              <div className="detail-copy">
+              <div>
                 <SectionHeader
                   eyebrow="OVERVIEW"
                   title={service.title}
                   text={service.description}
                 />
-                <StaggerContainer className="benefits">
-                  {benefits.map((b) => (
-                    <StaggerItem key={b} className="benefit">
-                      <CheckCircle2 size={16} />
-                      {b}
+
+                <StaggerContainer className="mt-[26px] mb-[30px] grid grid-cols-2 gap-x-[22px] gap-y-[15px] max-[600px]:grid-cols-1 max-[600px]:gap-3">
+                  {benefits.map((benefit) => (
+                    <StaggerItem
+                      key={benefit}
+                      className="flex items-center gap-2 text-[13px] text-ink"
+                    >
+                      <CheckCircle2
+                        size={16}
+                        className="shrink-0 text-blue"
+                      />
+                      {benefit}
                     </StaggerItem>
                   ))}
                 </StaggerContainer>
-                <div style={{ marginTop: 26 }}>
-                  <Button href="/contact">Talk to an expert</Button>
-                </div>
+
+                <Button href="/contact">Talk to an expert</Button>
               </div>
             </Reveal>
-          </div>
+          </Container>
         </section>
+
         <ContactSection />
       </main>
+
       <Footer />
     </>
   );
