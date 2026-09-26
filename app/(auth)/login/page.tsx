@@ -1,4 +1,14 @@
 import { LoginForm } from "@/components/auth/LoginForm";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Login",
+  description: "Sign in to your Enviroshield account.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function LoginPage({
   searchParams,
