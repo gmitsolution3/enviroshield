@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -35,6 +36,7 @@ function getSafeRedirectUrl(callbackUrl?: string) {
 export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -209,20 +211,42 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
                     </Link>
                   </div>
 
-                  <Input
-                    id="login-password"
-                    type="password"
-                    autoComplete="current-password"
-                    placeholder="Your password"
-                    aria-invalid={Boolean(errors.password)}
-                    aria-describedby={
-                      errors.password
-                        ? "login-password-error"
-                        : undefined
-                    }
-                    {...register("password")}
-                    className="h-[48px] rounded-[9px] border-[#e0e5ea] bg-[#fafbfd] px-[14px] text-[13px] text-ink transition-[border,box-shadow] duration-200 placeholder:text-[#9ca9b1] focus:border-blue focus:shadow-[0_0_0_3px_rgba(1,110,220,0.1)]"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="login-password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
+                      placeholder="Your password"
+                      aria-invalid={Boolean(errors.password)}
+                      aria-describedby={
+                        errors.password
+                          ? "login-password-error"
+                          : undefined
+                      }
+                      {...register("password")}
+                      className="h-[48px] rounded-[9px] border-[#e0e5ea] bg-[#fafbfd] px-[14px] pr-12 text-[13px] text-ink transition-[border,box-shadow] duration-200 placeholder:text-[#9ca9b1] focus:border-blue focus:shadow-[0_0_0_3px_rgba(1,110,220,0.1)]"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowPassword((current) => !current)
+                      }
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                      aria-label={
+                        showPassword
+                          ? "Hide password"
+                          : "Show password"
+                      }
+                      aria-pressed={showPassword}
+                    >
+                      {showPassword ? (
+                        <EyeOff size={18} aria-hidden="true" />
+                      ) : (
+                        <Eye size={18} aria-hidden="true" />
+                      )}
+                    </button>
+                  </div>
 
                   {errors.password && (
                     <p
