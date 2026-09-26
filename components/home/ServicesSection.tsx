@@ -23,6 +23,7 @@ const cards = [
       "Our precision painting services focus on delivering smooth, long-lasting finishes that bring your vision to life.",
     icon: Paintbrush,
   },
+
   {
     ...services[3],
     title: "Wallpaper Removal & Prep",
@@ -30,6 +31,7 @@ const cards = [
       "Preparing your walls for new wallpaper or paint starts with professional removal of old layers and careful surface prep.",
     icon: Wallpaper,
   },
+
   {
     ...services[2],
     title: "Custom Wallpapering",
@@ -146,7 +148,7 @@ export default function ServicesSection() {
                     >
                       <Image
                         src={service.image}
-                        alt={service.title}
+                        alt={`${service.title} service`}
                         fill
                         sizes="(max-width: 767px) 86vw, (max-width: 1100px) 44vw, 300px"
                         className="block"
@@ -167,6 +169,7 @@ export default function ServicesSection() {
                         reduce ? undefined : { scale: 1.05 }
                       }
                       transition={{ duration: 0.25 }}
+                      aria-hidden="true"
                     >
                       <Icon size={20} strokeWidth={1.8} />
                     </motion.span>
@@ -197,7 +200,7 @@ export default function ServicesSection() {
                       "
                     >
                       Learn More
-                      <ArrowUpRight size={16} />
+                      <ArrowUpRight size={16} aria-hidden="true" />
                     </Link>
                   </div>
                 </motion.article>

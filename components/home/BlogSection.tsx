@@ -1,6 +1,6 @@
 import { blogPosts } from "@/lib/data/content";
 import { StaggerContainer, StaggerItem } from "../animations/reveal";
-import { BlogCard } from "../BlogCard";
+import BlogCard from "../BlogCard";
 import { Button } from "../Button";
 import Container from "../Container";
 import { Reveal } from "../Reveal";

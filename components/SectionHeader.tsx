@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "motion/react";
 
 import { cn } from "@/lib/utils";
+
 import { fadeUp, viewportOnce } from "./animations/variants";
 
 export function SectionHeader({
@@ -11,14 +12,18 @@ export function SectionHeader({
   text,
   align = "left",
   light = false,
+  headingLevel = "h2",
 }: {
   eyebrow: string;
   title: string;
   text?: string;
   align?: "left" | "center";
   light?: boolean;
+  headingLevel?: "h1" | "h2" | "h3" | "h4";
 }) {
   const reduce = useReducedMotion();
+
+  const Heading = headingLevel;
 
   return (
     <motion.div
@@ -42,14 +47,14 @@ export function SectionHeader({
         {eyebrow}
       </div>
 
-      <h2
+      <Heading
         className={cn(
           "mb-[19px] text-[clamp(35px,4vw,53px)] font-extrabold leading-[1.05] tracking-[-0.05em]",
           light ? "text-white" : "text-navy",
         )}
       >
         {title}
-      </h2>
+      </Heading>
 
       {text && (
         <p

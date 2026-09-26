@@ -23,7 +23,7 @@ export function ContactSection({ full = false }: { full?: boolean }) {
             viewport={viewportOnce}
           >
             <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
-              <span className="h-[2px] w-7 bg-current" />
+              <span className="h-[2px] w-7 bg-current" aria-hidden="true" />
               CONTACT US
             </div>
           </motion.div>
@@ -70,18 +70,22 @@ export function ContactSection({ full = false }: { full?: boolean }) {
           >
             {[
               {
-                icon: <Clock3 />,
+                icon: <Clock3 aria-hidden="true" />,
                 b: "Working hours",
                 t: "Monday – Friday, 8:00 AM – 6:00 PM",
               },
               {
-                icon: <MapPin />,
+                icon: <MapPin aria-hidden="true" />,
                 b: "Visit us",
                 t: "45 Bridge Street, Brooklyn, NY",
               },
-              { icon: <Phone />, b: "Call us", t: "+1 123 456 7890" },
               {
-                icon: <Mail />,
+                icon: <Phone aria-hidden="true" />,
+                b: "Call us",
+                t: "+1 123 456 7890",
+              },
+              {
+                icon: <Mail aria-hidden="true" />,
                 b: "Email us",
                 t: "hello@enviroshield.com",
               },

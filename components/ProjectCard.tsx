@@ -58,7 +58,7 @@ export function ProjectCard({
       >
         <Image
           src={project.image}
-          alt={project.title}
+          alt={`${project.title} - ${project.category}`}
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
         />
@@ -95,7 +95,7 @@ export function ProjectCard({
           }}
           transition={{ duration: 0.3 }}
         >
-          <ArrowUpRight />
+          <ArrowUpRight aria-hidden="true" />
         </motion.div>
       </motion.div>
     </motion.article>

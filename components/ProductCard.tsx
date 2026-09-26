@@ -1,4 +1,5 @@
 import Image from "next/image";
+
 import Link from "next/link";
 
 export function ProductCard({ product }: { product: any }) {
@@ -7,7 +8,7 @@ export function ProductCard({ product }: { product: any }) {
       <div className="relative h-[230px]">
         <Image
           src={product.image}
-          alt={product.name}
+          alt={`${product.name} - ${product.category}`}
           fill
           sizes="(max-width: 600px) 100vw, 50vw"
           className="object-cover"

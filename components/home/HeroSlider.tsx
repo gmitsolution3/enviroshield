@@ -3,6 +3,7 @@
 import { EASE } from "@/components/animations/variants";
 import { Button } from "@/components/Button";
 import Container from "@/components/Container";
+import { ISlide } from "@/types";
 import {
   ArrowUpRight,
   ChevronLeft,
@@ -17,20 +18,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-type Slide = {
-  id: number;
-  bg: string;
-  eyebrow: string;
-  heading: string;
-  text: string;
-  cta: string;
-  href: string;
-};
-
-const slides: Slide[] = [
+const slides: ISlide[] = [
   {
     id: 1,
     bg: "https://images.pexels.com/photos/7546769/pexels-photo-7546769.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600",
+    alt: "Professionally painted and finished interior space",
     eyebrow: "TRANSFORM YOUR SPACE",
     heading: "Beautiful walls.\nBetter spaces.",
     text: "Professional painting and wall finishing solutions designed to transform your home or business with precision and care.",
@@ -40,6 +32,7 @@ const slides: Slide[] = [
   {
     id: 2,
     bg: "https://images.pexels.com/photos/16751235/pexels-photo-16751235.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600",
+    alt: "Interior space with a professionally finished feature wall",
     eyebrow: "TRANSFORM YOUR SPACE",
     heading: "Color that\nchanges everything.",
     text: "From subtle finishes to bold statement walls, we bring your vision to life with exceptional craftsmanship.",
@@ -49,6 +42,7 @@ const slides: Slide[] = [
   {
     id: 3,
     bg: "https://images.pexels.com/photos/8135503/pexels-photo-8135503.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600",
+    alt: "Interior surface with professional painting and finishing",
     eyebrow: "TRANSFORM YOUR SPACE",
     heading: "Crafted for lasting\nimpressions.",
     text: "Premium surface preparation, painting, and finishing solutions built around quality, detail, and reliability.",
@@ -61,7 +55,6 @@ export default function Hero() {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [paused, setPaused] = useState(false);
-
   const reduce = useReducedMotion();
   const slide = slides[index];
 
@@ -106,7 +99,7 @@ export default function Hero() {
         >
           <Image
             src={slide.bg}
-            alt="Beautifully finished interior space"
+            alt={slide.alt}
             fill
             priority={index === 0}
             sizes="100vw"
@@ -119,6 +112,7 @@ export default function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
+        aria-hidden="true"
       />
 
       <Container className="relative z-[1] py-[100px] pb-[110px] text-white max-[900px]:py-[85px] max-[600px]:py-[70px] max-[600px]:pb-[90px]">
@@ -141,27 +135,50 @@ export default function Hero() {
                   delay: 0.1,
                 }}
               >
-                <span className="inline-block h-[2px] w-7 bg-current" />
+                <span
+                  className="inline-block h-[2px] w-7 bg-current"
+                  aria-hidden="true"
+                />
                 {slide.eyebrow}
               </motion.div>
 
-              <motion.h1
-                className="mb-6 max-w-[700px] text-[clamp(45px,6.2vw,78px)] font-extrabold leading-[1.02] tracking-[-0.055em] text-white max-[600px]:text-[48px]"
-                initial={reduce ? false : { opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.65,
-                  ease: EASE,
-                  delay: 0.2,
-                }}
-              >
-                {headingLines.map((line, i) => (
-                  <span key={i}>
-                    {line}
-                    {i < headingLines.length - 1 && <br />}
-                  </span>
-                ))}
-              </motion.h1>
+              {index === 0 ? (
+                <motion.h1
+                  className="mb-6 max-w-[700px] text-[clamp(45px,6.2vw,78px)] font-extrabold leading-[1.02] tracking-[-0.055em] text-white max-[600px]:text-[48px]"
+                  initial={reduce ? false : { opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.65,
+                    ease: EASE,
+                    delay: 0.2,
+                  }}
+                >
+                  {headingLines.map((line, i) => (
+                    <span key={i}>
+                      {line}
+                      {i < headingLines.length - 1 && <br />}
+                    </span>
+                  ))}
+                </motion.h1>
+              ) : (
+                <motion.h2
+                  className="mb-6 max-w-[700px] text-[clamp(45px,6.2vw,78px)] font-extrabold leading-[1.02] tracking-[-0.055em] text-white max-[600px]:text-[48px]"
+                  initial={reduce ? false : { opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.65,
+                    ease: EASE,
+                    delay: 0.2,
+                  }}
+                >
+                  {headingLines.map((line, i) => (
+                    <span key={i}>
+                      {line}
+                      {i < headingLines.length - 1 && <br />}
+                    </span>
+                  ))}
+                </motion.h2>
+              )}
 
               <motion.p
                 className="mb-[34px] max-w-[550px] text-[17px] leading-[1.65] text-[#dbe8ef]"
@@ -193,7 +210,7 @@ export default function Hero() {
                   href="/services"
                 >
                   Explore our services
-                  <ArrowUpRight size={16} />
+                  <ArrowUpRight size={16} aria-hidden="true" />
                 </Link>
               </motion.div>
             </motion.div>
@@ -211,6 +228,7 @@ export default function Hero() {
                 : "!bg-[rgba(255,255,255,0.36)]"
             }`}
             aria-label={`Go to slide ${i + 1}`}
+            aria-current={i === index ? "true" : undefined}
             onClick={() => {
               setDirection(i > index ? 1 : -1);
               setIndex(i);
@@ -227,7 +245,7 @@ export default function Hero() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <ChevronLeft size={20} />
+          <ChevronLeft size={20} aria-hidden="true" />
         </motion.button>
 
         <motion.button
@@ -237,7 +255,7 @@ export default function Hero() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <ChevronRight size={20} />
+          <ChevronRight size={20} aria-hidden="true" />
         </motion.button>
       </div>
 

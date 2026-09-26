@@ -1,5 +1,4 @@
 import { products } from "@/lib/data/content";
-
 import { StaggerContainer, StaggerItem } from "../animations/reveal";
 import { Button } from "../Button";
 import Container from "../Container";

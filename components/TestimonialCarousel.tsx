@@ -58,7 +58,10 @@ export function TestimonialCarousel() {
         {/* Specular Liquid Sheen Overlay */}
         <div className="pointer-events-none absolute -left-[50%] -top-[50%] h-[200%] w-[200%] bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.7)_0%,transparent_50%)] opacity-80" />
 
-        <div className="absolute right-[36px] top-[18px] font-serif text-[92px] leading-none text-[#d9eaf9]/60 select-none drop-shadow-sm">
+        <div
+          className="absolute right-[36px] top-[18px] font-serif text-[92px] leading-none text-[#d9eaf9]/60 select-none drop-shadow-sm"
+          aria-hidden="true"
+        >
           &ldquo;
         </div>
 
@@ -71,6 +74,7 @@ export function TestimonialCarousel() {
             exit={reduce ? { opacity: 0 } : { opacity: 0, x: -30 }}
             transition={{ duration: 0.4, ease: EASE }}
             className="relative z-10"
+            aria-live="polite"
           >
             <div className="mb-[22px] flex gap-[5px] text-[#f4a623]">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -84,6 +88,7 @@ export function TestimonialCarousel() {
                     delay: star * 0.04,
                     duration: 0.3,
                   }}
+                  aria-hidden="true"
                 >
                   <Star size={17} fill="currentColor" />
                 </motion.span>
@@ -127,13 +132,18 @@ export function TestimonialCarousel() {
           whileTap={{ scale: 0.95 }}
           className="grid size-[38px] place-items-center rounded-full border border-white/70 bg-white/50 text-navy backdrop-blur-md backdrop-saturate-150 shadow-[0_4px_12px_rgba(0,51,78,0.06),_inset_0_1px_1px_rgba(255,255,255,0.8)] transition-all duration-200 hover:border-blue hover:bg-blue hover:text-white"
         >
-          <ChevronLeft size={18} />
+          <ChevronLeft size={18} aria-hidden="true" />
         </motion.button>
 
         <span className="font-medium tracking-wider">
           0{index + 1}{" "}
-          <i className="mx-[5px] not-italic text-[#b1bdc6]">/</i> 0
-          {items.length}
+          <i
+            className="mx-[5px] not-italic text-[#b1bdc6]"
+            aria-hidden="true"
+          >
+            /
+          </i>{" "}
+          0{items.length}
         </span>
 
         <motion.button
@@ -143,7 +153,7 @@ export function TestimonialCarousel() {
           whileTap={{ scale: 0.95 }}
           className="grid size-[38px] place-items-center rounded-full border border-white/70 bg-white/50 text-navy backdrop-blur-md backdrop-saturate-150 shadow-[0_4px_12px_rgba(0,51,78,0.06),_inset_0_1px_1px_rgba(255,255,255,0.8)] transition-all duration-200 hover:border-blue hover:bg-blue hover:text-white"
         >
-          <ChevronRight size={18} />
+          <ChevronRight size={18} aria-hidden="true" />
         </motion.button>
       </div>
     </div>

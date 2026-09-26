@@ -22,7 +22,10 @@ export default function WorkProcessSection() {
                 key={step.number}
                 className="grid grid-cols-[46px_1fr] gap-[18px] border-b border-[#d9dde8] py-[22px]"
               >
-                <span className="pt-1 text-[12px] font-extrabold text-blue">
+                <span
+                  className="pt-1 text-[12px] font-extrabold text-blue"
+                  aria-hidden="true"
+                >
                   {step.number}
                 </span>
 
@@ -54,13 +57,16 @@ export default function WorkProcessSection() {
             <div className="absolute right-0 bottom-0 h-[47%] w-[52%] overflow-hidden rounded-[18px] border-[12px] border-mist max-[600px]:border-[7px]">
               <Image
                 src="https://images.pexels.com/photos/16751235/pexels-photo-16751235.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
-                alt="Paint roller on a textured wall"
+                alt="Paint roller applying finish to a textured wall"
                 fill
                 sizes="25vw"
               />
             </div>
 
-            <div className="absolute top-[42%] left-[-28px] w-[130px] rounded-[13px] bg-blue p-[18px] text-[11px] leading-[1.5] text-white shadow-[0_14px_28px_rgba(1,110,220,0.2)] max-[600px]:top-[38%] max-[600px]:left-[-5px] max-[600px]:w-[105px] max-[600px]:p-3">
+            <div
+              className="absolute top-[42%] left-[-28px] w-[130px] rounded-[13px] bg-blue p-[18px] text-[11px] leading-[1.5] text-white shadow-[0_14px_28px_rgba(1,110,220,0.2)] max-[600px]:top-[38%] max-[600px]:left-[-5px] max-[600px]:w-[105px] max-[600px]:p-3"
+              aria-hidden="true"
+            >
               <strong className="block text-[25px] max-[600px]:text-[21px]">
                 01
               </strong>

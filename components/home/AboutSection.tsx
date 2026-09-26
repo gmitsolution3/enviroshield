@@ -27,7 +27,7 @@ export default function AboutSection() {
             <div className="relative col-start-2 row-start-1 overflow-hidden rounded-[18px] group">
               <Image
                 src={images.painter}
-                alt="Craftsperson preparing a wall"
+                alt="Craftsperson preparing a wall for finishing"
                 fill
                 sizes="30vw"
                 className="transition-transform duration-[0.6s] group-hover:scale-[1.04]"
@@ -37,7 +37,7 @@ export default function AboutSection() {
             <div className="relative col-start-2 row-span-2 row-start-2 overflow-hidden rounded-[18px] group">
               <Image
                 src="https://images.pexels.com/photos/6764289/pexels-photo-6764289.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
-                alt="Paint roller applying a blue finish"
+                alt="Paint roller applying a blue wall finish"
                 fill
                 sizes="30vw"
                 className="transition-transform duration-[0.6s] group-hover:scale-[1.04]"
@@ -73,15 +73,7 @@ export default function AboutSection() {
         </Reveal>
 
         <div
-          className="
-            [&_.section-header_h2]:mb-[19px]
-            [&_.section-header_h2]:text-[clamp(35px,4vw,53px)]
-            [&_.section-header_h2]:leading-[1.05]
-            [&_.section-header_h2]:tracking-[-0.05em]
-            max-[600px]:[&_.section-header_h2]:text-[37px]
-            [&_.section-header_p]:mb-6
-            [&_.section-header_p]:leading-[1.7]
-          "
+          
         >
           <SectionHeader
             eyebrow="ABOUT US"
@@ -105,6 +97,7 @@ export default function AboutSection() {
                 <CheckCircle2
                   size={16}
                   className="flex-none text-blue"
+                  aria-hidden="true"
                 />
                 {item}
               </StaggerItem>

@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { fadeUp, viewportOnce } from "./animations/variants";
 
-export function BlogCard({
+export default function BlogCard({
   post,
   index = 0,
 }: {
@@ -36,7 +36,7 @@ export function BlogCard({
         >
           <Image
             src={post.image}
-            alt={post.title}
+            alt={`${post.title} - ${post.category}`}
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
           />
@@ -45,7 +45,12 @@ export function BlogCard({
 
       <div className="mb-[12px] flex items-center gap-[10px] text-[10px] font-extrabold uppercase tracking-[0.12em]">
         <span className="text-blue">{post.category}</span>
-        <span className="h-[3px] w-[3px] rounded-full bg-[#aebcc3]" />
+
+        <span
+          className="h-[3px] w-[3px] rounded-full bg-[#aebcc3]"
+          aria-hidden="true"
+        />
+
         <span className="text-[#71838d]">{post.date}</span>
       </div>
 
@@ -64,6 +69,7 @@ export function BlogCard({
         Read article
         <ArrowUpRight
           size={16}
+          aria-hidden="true"
           className="transition-transform duration-200 group-hover/link:translate-x-1"
         />
       </Link>
