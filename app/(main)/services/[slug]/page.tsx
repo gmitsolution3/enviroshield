@@ -9,15 +9,32 @@ import {
 } from "@/components/animations/reveal";
 import { Button } from "@/components/Button";
 import Container from "@/components/Container";
-import { ContactSection } from "@/components/home/ContactSection";
-import { PageHero } from "@/components/PageHero";
+import ContactSection from "@/components/home/ContactSection";
+import PageHero from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
 import { services } from "@/lib/data/content";
 
-export const metadata = {
-  title: "Service details | Enviroshield",
-  description: "Learn more about this Enviroshield service.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const service = services.find((s) => s.slug === slug);
+
+  if (!service) {
+    return {
+      title: "Service not found | Enviroshield",
+      description:
+        "The requested Enviroshield service could not be found.",
+    };
+  }
+
+  return {
+    title: `${service.title} | Enviroshield`,
+    description: service.description,
+  };
+}
 
 export function generateStaticParams() {
   return services.map((service) => ({ slug: service.slug }));
@@ -50,7 +67,10 @@ export default async function ServiceDetailPage({
         image={service.image}
       />
 
-      <section className="py-[112px] max-[900px]:py-20 max-[600px]:py-16">
+      <section
+        aria-labelledby="service-overview-heading"
+        className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
+      >
         <Container className="grid grid-cols-2 items-center gap-[70px] max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
           <Reveal dir="image">
             <div className="relative h-[530px] overflow-hidden rounded-[18px] max-[600px]:h-[340px]">
@@ -67,8 +87,9 @@ export default async function ServiceDetailPage({
             <div>
               <SectionHeader
                 eyebrow="OVERVIEW"
-                title={service.title}
+                title={`About ${service.title}`}
                 text={service.description}
+                headingId="service-overview-heading"
               />
 
               <StaggerContainer className="mt-[26px] mb-[30px] grid grid-cols-2 gap-x-[22px] gap-y-[15px] max-[600px]:grid-cols-1 max-[600px]:gap-3">
@@ -79,6 +100,7 @@ export default async function ServiceDetailPage({
                   >
                     <CheckCircle2
                       size={16}
+                      aria-hidden="true"
                       className="shrink-0 text-blue"
                     />
                     {benefit}
