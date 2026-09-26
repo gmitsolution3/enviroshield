@@ -9,13 +9,16 @@ import { fadeUp, viewportOnce } from "./animations/variants";
 
 function PaintIcon() {
   return (
-    <span className="relative block h-[24px] w-[24px]">
+    <span
+      aria-hidden="true"
+      className="relative block h-[24px] w-[24px]"
+    >
       <span className="absolute bottom-[2px] left-[3px] h-[15px] w-[7px] rotate-[-8deg] rounded-[2px] bg-current" />
     </span>
   );
 }
 
-export function ServiceCard({
+export default function ServiceCard({
   service,
   index = 0,
 }: {
@@ -76,6 +79,7 @@ export function ServiceCard({
         >
           Learn more
           <ArrowUpRight
+            aria-hidden="true"
             size={16}
             className="transition-transform duration-200 group-hover/link:translate-x-1"
           />

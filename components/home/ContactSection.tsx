@@ -6,7 +6,7 @@ import { EASE, fadeUp, viewportOnce } from "../animations/variants";
 import { ContactForm } from "../ContactForm";
 import Container from "../Container";
 
-export function ContactSection({ full = false }: { full?: boolean }) {
+export default function ContactSection({ full = false }: { full?: boolean }) {
   const reduce = useReducedMotion();
 
   return (
