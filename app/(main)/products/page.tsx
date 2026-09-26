@@ -4,15 +4,15 @@ import {
   StaggerItem,
 } from "@/components/animations/reveal";
 import Container from "@/components/Container";
-import { PageHero } from "@/components/PageHero";
+import PageHero from "@/components/PageHero";
 import { ProductCard } from "@/components/ProductCard";
 import { SectionHeader } from "@/components/SectionHeader";
 import { products } from "@/lib/data/content";
 
 export const metadata = {
-  title: "Products | Enviroshield paints, primers and finishes",
+  title: "Paints, Primers & Finishing Products | Enviroshield",
   description:
-    "Explore the Enviroshield range: interior and exterior paints, primers, protective coatings, decorative finishes and wallcoverings.",
+    "Explore Enviroshield's range of interior and exterior paints, primers, decorative finishes, surface preparation products, and wallcoverings.",
 };
 
 export default function ProductsPage() {
@@ -30,17 +30,21 @@ export default function ProductsPage() {
         image="https://images.pexels.com/photos/9222200/pexels-photo-9222200.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600"
       />
 
-      <section className="py-[112px] max-[900px]:py-20 max-[600px]:py-16">
+      <section
+        aria-labelledby="products-catalogue-heading"
+        className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
+      >
         <Container>
           <SectionHeader
             eyebrow="CATALOGUE"
             title="Browse the range"
             text="An informational catalogue of the products we use and recommend."
+            headingId="products-catalogue-heading"
           />
 
           <div className="mt-11 grid grid-cols-[210px_1fr] gap-[55px] max-[900px]:grid-cols-1">
             <Reveal dir="left">
-              <aside data-filter>
+              <aside data-filter aria-label="Product categories">
                 <p className="mb-[18px] text-[12px] font-extrabold uppercase tracking-[0.13em] text-navy">
                   Categories
                 </p>
@@ -52,6 +56,7 @@ export default function ProductsPage() {
                   {categories.map((category) => (
                     <button
                       key={category}
+                      type="button"
                       data-category={category}
                       className={`rounded-[7px] px-3 py-[10px] text-left text-[13px] text-ink transition-colors ${
                         category === "All"
