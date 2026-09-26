@@ -70,6 +70,7 @@ export default function ServicesSection() {
             eyebrow="OUR SERVICES"
             title="Design-Driven Painting & Wallpapering Services"
             light
+            headingId="services-heading"
           />
 
           <Button

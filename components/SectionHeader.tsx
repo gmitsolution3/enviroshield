@@ -6,6 +6,16 @@ import { cn } from "@/lib/utils";
 
 import { fadeUp, viewportOnce } from "./animations/variants";
 
+interface ISectionHeaderProps {
+  eyebrow: string;
+  title: string;
+  text?: string;
+  align?: "left" | "center";
+  light?: boolean;
+  headingLevel?: "h1" | "h2" | "h3" | "h4";
+  headingId?: string;
+}
+
 export function SectionHeader({
   eyebrow,
   title,
@@ -13,14 +23,8 @@ export function SectionHeader({
   align = "left",
   light = false,
   headingLevel = "h2",
-}: {
-  eyebrow: string;
-  title: string;
-  text?: string;
-  align?: "left" | "center";
-  light?: boolean;
-  headingLevel?: "h1" | "h2" | "h3" | "h4";
-}) {
+  headingId = "",
+}: ISectionHeaderProps) {
   const reduce = useReducedMotion();
 
   const Heading = headingLevel;
@@ -48,6 +52,7 @@ export function SectionHeader({
       </div>
 
       <Heading
+        id={headingId && headingId}
         className={cn(
           "mb-[19px] text-[clamp(35px,4vw,53px)] font-extrabold leading-[1.05] tracking-[-0.05em]",
           light ? "text-white" : "text-navy",

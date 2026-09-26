@@ -7,13 +7,17 @@ import { SectionHeader } from "../SectionHeader";
 
 export default function WorkProcessSection() {
   return (
-    <section className="bg-mist py-[112px] max-[900px]:py-20 max-[600px]:py-16">
+    <section
+      aria-labelledby="process-heading"
+      className="bg-mist py-[112px] max-[900px]:py-20 max-[600px]:py-16"
+    >
       <Container className="grid grid-cols-[1.1fr_0.9fr] items-center gap-[90px] max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
         <Reveal dir="up">
           <SectionHeader
             eyebrow="OUR WORK PROCESS"
             title="A smooth, stress-free process from start to finish"
             text="Good work starts with good communication. We keep you informed, your space respected, and every detail accounted for."
+            headingId="process-heading"
           />
 
           <StaggerContainer className="mt-10">

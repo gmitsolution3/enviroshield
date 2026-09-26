@@ -8,12 +8,16 @@ import { SectionHeader } from "../SectionHeader";
 
 export default function ProductsSection() {
   return (
-    <section className="py-[112px]">
+    <section
+      aria-labelledby="products-heading"
+      className="py-[112px]"
+    >
       <Container>
         <div className="flex items-end justify-between gap-[25px] max-[900px]:flex-col max-[900px]:items-start">
           <SectionHeader
             eyebrow="OUR PRODUCTS"
             title="Finishes and materials you can trust."
+            headingId="products-heading"
           />
 
           <Reveal dir="up" delay={0.1}>

@@ -11,6 +11,7 @@ export function ContactSection({ full = false }: { full?: boolean }) {
 
   return (
     <section
+      aria-labelledby="contact-heading"
       className="bg-deep py-[105px] max-[600px]:py-[70px]"
       id="contact"
     >
@@ -23,7 +24,10 @@ export function ContactSection({ full = false }: { full?: boolean }) {
             viewport={viewportOnce}
           >
             <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
-              <span className="h-[2px] w-7 bg-current" aria-hidden="true" />
+              <span
+                className="h-[2px] w-7 bg-current"
+                aria-hidden="true"
+              />
               CONTACT US
             </div>
           </motion.div>
@@ -35,6 +39,7 @@ export function ContactSection({ full = false }: { full?: boolean }) {
             whileInView="visible"
             viewport={viewportOnce}
             transition={{ delay: reduce ? 0 : 0.05 }}
+            id="contact-heading"
           >
             Let&rsquo;s create something beautiful together.
           </motion.h2>

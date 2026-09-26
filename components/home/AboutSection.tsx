@@ -10,7 +10,10 @@ import { SectionHeader } from "../SectionHeader";
 
 export default function AboutSection() {
   return (
-    <section className="py-[112px] max-[900px]:py-20 max-[600px]:py-16">
+    <section
+      aria-labelledby="about-heading"
+      className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
+    >
       <Container className="grid grid-cols-2 items-center gap-24 max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
         <Reveal dir="image">
           <div className="relative grid grid-cols-[1fr_0.9fr] grid-rows-[180px_112px_150px] gap-5 px-[10px] py-2 pr-[10px] max-[900px]:mx-auto max-[900px]:w-full max-[900px]#:max-w-[560px] max-[600px]:grid-rows-[140px_95px_125px] max-[600px]:gap-3">
@@ -72,13 +75,12 @@ export default function AboutSection() {
           </div>
         </Reveal>
 
-        <div
-          
-        >
+        <div>
           <SectionHeader
             eyebrow="ABOUT US"
             title="We don’t just paint walls. We transform spaces."
             text="At Enviroshield, we believe walls are more than surfaces. They are opportunities to express personality, comfort, and style. Our team combines professional craftsmanship with thoughtful design to create spaces that feel truly yours."
+            headingId="about-heading"
           />
 
           <StaggerContainer className="mb-[30px] grid grid-cols-2 gap-x-[22px] gap-y-[15px] max-[600px]:grid-cols-1 max-[600px]:gap-3">
