@@ -15,7 +15,7 @@ export const metadata = {
     "Interior and exterior painting, wallpaper installation, decorative finishes, and surface preparation — delivered by Enviroshield.",
 };
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
   return (
     <>
       <PageHero
