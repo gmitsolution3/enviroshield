@@ -1,5 +1,3 @@
-import Footer from "@/components/Footer";
-import Header from "@/components/Header/Header";
 import AboutSection from "@/components/home/AboutSection";
 import BlogSection from "@/components/home/BlogSection";
 import { ContactSection } from "@/components/home/ContactSection";
@@ -10,22 +8,18 @@ import ServicesSection from "@/components/home/ServicesSection";
 import TestimonialSection from "@/components/home/TestimonialSection";
 import WorkProcessSection from "@/components/home/WorkProcessSection";
 
-export default function Home() {
+export default function HomePage() {
   return (
     <>
-      <Header />
-      <main>
-        <HeroSlider />
-        <AboutSection />
-        <ServicesSection />
-        <WorkProcessSection />
-        <ProductsSection />
-        <ProjectsSection />
-        <TestimonialSection />
-        <BlogSection />
-        <ContactSection />
-      </main>
-      <Footer />
+      <HeroSlider />
+      <AboutSection />
+      <ServicesSection />
+      <WorkProcessSection />
+      <ProductsSection />
+      <ProjectsSection />
+      <TestimonialSection />
+      <BlogSection />
+      <ContactSection />
     </>
   );
 }

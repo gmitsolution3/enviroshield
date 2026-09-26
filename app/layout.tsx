@@ -1,8 +1,9 @@
 import ClientIsland from "@/components/client-island";
-import SmoothScroll from "@/components/smooth-scroll";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Fustat, Geist } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
@@ -26,11 +27,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={cn("font-sans", fustat.variable)}>
-      <body>
-        <SmoothScroll>
-          {children} 
+      <body className="min-h-screen antialiased">
+        <TooltipProvider>
+          {children}
+          <Toaster />
           <ClientIsland />
-        </SmoothScroll>
+        </TooltipProvider>
       </body>
     </html>
   );
