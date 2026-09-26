@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import AboutSection from "@/components/home/AboutSection";
 import BlogSection from "@/components/home/BlogSection";
-import { ContactSection } from "@/components/home/ContactSection";
+import ContactSection from "@/components/home/ContactSection";
 import HeroSlider from "@/components/home/HeroSlider";
 import ProductsSection from "@/components/home/ProductsSection";
 import ProjectsSection from "@/components/home/ProjectsSection";

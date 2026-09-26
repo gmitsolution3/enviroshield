@@ -4,13 +4,13 @@ import {
   StaggerItem,
 } from "@/components/animations/reveal";
 import Container from "@/components/Container";
-import { ContactSection } from "@/components/home/ContactSection";
-import { PageHero } from "@/components/PageHero";
+import ContactSection from "@/components/home/ContactSection";
+import PageHero from "@/components/PageHero";
 
 export const metadata = {
-  title: "Contact Enviroshield | Start your transformation",
+  title: "Contact Enviroshield | Painting & Wall Finishing",
   description:
-    "Get in touch with Enviroshield to discuss your painting or wall finishing project.",
+    "Contact Enviroshield to discuss your painting, wallpaper, or wall finishing project and get clear next steps for your space.",
 };
 
 const faqs = [
@@ -44,17 +44,23 @@ export default function ContactPage() {
 
       <ContactSection full />
 
-      <section className="py-[112px] max-[900px]:py-20 max-[600px]:py-16">
+      <section
+        aria-labelledby="faq-heading"
+        className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
+      >
         <Container>
           <div className="mx-auto max-w-[820px]">
             <Reveal dir="up">
-              <h2 className="mb-[10px] text-[clamp(32px,4vw,48px)] leading-[1.05] tracking-[-0.04em] text-navy">
+              <h2
+                id="faq-heading"
+                className="mb-[10px] text-[clamp(32px,4vw,48px)] leading-[1.05] tracking-[-0.04em] text-navy"
+              >
                 Frequently asked questions
               </h2>
 
               <p className="mb-9 text-ink">
-                A few things we are often asked. If your question is
-                not here, just send us a message.
+                A few things we are often asked. If your question is not here,
+                just send us a message.
               </p>
             </Reveal>
 
@@ -66,9 +72,7 @@ export default function ContactPage() {
                       {faq.q}
                     </summary>
 
-                    <p className="mt-3 leading-[1.7] text-ink">
-                      {faq.a}
-                    </p>
+                    <p className="mt-3 leading-[1.7] text-ink">{faq.a}</p>
                   </details>
                 </StaggerItem>
               ))}
@@ -77,7 +81,10 @@ export default function ContactPage() {
         </Container>
       </section>
 
-      <section className="pb-[112px] max-[900px]:pb-20 max-[600px]:pb-16">
+      <section
+        aria-label="Enviroshield location"
+        className="pb-[112px] max-[900px]:pb-20 max-[600px]:pb-16"
+      >
         <Container>
           <Reveal dir="scale">
             <div className="h-[360px] overflow-hidden rounded-[18px] shadow-[0_4px_20px_rgba(0,0,0,0.08)]">

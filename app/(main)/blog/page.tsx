@@ -4,14 +4,15 @@ import {
   StaggerItem,
 } from "@/components/animations/reveal";
 import Container from "@/components/Container";
-import { PageHero } from "@/components/PageHero";
+import PageHero from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
 import { blogPosts } from "@/lib/data/content";
+import Link from "next/link";
 
 export const metadata = {
-  title: "Journal | Enviroshield ideas and inspiration",
+  title: "Painting & Wall Finishing Journal | Enviroshield",
   description:
-    "Ideas, guides, and inspiration for better walls and better spaces from the Enviroshield team.",
+    "Read Enviroshield's guides and ideas on paint colours, wallpaper, wall preparation, and creating better-finished spaces.",
 };
 
 export default function BlogPage() {
@@ -29,16 +30,20 @@ export default function BlogPage() {
         image="https://images.pexels.com/photos/7546558/pexels-photo-7546558.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600"
       />
 
-      <section className="py-[112px] max-[900px]:py-20 max-[600px]:py-16">
+      <section
+        aria-labelledby="blog-heading"
+        className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
+      >
         <Container>
           <SectionHeader
             eyebrow="ALL ARTICLES"
             title="Latest from the journal"
+            headingId="blog-heading"
           />
 
           <div className="mt-11 grid grid-cols-[210px_1fr] gap-[55px] max-[900px]:grid-cols-1">
             <Reveal dir="left">
-              <aside>
+              <aside aria-label="Blog categories">
                 <p className="mb-[18px] text-[12px] font-extrabold uppercase tracking-[0.13em] text-navy">
                   Categories
                 </p>
@@ -50,6 +55,7 @@ export default function BlogPage() {
                   {categories.map((category) => (
                     <button
                       key={category}
+                      type="button"
                       data-category={category}
                       className={`rounded-[7px] px-3 py-[10px] text-left text-[13px] text-ink transition-colors ${
                         category === "All"
@@ -73,7 +79,7 @@ export default function BlogPage() {
                   key={post.slug}
                   data-category={post.category}
                 >
-                  <div className="transition-shadow duration-300">
+                  <article className="transition-shadow duration-300">
                     <div className="relative mb-5 h-[235px] overflow-hidden rounded-[14px] max-[900px]:h-[240px]">
                       <img
                         src={post.image}
@@ -84,7 +90,10 @@ export default function BlogPage() {
 
                     <div className="mb-[10px] flex items-center gap-[14px] text-[11px] text-ink">
                       <span>{post.category}</span>
-                      <span className="border-l border-line pl-[14px]">
+                      <span
+                        className="border-l border-line pl-[14px]"
+                        aria-label={`Published ${post.date}`}
+                      >
                         {post.date}
                       </span>
                     </div>
@@ -97,13 +106,13 @@ export default function BlogPage() {
                       {post.excerpt}
                     </p>
 
-                    <a
+                    <Link
                       href={`/blog/${post.slug}`}
                       className="inline-flex items-center gap-[7px] text-[13px] font-extrabold text-navy transition-[gap,color] duration-200 hover:gap-[11px] hover:text-blue"
                     >
                       Read article
-                    </a>
-                  </div>
+                    </Link>
+                  </article>
                 </StaggerItem>
               ))}
             </StaggerContainer>

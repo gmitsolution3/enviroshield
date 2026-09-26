@@ -4,10 +4,9 @@ import {
   StaggerItem,
 } from "@/components/animations/reveal";
 import Container from "@/components/Container";
-import { ContactSection } from "@/components/home/ContactSection";
-import { PageHero } from "@/components/PageHero";
+import ContactSection from "@/components/home/ContactSection";
+import PageHero from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
-
 import {
   CheckCircle2,
   Compass,
@@ -19,9 +18,9 @@ import {
 import Image from "next/image";
 
 export const metadata = {
-  title: "About Enviroshield | Our story, mission and craft",
+  title: "About Enviroshield | Our Story, Mission & Craft",
   description:
-    "Meet Enviroshield — professional painters and wall finishing specialists dedicated to thoughtful craft and better spaces.",
+    "Meet Enviroshield, professional painters and wall finishing specialists focused on thoughtful craftsmanship, quality materials, and beautifully finished spaces.",
 };
 
 const values = [
@@ -66,7 +65,10 @@ export default function AboutPage() {
         text="We are painters, finishers, and problem-solvers who believe a great wall transforms a room — and a great room changes how you feel at home."
       />
 
-      <section className="py-[112px] max-[900px]:py-20 max-[600px]:py-16">
+      <section
+        aria-labelledby="our-story-heading"
+        className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
+      >
         <Container className="grid grid-cols-2 items-center gap-[70px] max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
           <Reveal dir="image">
             <div className="relative h-[530px] overflow-hidden rounded-[18px] max-[600px]:h-[340px]">
@@ -82,11 +84,17 @@ export default function AboutPage() {
           <Reveal dir="up" delay={0.15}>
             <div>
               <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
-                <span className="h-[2px] w-7 bg-current" />
+                <span
+                  className="h-[2px] w-7 bg-current"
+                  aria-hidden="true"
+                />
                 OUR STORY
               </div>
 
-              <h2 className="mb-[18px] text-[clamp(34px,4vw,52px)] font-extrabold leading-[1.05] tracking-[-0.05em] text-navy">
+              <h2
+                id="our-story-heading"
+                className="mb-[18px] text-[clamp(34px,4vw,52px)] font-extrabold leading-[1.05] tracking-[-0.05em] text-navy"
+              >
                 Craft, care, and a love for well-finished walls.
               </h2>
 
@@ -117,6 +125,7 @@ export default function AboutPage() {
                   >
                     <CheckCircle2
                       size={16}
+                      aria-hidden="true"
                       className="shrink-0 text-blue"
                     />
                     {item}
@@ -128,13 +137,17 @@ export default function AboutPage() {
         </Container>
       </section>
 
-      <section className="py-[112px] max-[900px]:py-20 max-[600px]:py-16">
+      <section
+        aria-labelledby="values-heading"
+        className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
+      >
         <Container>
           <SectionHeader
             eyebrow="WHAT WE VALUE"
             title="The principles behind every project"
             text="Six things we never compromise on."
             align="center"
+            headingId="values-heading"
           />
 
           <StaggerContainer className="mt-12 grid grid-cols-3 gap-5 max-[600px]:grid-cols-1">
@@ -144,7 +157,11 @@ export default function AboutPage() {
               return (
                 <StaggerItem key={value.title}>
                   <div className="rounded-[15px] border border-line p-7">
-                    <Icon size={26} className="mb-7 text-blue" />
+                    <Icon
+                      size={26}
+                      aria-hidden="true"
+                      className="mb-7 text-blue"
+                    />
 
                     <h3 className="mb-[9px] text-[19px] text-navy">
                       {value.title}

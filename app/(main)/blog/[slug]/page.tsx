@@ -12,21 +12,39 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export const metadata = {
-  title: "Article | Enviroshield",
-  description: "An article from the Enviroshield journal.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const post = blogPosts.find((p) => p.slug === slug);
+
+  if (!post) {
+    return {
+      title: "Article not found | Enviroshield",
+      description:
+        "The requested Enviroshield article could not be found.",
+    };
+  }
+
+  return {
+    title: `${post.title} | Enviroshield`,
+    description: post.excerpt,
+  };
+}
 
 export function generateStaticParams() {
   return blogPosts.map((post) => ({ slug: post.slug }));
 }
 
-export default function ArticlePage({
+export default async function ArticlePage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const post = blogPosts.find((p) => p.slug === params.slug);
+  const { slug } = await params;
+  const post = blogPosts.find((p) => p.slug === slug);
 
   if (!post) notFound();
 
@@ -36,7 +54,10 @@ export default function ArticlePage({
 
   return (
     <>
-      <section className="pt-[112px] max-[900px]:pt-20 max-[600px]:pt-16">
+      <section
+        aria-labelledby="article-heading"
+        className="pt-[112px] max-[900px]:pt-20 max-[600px]:pt-16"
+      >
         <Container>
           <div className="mx-auto max-w-[850px]">
             <Reveal dir="up">
@@ -46,7 +67,10 @@ export default function ArticlePage({
                 <span>{post.author}</span>
               </div>
 
-              <h1 className="mb-[30px] text-[clamp(40px,6vw,68px)] font-extrabold leading-[1.02] tracking-[-0.05em] text-navy max-[600px]:text-[42px]">
+              <h1
+                id="article-heading"
+                className="mb-[30px] text-[clamp(40px,6vw,68px)] font-extrabold leading-[1.02] tracking-[-0.05em] text-navy max-[600px]:text-[42px]"
+              >
                 {post.title}
               </h1>
             </Reveal>
@@ -66,60 +90,69 @@ export default function ArticlePage({
         </Container>
       </section>
 
-      <section className="pb-[112px] max-[900px]:pb-20 max-[600px]:pb-16">
-        <Container>
-          <Reveal
-            dir="up"
-            className="mx-auto max-w-[850px] text-[17px] leading-[1.8] text-ink"
-          >
-            <p className="mb-5">{post.excerpt}</p>
+      <article>
+        <section
+          aria-label="Article content"
+          className="pb-[112px] max-[900px]:pb-20 max-[600px]:pb-16"
+        >
+          <Container>
+            <Reveal
+              dir="up"
+              className="mx-auto max-w-[850px] text-[17px] leading-[1.8] text-ink"
+            >
+              <p className="mb-5">{post.excerpt}</p>
 
-            <h2 className="my-[36px] mb-[15px] text-[30px] leading-[1.1] text-navy">
-              The detail is the difference
-            </h2>
+              <h2 className="my-[36px] mb-[15px] text-[30px] leading-[1.1] text-navy">
+                The detail is the difference
+              </h2>
 
-            <p className="mb-5">
-              The best finishes begin long before the first coat of
-              colour. Preparation — sanding, filling, cleaning,
-              priming — is where a good result becomes a great one. It
-              is also the step most likely to be rushed. We take the
-              time to do it properly, because every layer that follows
-              depends on it.
-            </p>
+              <p className="mb-5">
+                The best finishes begin long before the first coat of
+                colour. Preparation — sanding, filling, cleaning,
+                priming — is where a good result becomes a great one.
+                It is also the step most likely to be rushed. We take
+                the time to do it properly, because every layer that
+                follows depends on it.
+              </p>
 
-            <h2 className="my-[36px] mb-[15px] text-[30px] leading-[1.1] text-navy">
-              Choosing what feels right
-            </h2>
+              <h2 className="my-[36px] mb-[15px] text-[30px] leading-[1.1] text-navy">
+                Choosing what feels right
+              </h2>
 
-            <p className="mb-5">
-              Colour, sheen, texture and light all interact in ways
-              that are hard to predict from a small sample. We help
-              you think through how a finish will look across the day,
-              against your furniture, and alongside the natural light
-              in your space.
-            </p>
+              <p className="mb-5">
+                Colour, sheen, texture and light all interact in ways
+                that are hard to predict from a small sample. We help
+                you think through how a finish will look across the
+                day, against your furniture, and alongside the natural
+                light in your space.
+              </p>
 
-            <p className="mb-5">
-              If you are considering a similar project, we would be
-              glad to talk it through with you.
-            </p>
+              <p className="mb-5">
+                If you are considering a similar project, we would be
+                glad to talk it through with you.
+              </p>
 
-            <Button href="/contact">Talk to an expert</Button>
-          </Reveal>
-        </Container>
-      </section>
+              <Button href="/contact">Talk to an expert</Button>
+            </Reveal>
+          </Container>
+        </section>
+      </article>
 
-      <section className="py-[112px] max-[900px]:py-20 max-[600px]:py-16">
+      <section
+        aria-labelledby="related-articles-heading"
+        className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
+      >
         <Container>
           <SectionHeader
             eyebrow="KEEP READING"
             title="Related articles"
+            headingId="related-articles-heading"
           />
 
           <StaggerContainer className="mt-11 grid grid-cols-3 gap-[25px] max-[600px]:grid-cols-1 max-[600px]:gap-10">
             {related.map((relatedPost) => (
               <StaggerItem key={relatedPost.slug}>
-                <div>
+                <article>
                   <div className="relative mb-5 h-[235px] overflow-hidden rounded-[14px] max-[900px]:h-[240px]">
                     <img
                       src={relatedPost.image}
@@ -148,9 +181,9 @@ export default function ArticlePage({
                     href={`/blog/${relatedPost.slug}`}
                   >
                     Read article
-                    <ArrowUpRight size={16} />
+                    <ArrowUpRight size={16} aria-hidden="true" />
                   </Link>
-                </div>
+                </article>
               </StaggerItem>
             ))}
           </StaggerContainer>
