@@ -22,7 +22,10 @@ export default function DesktopNavbar({ links }: DesktopNavProps) {
   const pathname = usePathname();
 
   return (
-    <nav className="hidden items-center gap-[30px] text-[14px] font-bold text-[#315366] min-[901px]:flex">
+    <nav
+      aria-label="Primary navigation"
+      className="hidden items-center gap-[30px] text-[14px] font-bold text-[#315366] min-[901px]:flex"
+    >
       {links.map((link, i) => {
         const isActive =
           link.href === "/"
@@ -50,6 +53,7 @@ export default function DesktopNavbar({ links }: DesktopNavProps) {
               {link.label}
 
               <span
+                aria-hidden="true"
                 className={`absolute -bottom-1 left-0 h-[2px] w-full origin-left bg-blue transition-transform duration-300 ${
                   isActive
                     ? "scale-x-100"

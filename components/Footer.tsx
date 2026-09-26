@@ -45,6 +45,7 @@ export default function Footer() {
             {["ig", "in", "f"].map((s) => (
               <motion.span
                 key={s}
+                aria-hidden="true"
                 className="grid size-[29px] place-items-center rounded-[11px] border border-[#547482] text-[12px] text-[#d8e7ee]"
                 whileHover={
                   reduce ? undefined : { scale: 1.08, y: -2 }

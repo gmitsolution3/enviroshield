@@ -48,6 +48,7 @@ export default function MobileMenu({
           />
 
           <motion.div
+            id="mobile-navigation"
             className="fixed right-0 top-0 bottom-0 z-50 flex w-[320px] max-w-[85vw] flex-col overflow-y-auto overscroll-contain border-l border-white/40 bg-white/70 p-6 backdrop-blur-xl backdrop-saturate-180 shadow-[-10px_0px_30px_-5px_rgba(0,51,78,0.1)]"
             role="dialog"
             aria-modal="true"
@@ -70,6 +71,7 @@ export default function MobileMenu({
             </div>
 
             <motion.nav
+              aria-label="Mobile navigation links"
               className="mt-[50px] mb-[35px] grid shrink-0"
               initial="hidden"
               animate="visible"

@@ -96,10 +96,13 @@ export default function Header() {
 
           <button
             className="block text-navy min-[901px]:hidden"
+            type="button"
             aria-label="Open navigation"
+            aria-expanded={open}
+            aria-controls="mobile-navigation"
             onClick={() => setOpen(true)}
           >
-            <Menu />
+            <Menu aria-hidden="true" />
           </button>
         </Container>
       </motion.header>
