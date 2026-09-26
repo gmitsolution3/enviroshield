@@ -142,43 +142,23 @@ export default function Hero() {
                 {slide.eyebrow}
               </motion.div>
 
-              {index === 0 ? (
-                <motion.h1
-                  className="mb-6 max-w-[700px] text-[clamp(45px,6.2vw,78px)] font-extrabold leading-[1.02] tracking-[-0.055em] text-white max-[600px]:text-[48px]"
-                  initial={reduce ? false : { opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.65,
-                    ease: EASE,
-                    delay: 0.2,
-                  }}
-                >
-                  {headingLines.map((line, i) => (
-                    <span key={i}>
-                      {line}
-                      {i < headingLines.length - 1 && <br />}
-                    </span>
-                  ))}
-                </motion.h1>
-              ) : (
-                <motion.h2
-                  className="mb-6 max-w-[700px] text-[clamp(45px,6.2vw,78px)] font-extrabold leading-[1.02] tracking-[-0.055em] text-white max-[600px]:text-[48px]"
-                  initial={reduce ? false : { opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.65,
-                    ease: EASE,
-                    delay: 0.2,
-                  }}
-                >
-                  {headingLines.map((line, i) => (
-                    <span key={i}>
-                      {line}
-                      {i < headingLines.length - 1 && <br />}
-                    </span>
-                  ))}
-                </motion.h2>
-              )}
+              <motion.h1
+                className="mb-6 max-w-[700px] text-[clamp(45px,6.2vw,78px)] font-extrabold leading-[1.02] tracking-[-0.055em] text-white max-[600px]:text-[48px]"
+                initial={reduce ? false : { opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.65,
+                  ease: EASE,
+                  delay: 0.2,
+                }}
+              >
+                {headingLines.map((line, i) => (
+                  <span key={i}>
+                    {line}
+                    {i < headingLines.length - 1 && <br />}
+                  </span>
+                ))}
+              </motion.h1>
 
               <motion.p
                 className="mb-[34px] max-w-[550px] text-[17px] leading-[1.65] text-[#dbe8ef]"

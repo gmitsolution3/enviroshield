@@ -47,12 +47,12 @@ export function SectionHeader({
           light ? "text-paste" : "text-blue",
         )}
       >
-        <span className="h-[2px] w-7 bg-current" />
+        <span className="h-[2px] w-7 bg-current" aria-hidden="true" />
         {eyebrow}
       </div>
 
       <Heading
-        id={headingId && headingId}
+        id={headingId}
         className={cn(
           "mb-[19px] text-[clamp(35px,4vw,53px)] font-extrabold leading-[1.05] tracking-[-0.05em]",
           light ? "text-white" : "text-navy",
