@@ -21,13 +21,14 @@ export function emailLayout({
 
 <body
   style="
-    margin: 0;
-    padding: 0;
-    background-color: #0b0d12;
-    color: #ffffff;
-    font-family: Arial, Helvetica, sans-serif;
+    margin:0;
+    padding:0;
+    background-color:#f0f0fa;
+    color:#18384a;
+    font-family:Arial, Helvetica, sans-serif;
   "
 >
+  <!-- Preview text -->
   <div
     style="
       display:none;
@@ -45,10 +46,18 @@ export function emailLayout({
     cellpadding="0"
     cellspacing="0"
     border="0"
-    style="background-color:#0b0d12;"
+    style="
+      width:100%;
+      background-color:#f0f0fa;
+    "
   >
     <tr>
-      <td align="center" style="padding:48px 20px;">
+      <td
+        align="center"
+        style="
+          padding:42px 20px;
+        "
+      >
 
         <table
           role="presentation"
@@ -56,14 +65,19 @@ export function emailLayout({
           cellpadding="0"
           cellspacing="0"
           border="0"
-          style="max-width:600px;"
+          style="
+            width:100%;
+            max-width:600px;
+          "
         >
 
-          <!-- Logo -->
+          <!-- Brand -->
           <tr>
             <td
               align="center"
-              style="padding-bottom:32px;"
+              style="
+                padding:0 0 26px;
+              "
             >
               ${
                 logoUrl
@@ -71,12 +85,12 @@ export function emailLayout({
                     <img
                       src="${logoUrl}"
                       alt="Enviroshield"
-                      width="52"
-                      height="52"
+                      width="56"
+                      height="56"
                       style="
                         display:block;
-                        width:52px;
-                        height:52px;
+                        width:56px;
+                        height:56px;
                         object-fit:contain;
                         border:0;
                       "
@@ -85,31 +99,50 @@ export function emailLayout({
                   : `
                     <div
                       style="
-                        font-size:22px;
+                        color:#00334e;
+                        font-size:24px;
+                        line-height:30px;
                         font-weight:800;
-                        letter-spacing:-0.5px;
-                        color:#ffffff;
+                        letter-spacing:-0.7px;
                       "
                     >
-                      Enviro<span
-                        style="color:rgba(255,255,255,0.45);"
-                      >
-                        shield
-                      </span>
+                      Enviro<span style="color:#016edc;">shield</span>
                     </div>
                   `
               }
             </td>
           </tr>
 
-          <!-- Card -->
+          <!-- Brand accent -->
+          <tr>
+            <td
+              align="center"
+              style="
+                padding:0 0 20px;
+              "
+            >
+              <div
+                style="
+                  width:28px;
+                  height:2px;
+                  background-color:#016edc;
+                  font-size:0;
+                  line-height:0;
+                "
+              >
+                &nbsp;
+              </div>
+            </td>
+          </tr>
+
+          <!-- Content card -->
           <tr>
             <td
               style="
-                background-color:#151820;
-                border:1px solid rgba(255,255,255,0.10);
-                border-radius:20px;
-                padding:40px;
+                background-color:#ffffff;
+                border:1px solid #dfe5e9;
+                border-radius:16px;
+                padding:42px;
               "
             >
               ${children}
@@ -121,17 +154,29 @@ export function emailLayout({
             <td
               align="center"
               style="
-                padding-top:28px;
-                color:rgba(255,255,255,0.35);
+                padding:26px 10px 0;
+                color:#18384a;
                 font-size:12px;
                 line-height:20px;
               "
             >
-              <div>
+              <div
+                style="
+                  color:#00334e;
+                  font-size:12px;
+                  line-height:20px;
+                  font-weight:800;
+                "
+              >
                 Enviroshield
               </div>
 
-              <div style="margin-top:4px;">
+              <div
+                style="
+                  margin-top:4px;
+                  color:#18384a;
+                "
+              >
                 Environmental solutions for a better future.
               </div>
             </td>

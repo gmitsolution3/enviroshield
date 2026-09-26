@@ -81,9 +81,9 @@ export function RegisterForm() {
       return;
     }
 
-    // toast.success("Account created successfully.");
-    // router.push("/verify-email");
-    // router.refresh();
+    toast.success("Account created successfully.");
+    router.push("/verify-email");
+    router.refresh();
   }
 
   return (

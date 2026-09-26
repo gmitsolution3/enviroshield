@@ -7,15 +7,19 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { authClient } from "@/lib/auth-client";
 
 const resetPasswordSchema = z
   .object({
-    password: z.string().min(8, "Password must be at least 8 characters."),
-    confirmPassword: z.string().min(1, "Please confirm your password."),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters."),
+    confirmPassword: z
+      .string()
+      .min(1, "Please confirm your password."),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match.",
@@ -40,7 +44,8 @@ export function ResetPasswordForm({
   );
   const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState(false);
 
   const {
     register,
@@ -112,10 +117,7 @@ export function ResetPasswordForm({
           Your password has been changed successfully.
         </p>
 
-        <p
-          className="mt-5 text-[12px] text-ink"
-          aria-live="polite"
-        >
+        <p className="mt-5 text-[12px] text-ink" aria-live="polite">
           Redirecting you to login...
         </p>
       </section>
@@ -159,7 +161,9 @@ export function ResetPasswordForm({
               type="button"
               onClick={() => setShowPassword((current) => !current)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-label={
+                showPassword ? "Hide password" : "Show password"
+              }
               aria-pressed={showPassword}
             >
               {showPassword ? (

@@ -7,8 +7,22 @@ export function verificationEmail({ url }: { url: string }) {
     children: `
       <div
         style="
-          color:#ffffff;
-          font-size:28px;
+          margin-bottom:10px;
+          color:#016edc;
+          font-size:11px;
+          line-height:16px;
+          font-weight:800;
+          letter-spacing:1.8px;
+          text-transform:uppercase;
+        "
+      >
+        WELCOME TO ENVIROSHIELD
+      </div>
+
+      <div
+        style="
+          color:#00334e;
+          font-size:30px;
           line-height:36px;
           font-weight:800;
           letter-spacing:-0.8px;
@@ -19,10 +33,10 @@ export function verificationEmail({ url }: { url: string }) {
 
       <p
         style="
-          margin:20px 0 0;
-          color:rgba(255,255,255,0.60);
-          font-size:16px;
-          line-height:26px;
+          margin:18px 0 0;
+          color:#18384a;
+          font-size:15px;
+          line-height:25px;
         "
       >
         Welcome to Enviroshield. Please verify your
@@ -42,18 +56,18 @@ export function verificationEmail({ url }: { url: string }) {
             align="center"
             style="
               border-radius:999px;
-              background-color:#ffffff;
+              background-color:#016edc;
             "
           >
             <a
               href="${url}"
               style="
                 display:inline-block;
-                padding:14px 26px;
-                color:#0b0d12;
+                padding:14px 27px;
+                color:#ffffff;
                 font-size:14px;
                 line-height:20px;
-                font-weight:700;
+                font-weight:800;
                 text-decoration:none;
               "
             >
@@ -65,8 +79,8 @@ export function verificationEmail({ url }: { url: string }) {
 
       <p
         style="
-          margin:30px 0 0;
-          color:rgba(255,255,255,0.38);
+          margin:28px 0 0;
+          color:#18384a;
           font-size:13px;
           line-height:21px;
         "
@@ -78,9 +92,9 @@ export function verificationEmail({ url }: { url: string }) {
       <p
         style="
           margin:24px 0 0;
-          padding-top:24px;
-          border-top:1px solid rgba(255,255,255,0.08);
-          color:rgba(255,255,255,0.38);
+          padding-top:22px;
+          border-top:1px solid #dfe5e9;
+          color:#18384a;
           font-size:12px;
           line-height:20px;
           word-break:break-all;
@@ -89,11 +103,10 @@ export function verificationEmail({ url }: { url: string }) {
         If the button doesn't work, copy and paste
         this link into your browser:
         <br />
-
         <a
           href="${url}"
           style="
-            color:#7c83ff;
+            color:#016edc;
             text-decoration:none;
           "
         >
@@ -110,6 +123,7 @@ Welcome to Enviroshield. Please verify your email
 address to activate your account.
 
 Verify your email:
+
 ${url}
 
 This verification link will expire after 1 hour.
