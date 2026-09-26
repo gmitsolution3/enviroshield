@@ -8,14 +8,14 @@ export default function Logo({ light = false }: { light?: boolean }) {
       className={`relative inline-flex items-center gap-2.5 ${
         light ? "text-white" : "text-blue"
       }`}
-      aria-label="Enviroshield Logo"
+      aria-label="EnviroShield home"
     >
       <Image
         src="/images/logo.png"
-        alt="Enviroshield Logo"
+        alt=""
         width={100}
         height={100}
-        className="h-auto w-18"
+        className="h-auto w-14"
       />
 
       <span className="relative text-[1.25rem] font-bold tracking-[-0.02em]">

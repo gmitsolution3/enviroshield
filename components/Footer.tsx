@@ -6,6 +6,7 @@ import { motion, useReducedMotion } from "motion/react";
 
 import { fadeUp, viewportOnce } from "./animations/variants";
 
+import Container from "./Container";
 import Logo from "./Logo";
 
 export default function Footer() {
@@ -25,7 +26,7 @@ export default function Footer() {
 
   return (
     <footer className="bg-[#00283d] pt-[55px] text-[#a9c1ce] min-[601px]:pt-[75px]">
-      <div className="container grid grid-cols-2 gap-x-5 gap-y-9 pb-[64px] min-[901px]:grid-cols-[1.45fr_1fr_1fr_1.2fr] min-[901px]:gap-[50px]">
+      <Container className="grid grid-cols-2 gap-x-5 gap-y-9 pb-[64px] min-[901px]:grid-cols-[1.45fr_1fr_1fr_1.2fr] min-[901px]:gap-[50px]">
         {/* Brand */}
         <motion.div
           className="col-span-2 min-[901px]:col-span-1"
@@ -157,13 +158,13 @@ export default function Footer() {
             Brooklyn, NY 11201
           </p>
         </motion.div>
-      </div>
+      </Container>
 
       {/* Bottom */}
-      <div className="container flex flex-col justify-between gap-2 border-t border-[#214a5d] py-5 text-[11px] text-[#7797a5] min-[601px]:flex-row">
+      <Container className="flex flex-col justify-between gap-2 border-t border-[#214a5d] py-5 text-[11px] text-[#7797a5] min-[601px]:flex-row">
         <span>© 2026 Enviroshield. All rights reserved.</span>
         <span>Crafted for better spaces.</span>
-      </div>
+      </Container>
     </footer>
   );
 }
