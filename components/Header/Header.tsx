@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 import { EASE } from "../animations/variants";
 import Container from "../Container";
-import { Logo } from "../Logo";
+import Logo from "../Logo";
 import { ScrollProgress } from "../ScrollProgress";
 import DesktopNavbar from "./DesktopNavbar";
 import MobileMenu from "./MobileMenu";

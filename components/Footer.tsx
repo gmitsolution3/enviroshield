@@ -6,7 +6,7 @@ import { motion, useReducedMotion } from "motion/react";
 
 import { fadeUp, viewportOnce } from "./animations/variants";
 
-import { Logo } from "./Logo";
+import Logo from "./Logo";
 
 export default function Footer() {
   const reduce = useReducedMotion();

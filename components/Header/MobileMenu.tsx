@@ -13,7 +13,7 @@ import { usePathname } from "next/navigation";
 
 import { EASE } from "../animations/variants";
 import { Button } from "../Button";
-import { Logo } from "../Logo";
+import Logo from "../Logo";
 
 type NavLink = {
   label: string;

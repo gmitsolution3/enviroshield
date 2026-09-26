@@ -1,13 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 
-export function Logo({ light = false }: { light?: boolean }) {
+export default function Logo({ light = false }: { light?: boolean }) {
   return (
     <Link
       href="/"
       className={`relative inline-flex items-center gap-2.5 ${
         light ? "text-white" : "text-blue"
       }`}
+      aria-label="Enviroshield Logo"
     >
       <Image
         src="/images/logo.png"
