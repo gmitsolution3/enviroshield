@@ -85,8 +85,7 @@ export default function Error({
 
             <div className="mx-auto mt-6 max-w-[520px]">
               <p className="text-[18px] leading-[1.75] text-ink">
-                {error.message ||
-                  `Something unexpected happened while loading this page.
+                {`Something unexpected happened while loading this page.
                 Please try again, or head back to the Enviroshield
                 homepage.`}
               </p>

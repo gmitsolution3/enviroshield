@@ -7,19 +7,15 @@ import { EASE, viewportOnce } from "./animations/variants";
 
 export function ContactForm() {
   const [sent, setSent] = useState(false);
-
   const [loading, setLoading] = useState(false);
-
   const reduce = useReducedMotion();
 
   function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     setLoading(true);
 
     setTimeout(() => {
       setLoading(false);
-
       setSent(true);
     }, 650);
   }
@@ -27,7 +23,7 @@ export function ContactForm() {
   if (sent) {
     return (
       <motion.div
-        className="py-[65px] text-center px-5"
+        className="px-5 py-[65px] text-center"
         initial={reduce ? false : { opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4, ease: EASE }}
@@ -49,13 +45,15 @@ export function ContactForm() {
         </h3>
 
         <p className="mx-auto mb-[22px] max-w-[330px] text-[14px] leading-[1.6] text-ink">
-          Your message is with our team. We will be in touch shortly
-          to talk through your space.
+          Your message is with our team. We will be in touch shortly to talk
+          through your space.
         </p>
 
         <button
+          type="button"
           className="inline-flex items-center gap-[7px] text-[13px] font-extrabold text-navy transition-[gap,color] duration-200 hover:gap-[11px] hover:text-blue"
           onClick={() => setSent(false)}
+          aria-label="Send another message"
         >
           Send another message
           <ArrowUpRight size={16} aria-hidden="true" />
@@ -76,9 +74,13 @@ export function ContactForm() {
       aria-busy={loading}
     >
       <div className="grid grid-cols-2 gap-[15px] max-[600px]:grid-cols-1">
-        <label className="grid gap-2 text-[12px] font-bold text-navy">
+        <label
+          htmlFor="contact-first-name"
+          className="grid gap-2 text-[12px] font-bold text-navy"
+        >
           First name *
           <input
+            id="contact-first-name"
             required
             name="firstName"
             autoComplete="given-name"
@@ -87,9 +89,13 @@ export function ContactForm() {
           />
         </label>
 
-        <label className="grid gap-2 text-[12px] font-bold text-navy">
+        <label
+          htmlFor="contact-last-name"
+          className="grid gap-2 text-[12px] font-bold text-navy"
+        >
           Last name *
           <input
+            id="contact-last-name"
             required
             name="lastName"
             autoComplete="family-name"
@@ -100,9 +106,13 @@ export function ContactForm() {
       </div>
 
       <div className="grid grid-cols-2 gap-[15px] max-[600px]:grid-cols-1">
-        <label className="grid gap-2 text-[12px] font-bold text-navy">
+        <label
+          htmlFor="contact-phone"
+          className="grid gap-2 text-[12px] font-bold text-navy"
+        >
           Phone number *
           <input
+            id="contact-phone"
             required
             type="tel"
             name="phone"
@@ -112,9 +122,13 @@ export function ContactForm() {
           />
         </label>
 
-        <label className="grid gap-2 text-[12px] font-bold text-navy">
+        <label
+          htmlFor="contact-email"
+          className="grid gap-2 text-[12px] font-bold text-navy"
+        >
           Email address *
           <input
+            id="contact-email"
             required
             type="email"
             name="email"
@@ -125,11 +139,16 @@ export function ContactForm() {
         </label>
       </div>
 
-      <label className="grid gap-2 text-[12px] font-bold text-navy">
+      <label
+        htmlFor="contact-service"
+        className="grid gap-2 text-[12px] font-bold text-navy"
+      >
         Service type *
         <select
+          id="contact-service"
           required
           name="service"
+          autoComplete="off"
           defaultValue=""
           className="w-full rounded-[9px] border border-[#e0e5ea] bg-[#fafbfd] px-[14px] py-[13px] text-[13px] font-normal text-ink outline-none transition-[border,box-shadow] duration-200 focus:border-blue focus:shadow-[0_0_0_3px_rgba(1,110,220,0.1)]"
         >
@@ -145,9 +164,13 @@ export function ContactForm() {
         </select>
       </label>
 
-      <label className="grid gap-2 text-[12px] font-bold text-navy">
+      <label
+        htmlFor="contact-message"
+        className="grid gap-2 text-[12px] font-bold text-navy"
+      >
         Tell us about your space *
         <textarea
+          id="contact-message"
           required
           name="message"
           placeholder="A little about your project..."
@@ -163,6 +186,7 @@ export function ContactForm() {
         whileHover={reduce ? undefined : { y: -2 }}
         whileTap={reduce ? undefined : { scale: 0.98 }}
         transition={{ duration: 0.2 }}
+        aria-label={loading ? "Sending message" : "Send message"}
       >
         {loading ? "Sending…" : "Send message"}
         <ArrowUpRight size={17} aria-hidden="true" />

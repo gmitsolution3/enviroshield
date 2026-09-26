@@ -6,7 +6,11 @@ import { EASE, fadeUp, viewportOnce } from "../animations/variants";
 import { ContactForm } from "../ContactForm";
 import Container from "../Container";
 
-export default function ContactSection({ full = false }: { full?: boolean }) {
+export default function ContactSection({
+  full = false,
+}: {
+  full?: boolean;
+}) {
   const reduce = useReducedMotion();
 
   return (
@@ -33,13 +37,13 @@ export default function ContactSection({ full = false }: { full?: boolean }) {
           </motion.div>
 
           <motion.h2
+            id="contact-heading"
             className="mb-5 text-[clamp(38px,4.5vw,58px)] font-extrabold leading-[1.03] tracking-[-0.05em]"
             variants={reduce ? undefined : fadeUp}
             initial={reduce ? false : "hidden"}
             whileInView="visible"
             viewport={viewportOnce}
             transition={{ delay: reduce ? 0 : 0.05 }}
-            id="contact-heading"
           >
             Let&rsquo;s create something beautiful together.
           </motion.h2>
@@ -57,8 +61,8 @@ export default function ContactSection({ full = false }: { full?: boolean }) {
             forward.
           </motion.p>
 
-          <motion.div
-            className="grid gap-5"
+          <motion.address
+            className="grid gap-5 not-italic"
             initial={reduce ? false : "hidden"}
             whileInView="visible"
             viewport={viewportOnce}
@@ -88,11 +92,13 @@ export default function ContactSection({ full = false }: { full?: boolean }) {
                 icon: <Phone aria-hidden="true" />,
                 b: "Call us",
                 t: "+1 123 456 7890",
+                href: "tel:+11234567890",
               },
               {
                 icon: <Mail aria-hidden="true" />,
                 b: "Email us",
                 t: "hello@enviroshield.com",
+                href: "mailto:hello@enviroshield.com",
               },
             ].map((item, i) => (
               <motion.div
@@ -120,11 +126,21 @@ export default function ContactSection({ full = false }: { full?: boolean }) {
                   <b className="mb-[3px] block text-[12px] text-white">
                     {item.b}
                   </b>
-                  {item.t}
+
+                  {item.href ? (
+                    <a
+                      href={item.href}
+                      className="transition-colors hover:text-white"
+                    >
+                      {item.t}
+                    </a>
+                  ) : (
+                    item.t
+                  )}
                 </span>
               </motion.div>
             ))}
-          </motion.div>
+          </motion.address>
         </div>
 
         <div className="rounded-[16px] bg-white p-[34px] max-[600px]:p-5 max-[600px]:px-4">

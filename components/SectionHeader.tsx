@@ -1,9 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
-
 import { cn } from "@/lib/utils";
-
+import { motion, useReducedMotion } from "motion/react";
 import { fadeUp, viewportOnce } from "./animations/variants";
 
 interface ISectionHeaderProps {
@@ -23,10 +21,9 @@ export function SectionHeader({
   align = "left",
   light = false,
   headingLevel = "h2",
-  headingId = "",
+  headingId,
 }: ISectionHeaderProps) {
   const reduce = useReducedMotion();
-
   const Heading = headingLevel;
 
   return (

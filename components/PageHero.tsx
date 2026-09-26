@@ -46,7 +46,7 @@ export default function PageHero({
           transition={{ duration: 0.8 }}
         />
 
-        <div className="container relative z-10 flex min-h-[420px] items-end pb-[55px] min-[601px]:min-h-[500px] min-[601px]:pb-[75px]">
+        <div className="relative z-10 flex min-h-[420px] items-end pb-[55px] min-[601px]:min-h-[500px] min-[601px]:pb-[75px]">
           <div className="max-w-[760px]">
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 30 }}
