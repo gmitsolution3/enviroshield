@@ -52,25 +52,25 @@ export function DashboardShell({
         navigation={navigation}
       />
 
-      <SidebarInset className="min-w-0 bg-muted/30">
+      <SidebarInset className="min-w-0 bg-mist">
         <DashboardHeader user={user} />
 
-        <main className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-muted/30">
+        <main className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-mist">
           {/* Subtle Enviroshield visual texture */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 grain opacity-[0.025]"
+            className="pointer-events-none absolute inset-0 grain opacity-[0.018]"
           />
 
-          {/* Very subtle brand ambience */}
+          {/* Very subtle Enviroshield brand ambience */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -right-40 -top-40 h-[420px] w-[420px] rounded-full bg-indigo/[0.035] blur-[120px]"
+            className="pointer-events-none absolute -right-40 -top-40 h-[420px] w-[420px] rounded-full bg-blue/[0.025] blur-[120px]"
           />
 
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -bottom-40 -left-40 h-[420px] w-[420px] rounded-full bg-teal/[0.025] blur-[120px]"
+            className="pointer-events-none absolute -bottom-40 -left-40 h-[420px] w-[420px] rounded-full bg-paste/[0.02] blur-[120px]"
           />
 
           <div className="relative">{children}</div>

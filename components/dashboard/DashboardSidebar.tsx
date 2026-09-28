@@ -56,7 +56,7 @@ export function DashboardSidebar({
     <Sidebar
       variant="sidebar"
       collapsible="icon"
-      className="border-r border-line bg-white"
+      className="group border-r border-line bg-white"
     >
       {/* Brand */}
       <SidebarHeader className="h-[64px] border-b border-line/80 p-0">
@@ -74,8 +74,8 @@ export function DashboardSidebar({
             <Image
               src="/images/logo.png"
               alt="Enviroshield"
-              width={150}
-              height={150}
+              width={500}
+              height={500}
               className="h-8 w-8 object-contain"
               priority
             />
