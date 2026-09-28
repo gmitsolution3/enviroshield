@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+import { Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -54,31 +56,37 @@ export function DashboardSidebar({
     <Sidebar
       variant="sidebar"
       collapsible="icon"
-      className="border-r border-border/70"
+      className="border-r border-line bg-white"
     >
       {/* Brand */}
-      <SidebarHeader className="h-16 border-b border-border/70 p-0">
+      <SidebarHeader className="h-[64px] border-b border-line/80 p-0">
         <Link
           href="/dashboard"
-          className="group flex h-16 w-full items-center gap-3 px-4 transition-colors hover:bg-muted/60 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="
+            group flex h-full w-full items-center gap-2.5 px-3.5
+            transition-colors duration-200
+            hover:bg-mist/60
+            group-data-[collapsible=icon]:justify-center
+            group-data-[collapsible=icon]:px-0
+          "
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center">
             <Image
               src="/images/logo.png"
               alt="Enviroshield"
               width={150}
               height={150}
-              className="h-9 w-9 object-contain"
+              className="h-8 w-8 object-contain"
               priority
             />
           </div>
 
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <p className="text-sm font-bold tracking-tight text-foreground">
+            <p className="truncate text-[13px] font-bold tracking-[-0.02em] text-navy">
               Enviroshield
             </p>
 
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
+            <p className="mt-0.5 truncate text-[10px] font-medium text-ink">
               {role === "admin" ? "Administration" : "Workspace"}
             </p>
           </div>
@@ -86,14 +94,14 @@ export function DashboardSidebar({
       </SidebarHeader>
 
       {/* Navigation */}
-      <SidebarContent className="px-2 py-5">
-        <div className="mb-3 px-2 group-data-[collapsible=icon]:hidden">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
+      <SidebarContent className="px-2.5 py-4">
+        <div className="mb-2 px-2 group-data-[collapsible=icon]:hidden">
+          <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-ink">
             Workspace
           </p>
         </div>
 
-        <SidebarMenu className="gap-1">
+        <SidebarMenu className="gap-0.5">
           {navigation.map((item) => {
             const Icon = dashboardIcons[item.icon];
 
@@ -107,23 +115,34 @@ export function DashboardSidebar({
                 <SidebarMenuButton
                   isActive={isActive}
                   tooltip={item.title}
-                  className={[
-                    "h-10 rounded-xl px-3",
-                    "text-sm font-medium",
+                  className={cn(
+                    "relative h-9 rounded-md px-2.5",
+                    "text-[14px] !font-medium text-ink/80",
                     "transition-all duration-200",
-                    "hover:bg-muted/70",
-                    "data-[active=true]:bg-indigo/[0.08]",
-                    "data-[active=true]:text-indigo",
-                    "data-[active=true]:shadow-none",
-                    "data-[active=true]:hover:bg-indigo/[0.10]",
+                    "hover:bg-blue/[0.10] hover:text-blue",
+
+                    // Active state
+                    isActive && "!bg-blue/[0.10]",
+                    isActive && "!text-blue",
+                    isActive && "!font-semibold",
+                    isActive && "hover:bg-blue/[0.09]",
+
+                    // Reference-style left active indicator
+                    isActive &&
+                      "before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-blue",
+
+                    // Collapsed state
                     "group-data-[collapsible=icon]:justify-center",
                     "group-data-[collapsible=icon]:px-0",
-                  ].join(" ")}
+                  )}
                 >
-                  <Link href={item.href}>
-                    <Icon className="h-4 w-4 shrink-0" />
+                  <Link
+                    href={item.href}
+                    className="flex min-w-0 w-full items-center gap-2.5"
+                  >
+                    <Icon className="h-[15px] w-[15px] shrink-0" />
 
-                    <span className="group-data-[collapsible=icon]:hidden">
+                    <span className="truncate group-data-[collapsible=icon]:hidden">
                       {item.title}
                     </span>
                   </Link>
@@ -134,30 +153,78 @@ export function DashboardSidebar({
         </SidebarMenu>
       </SidebarContent>
 
-      {/* User */}
-      <SidebarFooter className="border-t border-border/70 p-2">
-        <div className="flex h-12 items-center gap-3 rounded-xl px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-          <Avatar className="h-9 w-9 shrink-0 border border-border/70">
+      {/* Bottom utility + account area */}
+      <SidebarFooter className="mt-auto border-t border-line/80 p-2.5">
+        <div className="mb-2 space-y-0.5">
+          <Link href="/dashboard/settings">
+            <SidebarMenuButton
+              isActive={pathname.startsWith("/dashboard/settings")}
+              tooltip="Settings"
+              className={cn(
+                "relative h-9 rounded-md px-2.5",
+                "text-[14px] !font-medium text-ink/80",
+                "transition-all duration-200",
+                "hover:bg-blue/[0.10] hover:text-blue",
+
+                // Active state
+                pathname.startsWith("/dashboard/settings") &&
+                  "!bg-blue/[0.10]",
+                pathname.startsWith("/dashboard/settings") &&
+                  "!text-blue",
+                pathname.startsWith("/dashboard/settings") &&
+                  "!font-semibold",
+                pathname.startsWith("/dashboard/settings") &&
+                  "hover:bg-blue/[0.09]",
+
+                // Reference-style left active indicator
+                pathname.startsWith("/dashboard/settings") &&
+                  "before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-blue",
+
+                // Collapsed state
+                "group-data-[collapsible=icon]:justify-center",
+                "group-data-[collapsible=icon]:px-0",
+              )}
+            >
+              <Settings className="h-[14px] w-[14px] shrink-0" />
+              <span className="group-data-[collapsible=icon]:hidden">
+                Settings
+              </span>
+            </SidebarMenuButton>
+          </Link>
+        </div>
+
+        {/* User */}
+        <Link
+          href="/dashboard/profile"
+          className="
+            flex min-w-0 items-center gap-2.5
+            rounded-lg px-1.5 py-2
+            transition-colors duration-200
+            hover:bg-mist/70
+            group-data-[collapsible=icon]:justify-center
+          "
+        >
+          <Avatar className="h-10 w-10 shrink-0 border border-line">
             <AvatarImage
               src={user.image ?? undefined}
               alt={user.name}
             />
 
-            <AvatarFallback className="bg-ink text-xs font-semibold text-white">
+            <AvatarFallback className="bg-navy text-[10px] font-semibold text-white">
               {initials}
             </AvatarFallback>
           </Avatar>
 
           <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <p className="truncate text-sm font-medium text-foreground">
+            <p className="truncate !text-[13px] font-semibold text-ink">
               {user.name}
             </p>
 
-            <p className="truncate text-xs text-muted-foreground">
+            <p className="truncate !text-[12px] text-ink/45">
               {user.email}
             </p>
           </div>
-        </div>
+        </Link>
       </SidebarFooter>
     </Sidebar>
   );
