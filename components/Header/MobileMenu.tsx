@@ -119,7 +119,7 @@ export default function MobileMenu({
                     >
                       {link.label}
 
-                      <ArrowUpRight size={17} />
+                      <ArrowUpRight size={17} aria-hidden="true" />
                     </Link>
                   </motion.div>
                 );
