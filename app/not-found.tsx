@@ -1,7 +1,25 @@
+"use client";
+
 import { ArrowLeft, Home } from "lucide-react";
+import { motion } from "motion/react";
 import Link from "next/link";
 
 import Logo from "@/components/Logo";
+
+const itemVariants = {
+  hidden: {
+    opacity: 0,
+    y: 18,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.55,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  },
+};
 
 export default function NotFound() {
   return (
@@ -10,35 +28,89 @@ export default function NotFound() {
       aria-labelledby="not-found-title"
     >
       {/* Background decoration */}
-      <div
+      <motion.div
         className="pointer-events-none absolute -right-32 -top-32 h-[420px] w-[420px] rounded-full border border-white/10"
         aria-hidden="true"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{
+          duration: 1.1,
+          ease: [0.22, 1, 0.36, 1],
+        }}
       />
 
-      <div
+      <motion.div
         className="pointer-events-none absolute -bottom-48 -left-32 h-[520px] w-[520px] rounded-full border border-white/10"
         aria-hidden="true"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{
+          duration: 1.1,
+          delay: 0.1,
+          ease: [0.22, 1, 0.36, 1],
+        }}
       />
 
-      <div className="relative z-10 w-full max-w-[820px]">
+      <motion.div
+        className="relative z-10 w-full max-w-[820px]"
+        initial={{
+          opacity: 0,
+          y: 28,
+          scale: 0.98,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          scale: 1,
+        }}
+        transition={{
+          duration: 0.7,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+      >
         {/* Main error content */}
         <section
           className="overflow-hidden rounded-[24px] bg-white shadow-[0_24px_80px_rgba(0,0,0,0.18)]"
           aria-labelledby="not-found-title"
         >
           {/* Card accent */}
-          <div className="h-1.5 bg-blue" aria-hidden="true" />
+          <motion.div
+            className="h-1.5 bg-blue"
+            aria-hidden="true"
+            initial={{ scaleX: 0, transformOrigin: "left" }}
+            animate={{ scaleX: 1 }}
+            transition={{
+              duration: 0.7,
+              delay: 0.2,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+          />
 
           {/* Brand */}
-          <header className="mt-7 flex justify-center">
+          <motion.header
+            className="mt-7 flex justify-center"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.5,
+              delay: 0.25,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+          >
             <Link href="/" aria-label="Enviroshield home">
               <Logo />
             </Link>
-          </header>
+          </motion.header>
 
           <div className="px-10 py-12 text-center max-[600px]:px-6 max-[600px]:py-9">
             {/* Eyebrow */}
-            <p className="mb-6 flex items-center justify-center gap-3">
+            <motion.p
+              className="mb-6 flex items-center justify-center gap-3"
+              variants={itemVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.3 }}
+            >
               <span className="h-px w-8 bg-blue" aria-hidden="true" />
 
               <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-blue">
@@ -46,31 +118,75 @@ export default function NotFound() {
               </span>
 
               <span className="h-px w-8 bg-blue" aria-hidden="true" />
-            </p>
+            </motion.p>
 
             {/* Error heading */}
-            <h1
+            <motion.h1
               id="not-found-title"
               className="text-[clamp(88px,16vw,148px)] font-extrabold leading-[0.78] text-navy"
+              initial={{
+                opacity: 0,
+                y: 25,
+                scale: 0.94,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                scale: 1,
+              }}
+              transition={{
+                duration: 0.7,
+                delay: 0.35,
+                ease: [0.22, 1, 0.36, 1],
+              }}
             >
               404
-            </h1>
+            </motion.h1>
 
-            <div className="mx-auto mt-10 max-w-[470px]">
+            <motion.div
+              className="mx-auto mt-10 max-w-[470px]"
+              initial={{
+                opacity: 0,
+                y: 18,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                duration: 0.55,
+                delay: 0.45,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+            >
               <h2 className="mb-4 text-[clamp(27px,4vw,38px)] font-extrabold leading-[1.08] tracking-[-0.045em] text-navy">
                 This page needs a fresh finish.
               </h2>
 
               <p className="text-[15px] leading-[1.75] text-ink">
-                The page you&apos;re looking for may have moved, been removed,
-                or never existed. Let&apos;s get you back to somewhere useful.
+                The page you&apos;re looking for may have moved, been
+                removed, or never existed. Let&apos;s get you back to
+                somewhere useful.
               </p>
-            </div>
+            </motion.div>
 
             {/* Primary navigation */}
-            <nav
+            <motion.nav
               className="mt-9 flex items-center justify-center gap-3 max-[600px]:flex-col"
               aria-label="Error page navigation"
+              initial={{
+                opacity: 0,
+                y: 18,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                duration: 0.55,
+                delay: 0.55,
+                ease: [0.22, 1, 0.36, 1],
+              }}
             >
               <Link
                 href="/"
@@ -86,12 +202,25 @@ export default function NotFound() {
               >
                 Contact us
               </Link>
-            </nav>
+            </motion.nav>
 
             {/* Secondary navigation */}
-            <nav
+            <motion.nav
               className="mt-8 border-t border-line pt-7"
               aria-label="Return navigation"
+              initial={{
+                opacity: 0,
+                y: 12,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                duration: 0.5,
+                delay: 0.65,
+                ease: [0.22, 1, 0.36, 1],
+              }}
             >
               <Link
                 href="/"
@@ -100,17 +229,32 @@ export default function NotFound() {
                 <ArrowLeft size={14} aria-hidden="true" />
                 Return to Enviroshield
               </Link>
-            </nav>
+            </motion.nav>
           </div>
         </section>
 
         {/* Brand descriptor */}
-        <footer className="mt-6 text-center">
+        <motion.footer
+          className="mt-6 text-center"
+          initial={{
+            opacity: 0,
+            y: 10,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          transition={{
+            duration: 0.5,
+            delay: 0.75,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+        >
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/50">
             Painting · Wall Finishing · Transformation
           </p>
-        </footer>
-      </div>
+        </motion.footer>
+      </motion.div>
     </main>
   );
 }
