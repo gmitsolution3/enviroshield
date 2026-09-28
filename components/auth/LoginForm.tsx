@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
+import { motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -32,6 +33,21 @@ function getSafeRedirectUrl(callbackUrl?: string) {
 
   return callbackUrl;
 }
+
+const fieldVariants = {
+  hidden: {
+    opacity: 0,
+    y: 18,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  },
+};
 
 export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
   const router = useRouter();
@@ -99,42 +115,83 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
             />
 
             <div className="relative z-10 flex h-full flex-col justify-between">
-              <div>
-                <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: {},
+                  visible: {
+                    transition: {
+                      staggerChildren: 0.1,
+                      delayChildren: 0.15,
+                    },
+                  },
+                }}
+              >
+                <motion.div
+                  className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste"
+                  variants={fieldVariants}
+                >
                   <span
                     className="h-[2px] w-7 bg-current"
                     aria-hidden="true"
                   />
                   WELCOME BACK
-                </div>
+                </motion.div>
 
-                <h1
+                <motion.h1
                   id="login-heading"
                   className="max-w-[440px] text-[clamp(38px,4.5vw,58px)] font-extrabold leading-[1.03] tracking-[-0.05em]"
+                  variants={fieldVariants}
                 >
                   Beautiful spaces start with the right finish.
-                </h1>
+                </motion.h1>
 
-                <p className="mt-6 max-w-[400px] text-[15px] leading-[1.8] text-white/75">
+                <motion.p
+                  className="mt-6 max-w-[400px] text-[15px] leading-[1.8] text-white/75"
+                  variants={fieldVariants}
+                >
                   Sign in to your Enviroshield account to continue
                   managing your projects and account details.
-                </p>
-              </div>
+                </motion.p>
+              </motion.div>
 
-              <div className="mt-12 hidden max-[900px]:block">
+              <motion.div
+                className="mt-12 hidden max-[900px]:block"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.5,
+                  delay: 0.55,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+              >
                 <Link
                   href="/"
                   className="text-[13px] font-bold text-paste transition-colors hover:text-white"
                 >
                   ← Back to Enviroshield
                 </Link>
-              </div>
+              </motion.div>
             </div>
           </aside>
 
           {/* Form panel */}
-          <div className="px-[55px] py-[55px] max-[900px]:px-8 max-[900px]:py-10 max-[600px]:px-6 max-[600px]:py-8">
-            <header className="mb-8">
+          <motion.div
+            className="px-[55px] py-[55px] max-[900px]:px-8 max-[900px]:py-10 max-[600px]:px-6 max-[600px]:py-8"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  staggerChildren: 0.08,
+                  delayChildren: 0.2,
+                },
+              },
+            }}
+          >
+            <motion.header className="mb-8" variants={fieldVariants}>
               <div className="mb-3 text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
                 ACCOUNT LOGIN
               </div>
@@ -146,7 +203,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
               <p className="mt-3 text-[14px] leading-[1.7] text-ink">
                 Enter your details below to continue.
               </p>
-            </header>
+            </motion.header>
 
             <form
               onSubmit={handleSubmit(onSubmit)}
@@ -161,7 +218,10 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
                 <legend className="sr-only">Login credentials</legend>
 
                 {/* Email */}
-                <div className="space-y-2">
+                <motion.div
+                  className="space-y-2"
+                  variants={fieldVariants}
+                >
                   <Label
                     htmlFor="login-email"
                     className="text-[12px] font-bold text-navy"
@@ -191,10 +251,13 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
                       {errors.email.message}
                     </p>
                   )}
-                </div>
+                </motion.div>
 
                 {/* Password */}
-                <div className="space-y-2">
+                <motion.div
+                  className="space-y-2"
+                  variants={fieldVariants}
+                >
                   <div className="flex items-center justify-between gap-4">
                     <Label
                       htmlFor="login-password"
@@ -257,30 +320,50 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
                       {errors.password.message}
                     </p>
                   )}
-                </div>
+                </motion.div>
 
                 {/* Server error */}
                 {serverError && (
-                  <div
+                  <motion.div
                     id="login-server-error"
                     role="alert"
                     aria-live="polite"
                     className="rounded-[10px] border border-destructive/20 bg-destructive/5 px-4 py-3 text-[13px] leading-[1.6] text-destructive"
+                    initial={{
+                      opacity: 0,
+                      height: 0,
+                      y: -8,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      height: "auto",
+                      y: 0,
+                    }}
+                    transition={{
+                      duration: 0.35,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    style={{ overflow: "hidden" }}
                   >
                     {serverError}
-                  </div>
+                  </motion.div>
                 )}
 
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="h-[48px] w-full rounded-full bg-blue text-[13px] font-extrabold text-white transition-colors hover:bg-[#005cb9]"
-                >
-                  {isSubmitting ? "Logging in..." : "Login"}
-                </Button>
+                <motion.div variants={fieldVariants}>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="h-[48px] w-full rounded-full bg-blue text-[13px] font-extrabold text-white transition-colors hover:bg-[#005cb9]"
+                  >
+                    {isSubmitting ? "Logging in..." : "Login"}
+                  </Button>
+                </motion.div>
               </fieldset>
 
-              <p className="text-center text-[13px] text-ink">
+              <motion.p
+                className="text-center text-[13px] text-ink"
+                variants={fieldVariants}
+              >
                 Don&apos;t have an account?{" "}
                 <Link
                   href="/register"
@@ -288,18 +371,26 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
                 >
                   Create an account
                 </Link>
-              </p>
+              </motion.p>
             </form>
 
-            <div className="mt-8 border-t border-line pt-6 text-center min-[901px]:hidden">
+            <motion.div
+              className="mt-8 border-t border-line pt-6 text-center min-[901px]:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{
+                duration: 0.5,
+                delay: 0.8,
+              }}
+            >
               <Link
                 href="/"
                 className="text-[12px] font-bold text-ink transition-colors hover:text-blue"
               >
                 Back to Enviroshield
               </Link>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
     </main>

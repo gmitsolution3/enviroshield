@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
+import { motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,21 +15,49 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 
+const passwordRules = {
+  minLength: (password: string) => password.length >= 8,
+  uppercase: (password: string) => /[A-Z]/.test(password),
+  lowercase: (password: string) => /[a-z]/.test(password),
+  number: (password: string) => /\d/.test(password),
+  special: (password: string) => /[^A-Za-z0-9]/.test(password),
+};
+
 const registerSchema = z
   .object({
     name: z
       .string()
       .min(2, "Name must be at least 2 characters.")
       .max(100, "Name is too long."),
+
     email: z.string().email("Please enter a valid email address."),
+
     phone: z
       .string()
       .min(7, "Please enter a valid phone number.")
       .max(30, "Phone number is too long."),
+
     password: z
       .string()
       .min(8, "Password must be at least 8 characters.")
-      .max(128, "Password is too long."),
+      .max(128, "Password is too long.")
+      .refine(
+        (password) => passwordRules.uppercase(password),
+        "Password must contain at least one uppercase letter.",
+      )
+      .refine(
+        (password) => passwordRules.lowercase(password),
+        "Password must contain at least one lowercase letter.",
+      )
+      .refine(
+        (password) => passwordRules.number(password),
+        "Password must contain at least one number.",
+      )
+      .refine(
+        (password) => passwordRules.special(password),
+        "Password must contain at least one special character.",
+      ),
+
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -37,6 +66,49 @@ const registerSchema = z
   });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
+
+const passwordRequirements = [
+  {
+    key: "minLength",
+    label: "At least 8 characters",
+    test: passwordRules.minLength,
+  },
+  {
+    key: "uppercase",
+    label: "One uppercase letter",
+    test: passwordRules.uppercase,
+  },
+  {
+    key: "lowercase",
+    label: "One lowercase letter",
+    test: passwordRules.lowercase,
+  },
+  {
+    key: "number",
+    label: "One number",
+    test: passwordRules.number,
+  },
+  {
+    key: "special",
+    label: "One special character",
+    test: passwordRules.special,
+  },
+] as const;
+
+const fieldVariants = {
+  hidden: {
+    opacity: 0,
+    y: 18,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  },
+};
 
 export function RegisterForm() {
   const router = useRouter();
@@ -49,6 +121,7 @@ export function RegisterForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -60,6 +133,44 @@ export function RegisterForm() {
       confirmPassword: "",
     },
   });
+
+  const password = watch("password", "");
+
+  const passwordChecks = passwordRequirements.map((requirement) => ({
+    ...requirement,
+    passed: requirement.test(password),
+  }));
+
+  const passedPasswordChecks = passwordChecks.filter(
+    (requirement) => requirement.passed,
+  ).length;
+
+  const passwordStrength =
+    passedPasswordChecks === 0
+      ? "empty"
+      : passedPasswordChecks <= 2
+        ? "weak"
+        : passedPasswordChecks <= 4
+          ? "good"
+          : "strong";
+
+  const passwordStrengthLabel =
+    passwordStrength === "empty"
+      ? ""
+      : passwordStrength === "weak"
+        ? "Weak password"
+        : passwordStrength === "good"
+          ? "Good password"
+          : "Strong password";
+
+  const passwordStrengthWidth =
+    passwordStrength === "empty"
+      ? "0%"
+      : passwordStrength === "weak"
+        ? "25%"
+        : passwordStrength === "good"
+          ? "70%"
+          : "100%";
 
   async function onSubmit(values: RegisterFormValues) {
     setServerError(null);
@@ -145,8 +256,25 @@ export function RegisterForm() {
           </aside>
 
           {/* Form panel */}
-          <div className="px-[55px] py-[55px] max-[900px]:px-8 max-[900px]:py-10 max-[600px]:px-6 max-[600px]:py-8">
-            <header className="mb-8">
+          <motion.div
+            className="px-[55px] py-[55px] max-[900px]:px-8 max-[900px]:py-10 max-[600px]:px-6 max-[600px]:py-8"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  staggerChildren: 0.07,
+                  delayChildren: 0.15,
+                },
+              },
+            }}
+          >
+            {/* Header */}
+            <motion.header
+              className="mb-8"
+              variants={fieldVariants}
+            >
               <div className="mb-3 text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
                 CREATE ACCOUNT
               </div>
@@ -158,7 +286,7 @@ export function RegisterForm() {
               <p className="mt-3 text-[14px] leading-[1.7] text-ink">
                 Enter your details below to create your account.
               </p>
-            </header>
+            </motion.header>
 
             <form
               onSubmit={handleSubmit(onSubmit)}
@@ -175,7 +303,10 @@ export function RegisterForm() {
                 </legend>
 
                 {/* Name */}
-                <div className="space-y-2">
+                <motion.div
+                  className="space-y-2"
+                  variants={fieldVariants}
+                >
                   <Label
                     htmlFor="register-name"
                     className="text-[12px] font-bold text-navy"
@@ -205,10 +336,13 @@ export function RegisterForm() {
                       {errors.name.message}
                     </p>
                   )}
-                </div>
+                </motion.div>
 
                 {/* Email */}
-                <div className="space-y-2">
+                <motion.div
+                  className="space-y-2"
+                  variants={fieldVariants}
+                >
                   <Label
                     htmlFor="register-email"
                     className="text-[12px] font-bold text-navy"
@@ -240,10 +374,13 @@ export function RegisterForm() {
                       {errors.email.message}
                     </p>
                   )}
-                </div>
+                </motion.div>
 
                 {/* Phone */}
-                <div className="space-y-2">
+                <motion.div
+                  className="space-y-2"
+                  variants={fieldVariants}
+                >
                   <Label
                     htmlFor="register-phone"
                     className="text-[12px] font-bold text-navy"
@@ -263,7 +400,7 @@ export function RegisterForm() {
                         : undefined
                     }
                     {...register("phone")}
-                    className="h-[48px] rounded-[9px] border-[#e0e5ea] bg-[#fafbfd] px-[14px] text-[13px] text-ink transition-[border,box-shadow] duration-200 placeholder:text-[#9ca9b1] focus:border-blue focus:shadow-[0_0_0_3px_rgba(1,110,220,0.1)]"
+                    className="h-[48px] rounded-[9px] border-[#e0e5e9] bg-[#fafbfd] px-[14px] text-[13px] text-ink transition-[border,box-shadow] duration-200 placeholder:text-[#9ca9b1] focus:border-blue focus:shadow-[0_0_0_3px_rgba(1,110,220,0.1)]"
                   />
 
                   {errors.phone && (
@@ -275,10 +412,13 @@ export function RegisterForm() {
                       {errors.phone.message}
                     </p>
                   )}
-                </div>
+                </motion.div>
 
                 {/* Password */}
-                <div className="space-y-2">
+                <motion.div
+                  className="space-y-2"
+                  variants={fieldVariants}
+                >
                   <Label
                     htmlFor="register-password"
                     className="text-[12px] font-bold text-navy"
@@ -293,11 +433,7 @@ export function RegisterForm() {
                       autoComplete="new-password"
                       placeholder="Create a password"
                       aria-invalid={Boolean(errors.password)}
-                      aria-describedby={
-                        errors.password
-                          ? "register-password-error"
-                          : undefined
-                      }
+                      aria-describedby="register-password-help"
                       {...register("password")}
                       className="h-[48px] rounded-[9px] border-[#e0e5ea] bg-[#fafbfd] px-[14px] pr-12 text-[13px] text-ink transition-[border,box-shadow] duration-200 placeholder:text-[#9ca9b1] focus:border-blue focus:shadow-[0_0_0_3px_rgba(1,110,220,0.1)]"
                     />
@@ -323,6 +459,114 @@ export function RegisterForm() {
                     </button>
                   </div>
 
+                  {/* Strength meter */}
+                  {password.length > 0 && (
+                    <motion.div
+                      id="register-password-help"
+                      className="pt-1"
+                      initial={{
+                        opacity: 0,
+                        height: 0,
+                        y: -8,
+                      }}
+                      animate={{
+                        opacity: 1,
+                        height: "auto",
+                        y: 0,
+                      }}
+                      transition={{
+                        duration: 0.35,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-navy">
+                          Password strength
+                        </span>
+
+                        <span
+                          className={`text-[11px] font-bold ${
+                            passwordStrength === "strong"
+                              ? "text-green-600"
+                              : passwordStrength === "good"
+                                ? "text-blue"
+                                : "text-destructive"
+                          }`}
+                          aria-live="polite"
+                        >
+                          {passwordStrengthLabel}
+                        </span>
+                      </div>
+
+                      <div
+                        className="h-[5px] overflow-hidden rounded-full bg-[#e9eef2]"
+                        role="progressbar"
+                        aria-label="Password strength"
+                        aria-valuemin={0}
+                        aria-valuemax={5}
+                        aria-valuenow={passedPasswordChecks}
+                      >
+                        <motion.div
+                          className={`h-full rounded-full ${
+                            passwordStrength === "strong"
+                              ? "bg-green-500"
+                              : passwordStrength === "good"
+                                ? "bg-blue"
+                                : "bg-destructive"
+                          }`}
+                          initial={{ width: 0 }}
+                          animate={{
+                            width: passwordStrengthWidth,
+                          }}
+                          transition={{
+                            duration: 0.4,
+                            ease: [0.22, 1, 0.36, 1],
+                          }}
+                        />
+                      </div>
+
+                      <div className="mt-3 grid gap-1.5 min-[601px]:grid-cols-2">
+                        {passwordChecks.map((requirement, index) => (
+                          <motion.div
+                            key={requirement.key}
+                            className={`flex items-center gap-2 text-[11px] ${
+                              requirement.passed
+                                ? "text-green-600"
+                                : "text-muted-foreground"
+                            }`}
+                            initial={{
+                              opacity: 0,
+                              x: -6,
+                            }}
+                            animate={{
+                              opacity: 1,
+                              x: 0,
+                            }}
+                            transition={{
+                              duration: 0.25,
+                              delay: 0.08 + index * 0.04,
+                              ease: [0.22, 1, 0.36, 1],
+                            }}
+                          >
+                            <span
+                              className={`grid size-[15px] shrink-0 place-items-center rounded-full text-[9px] font-extrabold ${
+                                requirement.passed
+                                  ? "bg-green-100"
+                                  : "bg-[#edf1f4]"
+                              }`}
+                              aria-hidden="true"
+                            >
+                              {requirement.passed ? "✓" : ""}
+                            </span>
+
+                            {requirement.label}
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+
                   {errors.password && (
                     <p
                       id="register-password-error"
@@ -332,10 +576,13 @@ export function RegisterForm() {
                       {errors.password.message}
                     </p>
                   )}
-                </div>
+                </motion.div>
 
                 {/* Confirm password */}
-                <div className="space-y-2">
+                <motion.div
+                  className="space-y-2"
+                  variants={fieldVariants}
+                >
                   <Label
                     htmlFor="register-confirm-password"
                     className="text-[12px] font-bold text-navy"
@@ -389,30 +636,54 @@ export function RegisterForm() {
                       {errors.confirmPassword.message}
                     </p>
                   )}
-                </div>
+                </motion.div>
 
                 {/* Server error */}
                 {serverError && (
-                  <div
+                  <motion.div
                     id="register-server-error"
                     role="alert"
                     aria-live="polite"
                     className="rounded-[10px] border border-destructive/20 bg-destructive/5 px-4 py-3 text-[13px] leading-[1.6] text-destructive"
+                    initial={{
+                      opacity: 0,
+                      height: 0,
+                      y: -8,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      height: "auto",
+                      y: 0,
+                    }}
+                    transition={{
+                      duration: 0.35,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    style={{ overflow: "hidden" }}
                   >
                     {serverError}
-                  </div>
+                  </motion.div>
                 )}
 
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="h-[48px] w-full rounded-full bg-blue text-[13px] font-extrabold text-white transition-colors hover:bg-[#005cb9]"
-                >
-                  {isSubmitting ? "Registering..." : "Create account"}
-                </Button>
+                {/* Submit */}
+                <motion.div variants={fieldVariants}>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="h-[48px] w-full rounded-full bg-blue text-[13px] font-extrabold text-white transition-colors hover:bg-[#005cb9]"
+                  >
+                    {isSubmitting
+                      ? "Registering..."
+                      : "Create account"}
+                  </Button>
+                </motion.div>
               </fieldset>
 
-              <p className="text-center text-[13px] text-ink">
+              {/* Login link */}
+              <motion.p
+                className="text-center text-[13px] text-ink"
+                variants={fieldVariants}
+              >
                 Already have an account?{" "}
                 <Link
                   href="/login"
@@ -420,18 +691,31 @@ export function RegisterForm() {
                 >
                   Sign in
                 </Link>
-              </p>
+              </motion.p>
             </form>
 
-            <div className="mt-8 border-t border-line pt-6 text-center min-[901px]:hidden">
+            {/* Mobile footer */}
+            <motion.div
+              className="mt-8 border-t border-line pt-6 text-center min-[901px]:hidden"
+              initial={{
+                opacity: 0,
+              }}
+              animate={{
+                opacity: 1,
+              }}
+              transition={{
+                duration: 0.5,
+                delay: 0.8,
+              }}
+            >
               <Link
                 href="/"
                 className="text-[12px] font-bold text-ink transition-colors hover:text-blue"
               >
                 Back to Enviroshield
               </Link>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
     </main>
