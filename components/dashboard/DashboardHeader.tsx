@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
@@ -34,9 +35,7 @@ interface DashboardHeaderProps {
   };
 }
 
-export function DashboardHeader({
-  user,
-}: DashboardHeaderProps) {
+export function DashboardHeader({ user }: DashboardHeaderProps) {
   const router = useRouter();
 
   const initials = user.name
@@ -48,28 +47,31 @@ export function DashboardHeader({
 
   async function handleLogout() {
     await authClient.signOut();
-
     router.push("/login");
     router.refresh();
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-border/70 bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-line/80 bg-white/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-white/80 sm:px-6">
       {/* Left */}
       <div className="flex h-full items-center gap-3">
-        <SidebarTrigger className="h-9 w-9 rounded-xl" />
-
-        <Separator
-          orientation="vertical"
-          className="h-5"
+        <SidebarTrigger
+          className={cn(
+            "h-9 w-9 rounded-lg",
+            "text-ink/60",
+            "transition-colors duration-200",
+            "hover:bg-blue/[0.08] hover:text-blue",
+          )}
         />
 
+        <Separator orientation="vertical" className="h-5 bg-line" />
+
         <div className="flex flex-col justify-center">
-          <p className="text-sm font-semibold tracking-tight text-foreground">
+          <p className="text-sm font-semibold tracking-tight text-navy">
             Dashboard
           </p>
 
-          <p className="hidden text-xs text-muted-foreground sm:block">
+          <p className="hidden text-xs font-medium text-ink/45 sm:block">
             Enviroshield workspace
           </p>
         </div>
@@ -81,13 +83,16 @@ export function DashboardHeader({
           type="button"
           variant="ghost"
           size="icon"
-          className="h-9 w-9 rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className={cn(
+            "h-9 w-9 rounded-lg",
+            "text-ink/55",
+            "transition-colors duration-200",
+            "hover:bg-blue/[0.08] hover:text-blue",
+          )}
         >
-          <Bell className="h-4 w-4" />
+          <Bell className="h-[16px] w-[16px]" />
 
-          <span className="sr-only">
-            Notifications
-          </span>
+          <span className="sr-only">Notifications</span>
         </Button>
 
         <DropdownMenu>
@@ -97,13 +102,13 @@ export function DashboardHeader({
               variant="ghost"
               className="ml-1 h-9 rounded-full p-0 hover:bg-transparent"
             >
-              <Avatar className="h-9 w-9 border border-border/80">
+              <Avatar className="h-10 w-10 border border-line">
                 <AvatarImage
                   src={user.image ?? undefined}
                   alt={user.name}
                 />
 
-                <AvatarFallback className="bg-ink text-xs font-semibold text-white">
+                <AvatarFallback className="bg-navy text-[12px] font-semibold text-white">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -113,34 +118,36 @@ export function DashboardHeader({
           <DropdownMenuContent
             align="end"
             sideOffset={8}
-            className="w-56 rounded-2xl p-1.5"
+            className="w-56 rounded-xl border-line p-1.5"
           >
             <div className="px-2.5 py-2">
-              <p className="truncate text-sm font-medium">
+              <p className="truncate text-sm font-semibold text-ink">
                 {user.name}
               </p>
 
-              <p className="truncate text-xs text-muted-foreground">
+              <p className="truncate text-xs text-ink/45">
                 {user.email}
               </p>
             </div>
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem
-              className="rounded-xl"
-            >
-              <Link href="/dashboard/profile">
-                <User />
+            <DropdownMenuItem className="rounded-lg text-ink/90 focus:bg-blue/[0.10] focus:text-blue hover:bg-blue/[0.10]">
+              <Link
+                href="/dashboard/profile"
+                className="flex w-full items-center gap-2 h-7"
+              >
+                <User className="h-4 w-4" />
                 Profile
               </Link>
             </DropdownMenuItem>
 
-            <DropdownMenuItem
-              className="rounded-xl"
-            >
-              <Link href="/dashboard/settings">
-                <Settings />
+            <DropdownMenuItem className="rounded-lg text-ink/70 focus:bg-blue/[0.08] focus:text-blue">
+              <Link
+                href="/dashboard/settings"
+                className="flex w-full items-center gap-2 h-7"
+              >
+                <Settings className="h-4 w-4" />
                 Settings
               </Link>
             </DropdownMenuItem>
@@ -149,9 +156,9 @@ export function DashboardHeader({
 
             <DropdownMenuItem
               onClick={handleLogout}
-              className="rounded-xl text-destructive focus:text-destructive"
+              className="rounded-lg text-destructive focus:text-destructive h-8"
             >
-              <LogOut />
+              <LogOut className="h-4 w-4" />
               Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
