@@ -5,7 +5,7 @@ import clientPromise from "@/lib/mongodb";
 
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
-import { admin } from "better-auth/plugins";
+import { admin, bearer } from "better-auth/plugins";
 
 const client = await clientPromise;
 
@@ -30,7 +30,7 @@ export const auth = betterAuth({
     },
   },
 
-  plugins: [admin()],
+  plugins: [admin(), bearer()],
 
   session: {
     expiresIn: 60 * 60 * 24,
