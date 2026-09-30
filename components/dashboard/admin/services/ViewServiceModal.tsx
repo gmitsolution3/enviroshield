@@ -1,7 +1,5 @@
-
 "use client";
 
-import Image from "next/image";
 import {
   Calendar,
   CheckCircle,
@@ -16,6 +14,7 @@ import {
   Star,
   XCircle,
 } from "lucide-react";
+import Image from "next/image";
 
 import type { IService } from "@/types";
 
@@ -88,10 +87,7 @@ export default function ViewServiceModal({
                 {service.primaryImage?.url ? (
                   <Image
                     src={service.primaryImage.url}
-                    alt={
-                      service.primaryImage.alt ||
-                      service.name
-                    }
+                    alt={service.primaryImage.alt || service.name}
                     fill
                     priority
                     className="object-cover"
@@ -223,20 +219,12 @@ export default function ViewServiceModal({
 
                 <InfoCard
                   label="Featured"
-                  value={
-                    service.isFeatured ? "Featured" : "Standard"
-                  }
+                  value={service.isFeatured ? "Featured" : "Standard"}
                   icon={<Star className="h-4 w-4" />}
-                  accent={
-                    service.isFeatured ? "amber" : "gray"
-                  }
+                  accent={service.isFeatured ? "amber" : "gray"}
                 />
 
-                <InfoCard
-                  label="Slug"
-                  value={service.slug}
-                  mono
-                />
+                <InfoCard label="Slug" value={service.slug} mono />
 
                 <InfoCard
                   label="Service ID"
@@ -317,9 +305,7 @@ export default function ViewServiceModal({
                 eyebrow="Portfolio"
                 title="Projects"
                 description={`${service.projects?.length || 0} project${
-                  service.projects?.length === 1
-                    ? ""
-                    : "s"
+                  service.projects?.length === 1 ? "" : "s"
                 } associated with this service.`}
               />
 
@@ -334,9 +320,7 @@ export default function ViewServiceModal({
                         <div className="relative h-52 overflow-hidden bg-slate-100">
                           {project.primaryImage?.url ? (
                             <Image
-                              src={
-                                project.primaryImage.url
-                              }
+                              src={project.primaryImage.url}
                               alt={
                                 project.primaryImage.alt ||
                                 project.title
@@ -399,9 +383,7 @@ export default function ViewServiceModal({
                                 </p>
 
                                 <p className="mt-1 text-sm font-medium text-navy">
-                                  {formatDate(
-                                    project.completionDate,
-                                  )}
+                                  {formatDate(project.completionDate)}
                                 </p>
                               </div>
                             </div>
@@ -444,7 +426,8 @@ export default function ViewServiceModal({
                         </h4>
 
                         <p className="text-xs text-slate-500">
-                          Metadata used by search engines and social platforms.
+                          Metadata used by search engines and social
+                          platforms.
                         </p>
                       </div>
                     </div>
@@ -555,9 +538,7 @@ export default function ViewServiceModal({
                   <TimelineItem
                     icon={<Calendar className="h-4 w-4" />}
                     label="Created"
-                    value={formatDate(
-                      service.createdAt,
-                    )}
+                    value={formatDate(service.createdAt)}
                   />
 
                   <div className="hidden h-8 w-px bg-slate-200 sm:block" />
@@ -565,9 +546,7 @@ export default function ViewServiceModal({
                   <TimelineItem
                     icon={<Clock className="h-4 w-4" />}
                     label="Last Updated"
-                    value={formatDate(
-                      service.updatedAt,
-                    )}
+                    value={formatDate(service.updatedAt)}
                   />
 
                   {service.publishedAt && (
@@ -577,9 +556,7 @@ export default function ViewServiceModal({
                       <TimelineItem
                         icon={<Globe className="h-4 w-4" />}
                         label="Published"
-                        value={formatDate(
-                          service.publishedAt,
-                        )}
+                        value={formatDate(service.publishedAt)}
                       />
                     </>
                   )}
@@ -836,13 +813,9 @@ function VisualContentSection({
             : ""
         }`}
       >
-        <div className="relative p-2 sm:p-3">
-          {image}
-        </div>
+        <div className="relative p-2 sm:p-3">{image}</div>
 
-        <div className="p-5 sm:p-7 lg:p-8">
-          {content}
-        </div>
+        <div className="p-5 sm:p-7 lg:p-8">{content}</div>
       </div>
     </section>
   );
@@ -944,9 +917,7 @@ function EmptyState({
         {icon}
       </div>
 
-      <p className="mt-3 text-sm font-semibold text-navy">
-        {title}
-      </p>
+      <p className="mt-3 text-sm font-semibold text-navy">{title}</p>
 
       <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-slate-500">
         {description}

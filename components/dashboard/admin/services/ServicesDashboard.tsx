@@ -10,6 +10,7 @@ import {
   Filter,
   MoreHorizontal,
   Plus,
+  Trash,
   XCircle,
 } from "lucide-react";
 import { useState } from "react";
@@ -49,6 +50,7 @@ import DashboardLoading from "../../DashboardLoading";
 import { formatDate } from "./../../../../utils/formatDate";
 
 import CreateServiceModal from "./CreateServiceModal";
+import DeleteServiceDialog from "./DeleteServiceDialog";
 import ViewServiceModal from "./ViewServiceModal";
 
 const features = tableFeatures({});
@@ -60,6 +62,11 @@ export default function ServicesDashboard() {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  const [deleteService, setDeleteService] = useState<IService | null>(
+    null,
+  );
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const [selectedService, setSelectedService] =
     useState<IService | null>(null);
@@ -240,6 +247,17 @@ export default function ServicesDashboard() {
                   >
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    className="cursor-pointer text-red-600 focus:text-red-600"
+                    onClick={() => {
+                      setDeleteService(service);
+                      setIsDeleteDialogOpen(true);
+                    }}
+                  >
+                    <Trash className="mr-2 h-4 w-4" />
+                    Delete
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
@@ -437,6 +455,16 @@ export default function ServicesDashboard() {
         isModalOpen={isDetailModalOpen}
         setIsModalOpen={setIsDetailModalOpen}
         service={selectedService}
+      />
+
+      <DeleteServiceDialog
+        service={deleteService}
+        open={isDeleteDialogOpen}
+        revalidateKey={`/service?page=${currentPage}&limit=${limit}`}
+        onClose={() => {
+          setIsDeleteDialogOpen(false);
+          setDeleteService(null);
+        }}
       />
     </section>
   );

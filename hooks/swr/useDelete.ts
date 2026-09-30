@@ -1,7 +1,6 @@
-// hooks/useDelete.ts
-import { deleteFetcher } from "@/lib/fetchers/deleteFetcher";
 import { mutate } from "swr";
 import useSWRMutation from "swr/mutation";
+import { deleteFetcher } from "@/lib/fetchers/deleteFetcher";
 
 type UseDeleteOptions = {
   revalidateKey?: string | string[];
