@@ -6,6 +6,7 @@ import {
   Settings,
   User,
   Users,
+  Wrench,
   type LucideIcon,
 } from "lucide-react";
 
@@ -17,6 +18,7 @@ export const dashboardIcons = {
   documents: FileText,
   analytics: BarChart3,
   circlepile: CirclePile,
+  services: Wrench,
 } satisfies Record<string, LucideIcon>;
 
 export type DashboardIcon = keyof typeof dashboardIcons;
@@ -61,6 +63,11 @@ export const dashboardNavigation: Record<
       title: "Dashboard",
       href: "/dashboard",
       icon: "dashboard",
+    },
+    {
+      title: "Service Management",
+      href: "/dashboard/services",
+      icon: "services",
     },
     {
       title: "Venture Dashboards",
