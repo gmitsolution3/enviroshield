@@ -14,6 +14,12 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import {
+  tableFeatures,
+  useTable,
+  type ColumnDef,
+} from "@tanstack/react-table";
+
 import { useFetch } from "@/hooks/swr/useFetch";
 import type { IService, IServiceResponse } from "@/types";
 
@@ -34,10 +40,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import DashboardButton from "../../DashboardButton";
 import DashboardEmpty from "../../DashboardEmpty";
 import DashboardError from "../../DashboardError";
 import DashboardLoading from "../../DashboardLoading";
+
+const features = tableFeatures({});
 
 export default function ServicesDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -89,12 +98,171 @@ export default function ServicesDashboard() {
       : service.status !== "published";
   });
 
+  const columns: ColumnDef<typeof features, IService>[] = [
+    {
+      accessorKey: "name",
+      header: "Service",
+
+      cell: ({ row }) => {
+        const service = row.original;
+
+        return (
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-muted">
+              {service.primaryImage?.url ? (
+                <img
+                  src={service.primaryImage.url}
+                  alt={service.primaryImage.alt || service.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                  No image
+                </div>
+              )}
+            </div>
+
+            <div className="min-w-0">
+              <div className="font-semibold">{service.name}</div>
+
+              <div className="mt-0.5 max-w-md truncate text-sm text-muted-foreground">
+                {service.description}
+              </div>
+
+              <div className="mt-1 text-xs text-muted-foreground">
+                /{service.slug}
+              </div>
+            </div>
+          </div>
+        );
+      },
+    },
+
+    {
+      accessorKey: "status",
+      header: "Status",
+
+      cell: ({ row }) => {
+        const service = row.original;
+
+        return (
+          <>
+            {service.status === "published" ? (
+              <Badge className="gap-1 bg-green-500 hover:bg-green-600">
+                <CheckCircle className="h-3 w-3" />
+                Published
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="gap-1">
+                <XCircle className="h-3 w-3" />
+                {service.status}
+              </Badge>
+            )}
+
+            {service.isFeatured && (
+              <Badge variant="outline" className="ml-2">
+                Featured
+              </Badge>
+            )}
+          </>
+        );
+      },
+    },
+
+    {
+      accessorKey: "createdAt",
+      header: "Created",
+
+      cell: ({ row }) => {
+        const service = row.original;
+
+        return (
+          <>
+            <div className="flex items-center text-sm font-medium">
+              <Calendar className="mr-1 h-3 w-3 text-muted-foreground" />
+
+              {new Date(service.createdAt).toLocaleDateString(
+                "en-US",
+                {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                },
+              )}
+            </div>
+
+            <div className="mt-1 text-xs text-muted-foreground">
+              Updated:{" "}
+              {new Date(service.updatedAt).toLocaleDateString(
+                "en-US",
+                {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                },
+              )}
+            </div>
+          </>
+        );
+      },
+    },
+
+    {
+      id: "actions",
+      header: "Actions",
+
+      cell: ({ row }) => {
+        const service = row.original;
+
+        return (
+          <div className="flex items-center gap-1">
+            <DashboardButton
+              variant="outline"
+              className="h-8 w-8 rounded-lg border-blue/30 bg-muted/30 p-0 text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
+              icon={<Eye className="h-4 w-4" />}
+              onClick={() => handleView(service)}
+            />
+
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <DashboardButton
+                  variant="outline"
+                  className="h-8 w-8 rounded-lg border-blue/30 bg-muted/30 p-0 text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
+                  icon={<MoreHorizontal className="h-4 w-4" />}
+                />
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem
+                  onSelect={() => handleEdit(service)}
+                >
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    },
+  ];
+
+  const table = useTable({
+    features,
+    columns,
+    data: filteredServices,
+  });
+
   if (isLoading) {
     return <DashboardLoading />;
   }
 
   if (isError) {
-    return <DashboardError />;
+    return <DashboardError onRetry={() => refetch()} />;
   }
 
   const totalPages = meta?.totalPages || 1;
@@ -141,6 +309,7 @@ export default function ServicesDashboard() {
 
           <SelectContent>
             <SelectItem value="published">Published</SelectItem>
+
             <SelectItem value="draft">Draft</SelectItem>
           </SelectContent>
         </Select>
@@ -169,155 +338,33 @@ export default function ServicesDashboard() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="border-b bg-muted/50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-muted-foreground">
-                    Service
-                  </th>
-
-                  <th className="px-6 py-3 text-left text-sm font-medium text-muted-foreground">
-                    Status
-                  </th>
-
-                  <th className="px-6 py-3 text-left text-sm font-medium text-muted-foreground">
-                    Created
-                  </th>
-
-                  <th className="px-6 py-3 text-left text-sm font-medium text-muted-foreground">
-                    Actions
-                  </th>
-                </tr>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className="px-6 py-3 text-left text-sm font-medium text-muted-foreground"
+                      >
+                        {header.isPlaceholder ? null : (
+                          <table.FlexRender header={header} />
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
               </thead>
 
               <tbody>
-                {filteredServices.map((service) => (
+                {table.getRowModel().rows.map((row) => (
                   <tr
-                    key={service._id}
+                    key={row.id}
                     className="border-b transition-colors last:border-0 hover:bg-muted/30"
                   >
-                    {/* Service */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-muted">
-                          {service.primaryImage?.url ? (
-                            <img
-                              src={service.primaryImage.url}
-                              alt={
-                                service.primaryImage.alt ||
-                                service.name
-                              }
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-                              No image
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="min-w-0">
-                          <div className="font-semibold">
-                            {service.name}
-                          </div>
-
-                          <div className="mt-0.5 max-w-md truncate text-sm text-muted-foreground">
-                            {service.description}
-                          </div>
-
-                          <div className="mt-1 text-xs text-muted-foreground">
-                            /{service.slug}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Status */}
-                    <td className="px-6 py-4">
-                      {service.status === "published" ? (
-                        <Badge className="gap-1 bg-green-500 hover:bg-green-600">
-                          <CheckCircle className="h-3 w-3" />
-                          Published
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary" className="gap-1">
-                          <XCircle className="h-3 w-3" />
-                          {service.status}
-                        </Badge>
-                      )}
-
-                      {service.isFeatured && (
-                        <Badge variant="outline" className="ml-2">
-                          Featured
-                        </Badge>
-                      )}
-                    </td>
-
-                    {/* Created */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center text-sm font-medium">
-                        <Calendar className="mr-1 h-3 w-3 text-muted-foreground" />
-
-                        {new Date(
-                          service.createdAt,
-                        ).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </div>
-
-                      <div className="mt-1 text-xs text-muted-foreground">
-                        Updated:{" "}
-                        {new Date(
-                          service.updatedAt,
-                        ).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </div>
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1">
-                        <DashboardButton
-                          variant="outline"
-                          className="h-8 w-8 rounded-lg border-blue/30 bg-muted/30 p-0 text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
-                          icon={<Eye className="h-4 w-4" />}
-                          onClick={() => handleView(service)}
-                        />
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger>
-                            <DashboardButton
-                              variant="outline"
-                              className="h-8 w-8 rounded-lg border-blue/30 bg-muted/30 p-0 text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
-                              icon={
-                                <MoreHorizontal className="h-4 w-4" />
-                              }
-                            />
-                          </DropdownMenuTrigger>
-
-                          <DropdownMenuContent
-                            align="end"
-                            className="w-40"
-                          >
-                            <DropdownMenuLabel>
-                              Actions
-                            </DropdownMenuLabel>
-
-                            <DropdownMenuSeparator />
-
-                            <DropdownMenuItem
-                              onSelect={() => handleEdit(service)}
-                            >
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </td>
+                    {row.getAllCells().map((cell) => (
+                      <td key={cell.id} className="px-6 py-4">
+                        <table.FlexRender cell={cell} />
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
@@ -338,7 +385,7 @@ export default function ServicesDashboard() {
               value={String(limit)}
               onValueChange={handleLimitChange}
             >
-              <SelectTrigger className="h-8 w-20">
+              <SelectTrigger className="h-8 w-20 rounded-full border-blue/30 bg-muted/30 px-4 text-xs !text-navy font-semibold shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/5 focus:border-blue/40 focus:ring-2 focus:ring-blue/10">
                 <SelectValue />
               </SelectTrigger>
 
