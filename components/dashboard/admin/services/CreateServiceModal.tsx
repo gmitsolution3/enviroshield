@@ -9,7 +9,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -385,107 +385,86 @@ export default function CreateServiceModal({
         }
       }}
     >
-      <DialogContent className="max-h-[90vh] !max-w-5xl overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">Add Service</DialogTitle>
+      <DialogContent className="max-h-[92vh] !max-w-5xl overflow-hidden rounded-2xl border-0 p-0 shadow-2xl">
+        <div className="flex max-h-[92vh] flex-col">
+          <DialogHeader className="border-b px-6 py-5 text-left sm:px-8">
+            <DialogTitle className="text-xl font-bold text-navy">
+              Add Service
+            </DialogTitle>
 
-          <DialogDescription>
-            Create a new Enviroshield service and configure all
-            service, content, and SEO information.
-          </DialogDescription>
-        </DialogHeader>
+            <DialogDescription className="text-sm leading-6">
+              Create a new Enviroshield service and configure all service,
+              content, and SEO information.
+            </DialogDescription>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="min-h-0 flex-1 overflow-y-auto"
+          >
+            <div className="space-y-8 px-6 py-7 sm:px-8">
           {/* Step Timeline */}
-          <div className="rounded-xl border bg-muted/20 px-4 py-5 sm:px-6">
-            <div className="flex items-start">
-              {steps.map((step, index) => {
-                const isActive = currentStep === index;
-                const isCompleted = currentStep > index;
+          <div className="border-b bg-muted/20 px-5 py-5 sm:px-8">
+            <div className="relative">
+              <div className="absolute left-[7%] right-[7%] top-5 hidden h-px bg-border md:block" />
+              <div className="relative grid grid-cols-5 gap-2">
+                {steps.map((step, index) => {
+                  const isCompleted = index < currentStep;
+                  const isActive = index === currentStep;
 
-                return (
-                  <div
-                    key={step.number}
-                    className="flex min-w-0 flex-1 items-start"
-                  >
-                    <div className="flex min-w-0 flex-1 flex-col items-center">
-                      <div className="flex w-full items-center">
-                        <div
-                          className={[
-                            "h-px flex-1",
-                            index === 0
-                              ? "bg-transparent"
-                              : currentStep >= index
-                                ? "bg-blue"
-                                : "bg-border",
-                          ].join(" ")}
-                        />
-
-                        <button
-                          type="button"
-                          onClick={() => handleStepClick(index)}
-                          disabled={isLoading}
-                          className={[
-                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-[10px] font-bold transition-all duration-200",
-                            "disabled:cursor-not-allowed",
-                            isActive
-                              ? "border-blue bg-blue text-white shadow-[0_4px_12px_rgba(1,110,220,0.22)]"
-                              : isCompleted
-                                ? "border-blue bg-blue/10 text-blue"
-                                : "border-border bg-background text-muted-foreground",
-                          ].join(" ")}
-                          aria-label={`Go to ${step.title}`}
-                        >
-                          {isCompleted ? (
-                            <Check className="h-4 w-4" />
-                          ) : (
-                            step.number
-                          )}
-                        </button>
-
-                        <div
-                          className={[
-                            "h-px flex-1",
-                            index === steps.length - 1
-                              ? "bg-transparent"
-                              : currentStep > index
-                                ? "bg-blue"
-                                : "bg-border",
-                          ].join(" ")}
-                        />
+                  return (
+                    <button
+                      key={step.number}
+                      type="button"
+                      disabled={index >= currentStep}
+                      onClick={() => handleStepClick(index)}
+                      className="group flex flex-col items-center text-center disabled:cursor-default"
+                    >
+                      <div
+                        className={[
+                          "relative z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 text-xs font-bold transition-all duration-200",
+                          isCompleted
+                            ? "border-blue bg-blue text-white shadow-md shadow-blue/20"
+                            : isActive
+                              ? "border-blue bg-white text-blue shadow-md shadow-blue/15"
+                              : "border-border bg-white text-muted-foreground",
+                        ].join(" ")}
+                      >
+                        {isCompleted ? <Check className="h-4 w-4" /> : step.number}
                       </div>
 
-                      <div className="mt-3 text-center">
+                      <div className="mt-3 hidden md:block">
                         <p
                           className={[
-                            "text-xs font-semibold transition-colors",
-                            isActive || isCompleted
-                              ? "text-navy"
-                              : "text-muted-foreground",
+                            "text-xs font-bold",
+                            isActive || isCompleted ? "text-navy" : "text-muted-foreground",
                           ].join(" ")}
                         >
-                          <span className="hidden sm:inline">
-                            {step.title}
-                          </span>
-                          <span className="sm:hidden">
-                            {step.shortTitle}
-                          </span>
+                          {step.title}
                         </p>
-
-                        <p className="mt-1 hidden text-[11px] text-muted-foreground lg:block">
+                        <p className="mt-1 text-[11px] text-muted-foreground">
                           {step.description}
                         </p>
                       </div>
-                    </div>
-                  </div>
-                );
-              })}
+
+                      <p
+                        className={[
+                          "mt-2 text-[10px] font-bold md:hidden",
+                          isActive || isCompleted ? "text-blue" : "text-muted-foreground",
+                        ].join(" ")}
+                      >
+                        {step.shortTitle}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
           {/* Step 1 — Basic Information */}
           {currentStep === 0 && (
-            <div className="space-y-5 rounded-xl border bg-muted/20 p-5">
+            <div className="space-y-6">
               <div>
                 <h3 className="text-base font-semibold text-navy">
                   Basic Information
@@ -498,7 +477,7 @@ export default function CreateServiceModal({
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="service-name">Service Name</Label>
+                  <Label className="text-sm font-semibold text-navy" htmlFor="service-name">Service Name</Label>
 
                   <Input
                     id="service-name"
@@ -527,7 +506,7 @@ export default function CreateServiceModal({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="service-slug">Slug</Label>
+                  <Label className="text-sm font-semibold text-navy" htmlFor="service-slug">Slug</Label>
 
                   <Input
                     id="service-slug"
@@ -544,7 +523,7 @@ export default function CreateServiceModal({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="detail-heading">Detail Heading</Label>
+                <Label className="text-sm font-semibold text-navy" htmlFor="detail-heading">Detail Heading</Label>
 
                 <Input
                   id="detail-heading"
@@ -560,14 +539,14 @@ export default function CreateServiceModal({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="service-description">
+                <Label className="text-sm font-semibold text-navy" htmlFor="service-description">
                   Description
                 </Label>
 
                 <Textarea
                   id="service-description"
                   placeholder="Describe the service..."
-                  rows={4}
+                  className="min-h-32 resize-none"
                   {...register("description")}
                 />
 
@@ -627,9 +606,9 @@ export default function CreateServiceModal({
                   control={control}
                   name="isFeatured"
                   render={({ field }) => (
-                    <div className="flex items-center justify-between rounded-xl border p-4">
+                    <div className="flex items-center justify-between rounded-xl border bg-muted/20 p-4">
                       <div>
-                        <Label className="font-semibold">
+                        <Label className="font-semibold text-navy">
                           Featured Service
                         </Label>
                         <p className="mt-1 text-sm text-muted-foreground">
@@ -922,7 +901,7 @@ export default function CreateServiceModal({
                   render={({ field }) => (
                     <div className="flex items-center justify-between rounded-xl border p-4">
                       <div>
-                        <Label className="font-semibold">
+                        <Label className="font-semibold text-navy">
                           No Index
                         </Label>
                         <p className="mt-1 text-sm text-muted-foreground">
@@ -943,50 +922,63 @@ export default function CreateServiceModal({
           )}
 
           {/* Navigation */}
-          <div className="flex items-center justify-between border-t pt-5">
-            <DashboardButton
-              type="button"
-              variant="outline"
-              onClick={
-                currentStep === 0 ? handleClose : handlePreviousStep
-              }
-              disabled={isLoading}
-              icon={
-                currentStep > 0 ? (
-                  <ChevronLeft className="h-4 w-4" />
-                ) : undefined
-              }
-              className="h-10 rounded-full border-blue/30 bg-muted/30 px-5 text-sm font-semibold text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
-            >
-              {currentStep === 0 ? "Cancel" : "Back"}
-            </DashboardButton>
+          <div className="sticky bottom-0 flex items-center justify-between border-t bg-background px-6 py-4 sm:px-8">
+            <div>
+              {currentStep > 0 ? (
+                <DashboardButton
+                  type="button"
+                  variant="outline"
+                  icon={<ChevronLeft className="h-4 w-4" />}
+                  onClick={handlePreviousStep}
+                  disabled={isLoading}
+                  className="min-h-10 rounded-xl px-4 text-xs font-bold"
+                >
+                  Back
+                </DashboardButton>
+              ) : (
+                <DashboardButton
+                  type="button"
+                  variant="outline"
+                  onClick={handleClose}
+                  disabled={isLoading}
+                  className="min-h-10 rounded-xl px-4 text-xs font-bold"
+                >
+                  Cancel
+                </DashboardButton>
+              )}
+            </div>
 
-            {currentStep < steps.length - 1 ? (
-              <DashboardButton
-                type="button"
-                onClick={handleNextStep}
-                disabled={isLoading}
-                icon={<ChevronRight className="h-4 w-4" />}
-              >
-                Continue
-              </DashboardButton>
-            ) : (
-              <DashboardButton
-                type="submit"
-                disabled={isLoading}
-                icon={
-                  isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Plus className="h-4 w-4" />
-                  )
-                }
-              >
-                {isLoading ? "Creating..." : "Create Service"}
-              </DashboardButton>
-            )}
+            <div>
+              {currentStep < steps.length - 1 ? (
+                <DashboardButton
+                  type="button"
+                  icon={<ChevronRight className="h-4 w-4" />}
+                  onClick={handleNextStep}
+                  disabled={isLoading}
+                >
+                  Continue
+                </DashboardButton>
+              ) : (
+                <DashboardButton
+                  type="submit"
+                  disabled={isLoading}
+                  icon={
+                    isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Plus className="h-4 w-4" />
+                    )
+                  }
+                  className="min-h-10 rounded-xl px-5 text-xs font-bold"
+                >
+                  {isLoading ? "Creating..." : "Create Service"}
+                </DashboardButton>
+              )}
+            </div>
           </div>
-        </form>
+            </div>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -1012,58 +1004,50 @@ function ImageFields({
   errors,
 }: ImageFieldsProps) {
   const fieldName = urlName.split(".")[0];
-
   const imageErrors = errors?.[fieldName];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 rounded-2xl border bg-muted/10 p-5">
       <div>
-        <Label>{title}</Label>
+        <h4 className="text-sm font-bold text-navy">{title}</h4>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Upload the image and provide accessible metadata.
+        </p>
       </div>
 
       <Controller
         control={control}
         name={urlName}
         render={({ field }: any) => (
-          <ImageUploader
-            value={field.value}
-            onChange={(url) => field.onChange(url)}
-          />
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold">Image</Label>
+            <ImageUploader
+              value={field.value}
+              onChange={(url) => field.onChange(url)}
+            />
+            {imageErrors?.url && (
+              <p className="text-xs text-red-600">
+                {imageErrors.url.message}
+              </p>
+            )}
+          </div>
         )}
       />
 
-      {imageErrors?.url && (
-        <p className="text-sm text-destructive">
-          {imageErrors.url.message}
-        </p>
-      )}
-
       <div className="grid gap-5 md:grid-cols-2">
         <div className="space-y-2">
-          <Label>Alt Text</Label>
-
-          <Input
-            placeholder="Describe the image"
-            {...register(altName)}
-          />
-
+          <Label className="text-sm font-semibold text-navy">Alt Text</Label>
+          <Input placeholder="Describe the image" {...register(altName)} />
           {imageErrors?.alt && (
-            <p className="text-sm text-destructive">
-              {imageErrors.alt.message}
-            </p>
+            <p className="text-xs text-red-600">{imageErrors.alt.message}</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label>Caption</Label>
-
-          <Input
-            placeholder="Image caption"
-            {...register(captionName)}
-          />
-
+          <Label className="text-sm font-semibold text-navy">Caption</Label>
+          <Input placeholder="Image caption" {...register(captionName)} />
           {imageErrors?.caption && (
-            <p className="text-sm text-destructive">
+            <p className="text-xs text-red-600">
               {imageErrors.caption.message}
             </p>
           )}
@@ -1095,150 +1079,154 @@ function ContentSection({
   fields,
 }: ContentSectionProps) {
   return (
-    <div className="space-y-5 rounded-xl border bg-muted/20 p-5">
+    <section className="space-y-6">
       <div>
-        <h3 className="text-base font-semibold text-navy">{title}</h3>
-
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h3 className="text-lg font-bold text-navy">{title}</h3>
+        <p className="mt-1 text-sm leading-6 text-muted-foreground">
           {description}
         </p>
       </div>
 
-      {/* Section Image */}
-      <div className="space-y-4">
-        <Label>Section Image</Label>
-
-        <Controller
-          control={control}
-          name={`${sectionName}.image.url`}
-          render={({ field }: any) => (
-            <ImageUploader
-              value={field.value}
-              onChange={(url) => field.onChange(url)}
-            />
-          )}
-        />
-
-        {errors?.[sectionName]?.image?.url && (
-          <p className="text-sm text-destructive">
-            {errors[sectionName].image.url.message}
-          </p>
-        )}
-
-        <div className="grid gap-5 md:grid-cols-2">
-          <div className="space-y-2">
-            <Label>Image Alt Text</Label>
-
-            <Input
-              placeholder="Describe the image"
-              {...register(`${sectionName}.image.alt`)}
-            />
-
-            {errors?.[sectionName]?.image?.alt && (
-              <p className="text-sm text-destructive">
-                {errors[sectionName].image.alt.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label>Image Caption</Label>
-
-            <Input
-              placeholder="Image caption"
-              {...register(`${sectionName}.image.caption`)}
-            />
-
-            {errors?.[sectionName]?.image?.caption && (
-              <p className="text-sm text-destructive">
-                {errors[sectionName].image.caption.message}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Content Items */}
-      <div className="space-y-4 border-t pt-5">
-        <div className="flex items-center justify-between">
+      <div className="space-y-5">
+        <div className="space-y-5 rounded-2xl border bg-muted/10 p-5">
           <div>
-            <h4 className="text-sm font-semibold">Content Items</h4>
-
+            <h4 className="text-sm font-bold text-navy">Section Image</h4>
             <p className="mt-1 text-xs text-muted-foreground">
-              Add the points you want to show in this section.
+              Upload the image and provide accessible metadata.
             </p>
           </div>
 
-          <DashboardButton
-            type="button"
-            variant="outline"
-            icon={<Plus className="h-4 w-4" />}
-            onClick={() =>
-              fields.append({
-                title: "",
-                description: "",
-              })
-            }
-            className="h-9 rounded-full border-blue/30 bg-muted/30 px-4 text-xs font-semibold text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
-          >
-            Add Item
-          </DashboardButton>
-        </div>
-
-        {fields.fields.map((field: { id: string }, index: number) => (
-          <div
-            key={field.id}
-            className="relative space-y-4 rounded-lg border bg-background p-4"
-          >
-            {fields.fields.length > 1 && (
-              <DashboardButton
-                type="button"
-                variant="outline"
-                icon={<Trash2 className="h-4 w-4" />}
-                onClick={() => fields.remove(index)}
-                ariaLabel={`Remove item ${index + 1}`}
-                className="absolute right-3 top-3 h-8 w-8 rounded-lg border-red-200 bg-red-50 p-0 text-red-500 shadow-none hover:border-red-300 hover:bg-red-100 hover:text-red-600"
-              />
+          <Controller
+            control={control}
+            name={`${sectionName}.image.url`}
+            render={({ field }: any) => (
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Image</Label>
+                <ImageUploader
+                  value={field.value}
+                  onChange={(url) => field.onChange(url)}
+                />
+                {errors?.[sectionName]?.image?.url && (
+                  <p className="text-xs text-red-600">
+                    {errors[sectionName].image.url.message}
+                  </p>
+                )}
+              </div>
             )}
+          />
 
-            <div className="space-y-2 pr-10">
-              <Label>Item Title</Label>
-
-              <Input
-                placeholder="e.g. Experienced Professionals"
-                {...register(`${sectionName}.items.${index}.title`)}
-              />
-
-              {errors?.[sectionName]?.items?.[index]?.title && (
-                <p className="text-sm text-destructive">
-                  {errors[sectionName].items[index].title.message}
-                </p>
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-navy">Alt Text</Label>
+              <Input {...register(`${sectionName}.image.alt`)} placeholder="Describe the image" />
+              {errors?.[sectionName]?.image?.alt && (
+                <p className="text-xs text-red-600">{errors[sectionName].image.alt.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label>Item Description</Label>
-
-              <Textarea
-                placeholder="Describe this point..."
-                rows={3}
-                {...register(
-                  `${sectionName}.items.${index}.description`,
-                )}
-              />
-
-              {errors?.[sectionName]?.items?.[index]?.description && (
-                <p className="text-sm text-destructive">
-                  {
-                    errors[sectionName].items[index].description
-                      .message
-                  }
-                </p>
+              <Label className="text-sm font-semibold text-navy">Caption</Label>
+              <Input {...register(`${sectionName}.image.caption`)} placeholder="Image caption" />
+              {errors?.[sectionName]?.image?.caption && (
+                <p className="text-xs text-red-600">{errors[sectionName].image.caption.message}</p>
               )}
             </div>
           </div>
-        ))}
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <h4 className="text-sm font-bold text-navy">Content Items</h4>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Add the points you want to highlight in this section.
+              </p>
+            </div>
+
+            <DashboardButton
+              type="button"
+              icon={<Plus className="h-4 w-4" />}
+              onClick={() => fields.append({ title: "", description: "" })}
+              className="min-h-9 rounded-xl bg-blue px-4 text-xs font-bold text-white hover:bg-[#005cb9]"
+            >
+              Add Item
+            </DashboardButton>
+          </div>
+
+          <div className="space-y-4">
+            {fields.fields.map((field: { id: string }, index: number) => (
+              <div key={field.id} className="rounded-2xl border bg-muted/10 p-5">
+                <div className="mb-5 flex items-center justify-between">
+                  <p className="text-xs font-bold uppercase tracking-[0.08em] text-blue">
+                    Item {String(index + 1).padStart(2, "0")}
+                  </p>
+
+                  {fields.fields.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => fields.remove(index)}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 text-red-500 transition-colors hover:bg-red-50"
+                      aria-label={`Remove item ${index + 1}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-navy">Title</Label>
+                    <Input {...register(`${sectionName}.items.${index}.title`)} placeholder="Content item title" />
+                    {errors?.[sectionName]?.items?.[index]?.title && (
+                      <p className="text-xs text-red-600">
+                        {errors[sectionName].items[index].title.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-navy">Description</Label>
+                    <Textarea
+                      {...register(`${sectionName}.items.${index}.description`)}
+                      placeholder="Describe this point..."
+                      className="min-h-28 resize-none"
+                    />
+                    {errors?.[sectionName]?.items?.[index]?.description && (
+                      <p className="text-xs text-red-600">
+                        {errors[sectionName].items[index].description.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
+
+function FormSection({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="space-y-6">
+      <div>
+        <h3 className="text-lg font-bold text-navy">{title}</h3>
+        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+          {description}
+        </p>
+      </div>
+
+      <div className="space-y-5">{children}</div>
+    </section>
+  );
+}
+
