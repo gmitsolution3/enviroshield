@@ -93,7 +93,7 @@ export interface IService {
 
   projects: IServiceProject[];
 
-  status: string;
+  status: "published" | "draft";
   publishedAt?: string;
 
   seo?: IServiceSeo;

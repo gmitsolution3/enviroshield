@@ -28,6 +28,7 @@ import { Card } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -45,6 +46,9 @@ import DashboardButton from "../../DashboardButton";
 import DashboardEmpty from "../../DashboardEmpty";
 import DashboardError from "../../DashboardError";
 import DashboardLoading from "../../DashboardLoading";
+import { formatDate } from "./../../../../utils/formatDate";
+
+import CreateServiceModal from "./CreateServiceModal";
 
 const features = tableFeatures({});
 
@@ -52,6 +56,7 @@ export default function ServicesDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [filterStatus, setFilterStatus] = useState<string>("");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const { data, isLoading, isError, refetch } =
     useFetch<IServiceResponse>(
@@ -181,26 +186,11 @@ export default function ServicesDashboard() {
             <div className="flex items-center text-sm font-medium">
               <Calendar className="mr-1 h-3 w-3 text-muted-foreground" />
 
-              {new Date(service.createdAt).toLocaleDateString(
-                "en-US",
-                {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                },
-              )}
+              {formatDate(service.createdAt)}
             </div>
 
             <div className="mt-1 text-xs text-muted-foreground">
-              Updated:{" "}
-              {new Date(service.updatedAt).toLocaleDateString(
-                "en-US",
-                {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                },
-              )}
+              Updated: {formatDate(service.updatedAt)}
             </div>
           </>
         );
@@ -233,16 +223,18 @@ export default function ServicesDashboard() {
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-                <DropdownMenuSeparator />
+                  <DropdownMenuSeparator />
 
-                <DropdownMenuItem
-                  onSelect={() => handleEdit(service)}
-                >
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit
-                </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => handleEdit(service)}
+                  >
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -286,7 +278,10 @@ export default function ServicesDashboard() {
           )}
         </div>
 
-        <DashboardButton icon={<Plus className="h-4 w-4" />}>
+        <DashboardButton
+          icon={<Plus className="h-4 w-4" />}
+          onClick={() => setIsCreateModalOpen(true)}
+        >
           Add Service
         </DashboardButton>
       </div>
@@ -332,6 +327,7 @@ export default function ServicesDashboard() {
           description="Get started by adding your first Enviroshield service."
           icon={<span className="text-2xl">🛠️</span>}
           actionLabel="Add Service"
+          onAction={() => setIsCreateModalOpen(true)}
         />
       ) : (
         <Card className="overflow-hidden border p-0 shadow-sm">
@@ -423,6 +419,12 @@ export default function ServicesDashboard() {
           </div>
         </div>
       )}
+
+      <CreateServiceModal
+        isModalOpen={isCreateModalOpen}
+        setIsModalOpen={setIsCreateModalOpen}
+        onSuccess={() => refetch()}
+      />
     </section>
   );
 }
