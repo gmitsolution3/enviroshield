@@ -49,6 +49,7 @@ import DashboardLoading from "../../DashboardLoading";
 import { formatDate } from "./../../../../utils/formatDate";
 
 import CreateServiceModal from "./CreateServiceModal";
+import ViewServiceModal from "./ViewServiceModal";
 
 const features = tableFeatures({});
 
@@ -56,7 +57,12 @@ export default function ServicesDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [filterStatus, setFilterStatus] = useState<string>("");
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  const [selectedService, setSelectedService] =
+    useState<IService | null>(null);
 
   const { data, isLoading, isError, refetch } =
     useFetch<IServiceResponse>(
@@ -67,7 +73,8 @@ export default function ServicesDashboard() {
   const meta = data?.meta;
 
   const handleView = (service: IService) => {
-    console.log("View service:", service);
+    setSelectedService(service);
+    setIsDetailModalOpen(true);
   };
 
   const handleEdit = (service: IService) => {
@@ -424,6 +431,12 @@ export default function ServicesDashboard() {
         isModalOpen={isCreateModalOpen}
         setIsModalOpen={setIsCreateModalOpen}
         onSuccess={() => refetch()}
+      />
+
+      <ViewServiceModal
+        isModalOpen={isDetailModalOpen}
+        setIsModalOpen={setIsDetailModalOpen}
+        service={selectedService}
       />
     </section>
   );
