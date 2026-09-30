@@ -569,6 +569,28 @@ export default function CreateServiceModal({
               />
 
               <div className="grid gap-5 md:grid-cols-2">
+                <Controller
+                  control={control}
+                  name="isFeatured"
+                  render={({ field }) => (
+                    <div className="flex items-center justify-between rounded-xl border bg-muted/20 p-4">
+                      <div>
+                        <Label className="font-semibold text-navy">
+                          Featured Service
+                        </Label>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Highlight this service on the website.
+                        </p>
+                      </div>
+
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </div>
+                  )}
+                />
+
                 <div className="space-y-2">
                   <Label>Status</Label>
 
@@ -601,28 +623,6 @@ export default function CreateServiceModal({
                     </p>
                   )}
                 </div>
-
-                <Controller
-                  control={control}
-                  name="isFeatured"
-                  render={({ field }) => (
-                    <div className="flex items-center justify-between rounded-xl border bg-muted/20 p-4">
-                      <div>
-                        <Label className="font-semibold text-navy">
-                          Featured Service
-                        </Label>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Highlight this service on the website.
-                        </p>
-                      </div>
-
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </div>
-                  )}
-                />
               </div>
             </div>
           )}
