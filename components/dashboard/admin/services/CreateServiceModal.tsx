@@ -1,7 +1,14 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -26,6 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { generateSlug } from "@/utils/generateSlug";
 import DashboardButton from "../../DashboardButton";
 
 const imageSchema = z.object({
@@ -167,12 +175,46 @@ const defaultValues: FormValues = {
   },
 };
 
+const steps = [
+  {
+    number: "01",
+    title: "Basic Information",
+    shortTitle: "Basic",
+    description: "Service details and primary image",
+  },
+  {
+    number: "02",
+    title: "Why Enviroshield",
+    shortTitle: "Why Us",
+    description: "Why customers should choose Enviroshield",
+  },
+  {
+    number: "03",
+    title: "Process",
+    shortTitle: "Process",
+    description: "How this service is delivered",
+  },
+  {
+    number: "04",
+    title: "Benefits",
+    shortTitle: "Benefits",
+    description: "Key benefits customers receive",
+  },
+  {
+    number: "05",
+    title: "SEO",
+    shortTitle: "SEO",
+    description: "Search and social sharing settings",
+  },
+];
+
 export default function CreateServiceModal({
   isModalOpen,
   setIsModalOpen,
   onSuccess,
 }: CreateServiceModalProps) {
   const [seoKeywordInput, setSeoKeywordInput] = useState("");
+  const [currentStep, setCurrentStep] = useState(0);
 
   const { mutate: postService, isLoading } = usePost("/service", {
     revalidateKey: "/service",
@@ -185,6 +227,7 @@ export default function CreateServiceModal({
     reset,
     setValue,
     watch,
+    trigger,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -208,21 +251,49 @@ export default function CreateServiceModal({
 
   const currentKeywords = watch("seo.keywords");
 
+  const stepFields = [
+    [
+      "name",
+      "slug",
+      "isFeatured",
+      "primaryImage",
+      "detailHeading",
+      "description",
+      "status",
+    ],
+    ["whyEnviroshield"],
+    ["process"],
+    ["benefits"],
+    ["seo"],
+  ] as const;
+
   const handleClose = () => {
     if (isLoading) return;
 
     setIsModalOpen(false);
     reset(defaultValues);
     setSeoKeywordInput("");
+    setCurrentStep(0);
   };
 
-  const generateSlug = (value: string) => {
-    return value
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-");
+  const handleNextStep = async () => {
+    const isValid = await trigger(stepFields[currentStep]);
+
+    if (!isValid) return;
+
+    setCurrentStep((step) =>
+      Math.min(step + 1, steps.length - 1),
+    );
+  };
+
+  const handlePreviousStep = () => {
+    setCurrentStep((step) => Math.max(step - 1, 0));
+  };
+
+  const handleStepClick = async (stepIndex: number) => {
+    if (stepIndex >= currentStep) return;
+
+    setCurrentStep(stepIndex);
   };
 
   const onSubmit = async (data: FormValues) => {
@@ -288,6 +359,7 @@ export default function CreateServiceModal({
         setIsModalOpen(false);
         reset(defaultValues);
         setSeoKeywordInput("");
+        setCurrentStep(0);
         onSuccess?.();
       }
     } catch (error) {
@@ -306,7 +378,9 @@ export default function CreateServiceModal({
     >
       <DialogContent className="max-h-[90vh] !max-w-5xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Add Service</DialogTitle>
+          <DialogTitle className="text-2xl">
+            Add Service
+          </DialogTitle>
 
           <DialogDescription>
             Create a new Enviroshield service and configure all
@@ -314,463 +388,603 @@ export default function CreateServiceModal({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          {/* Basic Information */}
-          <div className="space-y-5 rounded-xl border bg-muted/20 p-5">
-            <div>
-              <h3 className="text-base font-semibold text-navy">
-                Basic Information
-              </h3>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-6"
+        >
+          {/* Step Timeline */}
+          <div className="rounded-xl border bg-muted/20 px-4 py-5 sm:px-6">
+            <div className="flex items-start">
+              {steps.map((step, index) => {
+                const isActive = currentStep === index;
+                const isCompleted = currentStep > index;
 
-              <p className="mt-1 text-sm text-muted-foreground">
-                Configure the basic information for this service.
-              </p>
-            </div>
+                return (
+                  <div
+                    key={step.number}
+                    className="flex min-w-0 flex-1 items-start"
+                  >
+                    <div className="flex min-w-0 flex-1 flex-col items-center">
+                      <div className="flex w-full items-center">
+                        <div
+                          className={[
+                            "h-px flex-1",
+                            index === 0
+                              ? "bg-transparent"
+                              : currentStep >= index
+                                ? "bg-blue"
+                                : "bg-border",
+                          ].join(" ")}
+                        />
 
-            <div className="grid gap-5 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="service-name">Service Name</Label>
+                        <button
+                          type="button"
+                          onClick={() => handleStepClick(index)}
+                          disabled={isLoading}
+                          className={[
+                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-[10px] font-bold transition-all duration-200",
+                            "disabled:cursor-not-allowed",
+                            isActive
+                              ? "border-blue bg-blue text-white shadow-[0_4px_12px_rgba(1,110,220,0.22)]"
+                              : isCompleted
+                                ? "border-blue bg-blue/10 text-blue"
+                                : "border-border bg-background text-muted-foreground",
+                          ].join(" ")}
+                          aria-label={`Go to ${step.title}`}
+                        >
+                          {isCompleted ? (
+                            <Check className="h-4 w-4" />
+                          ) : (
+                            step.number
+                          )}
+                        </button>
 
-                <Input
-                  id="service-name"
-                  placeholder="e.g. Roof Waterproofing"
-                  {...register("name")}
-                  onChange={(event) => {
-                    const value = event.target.value;
+                        <div
+                          className={[
+                            "h-px flex-1",
+                            index === steps.length - 1
+                              ? "bg-transparent"
+                              : currentStep > index
+                                ? "bg-blue"
+                                : "bg-border",
+                          ].join(" ")}
+                        />
+                      </div>
 
-                    setValue("name", value, {
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    });
+                      <div className="mt-3 text-center">
+                        <p
+                          className={[
+                            "text-xs font-semibold transition-colors",
+                            isActive || isCompleted
+                              ? "text-navy"
+                              : "text-muted-foreground",
+                          ].join(" ")}
+                        >
+                          <span className="hidden sm:inline">
+                            {step.title}
+                          </span>
+                          <span className="sm:hidden">
+                            {step.shortTitle}
+                          </span>
+                        </p>
 
-                    setValue("slug", generateSlug(value), {
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    });
-                  }}
-                />
-
-                {errors.name && (
-                  <p className="text-sm text-destructive">
-                    {errors.name.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="service-slug">Slug</Label>
-
-                <Input
-                  id="service-slug"
-                  placeholder="roof-waterproofing"
-                  {...register("slug")}
-                />
-
-                {errors.slug && (
-                  <p className="text-sm text-destructive">
-                    {errors.slug.message}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="detail-heading">Detail Heading</Label>
-
-              <Input
-                id="detail-heading"
-                placeholder="Professional Roof Waterproofing Solutions"
-                {...register("detailHeading")}
-              />
-
-              {errors.detailHeading && (
-                <p className="text-sm text-destructive">
-                  {errors.detailHeading.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="service-description">Description</Label>
-
-              <Textarea
-                id="service-description"
-                placeholder="Describe the service..."
-                rows={4}
-                {...register("description")}
-              />
-
-              {errors.description && (
-                <p className="text-sm text-destructive">
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
-
-            {/* Primary Image */}
-            <ImageFields
-              title="Primary Image"
-              urlName="primaryImage.url"
-              altName="primaryImage.alt"
-              captionName="primaryImage.caption"
-              control={control}
-              register={register}
-              errors={errors}
-            />
-
-            <div className="grid gap-5 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Status</Label>
-
-                <Controller
-                  control={control}
-                  name="status"
-                  render={({ field }) => (
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger className="h-10">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-
-                      <SelectContent>
-                        <SelectItem value="draft">Draft</SelectItem>
-
-                        <SelectItem value="published">
-                          Published
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-
-                {errors.status && (
-                  <p className="text-sm text-destructive">
-                    {errors.status.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex items-end">
-                <label className="flex cursor-pointer items-center gap-3">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-gray-300 accent-blue"
-                    {...register("isFeatured")}
-                  />
-
-                  <span className="text-sm font-medium">
-                    Feature this service
-                  </span>
-                </label>
-              </div>
+                        <p className="mt-1 hidden text-[11px] text-muted-foreground lg:block">
+                          {step.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Why Enviroshield */}
-          <ContentSection
-            title="Why Enviroshield"
-            description="Explain why customers should choose Enviroshield for this service."
-            sectionName="whyEnviroshield"
-            control={control}
-            register={register}
-            errors={errors}
-            fields={whyEnviroshieldItems}
-          />
+          {/* Step 1 — Basic Information */}
+          {currentStep === 0 && (
+            <div className="space-y-5 rounded-xl border bg-muted/20 p-5">
+              <div>
+                <h3 className="text-base font-semibold text-navy">
+                  Basic Information
+                </h3>
 
-          {/* Process */}
-          <ContentSection
-            title="Process"
-            description="Describe the process involved in delivering this service."
-            sectionName="process"
-            control={control}
-            register={register}
-            errors={errors}
-            fields={processItems}
-          />
-
-          {/* Benefits */}
-          <ContentSection
-            title="Benefits"
-            description="Highlight the main benefits customers receive from this service."
-            sectionName="benefits"
-            control={control}
-            register={register}
-            errors={errors}
-            fields={benefitsItems}
-          />
-
-          {/* SEO */}
-          <div className="space-y-5 rounded-xl border bg-muted/20 p-5">
-            <div>
-              <h3 className="text-base font-semibold text-navy">
-                SEO
-              </h3>
-
-              <p className="mt-1 text-sm text-muted-foreground">
-                Configure search engine and social sharing information
-                for this service.
-              </p>
-            </div>
-
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="seo-meta-title">Meta Title</Label>
-
-                <Input
-                  id="seo-meta-title"
-                  placeholder="Roof Waterproofing Services in Bangladesh | Enviroshield"
-                  {...register("seo.metaTitle")}
-                />
-
-                {errors.seo?.metaTitle && (
-                  <p className="text-sm text-destructive">
-                    {errors.seo.metaTitle.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="seo-meta-description">
-                  Meta Description
-                </Label>
-
-                <Textarea
-                  id="seo-meta-description"
-                  rows={3}
-                  placeholder="Professional roof waterproofing solutions..."
-                  {...register("seo.metaDescription")}
-                />
-
-                {errors.seo?.metaDescription && (
-                  <p className="text-sm text-destructive">
-                    {errors.seo.metaDescription.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Keywords */}
-              <div className="space-y-3">
-                <div>
-                  <Label>Keywords</Label>
-
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Add at least one SEO keyword.
-                  </p>
-                </div>
-
-                {/* Add keyword */}
-                <div className="flex gap-2">
-                  <Input
-                    value={seoKeywordInput}
-                    onChange={(event) =>
-                      setSeoKeywordInput(event.target.value)
-                    }
-                    placeholder="e.g. roof waterproofing"
-                  />
-
-                  <DashboardButton
-                    type="button"
-                    variant="outline"
-                    icon={<Plus className="h-4 w-4" />}
-                    onClick={() => {
-                      const keyword = seoKeywordInput.trim();
-
-                      if (!keyword) return;
-
-                      if (currentKeywords.includes(keyword)) {
-                        return;
-                      }
-
-                      setValue(
-                        "seo.keywords",
-                        [...currentKeywords, keyword],
-                        {
-                          shouldDirty: true,
-                          shouldValidate: true,
-                        },
-                      );
-
-                      setSeoKeywordInput("");
-                    }}
-                    className="h-10 shrink-0 rounded-full border-blue/30 bg-muted/30 px-4 text-xs font-semibold text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
-                  >
-                    Add
-                  </DashboardButton>
-                </div>
-
-                {/* Added keywords */}
-                <div className="flex flex-wrap gap-2">
-                  {currentKeywords.map((keyword, index) => (
-                    <div
-                      key={`${keyword}-${index}`}
-                      className="flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-sm"
-                    >
-                      <span>{keyword}</span>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const updatedKeywords =
-                            currentKeywords.filter(
-                              (_, keywordIndex) =>
-                                keywordIndex !== index,
-                            );
-
-                          setValue("seo.keywords", updatedKeywords, {
-                            shouldDirty: true,
-                            shouldValidate: true,
-                          });
-                        }}
-                        className="text-muted-foreground transition-colors hover:text-destructive"
-                        aria-label={`Remove ${keyword}`}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Validation error */}
-                {errors.seo?.keywords?.root && (
-                  <p className="text-sm text-destructive">
-                    {errors.seo.keywords.root.message}
-                  </p>
-                )}
-
-                {errors.seo?.keywords?.map?.(
-                  (error, index) =>
-                    error && (
-                      <p
-                        key={index}
-                        className="text-sm text-destructive"
-                      >
-                        {error.message}
-                      </p>
-                    ),
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="seo-canonical-url">
-                  Canonical URL
-                </Label>
-
-                <Input
-                  id="seo-canonical-url"
-                  type="url"
-                  placeholder="https://enviroshield.com/services/roof-waterproofing"
-                  {...register("seo.canonicalUrl")}
-                />
-
-                {errors.seo?.canonicalUrl && (
-                  <p className="text-sm text-destructive">
-                    {errors.seo.canonicalUrl.message}
-                  </p>
-                )}
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Configure the basic information for this service.
+                </p>
               </div>
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="seo-og-title">OG Title</Label>
+                  <Label htmlFor="service-name">
+                    Service Name
+                  </Label>
 
                   <Input
-                    id="seo-og-title"
-                    placeholder="Roof Waterproofing Services | Enviroshield"
-                    {...register("seo.ogTitle")}
+                    id="service-name"
+                    placeholder="e.g. Roof Waterproofing"
+                    {...register("name")}
+                    onChange={(event) => {
+                      const value = event.target.value;
+
+                      setValue("name", value, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+
+                      setValue("slug", generateSlug(value), {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                    }}
                   />
 
-                  {errors.seo?.ogTitle && (
+                  {errors.name && (
                     <p className="text-sm text-destructive">
-                      {errors.seo.ogTitle.message}
+                      {errors.name.message}
                     </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="seo-og-image">OG Image URL</Label>
+                  <Label htmlFor="service-slug">Slug</Label>
 
                   <Input
-                    id="seo-og-image"
-                    type="url"
-                    placeholder="https://example.com/services/roof-waterproofing.jpg"
-                    {...register("seo.ogImage")}
+                    id="service-slug"
+                    placeholder="roof-waterproofing"
+                    {...register("slug")}
                   />
 
-                  {errors.seo?.ogImage && (
+                  {errors.slug && (
                     <p className="text-sm text-destructive">
-                      {errors.seo.ogImage.message}
+                      {errors.slug.message}
                     </p>
                   )}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="seo-og-description">
-                  OG Description
+                <Label htmlFor="detail-heading">
+                  Detail Heading
                 </Label>
 
-                <Textarea
-                  id="seo-og-description"
-                  rows={3}
-                  placeholder="Professional roof waterproofing solutions for long-lasting building protection."
-                  {...register("seo.ogDescription")}
+                <Input
+                  id="detail-heading"
+                  placeholder="Professional Roof Waterproofing Solutions"
+                  {...register("detailHeading")}
                 />
 
-                {errors.seo?.ogDescription && (
+                {errors.detailHeading && (
                   <p className="text-sm text-destructive">
-                    {errors.seo.ogDescription.message}
+                    {errors.detailHeading.message}
                   </p>
                 )}
               </div>
 
-              <div className="rounded-lg border bg-background p-4">
-                <label className="flex cursor-pointer items-center gap-3">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-gray-300 accent-blue"
-                    {...register("seo.noIndex")}
+              <div className="space-y-2">
+                <Label htmlFor="service-description">
+                  Description
+                </Label>
+
+                <Textarea
+                  id="service-description"
+                  placeholder="Describe the service..."
+                  rows={4}
+                  {...register("description")}
+                />
+
+                {errors.description && (
+                  <p className="text-sm text-destructive">
+                    {errors.description.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Primary Image */}
+              <ImageFields
+                title="Primary Image"
+                urlName="primaryImage.url"
+                altName="primaryImage.alt"
+                captionName="primaryImage.caption"
+                control={control}
+                register={register}
+                errors={errors}
+              />
+
+              <div className="grid gap-5 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Status</Label>
+
+                  <Controller
+                    control={control}
+                    name="status"
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="h-10">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+
+                        <SelectContent>
+                          <SelectItem value="draft">
+                            Draft
+                          </SelectItem>
+
+                          <SelectItem value="published">
+                            Published
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
                   />
 
-                  <div>
-                    <p className="text-sm font-medium">No Index</p>
-
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Prevent search engines from indexing this
-                      service page.
+                  {errors.status && (
+                    <p className="text-sm text-destructive">
+                      {errors.status.message}
                     </p>
-                  </div>
-                </label>
+                  )}
+                </div>
+
+                <div className="flex items-end">
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-gray-300 accent-blue"
+                      {...register("isFeatured")}
+                    />
+
+                    <span className="text-sm font-medium">
+                      Feature this service
+                    </span>
+                  </label>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Footer */}
-          <div className="flex justify-end gap-3 border-t pt-5">
+          {/* Step 2 — Why Enviroshield */}
+          {currentStep === 1 && (
+            <ContentSection
+              title="Why Enviroshield"
+              description="Explain why customers should choose Enviroshield for this service."
+              sectionName="whyEnviroshield"
+              control={control}
+              register={register}
+              errors={errors}
+              fields={whyEnviroshieldItems}
+            />
+          )}
+
+          {/* Step 3 — Process */}
+          {currentStep === 2 && (
+            <ContentSection
+              title="Process"
+              description="Describe the process involved in delivering this service."
+              sectionName="process"
+              control={control}
+              register={register}
+              errors={errors}
+              fields={processItems}
+            />
+          )}
+
+          {/* Step 4 — Benefits */}
+          {currentStep === 3 && (
+            <ContentSection
+              title="Benefits"
+              description="Highlight the main benefits customers receive from this service."
+              sectionName="benefits"
+              control={control}
+              register={register}
+              errors={errors}
+              fields={benefitsItems}
+            />
+          )}
+
+          {/* Step 5 — SEO */}
+          {currentStep === 4 && (
+            <div className="space-y-5 rounded-xl border bg-muted/20 p-5">
+              <div>
+                <h3 className="text-base font-semibold text-navy">
+                  SEO
+                </h3>
+
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Configure search engine and social sharing
+                  information for this service.
+                </p>
+              </div>
+
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="seo-meta-title">
+                    Meta Title
+                  </Label>
+
+                  <Input
+                    id="seo-meta-title"
+                    placeholder="Roof Waterproofing Services in Bangladesh | Enviroshield"
+                    {...register("seo.metaTitle")}
+                  />
+
+                  {errors.seo?.metaTitle && (
+                    <p className="text-sm text-destructive">
+                      {errors.seo.metaTitle.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="seo-meta-description">
+                    Meta Description
+                  </Label>
+
+                  <Textarea
+                    id="seo-meta-description"
+                    rows={3}
+                    placeholder="Professional roof waterproofing solutions..."
+                    {...register("seo.metaDescription")}
+                  />
+
+                  {errors.seo?.metaDescription && (
+                    <p className="text-sm text-destructive">
+                      {errors.seo.metaDescription.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Keywords */}
+                <div className="space-y-3">
+                  <div>
+                    <Label>Keywords</Label>
+
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Add at least one SEO keyword.
+                    </p>
+                  </div>
+
+                  {/* Add keyword */}
+                  <div className="flex gap-2">
+                    <Input
+                      value={seoKeywordInput}
+                      onChange={(event) =>
+                        setSeoKeywordInput(event.target.value)
+                      }
+                      placeholder="e.g. roof waterproofing"
+                    />
+
+                    <DashboardButton
+                      type="button"
+                      variant="outline"
+                      icon={<Plus className="h-4 w-4" />}
+                      onClick={() => {
+                        const keyword = seoKeywordInput.trim();
+
+                        if (!keyword) return;
+
+                        if (currentKeywords.includes(keyword)) {
+                          return;
+                        }
+
+                        setValue(
+                          "seo.keywords",
+                          [...currentKeywords, keyword],
+                          {
+                            shouldDirty: true,
+                            shouldValidate: true,
+                          },
+                        );
+
+                        setSeoKeywordInput("");
+                      }}
+                      className="h-10 shrink-0 rounded-full border-blue/30 bg-muted/30 px-4 text-xs font-semibold text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
+                    >
+                      Add
+                    </DashboardButton>
+                  </div>
+
+                  {/* Added keywords */}
+                  <div className="flex flex-wrap gap-2">
+                    {currentKeywords.map((keyword, index) => (
+                      <div
+                        key={`${keyword}-${index}`}
+                        className="flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-sm"
+                      >
+                        <span>{keyword}</span>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updatedKeywords =
+                              currentKeywords.filter(
+                                (_, keywordIndex) =>
+                                  keywordIndex !== index,
+                              );
+
+                            setValue(
+                              "seo.keywords",
+                              updatedKeywords,
+                              {
+                                shouldDirty: true,
+                                shouldValidate: true,
+                              },
+                            );
+                          }}
+                          className="text-muted-foreground transition-colors hover:text-destructive"
+                          aria-label={`Remove ${keyword}`}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Validation error */}
+                  {errors.seo?.keywords?.root && (
+                    <p className="text-sm text-destructive">
+                      {errors.seo.keywords.root.message}
+                    </p>
+                  )}
+
+                  {errors.seo?.keywords?.map?.(
+                    (error, index) =>
+                      error && (
+                        <p
+                          key={index}
+                          className="text-sm text-destructive"
+                        >
+                          {error.message}
+                        </p>
+                      ),
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="seo-canonical-url">
+                    Canonical URL
+                  </Label>
+
+                  <Input
+                    id="seo-canonical-url"
+                    type="url"
+                    placeholder="https://enviroshield.com/services/roof-waterproofing"
+                    {...register("seo.canonicalUrl")}
+                  />
+
+                  {errors.seo?.canonicalUrl && (
+                    <p className="text-sm text-destructive">
+                      {errors.seo.canonicalUrl.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid gap-5 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="seo-og-title">
+                      OG Title
+                    </Label>
+
+                    <Input
+                      id="seo-og-title"
+                      placeholder="Roof Waterproofing Services | Enviroshield"
+                      {...register("seo.ogTitle")}
+                    />
+
+                    {errors.seo?.ogTitle && (
+                      <p className="text-sm text-destructive">
+                        {errors.seo.ogTitle.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="seo-og-image">
+                      OG Image URL
+                    </Label>
+
+                    <Input
+                      id="seo-og-image"
+                      type="url"
+                      placeholder="https://example.com/services/roof-waterproofing.jpg"
+                      {...register("seo.ogImage")}
+                    />
+
+                    {errors.seo?.ogImage && (
+                      <p className="text-sm text-destructive">
+                        {errors.seo.ogImage.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="seo-og-description">
+                    OG Description
+                  </Label>
+
+                  <Textarea
+                    id="seo-og-description"
+                    rows={3}
+                    placeholder="Professional roof waterproofing solutions for long-lasting building protection."
+                    {...register("seo.ogDescription")}
+                  />
+
+                  {errors.seo?.ogDescription && (
+                    <p className="text-sm text-destructive">
+                      {errors.seo.ogDescription.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="rounded-lg border bg-background p-4">
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-gray-300 accent-blue"
+                      {...register("seo.noIndex")}
+                    />
+
+                    <div>
+                      <p className="text-sm font-medium">
+                        No Index
+                      </p>
+
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Prevent search engines from indexing this
+                        service page.
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between border-t pt-5">
             <DashboardButton
               type="button"
               variant="outline"
-              onClick={handleClose}
-              disabled={isLoading}
-              className="h-10 rounded-full border-blue/30 bg-muted/30 px-5 text-sm font-semibold text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
-            >
-              Cancel
-            </DashboardButton>
-
-            <DashboardButton
-              type="submit"
+              onClick={
+                currentStep === 0
+                  ? handleClose
+                  : handlePreviousStep
+              }
               disabled={isLoading}
               icon={
-                isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Plus className="h-4 w-4" />
-                )
+                currentStep > 0 ? (
+                  <ChevronLeft className="h-4 w-4" />
+                ) : undefined
               }
+              className="h-10 rounded-full border-blue/30 bg-muted/30 px-5 text-sm font-semibold text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
             >
-              {isLoading ? "Creating..." : "Create Service"}
+              {currentStep === 0 ? "Cancel" : "Back"}
             </DashboardButton>
+
+            {currentStep < steps.length - 1 ? (
+              <DashboardButton
+                type="button"
+                onClick={handleNextStep}
+                disabled={isLoading}
+                icon={<ChevronRight className="h-4 w-4" />}
+              >
+                Continue
+              </DashboardButton>
+            ) : (
+              <DashboardButton
+                type="submit"
+                disabled={isLoading}
+                icon={
+                  isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Plus className="h-4 w-4" />
+                  )
+                }
+              >
+                {isLoading ? "Creating..." : "Create Service"}
+              </DashboardButton>
+            )}
           </div>
         </form>
       </DialogContent>
@@ -859,7 +1073,10 @@ function ImageFields({
   );
 }
 
-type ContentSectionName = "whyEnviroshield" | "process" | "benefits";
+type ContentSectionName =
+  | "whyEnviroshield"
+  | "process"
+  | "benefits";
 
 type ContentSectionProps = {
   title: string;
@@ -883,7 +1100,9 @@ function ContentSection({
   return (
     <div className="space-y-5 rounded-xl border bg-muted/20 p-5">
       <div>
-        <h3 className="text-base font-semibold text-navy">{title}</h3>
+        <h3 className="text-base font-semibold text-navy">
+          {title}
+        </h3>
 
         <p className="mt-1 text-sm text-muted-foreground">
           {description}
@@ -948,7 +1167,9 @@ function ContentSection({
       <div className="space-y-4 border-t pt-5">
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="text-sm font-semibold">Content Items</h4>
+            <h4 className="text-sm font-semibold">
+              Content Items
+            </h4>
 
             <p className="mt-1 text-xs text-muted-foreground">
               Add the points you want to show in this section.
@@ -971,59 +1192,67 @@ function ContentSection({
           </DashboardButton>
         </div>
 
-        {fields.fields.map((field: { id: string }, index: number) => (
-          <div
-            key={field.id}
-            className="relative space-y-4 rounded-lg border bg-background p-4"
-          >
-            {fields.fields.length > 1 && (
-              <DashboardButton
-                type="button"
-                variant="outline"
-                icon={<Trash2 className="h-4 w-4" />}
-                onClick={() => fields.remove(index)}
-                ariaLabel={`Remove item ${index + 1}`}
-                className="absolute right-3 top-3 h-8 w-8 rounded-lg border-red-200 bg-red-50 p-0 text-red-500 shadow-none hover:border-red-300 hover:bg-red-100 hover:text-red-600"
-              />
-            )}
-
-            <div className="space-y-2 pr-10">
-              <Label>Item Title</Label>
-
-              <Input
-                placeholder="e.g. Experienced Professionals"
-                {...register(`${sectionName}.items.${index}.title`)}
-              />
-
-              {errors?.[sectionName]?.items?.[index]?.title && (
-                <p className="text-sm text-destructive">
-                  {errors[sectionName].items[index].title.message}
-                </p>
+        {fields.fields.map(
+          (field: { id: string }, index: number) => (
+            <div
+              key={field.id}
+              className="relative space-y-4 rounded-lg border bg-background p-4"
+            >
+              {fields.fields.length > 1 && (
+                <DashboardButton
+                  type="button"
+                  variant="outline"
+                  icon={<Trash2 className="h-4 w-4" />}
+                  onClick={() => fields.remove(index)}
+                  ariaLabel={`Remove item ${index + 1}`}
+                  className="absolute right-3 top-3 h-8 w-8 rounded-lg border-red-200 bg-red-50 p-0 text-red-500 shadow-none hover:border-red-300 hover:bg-red-100 hover:text-red-600"
+                />
               )}
-            </div>
 
-            <div className="space-y-2">
-              <Label>Item Description</Label>
+              <div className="space-y-2 pr-10">
+                <Label>Item Title</Label>
 
-              <Textarea
-                placeholder="Describe this point..."
-                rows={3}
-                {...register(
-                  `${sectionName}.items.${index}.description`,
+                <Input
+                  placeholder="e.g. Experienced Professionals"
+                  {...register(
+                    `${sectionName}.items.${index}.title`,
+                  )}
+                />
+
+                {errors?.[sectionName]?.items?.[index]?.title && (
+                  <p className="text-sm text-destructive">
+                    {
+                      errors[sectionName].items[index].title
+                        .message
+                    }
+                  </p>
                 )}
-              />
+              </div>
 
-              {errors?.[sectionName]?.items?.[index]?.description && (
-                <p className="text-sm text-destructive">
-                  {
-                    errors[sectionName].items[index].description
-                      .message
-                  }
-                </p>
-              )}
+              <div className="space-y-2">
+                <Label>Item Description</Label>
+
+                <Textarea
+                  placeholder="Describe this point..."
+                  rows={3}
+                  {...register(
+                    `${sectionName}.items.${index}.description`,
+                  )}
+                />
+
+                {errors?.[sectionName]?.items?.[index]
+                  ?.description && (
+                  <p className="text-sm text-destructive">
+                    {
+                      errors[sectionName].items[index].description
+                        .message
+                    }
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ),
+        )}
       </div>
     </div>
   );
