@@ -53,6 +53,7 @@ import CreateServiceModal from "./CreateServiceModal";
 import DeleteServiceDialog from "./DeleteServiceDialog";
 import UpdateServiceModal from "./UpdateServiceModal";
 import ViewServiceModal from "./ViewServiceModal";
+import Image from "next/image";
 
 const features = tableFeatures({});
 
@@ -132,11 +133,14 @@ export default function ServicesDashboard() {
           <div className="flex min-w-[320px] items-center gap-4">
             <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
               {service.primaryImage?.url ? (
-                <img
-                  src={service.primaryImage.url}
-                  alt={service.primaryImage.alt || service.name}
-                  className="h-full w-full object-cover"
-                />
+                <div className="relative h-full w-full">
+                  <Image
+                    src={service.primaryImage.url}
+                    alt={service.primaryImage.alt || service.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-[10px] font-medium text-muted-foreground">
                   No image
