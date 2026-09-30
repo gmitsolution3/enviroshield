@@ -35,6 +35,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { generateSlug } from "@/utils/generateSlug";
+import { toast } from "sonner";
 import DashboardButton from "../../DashboardButton";
 
 const imageSchema = z.object({
@@ -355,14 +356,23 @@ export default function CreateServiceModal({
       const response = await postService(payload);
 
       if (response?.success) {
+        toast.success(response.message);
+
         setIsModalOpen(false);
         reset(defaultValues);
         setSeoKeywordInput("");
         setCurrentStep(0);
         onSuccess?.();
       }
-    } catch (error) {
-      console.error("Failed to create service:", error);
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "Failed to create service.";
+
+      toast.error(message);
+      console.error("Failed to create service:", message);
     }
   };
 
