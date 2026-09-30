@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { generateSlug } from "@/utils/generateSlug";
 import DashboardButton from "../../DashboardButton";
@@ -281,9 +282,7 @@ export default function CreateServiceModal({
 
     if (!isValid) return;
 
-    setCurrentStep((step) =>
-      Math.min(step + 1, steps.length - 1),
-    );
+    setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
   };
 
   const handlePreviousStep = () => {
@@ -378,9 +377,7 @@ export default function CreateServiceModal({
     >
       <DialogContent className="max-h-[90vh] !max-w-5xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">
-            Add Service
-          </DialogTitle>
+          <DialogTitle className="text-2xl">Add Service</DialogTitle>
 
           <DialogDescription>
             Create a new Enviroshield service and configure all
@@ -388,10 +385,7 @@ export default function CreateServiceModal({
           </DialogDescription>
         </DialogHeader>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="space-y-6"
-        >
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Step Timeline */}
           <div className="rounded-xl border bg-muted/20 px-4 py-5 sm:px-6">
             <div className="flex items-start">
@@ -494,9 +488,7 @@ export default function CreateServiceModal({
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="service-name">
-                    Service Name
-                  </Label>
+                  <Label htmlFor="service-name">Service Name</Label>
 
                   <Input
                     id="service-name"
@@ -542,9 +534,7 @@ export default function CreateServiceModal({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="detail-heading">
-                  Detail Heading
-                </Label>
+                <Label htmlFor="detail-heading">Detail Heading</Label>
 
                 <Input
                   id="detail-heading"
@@ -601,14 +591,12 @@ export default function CreateServiceModal({
                         value={field.value}
                         onValueChange={field.onChange}
                       >
-                        <SelectTrigger className="h-10">
+                        <SelectTrigger className="h-10 w-full">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
 
                         <SelectContent>
-                          <SelectItem value="draft">
-                            Draft
-                          </SelectItem>
+                          <SelectItem value="draft">Draft</SelectItem>
 
                           <SelectItem value="published">
                             Published
@@ -625,19 +613,27 @@ export default function CreateServiceModal({
                   )}
                 </div>
 
-                <div className="flex items-end">
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300 accent-blue"
-                      {...register("isFeatured")}
-                    />
+                <Controller
+                  control={control}
+                  name="isFeatured"
+                  render={({ field }) => (
+                    <div className="flex items-center justify-between rounded-xl border p-4">
+                      <div>
+                        <Label className="font-semibold">
+                          Featured Service
+                        </Label>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Highlight this service on the website.
+                        </p>
+                      </div>
 
-                    <span className="text-sm font-medium">
-                      Feature this service
-                    </span>
-                  </label>
-                </div>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </div>
+                  )}
+                />
               </div>
             </div>
           )}
@@ -697,9 +693,7 @@ export default function CreateServiceModal({
 
               <div className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="seo-meta-title">
-                    Meta Title
-                  </Label>
+                  <Label htmlFor="seo-meta-title">Meta Title</Label>
 
                   <Input
                     id="seo-meta-title"
@@ -860,9 +854,7 @@ export default function CreateServiceModal({
 
                 <div className="grid gap-5 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="seo-og-title">
-                      OG Title
-                    </Label>
+                    <Label htmlFor="seo-og-title">OG Title</Label>
 
                     <Input
                       id="seo-og-title"
@@ -878,9 +870,7 @@ export default function CreateServiceModal({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="seo-og-image">
-                      OG Image URL
-                    </Label>
+                    <Label htmlFor="seo-og-image">OG Image URL</Label>
 
                     <Input
                       id="seo-og-image"
@@ -916,26 +906,28 @@ export default function CreateServiceModal({
                   )}
                 </div>
 
-                <div className="rounded-lg border bg-background p-4">
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300 accent-blue"
-                      {...register("seo.noIndex")}
-                    />
+                <Controller
+                  control={control}
+                  name="seo.noIndex"
+                  render={({ field }) => (
+                    <div className="flex items-center justify-between rounded-xl border p-4">
+                      <div>
+                        <Label className="font-semibold">
+                          No Index
+                        </Label>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Prevent search engines from indexing this
+                          service.
+                        </p>
+                      </div>
 
-                    <div>
-                      <p className="text-sm font-medium">
-                        No Index
-                      </p>
-
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Prevent search engines from indexing this
-                        service page.
-                      </p>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
                     </div>
-                  </label>
-                </div>
+                  )}
+                />
               </div>
             </div>
           )}
@@ -946,9 +938,7 @@ export default function CreateServiceModal({
               type="button"
               variant="outline"
               onClick={
-                currentStep === 0
-                  ? handleClose
-                  : handlePreviousStep
+                currentStep === 0 ? handleClose : handlePreviousStep
               }
               disabled={isLoading}
               icon={
@@ -1073,10 +1063,7 @@ function ImageFields({
   );
 }
 
-type ContentSectionName =
-  | "whyEnviroshield"
-  | "process"
-  | "benefits";
+type ContentSectionName = "whyEnviroshield" | "process" | "benefits";
 
 type ContentSectionProps = {
   title: string;
@@ -1100,9 +1087,7 @@ function ContentSection({
   return (
     <div className="space-y-5 rounded-xl border bg-muted/20 p-5">
       <div>
-        <h3 className="text-base font-semibold text-navy">
-          {title}
-        </h3>
+        <h3 className="text-base font-semibold text-navy">{title}</h3>
 
         <p className="mt-1 text-sm text-muted-foreground">
           {description}
@@ -1167,9 +1152,7 @@ function ContentSection({
       <div className="space-y-4 border-t pt-5">
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="text-sm font-semibold">
-              Content Items
-            </h4>
+            <h4 className="text-sm font-semibold">Content Items</h4>
 
             <p className="mt-1 text-xs text-muted-foreground">
               Add the points you want to show in this section.
@@ -1192,67 +1175,59 @@ function ContentSection({
           </DashboardButton>
         </div>
 
-        {fields.fields.map(
-          (field: { id: string }, index: number) => (
-            <div
-              key={field.id}
-              className="relative space-y-4 rounded-lg border bg-background p-4"
-            >
-              {fields.fields.length > 1 && (
-                <DashboardButton
-                  type="button"
-                  variant="outline"
-                  icon={<Trash2 className="h-4 w-4" />}
-                  onClick={() => fields.remove(index)}
-                  ariaLabel={`Remove item ${index + 1}`}
-                  className="absolute right-3 top-3 h-8 w-8 rounded-lg border-red-200 bg-red-50 p-0 text-red-500 shadow-none hover:border-red-300 hover:bg-red-100 hover:text-red-600"
-                />
+        {fields.fields.map((field: { id: string }, index: number) => (
+          <div
+            key={field.id}
+            className="relative space-y-4 rounded-lg border bg-background p-4"
+          >
+            {fields.fields.length > 1 && (
+              <DashboardButton
+                type="button"
+                variant="outline"
+                icon={<Trash2 className="h-4 w-4" />}
+                onClick={() => fields.remove(index)}
+                ariaLabel={`Remove item ${index + 1}`}
+                className="absolute right-3 top-3 h-8 w-8 rounded-lg border-red-200 bg-red-50 p-0 text-red-500 shadow-none hover:border-red-300 hover:bg-red-100 hover:text-red-600"
+              />
+            )}
+
+            <div className="space-y-2 pr-10">
+              <Label>Item Title</Label>
+
+              <Input
+                placeholder="e.g. Experienced Professionals"
+                {...register(`${sectionName}.items.${index}.title`)}
+              />
+
+              {errors?.[sectionName]?.items?.[index]?.title && (
+                <p className="text-sm text-destructive">
+                  {errors[sectionName].items[index].title.message}
+                </p>
               )}
-
-              <div className="space-y-2 pr-10">
-                <Label>Item Title</Label>
-
-                <Input
-                  placeholder="e.g. Experienced Professionals"
-                  {...register(
-                    `${sectionName}.items.${index}.title`,
-                  )}
-                />
-
-                {errors?.[sectionName]?.items?.[index]?.title && (
-                  <p className="text-sm text-destructive">
-                    {
-                      errors[sectionName].items[index].title
-                        .message
-                    }
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label>Item Description</Label>
-
-                <Textarea
-                  placeholder="Describe this point..."
-                  rows={3}
-                  {...register(
-                    `${sectionName}.items.${index}.description`,
-                  )}
-                />
-
-                {errors?.[sectionName]?.items?.[index]
-                  ?.description && (
-                  <p className="text-sm text-destructive">
-                    {
-                      errors[sectionName].items[index].description
-                        .message
-                    }
-                  </p>
-                )}
-              </div>
             </div>
-          ),
-        )}
+
+            <div className="space-y-2">
+              <Label>Item Description</Label>
+
+              <Textarea
+                placeholder="Describe this point..."
+                rows={3}
+                {...register(
+                  `${sectionName}.items.${index}.description`,
+                )}
+              />
+
+              {errors?.[sectionName]?.items?.[index]?.description && (
+                <p className="text-sm text-destructive">
+                  {
+                    errors[sectionName].items[index].description
+                      .message
+                  }
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
