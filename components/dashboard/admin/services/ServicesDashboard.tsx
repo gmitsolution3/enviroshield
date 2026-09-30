@@ -51,6 +51,7 @@ import { formatDate } from "./../../../../utils/formatDate";
 
 import CreateServiceModal from "./CreateServiceModal";
 import DeleteServiceDialog from "./DeleteServiceDialog";
+import UpdateServiceModal from "./UpdateServiceModal";
 import ViewServiceModal from "./ViewServiceModal";
 
 const features = tableFeatures({});
@@ -61,15 +62,16 @@ export default function ServicesDashboard() {
   const [filterStatus, setFilterStatus] = useState<string>("");
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+
+  const [selectedService, setSelectedService] =
+    useState<IService | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const [deleteService, setDeleteService] = useState<IService | null>(
     null,
   );
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  const [selectedService, setSelectedService] =
-    useState<IService | null>(null);
 
   const { data, isLoading, isError, refetch } =
     useFetch<IServiceResponse>(
@@ -85,7 +87,8 @@ export default function ServicesDashboard() {
   };
 
   const handleEdit = (service: IService) => {
-    console.log("Edit service:", service);
+    setIsUpdateModalOpen(true);
+    setSelectedService(service);
   };
 
   const handleFilterChange = (value: string | null) => {
@@ -269,7 +272,8 @@ export default function ServicesDashboard() {
                   <DropdownMenuSeparator />
 
                   <DropdownMenuItem
-                    onSelect={() => handleEdit(service)}
+                    className="cursor-pointer"
+                    onClick={() => handleEdit(service)}
                   >
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
@@ -475,6 +479,15 @@ export default function ServicesDashboard() {
         isModalOpen={isCreateModalOpen}
         setIsModalOpen={setIsCreateModalOpen}
         onSuccess={() => refetch()}
+      />
+
+      <UpdateServiceModal
+        service={selectedService}
+        open={isUpdateModalOpen}
+        onClose={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedService(null);
+        }}
       />
 
       <ViewServiceModal
