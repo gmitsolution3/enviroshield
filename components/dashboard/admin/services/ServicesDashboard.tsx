@@ -126,8 +126,8 @@ export default function ServicesDashboard() {
         const service = row.original;
 
         return (
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-muted">
+          <div className="flex min-w-[320px] items-center gap-4">
+            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
               {service.primaryImage?.url ? (
                 <img
                   src={service.primaryImage.url}
@@ -135,21 +135,42 @@ export default function ServicesDashboard() {
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                <div className="flex h-full w-full items-center justify-center text-[10px] font-medium text-muted-foreground">
                   No image
                 </div>
               )}
             </div>
 
-            <div className="min-w-0">
-              <div className="font-semibold">{service.name}</div>
+            <div className="min-w-0 space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="truncate font-semibold leading-5 text-slate-900">
+                  {service.name}
+                </div>
 
-              <div className="mt-0.5 max-w-md truncate text-sm text-muted-foreground">
-                {service.description}
+                {service.isFeatured && (
+                  <span className="shrink-0 rounded-full bg-blue/10 px-2 py-0.5 text-[10px] font-semibold text-blue">
+                    Featured
+                  </span>
+                )}
               </div>
 
-              <div className="mt-1 text-xs text-muted-foreground">
-                /{service.slug}
+              <p className="max-w-md truncate text-[13px] leading-5 text-slate-500">
+                {service.description}
+              </p>
+
+              <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                <span className="font-medium text-slate-500">
+                  /{service.slug}
+                </span>
+
+                <span className="h-1 w-1 rounded-full bg-slate-300" />
+
+                <span>
+                  {service.projects?.length || 0}{" "}
+                  {service.projects?.length === 1
+                    ? "project"
+                    : "projects"}
+                </span>
               </div>
             </div>
           </div>
@@ -165,25 +186,28 @@ export default function ServicesDashboard() {
         const service = row.original;
 
         return (
-          <>
+          <div className="flex min-w-[130px] flex-col items-start gap-2">
             {service.status === "published" ? (
-              <Badge className="gap-1 bg-green-500 hover:bg-green-600">
+              <Badge className="gap-1 rounded-full bg-green-500 px-3 py-1 text-[11px] font-semibold hover:bg-green-600">
                 <CheckCircle className="h-3 w-3" />
                 Published
               </Badge>
             ) : (
-              <Badge variant="secondary" className="gap-1">
+              <Badge
+                variant="secondary"
+                className="gap-1 rounded-full px-3 py-1 text-[11px] font-semibold capitalize"
+              >
                 <XCircle className="h-3 w-3" />
                 {service.status}
               </Badge>
             )}
 
-            {service.isFeatured && (
-              <Badge variant="outline" className="ml-2">
-                Featured
-              </Badge>
-            )}
-          </>
+            <span className="text-[11px] text-slate-400">
+              {service.publishedAt
+                ? `Published ${formatDate(service.publishedAt)}`
+                : "Not published yet"}
+            </span>
+          </div>
         );
       },
     },
@@ -196,17 +220,19 @@ export default function ServicesDashboard() {
         const service = row.original;
 
         return (
-          <>
-            <div className="flex items-center text-sm font-medium">
-              <Calendar className="mr-1 h-3 w-3 text-muted-foreground" />
+          <div className="min-w-[140px] space-y-1.5">
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                <Calendar className="h-3.5 w-3.5" />
+              </span>
 
-              {formatDate(service.createdAt)}
+              <span>{formatDate(service.createdAt)}</span>
             </div>
 
-            <div className="mt-1 text-xs text-muted-foreground">
-              Updated: {formatDate(service.updatedAt)}
+            <div className="pl-9 text-[11px] text-slate-400">
+              Updated {formatDate(service.updatedAt)}
             </div>
-          </>
+          </div>
         );
       },
     },
@@ -219,7 +245,7 @@ export default function ServicesDashboard() {
         const service = row.original;
 
         return (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <DashboardButton
               variant="outline"
               className="h-8 w-8 rounded-lg border-blue/30 bg-muted/30 p-0 text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
