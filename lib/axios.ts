@@ -12,10 +12,10 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(async (config) => {
-  const { data } = await authClient.token();
+  const { data: session } = await authClient.getSession();
 
-  if (data?.token) {
-    config.headers.Authorization = `Bearer ${data.token}`;
+  if (session!.session?.token) {
+    config.headers.Authorization = `Bearer ${session!.session?.token}`;
   }
 
   return config;
