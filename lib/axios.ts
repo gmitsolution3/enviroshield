@@ -1,4 +1,5 @@
 import axios from "axios";
+import { authClient } from "./auth-client";
 
 const baseUrl =
   process.env.NODE_ENV === "development"
@@ -8,6 +9,16 @@ const baseUrl =
 const axiosInstance = axios.create({
   baseURL: baseUrl,
   withCredentials: true,
+});
+
+axiosInstance.interceptors.request.use(async (config) => {
+  const { data } = await authClient.token();
+
+  if (data?.token) {
+    config.headers.Authorization = `Bearer ${data.token}`;
+  }
+
+  return config;
 });
 
 axiosInstance.interceptors.response.use(
