@@ -70,16 +70,6 @@ export const dashboardNavigation: Record<
       icon: "services",
     },
     {
-      title: "Venture Dashboards",
-      href: "/dashboard/venture-dashboards",
-      icon: "dashboard",
-    },
-    {
-      title: "Ventures",
-      href: "/dashboard/ventures",
-      icon: "circlepile",
-    },
-    {
       title: "Users",
       href: "/dashboard/users",
       icon: "users",
