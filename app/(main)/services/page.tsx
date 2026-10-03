@@ -7,15 +7,44 @@ import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
 import ServiceCard from "@/components/ServiceCard";
-import { services } from "@/lib/data/content";
+import { getPublishedServices } from "@/lib/api/services";
 
 export const metadata = {
   title: "Painting & Wall Finishing Services | Enviroshield",
   description:
-    "Explore Enviroshield's painting and wall finishing services, including interior and exterior painting, wallpaper installation, decorative finishes, and surface preparation.",
+    "Explore Enviroshield's painting and wall finishing services, including interior and exterior painting, wallpaper installation, decorative finishes, surface preparation, and more.",
+  keywords: [
+    "painting services",
+    "wall finishing services",
+    "interior painting",
+    "exterior painting",
+    "wallpaper installation",
+    "decorative finishes",
+    "surface preparation",
+    "Enviroshield",
+  ],
+  alternates: {
+    canonical: "/services",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    title: "Painting & Wall Finishing Services | Enviroshield",
+    description:
+      "Explore Enviroshield's professional painting and wall finishing services.",
+    type: "website",
+    url: "/services",
+  },
 };
 
 export default async function ServicesPage() {
+  const services = await getPublishedServices({
+    page: 1,
+    limit: 10,
+  });
+
   return (
     <>
       <PageHero
@@ -38,12 +67,24 @@ export default async function ServicesPage() {
           />
 
           <StaggerContainer className="mt-12 grid grid-cols-3 gap-[22px] max-[900px]:grid-cols-2 max-[600px]:flex max-[600px]:overflow-auto max-[600px]:snap-x max-[600px]:snap-mandatory max-[600px]:mr-[-16px] max-[600px]:pr-4 max-[600px]:pb-2">
-            {services.map((service) => (
+            {services.map((service, index) => (
               <StaggerItem
-                key={service.id}
+                key={service._id}
                 className="max-[600px]:min-w-[280px] max-[600px]:snap-start"
               >
-                <ServiceCard service={service} index={0} />
+                <ServiceCard
+                  service={{
+                    id: service._id,
+                    title: service.name,
+                    slug: service.slug,
+                    description: service.description,
+                    image: service.primaryImage.url,
+                    category: service.isFeatured
+                      ? "FEATURED SERVICE"
+                      : "OUR SERVICES",
+                  }}
+                  index={index}
+                />
               </StaggerItem>
             ))}
           </StaggerContainer>
