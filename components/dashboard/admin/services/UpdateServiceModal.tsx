@@ -42,6 +42,7 @@ import DashboardButton from "../../DashboardButton";
 type UpdateServiceModalProps = {
   service: IService | null;
   open: boolean;
+  revalidateKey: string;
   onClose: () => void;
 };
 
@@ -293,13 +294,14 @@ const getServiceFormValues = (service: IService): FormValues => ({
 export default function UpdateServiceModal({
   service,
   open,
+  revalidateKey,
   onClose,
 }: UpdateServiceModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [seoKeywordInput, setSeoKeywordInput] = useState("");
 
   const { mutate: updateService, isLoading } = usePatch("/service", {
-    revalidateKey: "/service",
+    revalidateKey,
   });
 
   const {
@@ -350,7 +352,10 @@ export default function UpdateServiceModal({
     setSeoKeywordInput("");
   };
 
-  const handleNextStep = async () => {
+  const handleNextStep = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     let isValid = false;
 
     switch (currentStep) {
@@ -930,7 +935,6 @@ export default function UpdateServiceModal({
                         <Check className="h-4 w-4" />
                       )
                     }
-                    className="min-h-10 rounded-xl px-5 text-xs font-bold"
                   >
                     {isLoading ? "Updating..." : "Update Service"}
                   </DashboardButton>

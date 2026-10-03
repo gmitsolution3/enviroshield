@@ -15,7 +15,7 @@ type DashboardButtonProps = {
     | null
     | undefined;
   icon?: ReactNode;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   className?: string;
   disabled?: boolean;
   type?: "button" | "submit" | "reset";

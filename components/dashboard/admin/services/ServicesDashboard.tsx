@@ -488,6 +488,7 @@ export default function ServicesDashboard() {
       <UpdateServiceModal
         service={selectedService}
         open={isUpdateModalOpen}
+        revalidateKey={`/service?page=${currentPage}&limit=${limit}`}
         onClose={() => {
           setIsUpdateModalOpen(false);
           setSelectedService(null);
