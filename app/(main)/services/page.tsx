@@ -60,12 +60,12 @@ export async function generateMetadata({
   const isFirstPage = page === 1;
 
   const title = isFirstPage
-    ? "Painting & Wall Finishing Services | Enviroshield"
-    : `Painting & Wall Finishing Services — Page ${page} | Enviroshield`;
+    ? "Waterproofing, Flooring & Protective Coating Services | Enviroshield"
+    : `Waterproofing, Flooring & Protective Coating Services — Page ${page} | Enviroshield`;
 
   const description = isFirstPage
-    ? "Explore Enviroshield's professional painting and wall finishing services, including interior and exterior painting, wallpaper installation, decorative finishes, surface preparation, and more."
-    : `Explore more of Enviroshield's professional painting and wall finishing services on page ${page}.`;
+    ? "Explore Enviroshield's professional waterproofing, flooring, heat insulation, injection grouting, polished concrete, and protective coating solutions for residential, commercial, and industrial spaces."
+    : `Explore more of Enviroshield's waterproofing, flooring, insulation, and protective coating services on page ${page}.`;
 
   const canonical = isFirstPage
     ? "/services"
@@ -76,13 +76,18 @@ export async function generateMetadata({
     description,
 
     keywords: [
-      "painting services",
-      "wall finishing services",
-      "interior painting",
-      "exterior painting",
-      "wallpaper installation",
-      "decorative finishes",
-      "surface preparation",
+      "waterproofing solutions",
+      "waterproofing services",
+      "waterproofing paint",
+      "heat insulation",
+      "epoxy flooring",
+      "PU flooring",
+      "injection grouting",
+      "sports flooring",
+      "polished concrete",
+      "3D epoxy flooring",
+      "floor hardener",
+      "ETP protective coating",
       "Enviroshield",
     ],
 
@@ -100,6 +105,20 @@ export async function generateMetadata({
       description,
       type: "website",
       url: canonical,
+      images: [
+        {
+          url: "/images/service-hero.jpg",
+          width: 1200,
+          height: 630,
+          alt: "Enviroshield waterproofing, flooring and protective coating services",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/images/service-hero.jpg"],
     },
   };
 }
@@ -125,8 +144,8 @@ export default async function ServicesPage({
     <>
       <PageHero
         eyebrow="OUR SERVICES"
-        title="Painting and wall finishing, done with care."
-        text="Whether it is one room or a whole building, we deliver finishes that feel considered, durable, and beautifully made."
+        title="Professional waterproofing, flooring & protective coating solutions."
+        text="From waterproofing and heat insulation to epoxy, PU, sports flooring, injection grouting, polished concrete, and protective coatings, Enviroshield delivers durable solutions for residential, commercial, and industrial spaces."
         image="/images/service-hero.jpg"
       />
 
@@ -137,8 +156,8 @@ export default async function ServicesPage({
         <Container>
           <SectionHeader
             eyebrow="WHAT WE DO"
-            title="A full range of wall finishing services"
-            text="Explore our services below, then reach out to talk through your space."
+            title="Complete waterproofing, flooring & protective coating solutions"
+            text="Explore our full range of professional solutions for waterproofing, flooring, insulation, grouting, concrete finishing, and protective coatings."
             headingId="services-page-heading"
           />
 

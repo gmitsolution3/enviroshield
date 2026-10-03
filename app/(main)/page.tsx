@@ -11,9 +11,10 @@ import TestimonialSection from "@/components/home/TestimonialSection";
 import WorkProcessSection from "@/components/home/WorkProcessSection";
 
 export const metadata: Metadata = {
-  title: "Professional Painting & Wall Finishing Services",
+  title:
+    "Waterproofing, Flooring & Protective Coating Solutions | Enviroshield",
   description:
-    "Enviroshield provides professional painting, wallpaper, wall finishing, decorative finishes, and surface transformation services for residential and commercial spaces.",
+    "Enviroshield provides professional waterproofing, flooring, heat insulation, injection grouting, polished concrete, and protective coating solutions for residential, commercial, and industrial spaces.",
 };
 
 export default function HomePage() {

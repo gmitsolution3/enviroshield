@@ -18,7 +18,7 @@ const fustat = Fustat({
   display: "swap",
 });
 
-const siteUrl = "https://your-domain.com";
+const siteUrl = "https://enviroshieldbd.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
 
   description:
-    "Enviroshield provides professional painting, wall finishing, wallpaper, and surface transformation solutions.",
+    "Enviroshield provides professional waterproofing, flooring, heat insulation, injection grouting, polished concrete, and protective coating solutions for residential, commercial, and industrial spaces.",
 
   applicationName: "Enviroshield",
 
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     siteName: "Enviroshield",
     title: "Enviroshield",
     description:
-      "Professional painting, wall finishing, wallpaper, and surface transformation solutions.",
+      "Professional waterproofing, flooring, heat insulation, injection grouting, polished concrete, and protective coating solutions.",
     url: siteUrl,
   },
 
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Enviroshield",
     description:
-      "Professional painting, wall finishing, wallpaper, and surface transformation solutions.",
+      "Professional waterproofing, flooring, heat insulation, injection grouting, polished concrete, and protective coating solutions.",
   },
 
   other: {
@@ -68,6 +68,36 @@ export default function RootLayout({
     <html lang="en" className={cn("font-sans", fustat.variable)}>
       <body className="min-h-screen antialiased">
         <TooltipProvider>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@graph": [
+                  {
+                    "@type": "Organization",
+                    "@id": "https://enviroshieldbd.com/#organization",
+                    name: "EnviroShield Pvt. Ltd.",
+                    url: "https://enviroshieldbd.com",
+                    logo: {
+                      "@type": "ImageObject",
+                      url: "https://enviroshieldbd.com/images/logo.png",
+                    },
+                  },
+                  {
+                    "@type": "WebSite",
+                    "@id": "https://enviroshieldbd.com/#website",
+                    url: "https://enviroshieldbd.com",
+                    name: "EnviroShield",
+                    publisher: {
+                      "@id":
+                        "https://enviroshieldbd.com/#organization",
+                    },
+                  },
+                ],
+              }),
+            }}
+          />
           {children}
           <Toaster />
           <ClientIsland />
