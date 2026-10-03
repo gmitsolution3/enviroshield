@@ -23,7 +23,12 @@ import {
 } from "@tanstack/react-table";
 
 import { useFetch } from "@/hooks/swr/useFetch";
-import type { IProject, IProjectResponse } from "@/types";
+import type {
+  IProject,
+  IProjectResponse,
+  IService,
+  IServiceResponse,
+} from "@/types";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -50,6 +55,7 @@ import DashboardError from "../../DashboardError";
 import DashboardLoading from "../../DashboardLoading";
 import { formatDate } from "./../../../../utils/formatDate";
 
+import CreateProjectModal from "./CreateProjectModal";
 import DeleteProjectDialog from "./DeleteProjectDialog";
 import ViewProjectModal from "./ViewProjectModal";
 
@@ -59,6 +65,8 @@ export default function ProjectsDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [filterStatus, setFilterStatus] = useState<string>("");
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const [selectedProject, setSelectedProject] =
     useState<IProject | null>(null);
@@ -75,6 +83,13 @@ export default function ProjectsDashboard() {
     useFetch<IProjectResponse>(
       `/project?page=${currentPage}&limit=${limit}`,
     );
+  const {
+    data: serviceData,
+    isLoading: servicesLoading,
+    isError: servicesError,
+  } = useFetch<IServiceResponse>("/service?page=1&limit=10000");
+
+  const services: IService[] = serviceData?.data ?? [];
 
   const projects = data?.data || [];
   const meta = data?.meta;
@@ -357,9 +372,7 @@ export default function ProjectsDashboard() {
 
         <DashboardButton
           icon={<Plus className="h-4 w-4" />}
-          onClick={() => {
-            console.log("Add project");
-          }}
+          onClick={() => setIsCreateModalOpen(true)}
         >
           Add Project
         </DashboardButton>
@@ -406,9 +419,7 @@ export default function ProjectsDashboard() {
           description="Get started by adding your first Enviroshield project."
           icon={<span className="text-2xl">🏗️</span>}
           actionLabel="Add Project"
-          onAction={() => {
-            console.log("Add project");
-          }}
+          onAction={() => setIsCreateModalOpen(true)}
         />
       ) : (
         <Card className="overflow-hidden border p-0 shadow-sm">
@@ -500,6 +511,15 @@ export default function ProjectsDashboard() {
           </div>
         </div>
       )}
+
+      <CreateProjectModal
+        isModalOpen={isCreateModalOpen}
+        setIsModalOpen={setIsCreateModalOpen}
+        services={services}
+        servicesLoading={servicesLoading}
+        servicesError={servicesError}
+        onSuccess={() => refetch()}
+      />
 
       <ViewProjectModal
         isModalOpen={isDetailModalOpen}
