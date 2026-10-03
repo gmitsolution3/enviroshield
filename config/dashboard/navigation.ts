@@ -2,6 +2,7 @@ import {
   BarChart3,
   CirclePile,
   FileText,
+  FolderKanban,
   LayoutDashboard,
   Settings,
   User,
@@ -19,6 +20,7 @@ export const dashboardIcons = {
   analytics: BarChart3,
   circlepile: CirclePile,
   services: Wrench,
+  projects: FolderKanban,
 } satisfies Record<string, LucideIcon>;
 
 export type DashboardIcon = keyof typeof dashboardIcons;
@@ -68,6 +70,11 @@ export const dashboardNavigation: Record<
       title: "Service Management",
       href: "/dashboard/services",
       icon: "services",
+    },
+    {
+      title: "Project Management",
+      href: "/dashboard/projects",
+      icon: "projects",
     },
     {
       title: "Users",
