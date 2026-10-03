@@ -1,3 +1,5 @@
+import { IProject } from "./project.type";
+
 export interface IServiceImage {
   url: string;
   alt: string;
@@ -46,25 +48,6 @@ export interface IServiceProjectGalleryItem {
   alt: string;
 }
 
-export interface IServiceProject {
-  _id: string;
-  title: string;
-  slug: string;
-  primaryImage: IServiceImage;
-  description: string;
-  location: IServiceProjectLocation;
-  completionDate: string;
-  gallery: IServiceProjectGalleryItem[];
-  client: IServiceProjectClient;
-  serviceId: string;
-  status: string;
-  isFeatured: boolean;
-  seo: IServiceProjectSeo;
-  createdAt: string;
-  updatedAt: string;
-  __v?: number;
-}
-
 export interface IServiceSeo {
   metaTitle: string;
   metaDescription: string;
@@ -91,7 +74,7 @@ export interface IService {
   process: IServiceContentSection;
   benefits: IServiceContentSection;
 
-  projects: IServiceProject[];
+  projects: IProject[];
 
   status: "published" | "draft";
   publishedAt?: string;

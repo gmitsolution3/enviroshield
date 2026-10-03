@@ -82,6 +82,8 @@ export default function ServicesDashboard() {
   const services = data?.data || [];
   const meta = data?.meta;
 
+  console.log(services);
+
   const handleView = (service: IService) => {
     setSelectedService(service);
     setIsDetailModalOpen(true);

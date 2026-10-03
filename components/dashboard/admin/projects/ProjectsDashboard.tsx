@@ -57,6 +57,7 @@ import { formatDate } from "./../../../../utils/formatDate";
 
 import CreateProjectModal from "./CreateProjectModal";
 import DeleteProjectDialog from "./DeleteProjectDialog";
+import UpdateProjectModal from "./UpdateProjectModal";
 import ViewProjectModal from "./ViewProjectModal";
 
 const features = tableFeatures({});
@@ -67,6 +68,7 @@ export default function ProjectsDashboard() {
   const [filterStatus, setFilterStatus] = useState<string>("");
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
   const [selectedProject, setSelectedProject] =
     useState<IProject | null>(null);
@@ -100,7 +102,8 @@ export default function ProjectsDashboard() {
   };
 
   const handleEdit = (project: IProject) => {
-    console.log("Edit project:", project);
+    setSelectedProject(project);
+    setIsUpdateModalOpen(true);
   };
 
   const handleDelete = (project: IProject) => {
@@ -519,6 +522,19 @@ export default function ProjectsDashboard() {
         servicesLoading={servicesLoading}
         servicesError={servicesError}
         onSuccess={() => refetch()}
+      />
+
+      <UpdateProjectModal
+        project={selectedProject}
+        open={isUpdateModalOpen}
+        revalidateKey={`/project?page=${currentPage}&limit=${limit}`}
+        services={services}
+        servicesLoading={servicesLoading}
+        servicesError={servicesError}
+        onClose={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedProject(null);
+        }}
       />
 
       <ViewProjectModal

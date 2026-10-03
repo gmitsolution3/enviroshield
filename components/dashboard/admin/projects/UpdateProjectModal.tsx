@@ -9,7 +9,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -33,8 +33,8 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { usePost } from "@/hooks/swr/usePost";
-import type { IService } from "@/types";
+import { usePatch } from "@/hooks/swr/usePatch";
+import type { IProject, IService } from "@/types";
 import { generateSlug } from "@/utils/generateSlug";
 
 import DashboardButton from "../../DashboardButton";
@@ -125,10 +125,11 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-type CreateProjectModalProps = {
-  isModalOpen: boolean;
-  setIsModalOpen: (open: boolean) => void;
-  onSuccess?: () => void;
+type UpdateProjectModalProps = {
+  project: IProject | null;
+  open: boolean;
+  revalidateKey: string;
+  onClose: () => void;
   services: IService[];
   servicesLoading?: boolean;
   servicesError?: boolean;
@@ -220,20 +221,93 @@ const steps = [
   },
 ];
 
-export default function CreateProjectModal({
-  isModalOpen,
-  setIsModalOpen,
-  onSuccess,
+const getProjectFormValues = (
+  project: IProject,
+): FormValues => ({
+  title: project.title ?? "",
+  slug: project.slug ?? "",
+
+  primaryImage: {
+    url: project.primaryImage?.url ?? "",
+    alt: project.primaryImage?.alt ?? "",
+    caption: project.primaryImage?.caption ?? "",
+  },
+
+  description: project.description ?? "",
+
+  location: {
+    city: project.location?.city ?? "",
+    area: project.location?.area ?? "",
+    country: project.location?.country ?? "",
+  },
+
+  completionDate: project.completionDate
+    ? project.completionDate.slice(0, 10)
+    : "",
+
+  gallery:
+    project.gallery?.length > 0
+      ? project.gallery.map((item) => ({
+          url: item.url ?? "",
+          alt: item.alt ?? "",
+        }))
+      : [
+          {
+            url: "",
+            alt: "",
+          },
+        ],
+
+  client: {
+    name: project.client?.name ?? "",
+    description: project.client?.description ?? "",
+    logo: {
+      url: project.client?.logo?.url ?? "",
+      alt: project.client?.logo?.alt ?? "",
+    },
+  },
+
+  serviceId:
+    typeof project.serviceId === "object"
+      ? project.serviceId?._id ?? ""
+      : project.serviceId ?? "",
+
+  status:
+    project.status === "published" || project.status === "draft"
+      ? project.status
+      : "draft",
+
+  isFeatured: project.isFeatured ?? false,
+
+  seo: {
+    metaTitle: project.seo?.metaTitle ?? "",
+    metaDescription: project.seo?.metaDescription ?? "",
+    keywords: project.seo?.keywords ?? [],
+    ogTitle: project.seo?.ogTitle ?? "",
+    ogDescription: project.seo?.ogDescription ?? "",
+    ogImage: project.seo?.ogImage ?? "",
+    noIndex: project.seo?.noIndex ?? false,
+  },
+});
+
+export default function UpdateProjectModal({
+  project,
+  open,
+  revalidateKey,
+  onClose,
   services,
   servicesLoading = false,
   servicesError = false,
-}: CreateProjectModalProps) {
+}: UpdateProjectModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [seoKeywordInput, setSeoKeywordInput] = useState("");
 
-  const { mutate: postProject, isLoading } = usePost("/project", {
-    revalidateKey: "/project",
-  });
+  const { mutate: updateProject, isLoading } = usePatch(
+    "/project",
+    {
+      revalidateKey,
+    },
+  );
 
   const {
     register,
@@ -249,8 +323,6 @@ export default function CreateProjectModal({
     defaultValues,
   });
 
-  console.log(errors);
-
   const galleryItems = useFieldArray({
     control,
     name: "gallery",
@@ -258,10 +330,18 @@ export default function CreateProjectModal({
 
   const currentKeywords = watch("seo.keywords");
 
+  useEffect(() => {
+    if (!open || !project) return;
+
+    reset(getProjectFormValues(project));
+    setCurrentStep(0);
+    setSeoKeywordInput("");
+  }, [open, project, reset]);
+
   const handleClose = () => {
     if (isLoading) return;
 
-    setIsModalOpen(false);
+    onClose();
     reset(defaultValues);
     setSeoKeywordInput("");
     setCurrentStep(0);
@@ -310,7 +390,9 @@ export default function CreateProjectModal({
 
     if (!isValid) return;
 
-    setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
+    setCurrentStep((step) =>
+      Math.min(step + 1, steps.length - 1),
+    );
   };
 
   const handlePreviousStep = () => {
@@ -333,10 +415,14 @@ export default function CreateProjectModal({
       return;
     }
 
-    setValue("seo.keywords", [...currentKeywords, keyword], {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+    setValue(
+      "seo.keywords",
+      [...currentKeywords, keyword],
+      {
+        shouldDirty: true,
+        shouldValidate: true,
+      },
+    );
 
     setSeoKeywordInput("");
   };
@@ -355,6 +441,8 @@ export default function CreateProjectModal({
   };
 
   const onSubmit = async (data: FormValues) => {
+    if (!project) return;
+
     try {
       const payload = {
         title: data.title,
@@ -407,36 +495,42 @@ export default function CreateProjectModal({
         },
       };
 
-      const response = await postProject(payload);
+      const response = await updateProject({
+        id: project._id,
+        data: payload,
+      });
 
       if (response?.success) {
-        toast.success(response.message);
+        toast.success(
+          response.message || "Project updated successfully.",
+        );
 
-        setIsModalOpen(false);
+        onClose();
         reset(defaultValues);
         setSeoKeywordInput("");
         setCurrentStep(0);
-
-        onSuccess?.();
       }
     } catch (error: any) {
       const message =
         error?.response?.data?.message ||
         error?.response?.data?.error ||
         error?.message ||
-        "Failed to create project.";
+        "Failed to update project.";
 
       toast.error(message);
 
-      console.error("Failed to create project:", message);
+      console.error(
+        "Failed to update project:",
+        message,
+      );
     }
   };
 
   return (
     <Dialog
-      open={isModalOpen}
-      onOpenChange={(open) => {
-        if (!open) {
+      open={open}
+      onOpenChange={(value) => {
+        if (!value && !isLoading) {
           handleClose();
         }
       }}
@@ -445,12 +539,16 @@ export default function CreateProjectModal({
         <div className="flex max-h-[92vh] flex-col">
           <DialogHeader className="border-b px-6 py-5 text-left sm:px-8">
             <DialogTitle className="text-xl font-bold text-navy">
-              Add Project
+              Update Project
             </DialogTitle>
 
             <DialogDescription className="text-sm leading-6">
-              Create a new Enviroshield project and configure all
-              project, client, gallery, and SEO information.
+              Update the project, client, gallery, and SEO
+              information for{" "}
+              <span className="font-semibold text-foreground">
+                {project?.title ?? "this project"}
+              </span>
+              .
             </DialogDescription>
           </DialogHeader>
 
@@ -544,7 +642,9 @@ export default function CreateProjectModal({
                           onChange: (event) => {
                             setValue(
                               "slug",
-                              generateSlug(event.target.value),
+                              generateSlug(
+                                event.target.value,
+                              ),
                               {
                                 shouldValidate: true,
                                 shouldDirty: true,
@@ -556,7 +656,10 @@ export default function CreateProjectModal({
                       />
                     </Field>
 
-                    <Field label="Slug" error={errors.slug?.message}>
+                    <Field
+                      label="Slug"
+                      error={errors.slug?.message}
+                    >
                       <Input
                         {...register("slug")}
                         placeholder="industrial-roof-waterproofing-project"
@@ -596,7 +699,8 @@ export default function CreateProjectModal({
                             </Label>
 
                             <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                              Highlight this project on the website.
+                              Highlight this project on the
+                              website.
                             </p>
                           </div>
 
@@ -721,7 +825,8 @@ export default function CreateProjectModal({
                               {field.value
                                 ? services.find(
                                     (service) =>
-                                      service._id === field.value,
+                                      service._id ===
+                                      field.value,
                                   )?.name
                                 : undefined}
                             </SelectValue>
@@ -741,7 +846,8 @@ export default function CreateProjectModal({
 
                         {servicesError && (
                           <p className="text-sm text-destructive">
-                            Failed to load services. Please try again.
+                            Failed to load services. Please try
+                            again.
                           </p>
                         )}
 
@@ -829,78 +935,95 @@ export default function CreateProjectModal({
                   </div>
 
                   <div className="space-y-4">
-                    {galleryItems.fields.map((field, index) => (
-                      <div
-                        key={field.id}
-                        className="rounded-2xl border bg-muted/10 p-5"
-                      >
-                        <div className="mb-5 flex items-center justify-between">
-                          <p className="text-xs font-bold uppercase tracking-[0.08em] text-blue">
-                            Image {String(index + 1).padStart(2, "0")}
-                          </p>
+                    {galleryItems.fields.map(
+                      (field, index) => (
+                        <div
+                          key={field.id}
+                          className="rounded-2xl border bg-muted/10 p-5"
+                        >
+                          <div className="mb-5 flex items-center justify-between">
+                            <p className="text-xs font-bold uppercase tracking-[0.08em] text-blue">
+                              Image{" "}
+                              {String(index + 1).padStart(
+                                2,
+                                "0",
+                              )}
+                            </p>
 
-                          {galleryItems.fields.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                galleryItems.remove(index)
-                              }
-                              className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 text-red-500 transition-colors hover:bg-red-50"
-                              aria-label={`Remove image ${index + 1}`}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          )}
-                        </div>
-
-                        <div className="space-y-5">
-                          <Controller
-                            control={control}
-                            name={`gallery.${index}.url`}
-                            render={({ field }) => (
-                              <div className="space-y-2">
-                                <Label className="text-xs font-semibold">
-                                  Image
-                                </Label>
-
-                                <ImageUploader
-                                  value={field.value}
-                                  onChange={(url) =>
-                                    field.onChange(url)
-                                  }
-                                />
-
-                                {errors.gallery?.[index]?.url && (
-                                  <p className="text-xs text-red-600">
-                                    {
-                                      errors.gallery[index].url
-                                        ?.message
-                                    }
-                                  </p>
-                                )}
-                              </div>
-                            )}
-                          />
-
-                          <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-navy">
-                              Alt Text
-                            </Label>
-
-                            <Input
-                              {...register(`gallery.${index}.alt`)}
-                              placeholder="Describe the gallery image"
-                            />
-
-                            {errors.gallery?.[index]?.alt && (
-                              <p className="text-xs text-red-600">
-                                {errors.gallery[index].alt?.message}
-                              </p>
+                            {galleryItems.fields.length >
+                              1 && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  galleryItems.remove(index)
+                                }
+                                className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 text-red-500 transition-colors hover:bg-red-50"
+                                aria-label={`Remove image ${
+                                  index + 1
+                                }`}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
                             )}
                           </div>
+
+                          <div className="space-y-5">
+                            <Controller
+                              control={control}
+                              name={`gallery.${index}.url`}
+                              render={({ field }) => (
+                                <div className="space-y-2">
+                                  <Label className="text-xs font-semibold">
+                                    Image
+                                  </Label>
+
+                                  <ImageUploader
+                                    value={field.value}
+                                    onChange={(url) =>
+                                      field.onChange(url)
+                                    }
+                                  />
+
+                                  {errors.gallery?.[
+                                    index
+                                  ]?.url && (
+                                    <p className="text-xs text-red-600">
+                                      {
+                                        errors.gallery[index]
+                                          .url?.message
+                                      }
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            />
+
+                            <div className="space-y-2">
+                              <Label className="text-sm font-semibold text-navy">
+                                Alt Text
+                              </Label>
+
+                              <Input
+                                {...register(
+                                  `gallery.${index}.alt`,
+                                )}
+                                placeholder="Describe the gallery image"
+                              />
+
+                              {errors.gallery?.[index]
+                                ?.alt && (
+                                <p className="text-xs text-red-600">
+                                  {
+                                    errors.gallery[index].alt
+                                      ?.message
+                                  }
+                                </p>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
 
                   {errors.gallery?.root && (
@@ -929,7 +1052,9 @@ export default function CreateProjectModal({
 
                   <Field
                     label="Meta Description"
-                    error={errors.seo?.metaDescription?.message}
+                    error={
+                      errors.seo?.metaDescription?.message
+                    }
                   >
                     <Textarea
                       {...register("seo.metaDescription")}
@@ -952,7 +1077,9 @@ export default function CreateProjectModal({
                       <Input
                         value={seoKeywordInput}
                         onChange={(event) =>
-                          setSeoKeywordInput(event.target.value)
+                          setSeoKeywordInput(
+                            event.target.value,
+                          )
                         }
                         placeholder="e.g. roof waterproofing"
                       />
@@ -969,26 +1096,29 @@ export default function CreateProjectModal({
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      {currentKeywords.map((keyword, index) => (
-                        <div
-                          key={`${keyword}-${index}`}
-                          className="flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-sm"
-                        >
-                          <span>{keyword}</span>
-
-                          <button
-                            type="button"
-                            onClick={() => removeKeyword(index)}
-                            className="text-muted-foreground transition-colors hover:text-destructive"
-                            aria-label={`Remove ${keyword}`}
+                      {currentKeywords.map(
+                        (keyword, index) => (
+                          <div
+                            key={`${keyword}-${index}`}
+                            className="flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-sm"
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      ))}
+                            <span>{keyword}</span>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                removeKeyword(index)
+                              }
+                              className="text-muted-foreground transition-colors hover:text-destructive"
+                              aria-label={`Remove ${keyword}`}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        ),
+                      )}
                     </div>
 
-                    {/* Validation error */}
                     {errors.seo?.keywords && (
                       <p className="text-sm text-destructive">
                         {errors.seo.keywords.message}
@@ -1033,7 +1163,9 @@ export default function CreateProjectModal({
 
                   <Field
                     label="OG Description"
-                    error={errors.seo?.ogDescription?.message}
+                    error={
+                      errors.seo?.ogDescription?.message
+                    }
                   >
                     <Textarea
                       {...register("seo.ogDescription")}
@@ -1053,8 +1185,8 @@ export default function CreateProjectModal({
                           </Label>
 
                           <p className="mt-1 text-sm text-muted-foreground">
-                            Prevent search engines from indexing this
-                            project.
+                            Prevent search engines from indexing
+                            this project.
                           </p>
                         </div>
 
@@ -1075,7 +1207,9 @@ export default function CreateProjectModal({
                     <DashboardButton
                       type="button"
                       variant="outline"
-                      icon={<ChevronLeft className="h-4 w-4" />}
+                      icon={
+                        <ChevronLeft className="h-4 w-4" />
+                      }
                       onClick={handlePreviousStep}
                       disabled={isLoading}
                       className="min-h-10 rounded-xl px-4 text-xs font-bold"
@@ -1099,7 +1233,9 @@ export default function CreateProjectModal({
                   {currentStep < steps.length - 1 ? (
                     <DashboardButton
                       type="button"
-                      icon={<ChevronRight className="h-4 w-4" />}
+                      icon={
+                        <ChevronRight className="h-4 w-4" />
+                      }
                       onClick={handleNextStep}
                       disabled={isLoading}
                     >
@@ -1113,11 +1249,13 @@ export default function CreateProjectModal({
                         isLoading ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                          <Plus className="h-4 w-4" />
+                          <Check className="h-4 w-4" />
                         )
                       }
                     >
-                      {isLoading ? "Creating..." : "Create Project"}
+                      {isLoading
+                        ? "Updating..."
+                        : "Update Project"}
                     </DashboardButton>
                   )}
                 </div>
@@ -1136,7 +1274,11 @@ type FieldProps = {
   children: ReactNode;
 };
 
-function Field({ label, error, children }: FieldProps) {
+function Field({
+  label,
+  error,
+  children,
+}: FieldProps) {
   return (
     <div className="space-y-2">
       <Label className="text-sm font-semibold text-navy">
@@ -1145,7 +1287,11 @@ function Field({ label, error, children }: FieldProps) {
 
       {children}
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && (
+        <p className="text-sm text-destructive">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -1170,7 +1316,9 @@ function ImageFields({
   return (
     <div className="space-y-5 rounded-2xl border bg-muted/10 p-5">
       <div>
-        <h4 className="text-sm font-bold text-navy">{title}</h4>
+        <h4 className="text-sm font-bold text-navy">
+          {title}
+        </h4>
 
         <p className="mt-1 text-xs text-muted-foreground">
           Upload the image and provide accessible metadata.
@@ -1182,7 +1330,9 @@ function ImageFields({
         name={`${name}.url`}
         render={({ field }) => (
           <div className="space-y-2">
-            <Label className="text-xs font-semibold">Image</Label>
+            <Label className="text-xs font-semibold">
+              Image
+            </Label>
 
             <ImageUploader
               value={field.value}
@@ -1201,7 +1351,9 @@ function ImageFields({
       <div
         className={[
           "grid gap-5",
-          showCaption ? "md:grid-cols-2" : "md:grid-cols-1",
+          showCaption
+            ? "md:grid-cols-2"
+            : "md:grid-cols-1",
         ].join(" ")}
       >
         <div className="space-y-2">
@@ -1256,14 +1408,18 @@ function FormSection({
   return (
     <section className="space-y-6">
       <div>
-        <h3 className="text-lg font-bold text-navy">{title}</h3>
+        <h3 className="text-lg font-bold text-navy">
+          {title}
+        </h3>
 
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
           {description}
         </p>
       </div>
 
-      <div className="space-y-5">{children}</div>
+      <div className="space-y-5">
+        {children}
+      </div>
     </section>
   );
 }
