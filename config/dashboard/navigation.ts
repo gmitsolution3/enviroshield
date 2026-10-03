@@ -84,6 +84,11 @@ export const dashboardNavigation: Record<
       icon: "testimonials",
     },
     {
+      title: "Blog Management",
+      href: "/dashboard/blogs",
+      icon: "documents",
+    },
+    {
       title: "Users",
       href: "/dashboard/users",
       icon: "users",
