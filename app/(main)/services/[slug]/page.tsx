@@ -12,6 +12,8 @@ import Container from "@/components/Container";
 import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
+import ServiceFeatureCards from "@/components/services/ServiceFeatureCards";
+import ServiceProjectsSection from "@/components/services/ServiceProjectsSection";
 import {
   getPublishedServiceBySlug,
   getPublishedServices,
@@ -280,6 +282,17 @@ export default async function ServiceDetailPage({
           </Reveal>
         </Container>
       </section>
+
+      <ServiceFeatureCards
+        whyEnviroshield={service.whyEnviroshield}
+        process={service.process}
+        benefits={service.benefits}
+      />
+
+      <ServiceProjectsSection
+        projects={service.projects}
+        serviceName={service.name}
+      />
 
       <ContactSection />
     </>
