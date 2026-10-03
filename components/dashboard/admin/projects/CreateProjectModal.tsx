@@ -249,6 +249,8 @@ export default function CreateProjectModal({
     defaultValues,
   });
 
+  console.log(errors)
+
   const galleryItems = useFieldArray({
     control,
     name: "gallery",
@@ -715,7 +717,14 @@ export default function CreateProjectModal({
                                       ? "No services available"
                                       : "Select a service"
                               }
-                            />
+                            >
+                              {field.value
+                                ? services.find(
+                                    (service) =>
+                                      service._id === field.value,
+                                  )?.name
+                                : undefined}
+                            </SelectValue>
                           </SelectTrigger>
 
                           <SelectContent>
@@ -979,10 +988,23 @@ export default function CreateProjectModal({
                       ))}
                     </div>
 
-                    {errors.seo?.keywords?.root && (
+                    {/* Validation error */}
+                    {errors.seo?.keywords && (
                       <p className="text-sm text-destructive">
-                        {errors.seo.keywords.root.message}
+                        {errors.seo.keywords.message}
                       </p>
+                    )}
+
+                    {errors.seo?.keywords?.map?.(
+                      (error, index) =>
+                        error && (
+                          <p
+                            key={index}
+                            className="text-sm text-destructive"
+                          >
+                            {error.message}
+                          </p>
+                        ),
                     )}
                   </div>
 
