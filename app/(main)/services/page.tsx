@@ -7,9 +7,11 @@ import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
 import ServiceCard from "@/components/ServiceCard";
+import ServicesPagination from "@/components/services/ServicesPagination";
 import { getPublishedServices } from "@/lib/api/services";
+import type { Metadata } from "next";
 
-export const metadata = {
+/* export const metadata = {
   title: "Painting & Wall Finishing Services | Enviroshield",
   description:
     "Explore Enviroshield's painting and wall finishing services, including interior and exterior painting, wallpaper installation, decorative finishes, surface preparation, and more.",
@@ -37,13 +39,87 @@ export const metadata = {
     type: "website",
     url: "/services",
   },
+}; */
+
+type ServicesPageProps = {
+  searchParams: Promise<{
+    page?: string;
+  }>;
 };
 
-export default async function ServicesPage() {
-  const services = await getPublishedServices({
-    page: 1,
+export async function generateMetadata({
+  searchParams,
+}: ServicesPageProps): Promise<Metadata> {
+  const params = await searchParams;
+
+  const page = Math.max(
+    1,
+    Number.parseInt(params.page || "1", 10) || 1,
+  );
+
+  const isFirstPage = page === 1;
+
+  const title = isFirstPage
+    ? "Painting & Wall Finishing Services | Enviroshield"
+    : `Painting & Wall Finishing Services — Page ${page} | Enviroshield`;
+
+  const description = isFirstPage
+    ? "Explore Enviroshield's professional painting and wall finishing services, including interior and exterior painting, wallpaper installation, decorative finishes, surface preparation, and more."
+    : `Explore more of Enviroshield's professional painting and wall finishing services on page ${page}.`;
+
+  const canonical = isFirstPage
+    ? "/services"
+    : `/services?page=${page}`;
+
+  return {
+    title,
+    description,
+
+    keywords: [
+      "painting services",
+      "wall finishing services",
+      "interior painting",
+      "exterior painting",
+      "wallpaper installation",
+      "decorative finishes",
+      "surface preparation",
+      "Enviroshield",
+    ],
+
+    alternates: {
+      canonical,
+    },
+
+    robots: {
+      index: true,
+      follow: true,
+    },
+
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      url: canonical,
+    },
+  };
+}
+
+export default async function ServicesPage({
+  searchParams,
+}: ServicesPageProps) {
+  const params = await searchParams;
+
+  const page = Math.max(
+    1,
+    Number.parseInt(params.page || "1", 10) || 1,
+  );
+
+  const result = await getPublishedServices({
+    page,
     limit: 10,
   });
+
+  const services = result.data;
 
   return (
     <>
@@ -51,7 +127,7 @@ export default async function ServicesPage() {
         eyebrow="OUR SERVICES"
         title="Painting and wall finishing, done with care."
         text="Whether it is one room or a whole building, we deliver finishes that feel considered, durable, and beautifully made."
-        image="https://images.pexels.com/photos/16751235/pexels-photo-16751235.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600"
+        image="/images/service-hero.jpg"
       />
 
       <section
@@ -72,22 +148,14 @@ export default async function ServicesPage() {
                 key={service._id}
                 className="max-[600px]:min-w-[280px] max-[600px]:snap-start"
               >
-                <ServiceCard
-                  service={{
-                    id: service._id,
-                    title: service.name,
-                    slug: service.slug,
-                    description: service.description,
-                    image: service.primaryImage.url,
-                    category: service.isFeatured
-                      ? "FEATURED SERVICE"
-                      : "OUR SERVICES",
-                  }}
-                  index={index}
-                />
+                <ServiceCard service={service} index={index} />
               </StaggerItem>
             ))}
           </StaggerContainer>
+          <ServicesPagination
+            currentPage={result.meta.page}
+            totalPages={result.meta.totalPages}
+          />
         </Container>
       </section>
 

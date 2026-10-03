@@ -40,7 +40,7 @@ export default function PageHero({
         </motion.div>
 
         <motion.div
-          className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,40,61,0.82)_0%,rgba(0,40,61,0.58)_45%,rgba(0,40,61,0.3)_100%)]"
+          className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,40,61,0.95)_0%,rgba(0,40,61,0.68)_45%,rgba(0,40,61,0.60)_100%)]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
@@ -53,9 +53,9 @@ export default function PageHero({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65, ease: EASE, delay: 0.1 }}
             >
-              <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-white">
+              <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
                 <span
-                  className="h-[2px] w-7 bg-current"
+                  className="h-[2px] w-7 bg-paste"
                   aria-hidden="true"
                 />
                 {eyebrow}

@@ -53,6 +53,8 @@ import { formatDate } from "../../../../utils/formatDate";
 
 const features = tableFeatures({});
 
+//todo: yet to complete the blog management dashboard with add, edit, delete, and view functionalities. Currently, it fetches and displays blogs with filtering and pagination.
+
 export default function BlogDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);

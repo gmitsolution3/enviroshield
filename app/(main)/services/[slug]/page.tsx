@@ -12,32 +12,101 @@ import Container from "@/components/Container";
 import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
-import { services } from "@/lib/data/content";
+import {
+  getPublishedServiceBySlug,
+  getPublishedServices,
+} from "@/lib/api/services";
+import { Metadata } from "next";
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
-}) {
+}): Promise<Metadata> {
   const { slug } = await params;
-  const service = services.find((s) => s.slug === slug);
 
-  if (!service) {
+  try {
+    const service = await getPublishedServiceBySlug(slug);
+
+    const seo = service.seo;
+
+    const title =
+      seo?.metaTitle?.trim() || `${service.name} | Enviroshield`;
+
+    const description =
+      seo?.metaDescription?.trim() || service.description;
+
+    const keywords = seo?.keywords?.filter(Boolean) ?? [];
+
+    const canonical =
+      seo?.canonicalUrl?.trim() || `/services/${service.slug}`;
+
+    const ogTitle = seo?.ogTitle?.trim() || title;
+
+    const ogDescription = seo?.ogDescription?.trim() || description;
+
+    const ogImage = seo?.ogImage?.trim() || service.primaryImage.url;
+
+    return {
+      title,
+      description,
+      keywords,
+
+      alternates: {
+        canonical,
+      },
+
+      robots: {
+        index: seo?.noIndex !== true,
+        follow: seo?.noIndex !== true,
+      },
+
+      openGraph: {
+        title: ogTitle,
+        description: ogDescription,
+        type: "website",
+        url: canonical,
+        images: [
+          {
+            url: ogImage,
+            alt: service.primaryImage.alt || service.name,
+          },
+        ],
+      },
+
+      twitter: {
+        card: "summary_large_image",
+        title: ogTitle,
+        description: ogDescription,
+        images: [ogImage],
+      },
+    };
+  } catch {
     return {
       title: "Service not found | Enviroshield",
       description:
         "The requested Enviroshield service could not be found.",
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
-
-  return {
-    title: `${service.title} | Enviroshield`,
-    description: service.description,
-  };
 }
 
-export function generateStaticParams() {
-  return services.map((service) => ({ slug: service.slug }));
+export async function generateStaticParams() {
+  try {
+    const result = await getPublishedServices({
+      page: 1,
+      limit: 100,
+    });
+
+    return result.data.map((service) => ({
+      slug: service.slug,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export default async function ServiceDetailPage({
@@ -47,9 +116,13 @@ export default async function ServiceDetailPage({
 }) {
   const { slug } = await params;
 
-  const service = services.find((s) => s.slug === slug);
+  let service;
 
-  if (!service) notFound();
+  try {
+    service = await getPublishedServiceBySlug(slug);
+  } catch {
+    notFound();
+  }
 
   const benefits = [
     "Careful surface preparation",
@@ -58,13 +131,107 @@ export default async function ServiceDetailPage({
     "Clear timeline and quote",
   ];
 
+  const serviceUrl = `https://enviroshieldbd.com/services/${service.slug}`;
+
+  const serviceJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${serviceUrl}#service`,
+    name: service.name,
+    serviceType: service.name,
+    description: service.description,
+    url: serviceUrl,
+    image: service.primaryImage.url,
+
+    provider: {
+      "@type": "Organization",
+      "@id": "https://enviroshieldbd.com/#organization",
+      name: "Enviroshield",
+      url: "https://enviroshieldbd.com",
+    },
+
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${serviceUrl}#webpage`,
+      url: serviceUrl,
+      name: service.name,
+    },
+  };
+
+  const webPageJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${serviceUrl}#webpage`,
+    url: serviceUrl,
+    name: service.name,
+    description: service.description,
+    isPartOf: {
+      "@type": "WebSite",
+      "@id": "https://enviroshieldbd.com/#website",
+      url: "https://enviroshieldbd.com",
+      name: "Enviroshield",
+    },
+    about: {
+      "@id": `${serviceUrl}#service`,
+    },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "@id": `${serviceUrl}#breadcrumb`,
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://enviroshieldbd.com/",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Services",
+        item: "https://enviroshieldbd.com/services",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: service.name,
+        item: serviceUrl,
+      },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(serviceJsonLd),
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(webPageJsonLd),
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbJsonLd),
+        }}
+      />
+
       <PageHero
-        eyebrow={service.category}
-        title={service.title}
+        eyebrow={
+          service.isFeatured ? "FEATURED SERVICE" : "OUR SERVICES"
+        }
+        title={service.name}
         text={service.description}
-        image={service.image}
+        image={service.primaryImage.url}
       />
 
       <section
@@ -75,8 +242,8 @@ export default async function ServiceDetailPage({
           <Reveal dir="image">
             <div className="relative h-[530px] overflow-hidden rounded-[18px] max-[600px]:h-[340px]">
               <Image
-                src={service.image}
-                alt={service.title}
+                src={service.primaryImage.url}
+                alt={service.primaryImage.alt || service.name}
                 fill
                 sizes="45vw"
               />
@@ -87,7 +254,7 @@ export default async function ServiceDetailPage({
             <div>
               <SectionHeader
                 eyebrow="OVERVIEW"
-                title={`About ${service.title}`}
+                title={`About ${service.name}`}
                 text={service.description}
                 headingId="service-overview-heading"
               />
