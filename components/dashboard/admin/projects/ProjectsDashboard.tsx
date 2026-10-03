@@ -13,8 +13,8 @@ import {
   Trash,
   XCircle,
 } from "lucide-react";
-import { useState } from "react";
 import Image from "next/image";
+import { useState } from "react";
 
 import {
   tableFeatures,
@@ -50,12 +50,26 @@ import DashboardError from "../../DashboardError";
 import DashboardLoading from "../../DashboardLoading";
 import { formatDate } from "./../../../../utils/formatDate";
 
+import DeleteProjectDialog from "./DeleteProjectDialog";
+import ViewProjectModal from "./ViewProjectModal";
+
 const features = tableFeatures({});
 
 export default function ProjectsDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [filterStatus, setFilterStatus] = useState<string>("");
+
+  const [selectedProject, setSelectedProject] =
+    useState<IProject | null>(null);
+
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  const [deleteProject, setDeleteProject] = useState<IProject | null>(
+    null,
+  );
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const { data, isLoading, isError, refetch } =
     useFetch<IProjectResponse>(
@@ -66,7 +80,8 @@ export default function ProjectsDashboard() {
   const meta = data?.meta;
 
   const handleView = (project: IProject) => {
-    console.log("View project:", project);
+    setSelectedProject(project);
+    setIsDetailModalOpen(true);
   };
 
   const handleEdit = (project: IProject) => {
@@ -74,7 +89,8 @@ export default function ProjectsDashboard() {
   };
 
   const handleDelete = (project: IProject) => {
-    console.log("Delete project:", project);
+    setDeleteProject(project);
+    setIsDeleteDialogOpen(true);
   };
 
   const handleFilterChange = (value: string | null) => {
@@ -121,10 +137,7 @@ export default function ProjectsDashboard() {
                 <div className="relative h-full w-full">
                   <Image
                     src={project.primaryImage.url}
-                    alt={
-                      project.primaryImage.alt ||
-                      project.title
-                    }
+                    alt={project.primaryImage.alt || project.title}
                     fill
                     className="object-cover"
                   />
@@ -161,8 +174,7 @@ export default function ProjectsDashboard() {
                 <span className="h-1 w-1 rounded-full bg-slate-300" />
 
                 <span>
-                  {project.location.city},{" "}
-                  {project.location.area}
+                  {project.location.city}, {project.location.area}
                 </span>
               </div>
             </div>
@@ -242,9 +254,7 @@ export default function ProjectsDashboard() {
                 <Calendar className="h-3.5 w-3.5" />
               </span>
 
-              <span>
-                {formatDate(project.completionDate)}
-              </span>
+              <span>{formatDate(project.completionDate)}</span>
             </div>
 
             <div className="pl-9 text-[11px] text-slate-400">
@@ -276,20 +286,13 @@ export default function ProjectsDashboard() {
                 <DashboardButton
                   variant="outline"
                   className="h-8 w-8 rounded-lg border-blue/30 bg-muted/30 p-0 text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
-                  icon={
-                    <MoreHorizontal className="h-4 w-4" />
-                  }
+                  icon={<MoreHorizontal className="h-4 w-4" />}
                 />
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent
-                align="end"
-                className="w-40"
-              >
+              <DropdownMenuContent align="end" className="w-40">
                 <DropdownMenuGroup>
-                  <DropdownMenuLabel>
-                    Actions
-                  </DropdownMenuLabel>
+                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
                   <DropdownMenuSeparator />
 
@@ -339,9 +342,7 @@ export default function ProjectsDashboard() {
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">
-            Project Management
-          </h1>
+          <h1 className="text-3xl font-bold">Project Management</h1>
 
           <p className="mt-1 text-muted-foreground">
             Manage the projects completed by Enviroshield.
@@ -349,8 +350,7 @@ export default function ProjectsDashboard() {
 
           {meta && (
             <p className="mt-1 text-sm text-muted-foreground">
-              Showing {projects.length} of {meta.total}{" "}
-              projects
+              Showing {projects.length} of {meta.total} projects
             </p>
           )}
         </div>
@@ -370,9 +370,7 @@ export default function ProjectsDashboard() {
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-muted-foreground" />
 
-          <span className="text-sm font-medium">
-            Filter:
-          </span>
+          <span className="text-sm font-medium">Filter:</span>
         </div>
 
         <Select
@@ -384,9 +382,7 @@ export default function ProjectsDashboard() {
           </SelectTrigger>
 
           <SelectContent>
-            <SelectItem value="published">
-              Published
-            </SelectItem>
+            <SelectItem value="published">Published</SelectItem>
 
             <SelectItem value="draft">Draft</SelectItem>
           </SelectContent>
@@ -427,9 +423,7 @@ export default function ProjectsDashboard() {
                         className="px-6 py-3 text-left text-sm font-medium text-muted-foreground"
                       >
                         {header.isPlaceholder ? null : (
-                          <table.FlexRender
-                            header={header}
-                          />
+                          <table.FlexRender header={header} />
                         )}
                       </th>
                     ))}
@@ -444,10 +438,7 @@ export default function ProjectsDashboard() {
                     className="border-b transition-colors last:border-0 hover:bg-muted/30"
                   >
                     {row.getAllCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        className="px-6 py-4"
-                      >
+                      <td key={cell.id} className="px-6 py-4">
                         <table.FlexRender cell={cell} />
                       </td>
                     ))}
@@ -488,12 +479,8 @@ export default function ProjectsDashboard() {
             <DashboardButton
               variant="outline"
               disabled={currentPageNum <= 1}
-              onClick={() =>
-                handlePageChange(currentPageNum - 1)
-              }
-              icon={
-                <ChevronLeft className="h-4 w-4" />
-              }
+              onClick={() => handlePageChange(currentPageNum - 1)}
+              icon={<ChevronLeft className="h-4 w-4" />}
               className="h-8 w-8 rounded-full border-blue bg-blue p-0 text-white shadow-[0_3px_10px_rgba(1,110,220,0.18)] transition-[background-color,box-shadow] duration-200 hover:bg-[#005cb9] hover:text-white hover:shadow-[0_4px_12px_rgba(1,110,220,0.24)] disabled:pointer-events-none disabled:opacity-50"
               ariaLabel="Previous page"
             />
@@ -505,18 +492,30 @@ export default function ProjectsDashboard() {
             <DashboardButton
               variant="outline"
               disabled={currentPageNum >= totalPages}
-              onClick={() =>
-                handlePageChange(currentPageNum + 1)
-              }
-              icon={
-                <ChevronRight className="h-4 w-4" />
-              }
+              onClick={() => handlePageChange(currentPageNum + 1)}
+              icon={<ChevronRight className="h-4 w-4" />}
               className="h-8 w-8 rounded-full border-blue bg-blue p-0 text-white shadow-[0_3px_10px_rgba(1,110,220,0.18)] transition-[background-color,box-shadow] duration-200 hover:bg-[#005cb9] hover:text-white hover:shadow-[0_4px_12px_rgba(1,110,220,0.24)] disabled:pointer-events-none disabled:opacity-50"
               ariaLabel="Next page"
             />
           </div>
         </div>
       )}
+
+      <ViewProjectModal
+        isModalOpen={isDetailModalOpen}
+        setIsModalOpen={setIsDetailModalOpen}
+        project={selectedProject}
+      />
+
+      <DeleteProjectDialog
+        project={deleteProject}
+        open={isDeleteDialogOpen}
+        revalidateKey={`/project?page=${currentPage}&limit=${limit}`}
+        onClose={() => {
+          setIsDeleteDialogOpen(false);
+          setDeleteProject(null);
+        }}
+      />
     </section>
   );
 }
