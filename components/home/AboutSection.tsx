@@ -1,5 +1,5 @@
 import { images } from "@/lib/data/content";
-import { CheckCircle2 } from "lucide-react";
+import { Check } from "lucide-react";
 import Image from "next/image";
 import { AnimatedCounter } from "../animations/animated-counter";
 import { StaggerContainer, StaggerItem } from "../animations/reveal";
@@ -8,6 +8,34 @@ import Container from "../Container";
 import { Reveal } from "../Reveal";
 import { SectionHeader } from "../SectionHeader";
 
+// Swap these with the exact photos from your design.
+const aboutImages = {
+  wallpaper: {
+    src: "https://images.pexels.com/photos/7546771/pexels-photo-7546771.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    alt: "Hand peeling floral wallpaper off a wall",
+  },
+  inspection: {
+    src: images.painter,
+    alt: "Two professionals inspecting a prepared wall",
+  },
+  ladder: {
+    src: "https://images.pexels.com/photos/6764289/pexels-photo-6764289.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    alt: "Workers finishing a ceiling from a ladder",
+  },
+};
+
+const avatars = [
+  "https://i.pravatar.cc/80?img=12",
+  "https://i.pravatar.cc/80?img=33",
+  "https://i.pravatar.cc/80?img=47",
+  "https://i.pravatar.cc/80?img=45",
+];
+
+const photoClass =
+  "group relative h-[270px] overflow-hidden rounded-[18px] max-[600px]:h-[170px]";
+const imgClass =
+  "object-cover transition-transform duration-[0.6s] group-hover:scale-[1.04]";
+
 export default function AboutSection() {
   return (
     <section
@@ -15,63 +43,69 @@ export default function AboutSection() {
       className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
     >
       <Container className="grid grid-cols-2 items-center gap-24 max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
+        {/* ---------- Left: image collage ---------- */}
         <Reveal dir="image">
-          <div className="relative grid grid-cols-[1fr_0.9fr] grid-rows-[180px_112px_150px] gap-5 px-[10px] py-2 pr-[10px] max-[900px]:mx-auto max-[900px]:w-full max-[900px]#:max-w-[560px] max-[600px]:grid-rows-[140px_95px_125px] max-[600px]:gap-3">
-            <div className="relative row-span-2 overflow-hidden rounded-[18px] group">
-              <Image
-                src="https://images.pexels.com/photos/7546771/pexels-photo-7546771.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
-                alt="Botanical wallpaper in an elegant hallway"
-                fill
-                sizes="30vw"
-                className="transition-transform duration-[0.6s] group-hover:scale-[1.04]"
-              />
-            </div>
+          <div className="grid grid-cols-2 gap-5 max-[900px]:mx-auto max-[900px]:w-full max-[900px]:max-w-[580px] max-[600px]:gap-3">
+            {/* left column (offset down) */}
+            <div className="flex flex-col gap-[27px] pt-[70px] max-[600px]:gap-3 max-[600px]:pt-10">
+              <div className={photoClass}>
+                <Image
+                  src={aboutImages.wallpaper.src}
+                  alt={aboutImages.wallpaper.alt}
+                  fill
+                  sizes="(max-width: 900px) 45vw, 25vw"
+                  className={imgClass}
+                />
+              </div>
 
-            <div className="relative col-start-2 row-start-1 overflow-hidden rounded-[18px] group">
-              <Image
-                src={images.painter}
-                alt="Craftsperson preparing a wall for finishing"
-                fill
-                sizes="30vw"
-                className="transition-transform duration-[0.6s] group-hover:scale-[1.04]"
-              />
-            </div>
-
-            <div className="relative col-start-2 row-span-2 row-start-2 overflow-hidden rounded-[18px] group">
-              <Image
-                src="https://images.pexels.com/photos/6764289/pexels-photo-6764289.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
-                alt="Paint roller applying a blue wall finish"
-                fill
-                sizes="30vw"
-                className="transition-transform duration-[0.6s] group-hover:scale-[1.04]"
-              />
-            </div>
-
-            <Reveal dir="up" delay={0.3}>
-              <div className="absolute bottom-[22px] left-[-4px] z-[2] flex items-center gap-3 rounded-[14px] bg-[#e9eafa] px-[18px] py-4 shadow-[0_12px_30px_rgba(0,51,78,0.1)] max-[600px]:bottom-[14px] max-[600px]:left-0 max-[600px]:p-3">
-                <div className="flex">
-                  <span className="grid h-[27px] w-[27px] place-items-center rounded-full border-2 border-[#e9eafa] bg-white text-[10px] font-bold text-blue">
-                    ES
-                  </span>
-                  <span className="-ml-[7px] grid h-[27px] w-[27px] place-items-center rounded-full border-2 border-[#e9eafa] bg-white text-[10px] font-bold text-blue">
-                    J
-                  </span>
-                  <span className="-ml-[7px] grid h-[27px] w-[27px] place-items-center rounded-full border-2 border-[#e9eafa] bg-white text-[10px] font-bold text-blue">
-                    M
-                  </span>
-                  <span className="-ml-[7px] grid h-[27px] w-[27px] place-items-center rounded-full border-2 border-[#e9eafa] bg-white text-[10px] font-bold text-blue">
+              <div className="flex h-[128px] flex-col items-center justify-center gap-2 rounded-[18px] bg-mist max-[600px]:h-[100px]">
+                <div className="flex items-center">
+                  {avatars.map((src, i) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={src}
+                      src={src}
+                      alt=""
+                      aria-hidden="true"
+                      className={`h-[42px] w-[42px] rounded-full border-2 border-white bg-white object-cover max-[600px]:h-9 max-[600px]:w-9 ${
+                        i > 0 ? "-ml-2.5" : ""
+                      }`}
+                    />
+                  ))}
+                  <span
+                    className="-ml-2.5 grid h-[42px] w-[42px] place-items-center rounded-full border-2 border-white bg-blue text-[22px] leading-none text-white max-[600px]:h-9 max-[600px]:w-9"
+                    aria-hidden="true"
+                  >
                     +
                   </span>
                 </div>
-
-                <div>
-                  <b className="block text-[18px] text-navy">500+</b>
-                  <small className="text-[11px] text-ink">
-                    Spaces transformed
-                  </small>
-                </div>
+                <span className="text-[15px] text-ink">
+                  Happy Customer
+                </span>
               </div>
-            </Reveal>
+            </div>
+
+            {/* right column */}
+            <div className="flex flex-col gap-[27px] max-[600px]:gap-3">
+              <div className={photoClass}>
+                <Image
+                  src={aboutImages.inspection.src}
+                  alt={aboutImages.inspection.alt}
+                  fill
+                  sizes="(max-width: 900px) 45vw, 25vw"
+                  className={imgClass}
+                />
+              </div>
+              <div className={photoClass}>
+                <Image
+                  src={aboutImages.ladder.src}
+                  alt={aboutImages.ladder.alt}
+                  fill
+                  sizes="(max-width: 900px) 45vw, 25vw"
+                  className={imgClass}
+                />
+              </div>
+            </div>
           </div>
         </Reveal>
 
@@ -85,22 +119,23 @@ export default function AboutSection() {
 
           <StaggerContainer className="mb-[30px] grid grid-cols-2 gap-x-[22px] gap-y-[15px] max-[600px]:grid-cols-1 max-[600px]:gap-3">
             {[
-              "Your vision, our expertise",
-              "Walls are our canvas",
-              "Premium materials & finishes",
-              "Your space is our inspiration",
-              "Built on trust",
-              "Passionate about quality",
+              "Your Vision Our Expertise",
+              "Your Space Is Our Inspiration",
+              "Walls Are Our Canvas",
+              "Beautiful Walls, Built on Trust",
+              "24/7 Availability",
+              "Passionate About Quality",
             ].map((item) => (
               <StaggerItem
                 key={item}
-                className="flex items-center gap-2 text-[13px] font-bold text-navy"
+                className="flex items-center gap-2 text-[15px] font-medium text-navy"
               >
-                <CheckCircle2
-                  size={16}
-                  className="flex-none text-blue"
+                <span
+                  className="grid h-5 w-5 flex-none place-items-center rounded-full bg-navy text-white"
                   aria-hidden="true"
-                />
+                >
+                  <Check size={12} strokeWidth={3.5} />
+                </span>
                 {item}
               </StaggerItem>
             ))}
