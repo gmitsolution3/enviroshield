@@ -14,77 +14,22 @@ import Container from "@/components/Container";
 import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
+import { getPublishedProjectBySlug } from "@/lib/api/projects";
 
-const projects = [
-  {
-    slug: "dhaka-corporate-office-waterproofing",
-    title: "Dhaka Corporate Office Waterproofing",
-    description:
-      "Complete roof and terrace waterproofing solution for a large commercial office facility.",
-    image:
-      "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    imageAlt: "Commercial office building project",
-    location: "Gulshan, Dhaka, Bangladesh",
-    service: "Waterproofing Solution",
-    completionDate: "2026-02-01",
-    client: "Dhaka Corporate Office",
-    featured: true,
-    gallery: [
-      "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1600",
-      "https://images.pexels.com/photos/373543/pexels-photo-373543.jpeg?auto=compress&cs=tinysrgb&w=1600",
-      "https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    ],
-  },
-  {
-    slug: "premium-residential-epoxy-flooring",
-    title: "Premium Residential Epoxy Flooring",
-    description:
-      "Seamless decorative epoxy flooring designed for a premium residential interior.",
-    image:
-      "https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    imageAlt: "Premium residential flooring project",
-    location: "Banani, Dhaka, Bangladesh",
-    service: "Epoxy Flooring",
-    completionDate: "2026-01-01",
-    client: "Private Residence",
-    featured: false,
-    gallery: [
-      "https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg?auto=compress&cs=tinysrgb&w=1600",
-      "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=1600",
-      "https://images.pexels.com/photos/1571458/pexels-photo-1571458.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    ],
-  },
-  {
-    slug: "industrial-floor-protection",
-    title: "Industrial Floor Protection",
-    description:
-      "Heavy-duty floor protection system engineered for demanding industrial conditions.",
-    image:
-      "https://images.pexels.com/photos/4481327/pexels-photo-4481327.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    imageAlt: "Industrial floor protection project",
-    location: "Patenga, Chattogram, Bangladesh",
-    service: "Floor Hardener",
-    completionDate: "2025-11-01",
-    client: "Industrial Facility",
-    featured: false,
-    gallery: [
-      "https://images.pexels.com/photos/4481327/pexels-photo-4481327.jpeg?auto=compress&cs=tinysrgb&w=1600",
-      "https://images.pexels.com/photos/373543/pexels-photo-373543.jpeg?auto=compress&cs=tinysrgb&w=1600",
-      "https://images.pexels.com/photos/3862130/pexels-photo-3862130.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    ],
-  },
-];
+type ProjectDetailPageProps = {
+  params: Promise<{ slug: string }>;
+};
 
 export async function generateMetadata({
   params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
+}: ProjectDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  const project = projects.find((item) => item.slug === slug);
+  let project;
 
-  if (!project) {
+  try {
+    project = await getPublishedProjectBySlug(slug);
+  } catch {
     return {
       title: "Project not found | Enviroshield",
       description:
@@ -98,12 +43,20 @@ export async function generateMetadata({
 
   const canonical = `https://enviroshieldbd.com/projects/${project.slug}`;
 
+  const location = [
+    project.location?.area,
+    project.location?.city,
+    project.location?.country,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
   return {
     title: `${project.title} | Enviroshield`,
     description: project.description,
     keywords: [
       project.title,
-      project.service,
+      project.serviceId?.name || "Enviroshield project",
       "Enviroshield projects",
       "Bangladesh construction projects",
       "waterproofing projects",
@@ -124,8 +77,8 @@ export async function generateMetadata({
       url: canonical,
       images: [
         {
-          url: project.image,
-          alt: project.imageAlt,
+          url: project.primaryImage.url,
+          alt: project.primaryImage.alt,
         },
       ],
     },
@@ -133,31 +86,36 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: `${project.title} | Enviroshield`,
       description: project.description,
-      images: [project.image],
+      images: [project.primaryImage.url],
     },
   };
 }
 
-export async function generateStaticParams() {
-  return projects.map((project) => ({
-    slug: project.slug,
-  }));
-}
-
 export default async function ProjectDetailPage({
   params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+}: ProjectDetailPageProps) {
   const { slug } = await params;
 
-  const project = projects.find((item) => item.slug === slug);
+  let project;
 
-  if (!project) {
+  try {
+    project = await getPublishedProjectBySlug(slug);
+  } catch {
     notFound();
   }
 
   const projectUrl = `https://enviroshieldbd.com/projects/${project.slug}`;
+
+  const location = [
+    project.location?.area,
+    project.location?.city,
+    project.location?.country,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  const serviceName =
+    project.serviceId?.name || "Enviroshield Solution";
 
   const projectJsonLd = {
     "@context": "https://schema.org",
@@ -166,7 +124,7 @@ export default async function ProjectDetailPage({
     name: project.title,
     description: project.description,
     url: projectUrl,
-    image: project.image,
+    image: project.primaryImage.url,
     creator: {
       "@type": "Organization",
       "@id": "https://enviroshieldbd.com/#organization",
@@ -175,11 +133,11 @@ export default async function ProjectDetailPage({
     },
     locationCreated: {
       "@type": "Place",
-      name: project.location,
+      name: location,
     },
     about: {
       "@type": "Thing",
-      name: project.service,
+      name: serviceName,
     },
   };
 
@@ -266,12 +224,12 @@ export default async function ProjectDetailPage({
 
       <PageHero
         eyebrow={
-          project.featured ? "FEATURED PROJECT" : "OUR PROJECTS"
+          project.isFeatured ? "FEATURED PROJECT" : "OUR PROJECTS"
         }
         title={project.title}
         text={project.description}
-        image={project.image}
-        imageAlt={project.imageAlt}
+        image={project.primaryImage.url}
+        imageAlt={project.primaryImage.alt}
       />
 
       <section
@@ -282,8 +240,8 @@ export default async function ProjectDetailPage({
           <Reveal dir="image">
             <div className="relative h-[530px] overflow-hidden rounded-[18px] max-[600px]:h-[340px]">
               <Image
-                src={project.image}
-                alt={project.imageAlt}
+                src={project.primaryImage.url}
+                alt={project.primaryImage.alt}
                 fill
                 sizes="45vw"
                 className="object-cover"
@@ -314,7 +272,7 @@ export default async function ProjectDetailPage({
                     </p>
 
                     <p className="mt-1 text-[14px] leading-[1.6] text-ink">
-                      {project.location}
+                      {location}
                     </p>
                   </div>
                 </div>
@@ -350,7 +308,7 @@ export default async function ProjectDetailPage({
                     </p>
 
                     <p className="mt-1 text-[14px] leading-[1.6] text-ink">
-                      {project.service}
+                      {serviceName}
                     </p>
                   </div>
                 </div>
@@ -391,7 +349,7 @@ export default async function ProjectDetailPage({
           <SectionHeader
             eyebrow="PROJECT DETAILS"
             title="The work behind the result."
-            text={`A closer look at the ${project.service.toLowerCase()} solution delivered for ${project.client}.`}
+            text={`A closer look at the ${serviceName.toLowerCase()} solution delivered for ${project.client.name}.`}
             headingId="project-details-heading"
           />
 
@@ -448,7 +406,7 @@ export default async function ProjectDetailPage({
           <StaggerContainer className="mt-12 grid grid-cols-2 gap-5 max-[600px]:grid-cols-1">
             {project.gallery.map((image, index) => (
               <StaggerItem
-                key={image}
+                key={`${image.url}-${index}`}
                 className={index === 0 ? "row-span-2" : ""}
               >
                 <div
@@ -459,8 +417,11 @@ export default async function ProjectDetailPage({
                   }`}
                 >
                   <Image
-                    src={image}
-                    alt={`${project.title} — project image ${index + 1}`}
+                    src={image.url}
+                    alt={
+                      image.alt ||
+                      `${project.title} — project image ${index + 1}`
+                    }
                     fill
                     sizes={
                       index === 0
