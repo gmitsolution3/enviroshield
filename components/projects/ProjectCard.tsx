@@ -6,12 +6,10 @@ import type { IProject } from "@/types/admin/project.type";
 
 interface ProjectCardProps {
   project: IProject;
-  featured?: boolean;
 }
 
 export default function ProjectCard({
   project,
-  featured = false,
 }: ProjectCardProps) {
   const location = [
     project.location?.area,
@@ -25,7 +23,7 @@ export default function ProjectCard({
     <Link href={`/projects/${project.slug}`} className="group block">
       <article
         className={`relative overflow-hidden rounded-[18px] bg-navy ${
-          featured
+          project.isFeatured
             ? "min-h-[540px] max-[900px]:min-h-[460px]"
             : "min-h-[420px]"
         }`}
@@ -40,7 +38,7 @@ export default function ProjectCard({
             }
             fill
             sizes={
-              featured
+              project.isFeatured
                 ? "(max-width: 900px) 100vw, 58vw"
                 : "(max-width: 900px) 50vw, 42vw"
             }
@@ -79,7 +77,7 @@ export default function ProjectCard({
 
             <h2
               className={`font-extrabold leading-[1.05] tracking-[-0.045em] text-white ${
-                featured
+                project.isFeatured
                   ? "text-[clamp(30px,4vw,48px)]"
                   : "text-[28px]"
               }`}

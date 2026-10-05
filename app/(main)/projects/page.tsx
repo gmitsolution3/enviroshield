@@ -115,7 +115,6 @@ export default async function ProjectsPage({
                 >
                   <ProjectCard
                     project={project}
-                    featured={featured}
                   />
                 </StaggerItem>
               );
