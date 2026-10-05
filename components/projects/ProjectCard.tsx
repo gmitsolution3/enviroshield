@@ -14,21 +14,21 @@ export default function ProjectCard({
   const reduce = useReducedMotion();
 
   const location = [
-    project.location?.area,
-    project.location?.city,
-    project.location?.country,
+    project?.location?.area,
+    project?.location?.city,
+    project?.location?.country,
   ]
     .filter(Boolean)
     .join(", ");
 
-  const completionDate = project.completionDate
+  const completionDate = project?.completionDate
     ? new Date(project.completionDate).toLocaleDateString("en-US", {
         month: "short",
         year: "numeric",
       })
     : null;
 
-  const isFeatured = project.isFeatured;
+  const isFeatured = project?.isFeatured;
 
   return (
     <Link
@@ -37,7 +37,7 @@ export default function ProjectCard({
       aria-label={`View ${project.title} project`}
     >
       <motion.article
-        className="relative isolate h-full min-h-0 overflow-hidden rounded-[24px] border border-line bg-navy shadow-[0_10px_40px_rgba(0,51,78,0.07)] transition-shadow duration-500 hover:shadow-[0_24px_48px_-12px_rgba(1,110,220,0.35)]"
+        className="relative isolate h-full min-h-0 overflow-hidden rounded-[24px] bg-navy shadow-[0_10px_40px_rgba(0,51,78,0.07)] transition-shadow duration-500 hover:shadow-[0_24px_48px_-12px_rgba(1,110,220,0.35)]"
         whileHover={reduce ? undefined : { y: -8 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
       >
