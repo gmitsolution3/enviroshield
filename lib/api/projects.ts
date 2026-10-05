@@ -50,6 +50,42 @@ export async function getPublishedProjects({
   return result;
 }
 
+export async function getFeaturedProjects(): Promise<IProject[]> {
+  if (!API_BASE_URL) {
+    throw new Error("API base URL is not configured.");
+  }
+
+  const baseUrl = API_BASE_URL.replace(/\/$/, "");
+
+  const response = await fetch(`${baseUrl}/project/featured`, {
+    next: {
+      revalidate: 60,
+      tags: ["featured-projects"],
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch featured projects: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const result: {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: IProject[];
+  } = await response.json();
+
+  if (!result.success) {
+    throw new Error(
+      result.message || "Failed to fetch featured projects.",
+    );
+  }
+
+  return result.data ?? [];
+}
+
 export async function getPublishedProjectBySlug(
   slug: string,
 ): Promise<IProject> {
@@ -64,7 +100,10 @@ export async function getPublishedProjectBySlug(
     {
       next: {
         revalidate: 60,
-        tags: ["published-projects", `published-project-${slug}`],
+        tags: [
+          "published-projects",
+          `published-project-${slug}`,
+        ],
       },
     },
   );

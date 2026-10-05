@@ -47,6 +47,42 @@ export async function getPublishedServices({
   return result;
 }
 
+export async function getFeaturedServices(): Promise<IService[]> {
+  if (!API_BASE_URL) {
+    throw new Error("API base URL is not configured.");
+  }
+
+  const baseUrl = API_BASE_URL.replace(/\/$/, "");
+
+  const response = await fetch(`${baseUrl}/service/featured`, {
+    next: {
+      revalidate: 60,
+      tags: ["featured-services"],
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch featured services: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const result: {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: IService[];
+  } = await response.json();
+
+  if (!result.success) {
+    throw new Error(
+      result.message || "Failed to fetch featured services.",
+    );
+  }
+
+  return result.data ?? [];
+}
+
 export async function getPublishedServiceBySlug(
   slug: string,
 ): Promise<IService> {

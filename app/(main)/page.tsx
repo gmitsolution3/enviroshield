@@ -5,8 +5,8 @@ import BlogSection from "@/components/home/BlogSection";
 import ContactSection from "@/components/home/ContactSection";
 import HeroSlider from "@/components/home/HeroSlider";
 import ProductsSection from "@/components/home/ProductsSection";
-import ProjectsSection from "@/components/home/ProjectsSection";
-import ServicesSection from "@/components/home/ServicesSection";
+import ProjectsSection from "@/components/home/ProjectsSection/ProjectsSection";
+import ServicesSection from "@/components/home/ServiceSection/ServicesSection";
 import TestimonialSection from "@/components/home/TestimonialSection";
 import WorkProcessSection from "@/components/home/WorkProcessSection";
 
