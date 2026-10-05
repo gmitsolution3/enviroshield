@@ -5,9 +5,9 @@ import {
 import Container from "@/components/Container";
 import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
-import { SectionHeader } from "@/components/SectionHeader";
 import ProjectCard from "@/components/projects/ProjectCard";
 import ProjectsPagination from "@/components/projects/ProjectsPagination";
+import { SectionHeader } from "@/components/SectionHeader";
 import { getPublishedProjects } from "@/lib/api/projects";
 import type { Metadata } from "next";
 
@@ -61,6 +61,18 @@ type ProjectsPageProps = {
   }>;
 };
 
+const masonryHeights = [
+  "h-[560px]",
+  "h-[390px]",
+  "h-[470px]",
+  "h-[430px]",
+  "h-[580px]",
+  "h-[380px]",
+  "h-[500px]",
+  "h-[420px]",
+  "h-[540px]",
+] as const;
+
 export default async function ProjectsPage({
   searchParams,
 }: ProjectsPageProps) {
@@ -100,22 +112,17 @@ export default async function ProjectsPage({
             headingId="projects-page-heading"
           />
 
-          <StaggerContainer className="mt-12 grid grid-cols-12 gap-5 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
+          <StaggerContainer className="mt-12 columns-3 gap-5 max-[900px]:columns-2 max-[600px]:columns-1">
             {projects.map((project, index) => {
-              const featured = index === 0;
+              const height =
+                masonryHeights[index % masonryHeights.length];
 
               return (
                 <StaggerItem
                   key={project._id}
-                  className={
-                    featured
-                      ? "col-span-7 max-[900px]:col-span-2 max-[600px]:col-span-1"
-                      : "col-span-5 max-[900px]:col-span-1 max-[600px]:col-span-1"
-                  }
+                  className={`mb-5 break-inside-avoid ${height}`}
                 >
-                  <ProjectCard
-                    project={project}
-                  />
+                  <ProjectCard project={project} />
                 </StaggerItem>
               );
             })}
