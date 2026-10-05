@@ -47,7 +47,7 @@ export default function ProjectCard({
             `${project.title} project completed by Enviroshield`
           }
           fill
-          sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 60vw"
+          sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
           className="object-cover"
         />
       </motion.div>

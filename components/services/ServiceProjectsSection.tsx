@@ -14,24 +14,16 @@ type ServiceProjectsSectionProps = {
   serviceName: string;
 };
 
-const collageLayouts = [
-  // Big left
-  "col-span-7 row-span-2 min-h-[540px] max-[900px]:col-span-2 max-[900px]:row-span-2 max-[600px]:col-span-1 max-[600px]:row-span-1 max-[600px]:min-h-[420px]",
-
-  // Small right — top
-  "col-span-5 min-h-[260px] max-[900px]:col-span-1 max-[600px]:col-span-1 max-[600px]:min-h-[420px]",
-
-  // Small right — bottom
-  "col-span-5 min-h-[260px] max-[900px]:col-span-1 max-[600px]:col-span-1 max-[600px]:min-h-[420px]",
-
-  // Small left — top
-  "col-span-5 min-h-[260px] max-[900px]:col-span-1 max-[600px]:col-span-1 max-[600px]:min-h-[420px]",
-
-  // Small left — bottom
-  "col-span-5 min-h-[260px] max-[900px]:col-span-1 max-[600px]:col-span-1 max-[600px]:min-h-[420px]",
-
-  // Big right
-  "col-span-7 row-span-2 min-h-[540px] max-[900px]:col-span-2 max-[900px]:row-span-2 max-[600px]:col-span-1 max-[600px]:row-span-1 max-[600px]:min-h-[420px]",
+const masonryHeights = [
+  "h-[560px]",
+  "h-[390px]",
+  "h-[470px]",
+  "h-[430px]",
+  "h-[580px]",
+  "h-[380px]",
+  "h-[500px]",
+  "h-[420px]",
+  "h-[540px]",
 ] as const;
 
 export default function ServiceProjectsSection({
@@ -67,13 +59,15 @@ export default function ServiceProjectsSection({
           />
         </div>
 
-        <StaggerContainer className="grid grid-cols-12 gap-5 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
+        <StaggerContainer className="columns-3 gap-5 max-[900px]:columns-2 max-[600px]:columns-1">
           {projects.map((project, index) => {
-            const className =
-              collageLayouts[index % collageLayouts.length];
+            const height = masonryHeights[index % masonryHeights.length];
 
             return (
-              <StaggerItem key={project._id} className={className}>
+              <StaggerItem
+                key={project._id}
+                className={`mb-5 break-inside-avoid ${height}`}
+              >
                 <ProjectCard project={project} />
               </StaggerItem>
             );
