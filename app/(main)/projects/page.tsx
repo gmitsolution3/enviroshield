@@ -11,55 +11,86 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { getPublishedProjects } from "@/lib/api/projects";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Our Projects | Enviroshield",
-  description:
-    "Explore Enviroshield's completed waterproofing, flooring, heat insulation, injection grouting, polished concrete, and protective coating projects across residential, commercial, and industrial spaces.",
-  keywords: [
-    "Enviroshield projects",
-    "waterproofing projects",
-    "flooring projects",
-    "epoxy flooring projects",
-    "protective coating projects",
-    "heat insulation projects",
-    "construction projects Bangladesh",
-  ],
-  alternates: {
-    canonical: "/projects",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  openGraph: {
-    title: "Our Projects | Enviroshield",
-    description:
-      "Explore Enviroshield's completed waterproofing, flooring, insulation, and protective coating projects.",
-    type: "website",
-    url: "/projects",
-    images: [
-      {
-        url: "/images/service-hero.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Enviroshield completed projects",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Our Projects | Enviroshield",
-    description:
-      "Explore Enviroshield's completed waterproofing, flooring, insulation, and protective coating projects.",
-    images: ["/images/service-hero.jpg"],
-  },
-};
-
 type ProjectsPageProps = {
   searchParams: Promise<{
     page?: string;
   }>;
 };
+
+export async function generateMetadata({
+  searchParams,
+}: ProjectsPageProps): Promise<Metadata> {
+  const params = await searchParams;
+
+  const page = Math.max(
+    1,
+    Number.parseInt(params.page || "1", 10) || 1,
+  );
+
+  const isFirstPage = page === 1;
+
+  const title = isFirstPage
+    ? "Our Projects | Enviroshield"
+    : `Our Projects — Page ${page} | Enviroshield`;
+
+  const description = isFirstPage
+    ? "Explore Enviroshield's completed waterproofing, flooring, heat insulation, injection grouting, polished concrete, and protective coating projects across residential, commercial, and industrial spaces."
+    : `Explore more of Enviroshield's completed waterproofing, flooring, insulation, and protective coating projects on page ${page}.`;
+
+  const canonical = isFirstPage
+    ? "/projects"
+    : `/projects?page=${page}`;
+
+  return {
+    title,
+    description,
+
+    keywords: [
+      "Enviroshield projects",
+      "waterproofing projects",
+      "waterproofing projects Bangladesh",
+      "flooring projects",
+      "epoxy flooring projects",
+      "PU flooring projects",
+      "heat insulation projects",
+      "injection grouting projects",
+      "polished concrete projects",
+      "protective coating projects",
+      "construction projects Bangladesh",
+    ],
+
+    alternates: {
+      canonical,
+    },
+
+    robots: {
+      index: true,
+      follow: true,
+    },
+
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      url: canonical,
+      images: [
+        {
+          url: "/images/service-hero.jpg",
+          width: 1200,
+          height: 630,
+          alt: "Enviroshield completed waterproofing, flooring and protective coating projects",
+        },
+      ],
+    },
+
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/images/service-hero.jpg"],
+    },
+  };
+}
 
 const masonryHeights = [
   "h-[560px]",

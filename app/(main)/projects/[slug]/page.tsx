@@ -14,7 +14,10 @@ import Container from "@/components/Container";
 import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
-import { getPublishedProjectBySlug } from "@/lib/api/projects";
+import {
+  getPublishedProjectBySlug,
+  getPublishedProjects,
+} from "@/lib/api/projects";
 
 type ProjectDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -25,10 +28,84 @@ export async function generateMetadata({
 }: ProjectDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  let project;
-
   try {
-    project = await getPublishedProjectBySlug(slug);
+    const project = await getPublishedProjectBySlug(slug);
+
+    const seo = project.seo;
+
+    const title =
+      seo?.metaTitle?.trim() || `${project.title} | Enviroshield`;
+
+    const description =
+      seo?.metaDescription?.trim() || project.description;
+
+    const keywords = seo?.keywords?.filter(Boolean) ?? [];
+
+    const defaultCanonical = `https://enviroshieldbd.com/projects/${project.slug}`;
+
+    const canonical = (() => {
+      const configuredCanonical = seo?.canonicalUrl?.trim();
+
+      if (!configuredCanonical) {
+        return defaultCanonical;
+      }
+
+      try {
+        const parsed = new URL(
+          configuredCanonical,
+          "https://enviroshieldbd.com",
+        );
+
+        if (parsed.origin !== "https://enviroshieldbd.com") {
+          return defaultCanonical;
+        }
+
+        return parsed.toString();
+      } catch {
+        return defaultCanonical;
+      }
+    })();
+
+    const ogTitle = seo?.ogTitle?.trim() || title;
+
+    const ogDescription = seo?.ogDescription?.trim() || description;
+
+    const ogImage = seo?.ogImage?.trim() || project.primaryImage.url;
+
+    return {
+      title,
+      description,
+      keywords,
+
+      alternates: {
+        canonical,
+      },
+
+      robots: {
+        index: seo?.noIndex !== true,
+        follow: seo?.noIndex !== true,
+      },
+
+      openGraph: {
+        title: ogTitle,
+        description: ogDescription,
+        type: "article",
+        url: canonical,
+        images: [
+          {
+            url: ogImage,
+            alt: project.primaryImage.alt || project.title,
+          },
+        ],
+      },
+
+      twitter: {
+        card: "summary_large_image",
+        title: ogTitle,
+        description: ogDescription,
+        images: [ogImage],
+      },
+    };
   } catch {
     return {
       title: "Project not found | Enviroshield",
@@ -37,58 +114,28 @@ export async function generateMetadata({
       robots: {
         index: false,
         follow: false,
+        googleBot: {
+          index: false,
+          follow: false,
+        },
       },
     };
   }
+}
 
-  const canonical = `https://enviroshieldbd.com/projects/${project.slug}`;
+export async function generateStaticParams() {
+  try {
+    const result = await getPublishedProjects({
+      page: 1,
+      limit: 100,
+    });
 
-  const location = [
-    project.location?.area,
-    project.location?.city,
-    project.location?.country,
-  ]
-    .filter(Boolean)
-    .join(", ");
-
-  return {
-    title: `${project.title} | Enviroshield`,
-    description: project.description,
-    keywords: [
-      project.title,
-      project.serviceId?.name || "Enviroshield project",
-      "Enviroshield projects",
-      "Bangladesh construction projects",
-      "waterproofing projects",
-      "flooring projects",
-      "protective coating projects",
-    ],
-    alternates: {
-      canonical,
-    },
-    robots: {
-      index: true,
-      follow: true,
-    },
-    openGraph: {
-      title: `${project.title} | Enviroshield`,
-      description: project.description,
-      type: "article",
-      url: canonical,
-      images: [
-        {
-          url: project.primaryImage.url,
-          alt: project.primaryImage.alt,
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${project.title} | Enviroshield`,
-      description: project.description,
-      images: [project.primaryImage.url],
-    },
-  };
+    return result.data.map((project) => ({
+      slug: project.slug,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export default async function ProjectDetailPage({
