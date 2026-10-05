@@ -2,6 +2,7 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "@/components/animations/reveal";
+import { Button } from "@/components/Button";
 import Container from "@/components/Container";
 import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
@@ -143,26 +144,46 @@ export default async function ProjectsPage({
             headingId="projects-page-heading"
           />
 
-          <StaggerContainer className="mt-12 columns-3 gap-5 max-[900px]:columns-2 max-[600px]:columns-1">
-            {projects.map((project, index) => {
-              const height =
-                masonryHeights[index % masonryHeights.length];
+          {projects.length > 0 ? (
+            <>
+              <StaggerContainer className="mt-12 columns-3 gap-5 max-[900px]:columns-2 max-[600px]:columns-1">
+                {projects.map((project, index) => {
+                  const height =
+                    masonryHeights[index % masonryHeights.length];
 
-              return (
-                <StaggerItem
-                  key={project._id}
-                  className={`mb-5 break-inside-avoid ${height}`}
-                >
-                  <ProjectCard project={project} />
-                </StaggerItem>
-              );
-            })}
-          </StaggerContainer>
+                  return (
+                    <StaggerItem
+                      key={project._id}
+                      className={`mb-5 break-inside-avoid ${height}`}
+                    >
+                      <ProjectCard project={project} />
+                    </StaggerItem>
+                  );
+                })}
+              </StaggerContainer>
 
-          <ProjectsPagination
-            currentPage={result.meta.page}
-            totalPages={result.meta.totalPages}
-          />
+              <ProjectsPagination
+                currentPage={result.meta.page}
+                totalPages={result.meta.totalPages}
+              />
+            </>
+          ) : (
+            <div className="mt-12 rounded-[18px] border border-line bg-mist px-6 py-16 text-center max-[600px]:px-5 max-[600px]:py-12">
+              <h3 className="text-[28px] font-extrabold tracking-[-0.03em] text-navy max-[600px]:text-[24px]">
+                No projects available
+              </h3>
+
+              <p className="mx-auto mt-3 max-w-[560px] text-[14px] leading-[1.7] text-ink">
+                We&apos;re currently updating our project portfolio.
+                Please check back soon or contact our team if you need
+                assistance.
+              </p>
+
+              <div className="mt-7">
+                <Button href="/contact">Talk to our team</Button>
+              </div>
+            </div>
+          )}
         </Container>
       </section>
 

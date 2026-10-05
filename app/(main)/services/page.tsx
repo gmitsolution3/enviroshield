@@ -2,6 +2,7 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "@/components/animations/reveal";
+import { Button } from "@/components/Button";
 import Container from "@/components/Container";
 import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
@@ -10,36 +11,6 @@ import ServiceCard from "@/components/ServiceCard";
 import ServicesPagination from "@/components/services/ServicesPagination";
 import { getPublishedServices } from "@/lib/api/services";
 import type { Metadata } from "next";
-
-/* export const metadata = {
-  title: "Painting & Wall Finishing Services | Enviroshield",
-  description:
-    "Explore Enviroshield's painting and wall finishing services, including interior and exterior painting, wallpaper installation, decorative finishes, surface preparation, and more.",
-  keywords: [
-    "painting services",
-    "wall finishing services",
-    "interior painting",
-    "exterior painting",
-    "wallpaper installation",
-    "decorative finishes",
-    "surface preparation",
-    "Enviroshield",
-  ],
-  alternates: {
-    canonical: "/services",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  openGraph: {
-    title: "Painting & Wall Finishing Services | Enviroshield",
-    description:
-      "Explore Enviroshield's professional painting and wall finishing services.",
-    type: "website",
-    url: "/services",
-  },
-}; */
 
 type ServicesPageProps = {
   searchParams: Promise<{
@@ -114,6 +85,7 @@ export async function generateMetadata({
         },
       ],
     },
+
     twitter: {
       card: "summary_large_image",
       title,
@@ -161,20 +133,41 @@ export default async function ServicesPage({
             headingId="services-page-heading"
           />
 
-          <StaggerContainer className="mt-12 grid grid-cols-3 gap-[22px] max-[900px]:grid-cols-2 max-[600px]:flex max-[600px]:overflow-auto max-[600px]:snap-x max-[600px]:snap-mandatory max-[600px]:mr-[-16px] max-[600px]:pr-4 max-[600px]:pb-2">
-            {services.map((service, index) => (
-              <StaggerItem
-                key={service._id}
-                className="max-[600px]:min-w-[280px] max-[600px]:snap-start"
-              >
-                <ServiceCard service={service} index={index} />
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-          <ServicesPagination
-            currentPage={result.meta.page}
-            totalPages={result.meta.totalPages}
-          />
+          {services.length > 0 ? (
+            <>
+              <StaggerContainer className="mt-12 grid grid-cols-3 gap-[22px] max-[900px]:grid-cols-2 max-[600px]:flex max-[600px]:overflow-auto max-[600px]:snap-x max-[600px]:snap-mandatory max-[600px]:mr-[-16px] max-[600px]:pr-4 max-[600px]:pb-2">
+                {services.map((service, index) => (
+                  <StaggerItem
+                    key={service._id}
+                    className="max-[600px]:min-w-[280px] max-[600px]:snap-start"
+                  >
+                    <ServiceCard service={service} index={index} />
+                  </StaggerItem>
+                ))}
+              </StaggerContainer>
+
+              <ServicesPagination
+                currentPage={result.meta.page}
+                totalPages={result.meta.totalPages}
+              />
+            </>
+          ) : (
+            <div className="mt-12 rounded-[18px] border border-line bg-mist px-6 py-16 text-center max-[600px]:px-5 max-[600px]:py-12">
+              <h3 className="text-[28px] font-extrabold tracking-[-0.03em] text-navy max-[600px]:text-[24px]">
+                No services available
+              </h3>
+
+              <p className="mx-auto mt-3 max-w-[560px] text-[14px] leading-[1.7] text-ink">
+                We&apos;re currently updating our service offerings.
+                Please check back soon or contact our team if you need
+                assistance.
+              </p>
+
+              <div className="mt-7">
+                <Button href="/contact">Talk to our team</Button>
+              </div>
+            </div>
+          )}
         </Container>
       </section>
 
