@@ -34,7 +34,7 @@ const slides: ISlide[] = [
     bg: "https://images.pexels.com/photos/16751235/pexels-photo-16751235.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600",
     alt: "Interior space with a professionally finished feature wall",
     eyebrow: "TRANSFORM YOUR SPACE",
-    heading: "Color that\nchanges everything.",
+    heading: "Color that changes\neverything.",
     text: "From subtle finishes to bold statement walls, we bring your vision to life with exceptional craftsmanship.",
     cta: "Explore our services",
     href: "/services",
@@ -143,7 +143,7 @@ export default function Hero() {
               </motion.div>
 
               <motion.h1
-                className="mb-6 max-w-[700px] text-[clamp(45px,6.2vw,78px)] font-extrabold leading-[1.02] tracking-[-0.055em] text-white max-[600px]:text-[48px]"
+                className="mb-6 max-w-[800px] text-[clamp(45px,6.2vw,78px)] font-extrabold leading-[1.02] tracking-[-0.055em] text-white max-[600px]:text-[48px]"
                 initial={reduce ? false : { opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{

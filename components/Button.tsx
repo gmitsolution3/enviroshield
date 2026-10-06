@@ -19,7 +19,7 @@ const variantClasses = {
     "bg-blue text-white shadow-[0_4px_14px_rgba(1,110,220,0.22)] hover:bg-[#005cb9] hover:shadow-[0_6px_18px_rgba(1,110,220,0.28)]",
   light:
     "bg-white text-navy shadow-[0_4px_14px_rgba(0,0,0,0.08)] hover:bg-[#f5f8fa]",
-  outline: "border border-current bg-transparent text-current",
+  outline: "border border-blue bg-transparent text-blue hover:bg-blue hover:text-white",
 } as const;
 
 export function Button({
