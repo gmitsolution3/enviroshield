@@ -1,25 +1,77 @@
 import {
-  Reveal,
   StaggerContainer,
   StaggerItem,
 } from "@/components/animations/reveal";
+import BlogCard from "@/components/blog/BlogCard";
+import BlogPagination from "@/components/blog/BlogPagination";
+import { Button } from "@/components/Button";
 import Container from "@/components/Container";
 import PageHero from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
-import { blogPosts } from "@/lib/data/content";
-import Link from "next/link";
+import { getPublishedBlogs } from "@/lib/api/blogs";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Painting & Wall Finishing Journal | Enviroshield",
-  description:
-    "Read Enviroshield's guides and ideas on paint colours, wallpaper, wall preparation, and creating better-finished spaces.",
+type BlogPageProps = {
+  searchParams: Promise<{
+    page?: string;
+  }>;
 };
 
-export default function BlogPage() {
-  const categories = [
-    "All",
-    ...Array.from(new Set(blogPosts.map((p) => p.category))),
-  ];
+export async function generateMetadata({
+  searchParams,
+}: BlogPageProps): Promise<Metadata> {
+  const params = await searchParams;
+
+  const page = Math.max(
+    1,
+    Number.parseInt(params.page ?? "1", 10) || 1,
+  );
+
+  return {
+    title:
+      page === 1
+        ? "Painting & Wall Finishing Journal | Enviroshield"
+        : `Painting & Wall Finishing Journal — Page ${page} | Enviroshield`,
+    description:
+      page === 1
+        ? "Read Enviroshield's guides and ideas on paint colours, wallpaper, wall preparation, and creating better-finished spaces."
+        : `Read more Enviroshield guides and ideas on paint colours, wallpaper, wall preparation, and creating better-finished spaces — page ${page}.`,
+  };
+}
+
+export default async function BlogPage({
+  searchParams,
+}: BlogPageProps) {
+  const params = await searchParams;
+
+  const currentPage = Math.max(
+    1,
+    Number.parseInt(params.page ?? "1", 10) || 1,
+  );
+
+  let result;
+
+  try {
+    result = await getPublishedBlogs({
+      page: currentPage,
+      limit: 10,
+    });
+  } catch {
+    result = {
+      success: false,
+      statusCode: 500,
+      message: "Failed to load blog articles.",
+      meta: {
+        page: currentPage,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+      },
+      data: [],
+    };
+  }
+
+  const blogs = result.data;
 
   return (
     <>
@@ -41,82 +93,37 @@ export default function BlogPage() {
             headingId="blog-heading"
           />
 
-          <div className="mt-11 grid grid-cols-[210px_1fr] gap-[55px] max-[900px]:grid-cols-1">
-            <Reveal dir="left">
-              <aside aria-label="Blog categories">
-                <p className="mb-[18px] text-[12px] font-extrabold uppercase tracking-[0.13em] text-navy">
-                  Categories
-                </p>
+          {blogs.length > 0 ? (
+            <>
+              <StaggerContainer className="mt-11 grid grid-cols-3 gap-[25px] max-[900px]:grid-cols-2 max-[600px]:grid-cols-1 max-[600px]:gap-10">
+                {blogs.map((blog, index) => (
+                  <StaggerItem key={blog._id}>
+                    <BlogCard post={blog} index={index} />
+                  </StaggerItem>
+                ))}
+              </StaggerContainer>
 
-                <div
-                  className="grid gap-[5px] max-[900px]:flex max-[900px]:flex-wrap"
-                  id="blog-filter"
-                >
-                  {categories.map((category) => (
-                    <button
-                      key={category}
-                      type="button"
-                      data-category={category}
-                      className={`rounded-[7px] px-3 py-[10px] text-left text-[13px] text-ink transition-colors ${
-                        category === "All"
-                          ? "bg-[#e9f3fd] font-bold text-blue"
-                          : "hover:bg-[#e9f3fd] hover:font-bold hover:text-blue"
-                      } max-[900px]:border max-[900px]:border-line`}
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-              </aside>
-            </Reveal>
+              <BlogPagination
+                currentPage={result.meta.page}
+                totalPages={result.meta.totalPages}
+              />
+            </>
+          ) : (
+            <div className="mt-11 flex min-h-[280px] flex-col items-center justify-center rounded-[24px] border border-line bg-[#f8fbfd] px-6 py-12 text-center">
+              <h3 className="text-2xl font-semibold text-navy">
+                No articles available
+              </h3>
 
-            <StaggerContainer
-              className="grid grid-cols-3 gap-[25px] max-[600px]:grid-cols-1 max-[600px]:gap-10"
-              id="blog-grid"
-            >
-              {blogPosts.map((post) => (
-                <StaggerItem
-                  key={post.slug}
-                  data-category={post.category}
-                >
-                  <article className="transition-shadow duration-300">
-                    <div className="relative mb-5 h-[235px] overflow-hidden rounded-[14px] max-[900px]:h-[240px]">
-                      <img
-                        src={post.image}
-                        alt={post.title}
-                        className="block h-full w-full object-cover"
-                      />
-                    </div>
+              <p className="mt-3 max-w-[560px] text-sm leading-6 text-ink">
+                We're currently updating our journal. Please check
+                back soon or contact our team if you need assistance.
+              </p>
 
-                    <div className="mb-[10px] flex items-center gap-[14px] text-[11px] text-ink">
-                      <span>{post.category}</span>
-                      <span
-                        className="border-l border-line pl-[14px]"
-                        aria-label={`Published ${post.date}`}
-                      >
-                        {post.date}
-                      </span>
-                    </div>
-
-                    <h3 className="mb-[10px] text-[21px] font-extrabold leading-[1.2] tracking-[-0.03em] text-navy">
-                      {post.title}
-                    </h3>
-
-                    <p className="mb-4 text-[14px] leading-[1.6] text-ink">
-                      {post.excerpt}
-                    </p>
-
-                    <Link
-                      href={`/blog/${post.slug}`}
-                      className="inline-flex items-center gap-[7px] text-[13px] font-extrabold text-navy transition-[gap,color] duration-200 hover:gap-[11px] hover:text-blue"
-                    >
-                      Read article
-                    </Link>
-                  </article>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
+              <Button href="/contact" className="mt-6">
+                Talk to our team
+              </Button>
+            </div>
+          )}
         </Container>
       </section>
     </>

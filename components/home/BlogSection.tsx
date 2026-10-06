@@ -1,6 +1,6 @@
 import { blogPosts } from "@/lib/data/content";
 import { StaggerContainer, StaggerItem } from "../animations/reveal";
-import BlogCard from "../BlogCard";
+import BlogCard from "../blog/BlogCard";
 import { Button } from "../Button";
 import Container from "../Container";
 import { Reveal } from "../Reveal";
@@ -8,7 +8,10 @@ import { SectionHeader } from "../SectionHeader";
 
 export default function BlogSection() {
   return (
-    <section  aria-labelledby="blog-heading" className="py-[112px] pb-[120px] max-[900px]:py-20 max-[900px]:pb-[120px] max-[600px]:py-16 max-[600px]:pb-[120px]">
+    <section
+      aria-labelledby="blog-heading"
+      className="py-[112px] pb-[120px] max-[900px]:py-20 max-[900px]:pb-[120px] max-[600px]:py-16 max-[600px]:pb-[120px]"
+    >
       <Container>
         <div className="mb-12 flex items-end justify-between max-[900px]:flex-col max-[900px]:items-start max-[900px]:gap-[25px]">
           <SectionHeader
