@@ -52,6 +52,7 @@ import DashboardError from "../../DashboardError";
 import DashboardLoading from "../../DashboardLoading";
 
 import CreateBlogModal from "./CreateBlogModal";
+import DeleteBlogDialog from "./DeleteBlogDialog";
 import EditBlogModal from "./EditBlogModal";
 import ViewBlogModal from "./ViewBlogModal";
 
@@ -68,7 +69,13 @@ export default function BlogDashboard() {
 
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
   const [selectedBlog, setSelectedBlog] = useState<IBlog | null>(
+    null,
+  );
+
+  const [deleteBlog, setDeleteBlog] = useState<IBlog | null>(
     null,
   );
 
@@ -91,7 +98,8 @@ export default function BlogDashboard() {
   };
 
   const handleDelete = (blog: IBlog) => {
-    console.log("Delete blog:", blog);
+    setDeleteBlog(blog);
+    setIsDeleteDialogOpen(true);
   };
 
   const handleFilterChange = (value: string | null) => {
@@ -525,6 +533,21 @@ export default function BlogDashboard() {
           if (!open) {
             setSelectedBlog(null);
           }
+        }}
+      />
+
+      {/* =====================================================
+          DELETE BLOG
+      ===================================================== */}
+
+      <DeleteBlogDialog
+        blog={deleteBlog}
+        open={isDeleteDialogOpen}
+        revalidateKey={`/blog?page=${currentPage}&limit=${limit}`}
+        onClose={() => {
+          setIsDeleteDialogOpen(false);
+          setDeleteBlog(null);
+          refetch();
         }}
       />
     </section>
