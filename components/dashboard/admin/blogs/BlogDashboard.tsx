@@ -53,10 +53,9 @@ import DashboardLoading from "../../DashboardLoading";
 
 import CreateBlogModal from "./CreateBlogModal";
 import EditBlogModal from "./EditBlogModal";
+import ViewBlogModal from "./ViewBlogModal";
 
 const features = tableFeatures({});
-
-//todo: yet to complete the blog management dashboard with add, edit, delete, and view functionalities. Currently, it fetches and displays blogs with filtering and pagination.
 
 export default function BlogDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -66,6 +65,8 @@ export default function BlogDashboard() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   const [selectedBlog, setSelectedBlog] = useState<IBlog | null>(
     null,
@@ -80,7 +81,8 @@ export default function BlogDashboard() {
   const meta = data?.meta;
 
   const handleView = (blog: IBlog) => {
-    console.log("View blog:", blog);
+    setSelectedBlog(blog);
+    setIsViewModalOpen(true);
   };
 
   const handleEdit = (blog: IBlog) => {
@@ -312,7 +314,10 @@ export default function BlogDashboard() {
 
   return (
     <section className="container mx-auto px-5 py-8 lg:px-0">
-      {/* Header */}
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
+
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold">Blog Management</h1>
@@ -336,7 +341,10 @@ export default function BlogDashboard() {
         </DashboardButton>
       </div>
 
-      {/* Filters */}
+      {/* =====================================================
+          FILTERS
+      ===================================================== */}
+
       <div className="mb-6 flex items-center justify-end gap-4">
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-muted-foreground" />
@@ -370,7 +378,10 @@ export default function BlogDashboard() {
         )}
       </div>
 
-      {/* Blog table */}
+      {/* =====================================================
+          BLOG TABLE
+      ===================================================== */}
+
       {filteredBlogs.length === 0 ? (
         <DashboardEmpty
           title="No blogs found"
@@ -419,7 +430,10 @@ export default function BlogDashboard() {
         </Card>
       )}
 
-      {/* Pagination */}
+      {/* =====================================================
+          PAGINATION
+      ===================================================== */}
+
       {filteredBlogs.length > 0 && (
         <div className="mt-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -437,8 +451,11 @@ export default function BlogDashboard() {
 
               <SelectContent>
                 <SelectItem value="5">5</SelectItem>
+
                 <SelectItem value="10">10</SelectItem>
+
                 <SelectItem value="20">20</SelectItem>
+
                 <SelectItem value="50">50</SelectItem>
               </SelectContent>
             </Select>
@@ -470,11 +487,19 @@ export default function BlogDashboard() {
         </div>
       )}
 
+      {/* =====================================================
+          CREATE BLOG
+      ===================================================== */}
+
       <CreateBlogModal
         isModalOpen={isCreateModalOpen}
         setIsModalOpen={setIsCreateModalOpen}
         onSuccess={() => refetch()}
       />
+
+      {/* =====================================================
+          EDIT BLOG
+      ===================================================== */}
 
       <EditBlogModal
         blog={selectedBlog}
@@ -484,6 +509,22 @@ export default function BlogDashboard() {
           setIsUpdateModalOpen(false);
           setSelectedBlog(null);
           refetch();
+        }}
+      />
+
+      {/* =====================================================
+          VIEW BLOG
+      ===================================================== */}
+
+      <ViewBlogModal
+        blog={selectedBlog}
+        isModalOpen={isViewModalOpen}
+        setIsModalOpen={(open) => {
+          setIsViewModalOpen(open);
+
+          if (!open) {
+            setSelectedBlog(null);
+          }
         }}
       />
     </section>
