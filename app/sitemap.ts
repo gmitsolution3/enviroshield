@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 
+import { getPublishedBlogs } from "@/lib/api/blogs";
 import { getPublishedProjects } from "@/lib/api/projects";
 import { getPublishedServices } from "@/lib/api/services";
-import { blogPosts, products } from "@/lib/data/content";
+import { products } from "@/lib/data/content";
 
 const siteUrl = "https://enviroshieldbd.com";
 
@@ -91,6 +92,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     projectRoutes = [];
   }
 
+  let blogRoutes: MetadataRoute.Sitemap = [];
+
+  try {
+    const result = await getPublishedBlogs({
+      page: 1,
+      limit: 100,
+    });
+
+    blogRoutes = result.data
+      .filter(
+        (post) =>
+          post.status === "published" &&
+          post.seo?.noIndex !== true,
+      )
+      .map((post) => ({
+        url: `${siteUrl}/blog/${post.slug}`,
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+      }));
+  } catch {
+    blogRoutes = [];
+  }
+
   const productRoutes: MetadataRoute.Sitemap = products.map(
     (product) => ({
       url: `${siteUrl}/products/${product.slug}`,
@@ -98,12 +122,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }),
   );
-
-  const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
-    url: `${siteUrl}/blog/${post.slug}`,
-    changeFrequency: "monthly",
-    priority: 0.7,
-  }));
 
   return [
     ...staticRoutes,
