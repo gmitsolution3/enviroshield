@@ -45,11 +45,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { formatDate } from "../../../../utils/formatDate";
 import DashboardButton from "../../DashboardButton";
 import DashboardEmpty from "../../DashboardEmpty";
 import DashboardError from "../../DashboardError";
 import DashboardLoading from "../../DashboardLoading";
-import { formatDate } from "../../../../utils/formatDate";
+
+import CreateBlogModal from "./CreateBlogModal";
 
 const features = tableFeatures({});
 
@@ -59,6 +61,8 @@ export default function BlogDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [filterStatus, setFilterStatus] = useState<string>("");
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const { data, isLoading, isError, refetch } =
     useFetch<IBlogResponse>(
@@ -253,9 +257,7 @@ export default function BlogDashboard() {
 
               <DropdownMenuContent align="end" className="w-40">
                 <DropdownMenuGroup>
-                  <DropdownMenuLabel>
-                    Actions
-                  </DropdownMenuLabel>
+                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
                   <DropdownMenuSeparator />
 
@@ -305,13 +307,10 @@ export default function BlogDashboard() {
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">
-            Blog Management
-          </h1>
+          <h1 className="text-3xl font-bold">Blog Management</h1>
 
           <p className="mt-1 text-muted-foreground">
-            Manage the blog articles available across
-            Enviroshield.
+            Manage the blog articles available across Enviroshield.
           </p>
 
           {meta && (
@@ -323,9 +322,7 @@ export default function BlogDashboard() {
 
         <DashboardButton
           icon={<Plus className="h-4 w-4" />}
-          onClick={() => {
-            console.log("Add blog");
-          }}
+          onClick={() => setIsCreateModalOpen(true)}
         >
           Add Blog
         </DashboardButton>
@@ -336,9 +333,7 @@ export default function BlogDashboard() {
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-muted-foreground" />
 
-          <span className="text-sm font-medium">
-            Filter:
-          </span>
+          <span className="text-sm font-medium">Filter:</span>
         </div>
 
         <Select
@@ -350,13 +345,9 @@ export default function BlogDashboard() {
           </SelectTrigger>
 
           <SelectContent>
-            <SelectItem value="published">
-              Published
-            </SelectItem>
+            <SelectItem value="published">Published</SelectItem>
 
-            <SelectItem value="draft">
-              Draft
-            </SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
           </SelectContent>
         </Select>
 
@@ -378,9 +369,7 @@ export default function BlogDashboard() {
           description="Get started by adding your first Enviroshield blog."
           icon={<FileText className="h-6 w-6" />}
           actionLabel="Add Blog"
-          onAction={() => {
-            console.log("Add blog");
-          }}
+          onAction={() => setIsCreateModalOpen(true)}
         />
       ) : (
         <Card className="overflow-hidden border p-0 shadow-sm">
@@ -395,9 +384,7 @@ export default function BlogDashboard() {
                         className="px-6 py-3 text-left text-sm font-medium text-muted-foreground"
                       >
                         {header.isPlaceholder ? null : (
-                          <table.FlexRender
-                            header={header}
-                          />
+                          <table.FlexRender header={header} />
                         )}
                       </th>
                     ))}
@@ -412,10 +399,7 @@ export default function BlogDashboard() {
                     className="border-b transition-colors last:border-0 hover:bg-muted/30"
                   >
                     {row.getAllCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        className="px-6 py-4"
-                      >
+                      <td key={cell.id} className="px-6 py-4">
                         <table.FlexRender cell={cell} />
                       </td>
                     ))}
@@ -456,9 +440,7 @@ export default function BlogDashboard() {
             <DashboardButton
               variant="outline"
               disabled={currentPageNum <= 1}
-              onClick={() =>
-                handlePageChange(currentPageNum - 1)
-              }
+              onClick={() => handlePageChange(currentPageNum - 1)}
               icon={<ChevronLeft className="h-4 w-4" />}
               className="h-8 w-8 rounded-full border-blue bg-blue p-0 text-white shadow-[0_3px_10px_rgba(1,110,220,0.18)] transition-[background-color,box-shadow] duration-200 hover:bg-[#005cb9] hover:text-white hover:shadow-[0_4px_12px_rgba(1,110,220,0.24)] disabled:pointer-events-none disabled:opacity-50"
               ariaLabel="Previous page"
@@ -471,9 +453,7 @@ export default function BlogDashboard() {
             <DashboardButton
               variant="outline"
               disabled={currentPageNum >= totalPages}
-              onClick={() =>
-                handlePageChange(currentPageNum + 1)
-              }
+              onClick={() => handlePageChange(currentPageNum + 1)}
               icon={<ChevronRight className="h-4 w-4" />}
               className="h-8 w-8 rounded-full border-blue bg-blue p-0 text-white shadow-[0_3px_10px_rgba(1,110,220,0.18)] transition-[background-color,box-shadow] duration-200 hover:bg-[#005cb9] hover:text-white hover:shadow-[0_4px_12px_rgba(1,110,220,0.24)] disabled:pointer-events-none disabled:opacity-50"
               ariaLabel="Next page"
@@ -481,6 +461,12 @@ export default function BlogDashboard() {
           </div>
         </div>
       )}
+
+      <CreateBlogModal
+        isModalOpen={isCreateModalOpen}
+        setIsModalOpen={setIsCreateModalOpen}
+        onSuccess={() => refetch()}
+      />
     </section>
   );
 }
