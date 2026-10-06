@@ -2,8 +2,8 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "@/components/animations/reveal";
-import BlogCard from "@/components/blog/BlogCard";
 import BlogPagination from "@/components/blog/BlogPagination";
+import BlogCard from "@/components/blog/BlogCard";
 import { Button } from "@/components/Button";
 import Container from "@/components/Container";
 import PageHero from "@/components/PageHero";
@@ -24,18 +24,73 @@ export async function generateMetadata({
 
   const page = Math.max(
     1,
-    Number.parseInt(params.page ?? "1", 10) || 1,
+    Number.parseInt(params.page || "1", 10) || 1,
   );
 
+  const isFirstPage = page === 1;
+
+  const title = isFirstPage
+    ? "Painting, Waterproofing & Flooring Journal | Enviroshield"
+    : `Painting, Waterproofing & Flooring Journal — Page ${page} | Enviroshield`;
+
+  const description = isFirstPage
+    ? "Read Enviroshield's latest guides, insights, and practical advice on waterproofing, flooring, painting, protective coatings, heat insulation, and better-finished spaces."
+    : `Explore more Enviroshield guides and insights on waterproofing, flooring, painting, protective coatings, insulation, and better-finished spaces — page ${page}.`;
+
+  const canonical = isFirstPage ? "/blog" : `/blog?page=${page}`;
+
   return {
-    title:
-      page === 1
-        ? "Painting & Wall Finishing Journal | Enviroshield"
-        : `Painting & Wall Finishing Journal — Page ${page} | Enviroshield`,
-    description:
-      page === 1
-        ? "Read Enviroshield's guides and ideas on paint colours, wallpaper, wall preparation, and creating better-finished spaces."
-        : `Read more Enviroshield guides and ideas on paint colours, wallpaper, wall preparation, and creating better-finished spaces — page ${page}.`,
+    title,
+    description,
+
+    keywords: [
+      "Enviroshield blog",
+      "waterproofing blog",
+      "waterproofing solutions",
+      "flooring solutions",
+      "epoxy flooring",
+      "PU flooring",
+      "painting services",
+      "wall finishing",
+      "protective coating",
+      "heat insulation",
+      "construction solutions Bangladesh",
+      "waterproofing Bangladesh",
+      "flooring Bangladesh",
+    ],
+
+    alternates: {
+      canonical,
+    },
+
+    robots: {
+      index: true,
+      follow: true,
+    },
+
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      url: canonical,
+      images: [
+        {
+          url: "https://images.pexels.com/photos/7546558/pexels-photo-7546558.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600",
+          width: 1200,
+          height: 630,
+          alt: "Enviroshield painting, flooring and protective coating journal",
+        },
+      ],
+    },
+
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [
+        "https://images.pexels.com/photos/7546558/pexels-photo-7546558.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600",
+      ],
+    },
   };
 }
 
@@ -46,7 +101,7 @@ export default async function BlogPage({
 
   const currentPage = Math.max(
     1,
-    Number.parseInt(params.page ?? "1", 10) || 1,
+    Number.parseInt(params.page || "1", 10) || 1,
   );
 
   let result;
@@ -115,8 +170,9 @@ export default async function BlogPage({
               </h3>
 
               <p className="mt-3 max-w-[560px] text-sm leading-6 text-ink">
-                We're currently updating our journal. Please check
-                back soon or contact our team if you need assistance.
+                We&apos;re currently updating our journal. Please
+                check back soon or contact our team if you need
+                assistance.
               </p>
 
               <Button href="/contact" className="mt-6">
