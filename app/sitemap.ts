@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 
+import { getPublishedProjects } from "@/lib/api/projects";
 import { getPublishedServices } from "@/lib/api/services";
 import { blogPosts, products } from "@/lib/data/content";
 
@@ -19,6 +20,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${siteUrl}/services`,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/projects`,
       changeFrequency: "monthly",
       priority: 0.9,
     },
@@ -62,6 +68,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     serviceRoutes = [];
   }
 
+  let projectRoutes: MetadataRoute.Sitemap = [];
+
+  try {
+    const result = await getPublishedProjects({
+      page: 1,
+      limit: 100,
+    });
+
+    projectRoutes = result.data
+      .filter(
+        (project) =>
+          project.status === "published" &&
+          project.seo?.noIndex !== true,
+      )
+      .map((project) => ({
+        url: `${siteUrl}/projects/${project.slug}`,
+        changeFrequency: "monthly" as const,
+        priority: 0.8,
+      }));
+  } catch {
+    projectRoutes = [];
+  }
+
   const productRoutes: MetadataRoute.Sitemap = products.map(
     (product) => ({
       url: `${siteUrl}/products/${product.slug}`,
@@ -79,6 +108,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticRoutes,
     ...serviceRoutes,
+    ...projectRoutes,
     ...productRoutes,
     ...blogRoutes,
   ];
