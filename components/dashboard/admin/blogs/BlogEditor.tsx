@@ -1,9 +1,18 @@
 "use client";
 
+import Link from "@tiptap/extension-link";
+import TextAlign from "@tiptap/extension-text-align";
+import UnderlineExtension from "@tiptap/extension-underline";
 import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 import {
+  AlignCenter,
+  AlignJustify,
+  AlignLeft,
+  AlignRight,
   Bold,
   Code,
+  CodeXml,
   Eraser,
   Heading1,
   Heading2,
@@ -20,9 +29,6 @@ import {
   Underline,
   Undo2,
 } from "lucide-react";
-import Link from "@tiptap/extension-link";
-import UnderlineExtension from "@tiptap/extension-underline";
-import StarterKit from "@tiptap/starter-kit";
 import { useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -42,8 +48,7 @@ export default function BlogEditor({
   onChange,
   disabled = false,
 }: BlogEditorProps) {
-  const fileInputRef =
-    useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -57,9 +62,12 @@ export default function BlogEditor({
         openOnClick: false,
         autolink: true,
         HTMLAttributes: {
-          class:
-            "text-blue-600 underline underline-offset-2",
+          class: "text-blue-600 underline underline-offset-2",
         },
+      }),
+
+      TextAlign.configure({
+        types: ["heading", "paragraph", "blockquote"],
       }),
 
       /*
@@ -100,9 +108,7 @@ export default function BlogEditor({
   useEffect(() => {
     if (!editor || !value) return;
 
-    const currentContent = JSON.stringify(
-      editor.getJSON(),
-    );
+    const currentContent = JSON.stringify(editor.getJSON());
 
     const incomingContent = JSON.stringify(value);
 
@@ -135,17 +141,13 @@ export default function BlogEditor({
       });
 
       if (!response.ok) {
-        throw new Error(
-          "Failed to upload image.",
-        );
+        throw new Error("Failed to upload image.");
       }
 
       const data = await response.json();
 
       if (!data.url) {
-        throw new Error(
-          "Image URL was not returned.",
-        );
+        throw new Error("Image URL was not returned.");
       }
 
       editor
@@ -157,10 +159,7 @@ export default function BlogEditor({
         })
         .run();
     } catch (error) {
-      console.error(
-        "Blog image upload failed:",
-        error,
-      );
+      console.error("Blog image upload failed:", error);
     } finally {
       event.target.value = "";
     }
@@ -172,13 +171,9 @@ export default function BlogEditor({
   const handleLink = () => {
     if (!editor) return;
 
-    const existingUrl =
-      editor.getAttributes("link").href;
+    const existingUrl = editor.getAttributes("link").href;
 
-    const url = window.prompt(
-      "Enter URL",
-      existingUrl || "https://",
-    );
+    const url = window.prompt("Enter URL", existingUrl || "https://");
 
     if (url === null) return;
 
@@ -209,12 +204,7 @@ export default function BlogEditor({
   const handleClearFormatting = () => {
     if (!editor) return;
 
-    editor
-      .chain()
-      .focus()
-      .clearNodes()
-      .unsetAllMarks()
-      .run();
+    editor.chain().focus().clearNodes().unsetAllMarks().run();
   };
 
   /*
@@ -237,9 +227,7 @@ export default function BlogEditor({
   /*
    * Set selected image alignment.
    */
-  const setImageAlignment = (
-    align: "left" | "center" | "right",
-  ) => {
+  const setImageAlignment = (align: "left" | "center" | "right") => {
     if (!editor || !editor.isActive("image")) {
       return;
     }
@@ -261,13 +249,9 @@ export default function BlogEditor({
       return;
     }
 
-    const currentAlt =
-      editor.getAttributes("image").alt || "";
+    const currentAlt = editor.getAttributes("image").alt || "";
 
-    const alt = window.prompt(
-      "Image alt text",
-      currentAlt,
-    );
+    const alt = window.prompt("Image alt text", currentAlt);
 
     if (alt === null) return;
 
@@ -288,11 +272,7 @@ export default function BlogEditor({
       return;
     }
 
-    editor
-      .chain()
-      .focus()
-      .deleteSelection()
-      .run();
+    editor.chain().focus().deleteSelection().run();
   };
 
   if (!editor) {
@@ -303,11 +283,9 @@ export default function BlogEditor({
     );
   }
 
-  const imageSelected =
-    editor.isActive("image");
+  const imageSelected = editor.isActive("image");
 
-  const selectedImageAttributes =
-    editor.getAttributes("image");
+  const selectedImageAttributes = editor.getAttributes("image");
 
   return (
     <Card
@@ -321,7 +299,9 @@ export default function BlogEditor({
       ========================== */}
 
       <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b bg-background/95 p-2 backdrop-blur">
-        {/* Headings */}
+        {/* =========================
+            HEADINGS
+        ========================== */}
 
         <ToolbarButton
           label="Heading 1"
@@ -382,19 +362,73 @@ export default function BlogEditor({
 
         <ToolbarDivider />
 
-        {/* Formatting */}
+        {/* =========================
+            TEXT ALIGNMENT
+        ========================== */}
+
+        <ToolbarButton
+          label="Align Left"
+          active={editor.isActive({
+            textAlign: "left",
+          })}
+          disabled={disabled}
+          onClick={() =>
+            editor.chain().focus().setTextAlign("left").run()
+          }
+        >
+          <AlignLeft className="h-4 w-4" />
+        </ToolbarButton>
+
+        <ToolbarButton
+          label="Align Center"
+          active={editor.isActive({
+            textAlign: "center",
+          })}
+          disabled={disabled}
+          onClick={() =>
+            editor.chain().focus().setTextAlign("center").run()
+          }
+        >
+          <AlignCenter className="h-4 w-4" />
+        </ToolbarButton>
+
+        <ToolbarButton
+          label="Align Right"
+          active={editor.isActive({
+            textAlign: "right",
+          })}
+          disabled={disabled}
+          onClick={() =>
+            editor.chain().focus().setTextAlign("right").run()
+          }
+        >
+          <AlignRight className="h-4 w-4" />
+        </ToolbarButton>
+
+        <ToolbarButton
+          label="Justify"
+          active={editor.isActive({
+            textAlign: "justify",
+          })}
+          disabled={disabled}
+          onClick={() =>
+            editor.chain().focus().setTextAlign("justify").run()
+          }
+        >
+          <AlignJustify className="h-4 w-4" />
+        </ToolbarButton>
+
+        <ToolbarDivider />
+
+        {/* =========================
+            FORMATTING
+        ========================== */}
 
         <ToolbarButton
           label="Bold"
           active={editor.isActive("bold")}
           disabled={disabled}
-          onClick={() =>
-            editor
-              .chain()
-              .focus()
-              .toggleBold()
-              .run()
-          }
+          onClick={() => editor.chain().focus().toggleBold().run()}
         >
           <Bold className="h-4 w-4" />
         </ToolbarButton>
@@ -403,13 +437,7 @@ export default function BlogEditor({
           label="Italic"
           active={editor.isActive("italic")}
           disabled={disabled}
-          onClick={() =>
-            editor
-              .chain()
-              .focus()
-              .toggleItalic()
-              .run()
-          }
+          onClick={() => editor.chain().focus().toggleItalic().run()}
         >
           <Italic className="h-4 w-4" />
         </ToolbarButton>
@@ -419,11 +447,7 @@ export default function BlogEditor({
           active={editor.isActive("underline")}
           disabled={disabled}
           onClick={() =>
-            editor
-              .chain()
-              .focus()
-              .toggleUnderline()
-              .run()
+            editor.chain().focus().toggleUnderline().run()
           }
         >
           <Underline className="h-4 w-4" />
@@ -433,46 +457,47 @@ export default function BlogEditor({
           label="Strikethrough"
           active={editor.isActive("strike")}
           disabled={disabled}
-          onClick={() =>
-            editor
-              .chain()
-              .focus()
-              .toggleStrike()
-              .run()
-          }
+          onClick={() => editor.chain().focus().toggleStrike().run()}
         >
           <Strikethrough className="h-4 w-4" />
         </ToolbarButton>
+
+        {/* Inline Code */}
 
         <ToolbarButton
           label="Inline Code"
           active={editor.isActive("code")}
           disabled={disabled}
-          onClick={() =>
-            editor
-              .chain()
-              .focus()
-              .toggleCode()
-              .run()
-          }
+          onClick={() => editor.chain().focus().toggleCode().run()}
         >
           <Code className="h-4 w-4" />
         </ToolbarButton>
 
+        {/* Code Block */}
+
+        <ToolbarButton
+          label="Code Block"
+          active={editor.isActive("codeBlock")}
+          disabled={disabled}
+          onClick={() =>
+            editor.chain().focus().toggleCodeBlock().run()
+          }
+        >
+          <CodeXml className="h-4 w-4" />
+        </ToolbarButton>
+
         <ToolbarDivider />
 
-        {/* Lists */}
+        {/* =========================
+            LISTS
+        ========================== */}
 
         <ToolbarButton
           label="Bullet List"
           active={editor.isActive("bulletList")}
           disabled={disabled}
           onClick={() =>
-            editor
-              .chain()
-              .focus()
-              .toggleBulletList()
-              .run()
+            editor.chain().focus().toggleBulletList().run()
           }
         >
           <List className="h-4 w-4" />
@@ -483,11 +508,7 @@ export default function BlogEditor({
           active={editor.isActive("orderedList")}
           disabled={disabled}
           onClick={() =>
-            editor
-              .chain()
-              .focus()
-              .toggleOrderedList()
-              .run()
+            editor.chain().focus().toggleOrderedList().run()
           }
         >
           <ListOrdered className="h-4 w-4" />
@@ -498,11 +519,7 @@ export default function BlogEditor({
           active={editor.isActive("blockquote")}
           disabled={disabled}
           onClick={() =>
-            editor
-              .chain()
-              .focus()
-              .toggleBlockquote()
-              .run()
+            editor.chain().focus().toggleBlockquote().run()
           }
         >
           <Quote className="h-4 w-4" />
@@ -510,7 +527,9 @@ export default function BlogEditor({
 
         <ToolbarDivider />
 
-        {/* Link */}
+        {/* =========================
+            LINK
+        ========================== */}
 
         <ToolbarButton
           label="Add Link"
@@ -521,14 +540,14 @@ export default function BlogEditor({
           <LinkIcon className="h-4 w-4" />
         </ToolbarButton>
 
-        {/* Image Upload */}
+        {/* =========================
+            IMAGE UPLOAD
+        ========================== */}
 
         <ToolbarButton
           label="Upload Image"
           disabled={disabled}
-          onClick={() =>
-            fileInputRef.current?.click()
-          }
+          onClick={() => fileInputRef.current?.click()}
         >
           <ImagePlus className="h-4 w-4" />
         </ToolbarButton>
@@ -542,23 +561,23 @@ export default function BlogEditor({
           disabled={disabled}
         />
 
-        {/* Horizontal Rule */}
+        {/* =========================
+            HORIZONTAL RULE
+        ========================== */}
 
         <ToolbarButton
           label="Horizontal Rule"
           disabled={disabled}
           onClick={() =>
-            editor
-              .chain()
-              .focus()
-              .setHorizontalRule()
-              .run()
+            editor.chain().focus().setHorizontalRule().run()
           }
         >
           <Minus className="h-4 w-4" />
         </ToolbarButton>
 
-        {/* Clear */}
+        {/* =========================
+            CLEAR
+        ========================== */}
 
         <ToolbarButton
           label="Clear Formatting"
@@ -570,36 +589,22 @@ export default function BlogEditor({
 
         <ToolbarDivider />
 
-        {/* Undo / Redo */}
+        {/* =========================
+            UNDO / REDO
+        ========================== */}
 
         <ToolbarButton
           label="Undo"
-          disabled={
-            disabled || !editor.can().undo()
-          }
-          onClick={() =>
-            editor
-              .chain()
-              .focus()
-              .undo()
-              .run()
-          }
+          disabled={disabled || !editor.can().undo()}
+          onClick={() => editor.chain().focus().undo().run()}
         >
           <Undo2 className="h-4 w-4" />
         </ToolbarButton>
 
         <ToolbarButton
           label="Redo"
-          disabled={
-            disabled || !editor.can().redo()
-          }
-          onClick={() =>
-            editor
-              .chain()
-              .focus()
-              .redo()
-              .run()
-          }
+          disabled={disabled || !editor.can().redo()}
+          onClick={() => editor.chain().focus().redo().run()}
         >
           <Redo2 className="h-4 w-4" />
         </ToolbarButton>
@@ -616,76 +621,56 @@ export default function BlogEditor({
               Image:
             </span>
 
-            {/* Alignment */}
+            {/* Image Alignment */}
 
             <ToolbarSmallButton
               label="Left"
-              active={
-                selectedImageAttributes.align ===
-                "left"
-              }
-              onClick={() =>
-                setImageAlignment("left")
-              }
+              active={selectedImageAttributes.align === "left"}
+              onClick={() => setImageAlignment("left")}
             />
 
             <ToolbarSmallButton
               label="Center"
               active={
                 !selectedImageAttributes.align ||
-                selectedImageAttributes.align ===
-                  "center"
+                selectedImageAttributes.align === "center"
               }
-              onClick={() =>
-                setImageAlignment("center")
-              }
+              onClick={() => setImageAlignment("center")}
             />
 
             <ToolbarSmallButton
               label="Right"
-              active={
-                selectedImageAttributes.align ===
-                "right"
-              }
-              onClick={() =>
-                setImageAlignment("right")
-              }
+              active={selectedImageAttributes.align === "right"}
+              onClick={() => setImageAlignment("right")}
             />
 
             <ToolbarDivider />
 
-            {/* Width */}
+            {/* Image Width */}
 
             <span className="mr-1 text-xs font-semibold text-muted-foreground">
               Width:
             </span>
 
-            {["25%", "50%", "75%", "100%"].map(
-              (width) => (
-                <ToolbarSmallButton
-                  key={width}
-                  label={width}
-                  active={
-                    selectedImageAttributes.width ===
-                    width
-                  }
-                  onClick={() =>
-                    setImageWidth(width)
-                  }
-                />
-              ),
-            )}
+            {["25%", "50%", "75%", "100%"].map((width) => (
+              <ToolbarSmallButton
+                key={width}
+                label={width}
+                active={selectedImageAttributes.width === width}
+                onClick={() => setImageWidth(width)}
+              />
+            ))}
 
             <ToolbarDivider />
 
-            {/* Alt */}
+            {/* Image Alt */}
 
             <ToolbarSmallButton
               label="Edit Alt"
               onClick={handleImageAlt}
             />
 
-            {/* Delete */}
+            {/* Delete Image */}
 
             <ToolbarSmallButton
               label="Delete"
@@ -715,8 +700,7 @@ export default function BlogEditor({
 
       <div className="flex items-center justify-between border-t bg-muted/10 px-4 py-2">
         <p className="text-[11px] text-muted-foreground">
-          Use the toolbar to format your article and
-          upload images.
+          Use the toolbar to format your article and upload images.
         </p>
 
         <p className="hidden text-[11px] text-muted-foreground sm:block">
@@ -728,9 +712,7 @@ export default function BlogEditor({
 }
 
 function ToolbarDivider() {
-  return (
-    <div className="mx-1 h-6 w-px bg-border" />
-  );
+  return <div className="mx-1 h-6 w-px bg-border" />;
 }
 
 function ToolbarButton({
@@ -786,8 +768,7 @@ function ToolbarSmallButton({
       onClick={onClick}
       className={cn(
         "h-7 px-2 text-xs",
-        active &&
-          "border-primary bg-primary/10 text-primary",
+        active && "border-primary bg-primary/10 text-primary",
         destructive &&
           "border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive",
       )}
