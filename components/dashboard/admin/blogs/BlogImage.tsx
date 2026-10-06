@@ -19,6 +19,7 @@ function BlogImageView({
 
   const width = node.attrs.width || "100%";
   const align = node.attrs.align || "center";
+  const caption = node.attrs.caption || "";
 
   const startResize = (
     event: React.PointerEvent<HTMLDivElement>,
@@ -126,15 +127,19 @@ function BlogImageView({
 
         {selected && (
           <>
-            {/* Selection outline */}
             <div className="pointer-events-none absolute inset-0 rounded-xl ring-2 ring-primary ring-offset-2" />
 
-            {/* Resize handle */}
             <div
               className="absolute right-0 top-1/2 z-20 h-14 w-2 -translate-y-1/2 cursor-ew-resize rounded-full bg-primary shadow-sm"
               onPointerDown={startResize}
             />
           </>
+        )}
+
+        {caption && (
+          <div className="mt-2 text-center text-sm leading-relaxed text-muted-foreground">
+            {caption}
+          </div>
         )}
       </div>
     </NodeViewWrapper>
@@ -171,6 +176,17 @@ export const BlogImage = Image.extend({
 
         renderHTML: (attributes) => ({
           "data-align": attributes.align,
+        }),
+      },
+
+      caption: {
+        default: "",
+
+        parseHTML: (element) =>
+          element.getAttribute("data-caption") || "",
+
+        renderHTML: (attributes) => ({
+          "data-caption": attributes.caption,
         }),
       },
     };

@@ -3,7 +3,10 @@
 import Link from "@tiptap/extension-link";
 import TextAlign from "@tiptap/extension-text-align";
 import UnderlineExtension from "@tiptap/extension-underline";
-import { EditorContent, useEditor } from "@tiptap/react";
+import {
+  EditorContent,
+  useEditor,
+} from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {
   AlignCenter,
@@ -260,6 +263,25 @@ export default function BlogEditor({
       .focus()
       .updateAttributes("image", {
         alt: alt.trim(),
+      })
+      .run();
+  };
+
+  const handleImageCaption = () => {
+    if (!editor || !editor.isActive("image")) return;
+
+    const currentCaption =
+      editor.getAttributes("image").caption || "";
+
+    const caption = window.prompt("Image caption", currentCaption);
+
+    if (caption === null) return;
+
+    editor
+      .chain()
+      .focus()
+      .updateAttributes("image", {
+        caption: caption.trim(),
       })
       .run();
   };
@@ -668,6 +690,11 @@ export default function BlogEditor({
             <ToolbarSmallButton
               label="Edit Alt"
               onClick={handleImageAlt}
+            />
+
+            <ToolbarSmallButton
+              label="Edit Caption"
+              onClick={handleImageCaption}
             />
 
             {/* Delete Image */}
