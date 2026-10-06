@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -34,6 +35,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import { authClient } from "@/lib/auth-client";
+
 import { generateSlug } from "@/utils/generateSlug";
 import { toast } from "sonner";
 
@@ -41,30 +44,41 @@ import DashboardButton from "../../DashboardButton";
 import BlogEditor from "./BlogEditor";
 
 const imageSchema = z.object({
-  url: z.string().optional(),
-  alt: z.string().optional(),
+  url: z.string().min(1, "Cover image is required"),
+  alt: z
+    .string()
+    .min(1, "Cover image alt text is required"),
   caption: z.string().optional(),
 });
 
 const seoSchema = z.object({
-  metaTitle: z
-    .string()
-    .min(1, "Meta title is required"),
+  metaTitle: z.string().optional(),
 
-  metaDescription: z
-    .string()
-    .min(1, "Meta description is required"),
+  metaDescription: z.string().optional(),
 
-  keywords: z
-    .array(z.string().min(1, "Keyword cannot be empty"))
-    .min(1, "At least one SEO keyword is required"),
+  keywords: z.array(
+    z.string().min(1, "Keyword cannot be empty"),
+  ),
+
+  canonicalUrl: z.string().optional(),
+
+  ogTitle: z.string().optional(),
+
+  ogDescription: z.string().optional(),
+
+  ogImage: z.string().optional(),
+
+  noIndex: z.boolean(),
 });
 
 const formSchema = z.object({
   title: z
     .string()
     .min(1, "Blog title is required")
-    .max(200, "Title must be 200 characters or less"),
+    .max(
+      200,
+      "Title must be 200 characters or less",
+    ),
 
   slug: z
     .string()
@@ -80,7 +94,7 @@ const formSchema = z.object({
 
   content: z.any(),
 
-  coverImage: imageSchema.optional(),
+  coverImage: imageSchema,
 
   tags: z
     .array(z.string().min(1))
@@ -112,18 +126,28 @@ const defaultValues: FormValues = {
   title: "",
   slug: "",
   excerpt: "",
+
   content: emptyContent,
+
   coverImage: {
     url: "",
     alt: "",
     caption: "",
   },
+
   tags: [],
+
   status: "draft",
+
   seo: {
     metaTitle: "",
     metaDescription: "",
     keywords: [],
+    canonicalUrl: "",
+    ogTitle: "",
+    ogDescription: "",
+    ogImage: "",
+    noIndex: false,
   },
 };
 
@@ -132,8 +156,13 @@ export default function CreateBlogModal({
   setIsModalOpen,
   onSuccess,
 }: CreateBlogModalProps) {
-  const [currentStep, setCurrentStep] = useState(0);
+  const { data: session } = authClient.useSession();
+
+  const [currentStep, setCurrentStep] =
+    useState(0);
+
   const [tagInput, setTagInput] = useState("");
+
   const [seoKeywordInput, setSeoKeywordInput] =
     useState("");
 
@@ -159,7 +188,11 @@ export default function CreateBlogModal({
   });
 
   const currentTags = watch("tags");
-  const currentKeywords = watch("seo.keywords");
+
+  const currentKeywords = watch(
+    "seo.keywords",
+  );
+
   const editorContent = watch("content");
 
   const steps = [
@@ -167,7 +200,8 @@ export default function CreateBlogModal({
       number: "01",
       title: "Basic Information",
       shortTitle: "Basic",
-      description: "Title, excerpt and cover image",
+      description:
+        "Title, excerpt and cover image",
     },
     {
       number: "02",
@@ -179,13 +213,15 @@ export default function CreateBlogModal({
       number: "03",
       title: "Tags & Status",
       shortTitle: "Publish",
-      description: "Tags and publishing status",
+      description:
+        "Tags and publishing status",
     },
     {
       number: "04",
       title: "SEO",
       shortTitle: "SEO",
-      description: "Search engine settings",
+      description:
+        "Search engine settings",
     },
   ];
 
@@ -205,9 +241,13 @@ export default function CreateBlogModal({
     if (isLoading) return;
 
     setIsModalOpen(false);
+
     reset(defaultValues);
+
     setCurrentStep(0);
+
     setTagInput("");
+
     setSeoKeywordInput("");
   };
 
@@ -224,7 +264,10 @@ export default function CreateBlogModal({
     if (!isValid) return;
 
     setCurrentStep((step) =>
-      Math.min(step + 1, steps.length - 1),
+      Math.min(
+        step + 1,
+        steps.length - 1,
+      ),
     );
   };
 
@@ -244,10 +287,14 @@ export default function CreateBlogModal({
       return;
     }
 
-    setValue("tags", [...currentTags, tag], {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+    setValue(
+      "tags",
+      [...currentTags, tag],
+      {
+        shouldDirty: true,
+        shouldValidate: true,
+      },
+    );
 
     setTagInput("");
   };
@@ -256,7 +303,8 @@ export default function CreateBlogModal({
     setValue(
       "tags",
       currentTags.filter(
-        (_, tagIndex) => tagIndex !== index,
+        (_, tagIndex) =>
+          tagIndex !== index,
       ),
       {
         shouldDirty: true,
@@ -266,7 +314,8 @@ export default function CreateBlogModal({
   };
 
   const addSeoKeyword = () => {
-    const keyword = seoKeywordInput.trim();
+    const keyword =
+      seoKeywordInput.trim();
 
     if (!keyword) return;
 
@@ -287,7 +336,9 @@ export default function CreateBlogModal({
     setSeoKeywordInput("");
   };
 
-  const removeSeoKeyword = (index: number) => {
+  const removeSeoKeyword = (
+    index: number,
+  ) => {
     setValue(
       "seo.keywords",
       currentKeywords.filter(
@@ -301,38 +352,76 @@ export default function CreateBlogModal({
     );
   };
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (
+    data: FormValues,
+  ) => {
     try {
+      const authorId = session?.user.id;
+
+      if (!authorId) {
+        toast.error(
+          "Unable to determine the current user.",
+        );
+
+        return;
+      }
+
       const payload = {
         title: data.title,
+
         slug: data.slug,
+
         excerpt: data.excerpt,
+
         content: data.content,
 
-        ...(data.coverImage?.url
-          ? {
-              coverImage: {
-                url: data.coverImage.url,
-                alt:
-                  data.coverImage.alt || "",
-                caption:
-                  data.coverImage.caption || "",
-              },
-            }
-          : {}),
+        coverImage: {
+          url: data.coverImage.url,
+
+          alt: data.coverImage.alt,
+
+          caption:
+            data.coverImage.caption || "",
+        },
 
         tags: data.tags,
+
+        authorId,
+
         status: data.status,
 
+        publishedAt:
+          data.status === "published"
+            ? new Date()
+            : null,
+
         seo: {
-          metaTitle: data.seo.metaTitle,
+          metaTitle:
+            data.seo.metaTitle || "",
+
           metaDescription:
-            data.seo.metaDescription,
+            data.seo.metaDescription || "",
+
           keywords: data.seo.keywords,
+
+          canonicalUrl:
+            data.seo.canonicalUrl || "",
+
+          ogTitle:
+            data.seo.ogTitle || "",
+
+          ogDescription:
+            data.seo.ogDescription || "",
+
+          ogImage:
+            data.seo.ogImage || "",
+
+          noIndex: data.seo.noIndex,
         },
       };
 
-      const response = await postBlog(payload);
+      const response =
+        await postBlog(payload);
 
       if (response?.success) {
         toast.success(
@@ -341,9 +430,13 @@ export default function CreateBlogModal({
         );
 
         setIsModalOpen(false);
+
         reset(defaultValues);
+
         setCurrentStep(0);
+
         setTagInput("");
+
         setSeoKeywordInput("");
 
         onSuccess?.();
@@ -381,9 +474,9 @@ export default function CreateBlogModal({
             </DialogTitle>
 
             <DialogDescription className="text-sm leading-6">
-              Create a new blog article with rich
-              content, images, tags, publishing and
-              SEO settings.
+              Create a new blog article with
+              rich content, images, tags,
+              publishing and SEO settings.
             </DialogDescription>
           </DialogHeader>
 
@@ -398,78 +491,97 @@ export default function CreateBlogModal({
                   <div className="absolute left-[8%] right-[8%] top-5 hidden h-px bg-border md:block" />
 
                   <div className="relative grid grid-cols-4 gap-2">
-                    {steps.map((step, index) => {
-                      const isCompleted =
-                        index < currentStep;
+                    {steps.map(
+                      (step, index) => {
+                        const isCompleted =
+                          index < currentStep;
 
-                      const isActive =
-                        index === currentStep;
+                        const isActive =
+                          index ===
+                          currentStep;
 
-                      return (
-                        <button
-                          key={step.number}
-                          type="button"
-                          disabled={
-                            index >= currentStep
-                          }
-                          onClick={() => {
-                            if (
-                              index < currentStep
-                            ) {
-                              setCurrentStep(
-                                index,
-                              );
+                        return (
+                          <button
+                            key={
+                              step.number
                             }
-                          }}
-                          className="group flex flex-col items-center text-center disabled:cursor-default"
-                        >
-                          <div
-                            className={[
-                              "relative z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 text-xs font-bold transition-all duration-200",
-                              isCompleted
-                                ? "border-blue bg-blue text-white shadow-md shadow-blue/20"
-                                : isActive
-                                  ? "border-blue bg-white text-blue shadow-md shadow-blue/15"
-                                  : "border-border bg-white text-muted-foreground",
-                            ].join(" ")}
+                            type="button"
+                            disabled={
+                              index >=
+                              currentStep
+                            }
+                            onClick={() => {
+                              if (
+                                index <
+                                currentStep
+                              ) {
+                                setCurrentStep(
+                                  index,
+                                );
+                              }
+                            }}
+                            className="group flex flex-col items-center text-center disabled:cursor-default"
                           >
-                            {isCompleted
-                              ? "✓"
-                              : step.number}
-                          </div>
+                            <div
+                              className={[
+                                "relative z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 text-xs font-bold transition-all duration-200",
+                                isCompleted
+                                  ? "border-blue bg-blue text-white shadow-md shadow-blue/20"
+                                  : isActive
+                                    ? "border-blue bg-white text-blue shadow-md shadow-blue/15"
+                                    : "border-border bg-white text-muted-foreground",
+                              ].join(
+                                " ",
+                              )}
+                            >
+                              {isCompleted
+                                ? "✓"
+                                : step.number}
+                            </div>
 
-                          <div className="mt-3 hidden md:block">
+                            <div className="mt-3 hidden md:block">
+                              <p
+                                className={[
+                                  "text-xs font-bold",
+                                  isActive ||
+                                  isCompleted
+                                    ? "text-navy"
+                                    : "text-muted-foreground",
+                                ].join(
+                                  " ",
+                                )}
+                              >
+                                {
+                                  step.title
+                                }
+                              </p>
+
+                              <p className="mt-1 text-[11px] text-muted-foreground">
+                                {
+                                  step.description
+                                }
+                              </p>
+                            </div>
+
                             <p
                               className={[
-                                "text-xs font-bold",
+                                "mt-2 text-[10px] font-bold md:hidden",
                                 isActive ||
                                 isCompleted
-                                  ? "text-navy"
+                                  ? "text-blue"
                                   : "text-muted-foreground",
-                              ].join(" ")}
+                              ].join(
+                                " ",
+                              )}
                             >
-                              {step.title}
+                              {
+                                step.shortTitle
+                              }
                             </p>
-
-                            <p className="mt-1 text-[11px] text-muted-foreground">
-                              {step.description}
-                            </p>
-                          </div>
-
-                          <p
-                            className={[
-                              "mt-2 text-[10px] font-bold md:hidden",
-                              isActive ||
-                              isCompleted
-                                ? "text-blue"
-                                : "text-muted-foreground",
-                            ].join(" ")}
-                          >
-                            {step.shortTitle}
-                          </p>
-                        </button>
-                      );
-                    })}
+                          </button>
+                        );
+                      },
+                    )}
                   </div>
                 </div>
               </div>
@@ -483,8 +595,9 @@ export default function CreateBlogModal({
                     </h3>
 
                     <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                      Configure the main information
-                      and cover image for the blog.
+                      Configure the main
+                      information and cover
+                      image for the blog.
                     </p>
                   </div>
 
@@ -501,25 +614,34 @@ export default function CreateBlogModal({
                         id="blog-title"
                         placeholder="Why Environmental Responsibility Matters"
                         {...register("title")}
-                        onChange={(event) => {
+                        onChange={(
+                          event,
+                        ) => {
                           const title =
-                            event.target.value;
+                            event.target
+                              .value;
 
                           setValue(
                             "title",
                             title,
                             {
-                              shouldDirty: true,
-                              shouldValidate: true,
+                              shouldDirty:
+                                true,
+                              shouldValidate:
+                                true,
                             },
                           );
 
                           setValue(
                             "slug",
-                            generateSlug(title),
+                            generateSlug(
+                              title,
+                            ),
                             {
-                              shouldDirty: true,
-                              shouldValidate: true,
+                              shouldDirty:
+                                true,
+                              shouldValidate:
+                                true,
                             },
                           );
                         }}
@@ -527,7 +649,11 @@ export default function CreateBlogModal({
 
                       {errors.title && (
                         <p className="text-sm text-destructive">
-                          {errors.title.message}
+                          {
+                            errors
+                              .title
+                              .message
+                          }
                         </p>
                       )}
                     </div>
@@ -548,7 +674,11 @@ export default function CreateBlogModal({
 
                       {errors.slug && (
                         <p className="text-sm text-destructive">
-                          {errors.slug.message}
+                          {
+                            errors
+                              .slug
+                              .message
+                          }
                         </p>
                       )}
                     </div>
@@ -566,12 +696,18 @@ export default function CreateBlogModal({
                       id="blog-excerpt"
                       placeholder="Write a short summary of the blog..."
                       className="min-h-28 resize-none"
-                      {...register("excerpt")}
+                      {...register(
+                        "excerpt",
+                      )}
                     />
 
                     {errors.excerpt && (
                       <p className="text-sm text-destructive">
-                        {errors.excerpt.message}
+                        {
+                          errors
+                            .excerpt
+                            .message
+                        }
                       </p>
                     )}
                   </div>
@@ -584,26 +720,47 @@ export default function CreateBlogModal({
                       </h4>
 
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Upload the main image used
-                        for this blog.
+                        Upload the main image
+                        used for this blog.
                       </p>
                     </div>
 
                     <Controller
                       control={control}
                       name="coverImage.url"
-                      render={({ field }) => (
+                      render={({
+                        field,
+                      }) => (
                         <div className="space-y-2">
                           <Label className="text-xs font-semibold">
                             Image
                           </Label>
 
                           <ImageUploader
-                            value={field.value}
-                            onChange={(url) =>
-                              field.onChange(url)
+                            value={
+                              field.value
+                            }
+                            onChange={(
+                              url,
+                            ) =>
+                              field.onChange(
+                                url,
+                              )
                             }
                           />
+
+                          {errors
+                            .coverImage
+                            ?.url && (
+                            <p className="text-sm text-destructive">
+                              {
+                                errors
+                                  .coverImage
+                                  .url
+                                  .message
+                              }
+                            </p>
+                          )}
                         </div>
                       )}
                     />
@@ -624,6 +781,19 @@ export default function CreateBlogModal({
                             "coverImage.alt",
                           )}
                         />
+
+                        {errors
+                          .coverImage
+                          ?.alt && (
+                          <p className="text-sm text-destructive">
+                            {
+                              errors
+                                .coverImage
+                                .alt
+                                .message
+                            }
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
@@ -656,8 +826,9 @@ export default function CreateBlogModal({
                     </h3>
 
                     <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                      Write the article using the rich
-                      text editor. Images can be uploaded
+                      Write the article using
+                      the rich text editor.
+                      Images can be uploaded
                       directly into the content.
                     </p>
                   </div>
@@ -667,18 +838,27 @@ export default function CreateBlogModal({
                     name="content"
                     render={({ field }) => (
                       <BlogEditor
-                        value={editorContent}
-                        onChange={(content) =>
-                          field.onChange(content)
+                        value={
+                          editorContent
                         }
-                        disabled={isLoading}
+                        onChange={(
+                          content,
+                        ) =>
+                          field.onChange(
+                            content,
+                          )
+                        }
+                        disabled={
+                          isLoading
+                        }
                       />
                     )}
                   />
 
                   {errors.content && (
                     <p className="text-sm text-destructive">
-                      Blog content is required.
+                      Blog content is
+                      required.
                     </p>
                   )}
 
@@ -687,9 +867,11 @@ export default function CreateBlogModal({
                       <strong className="text-navy">
                         Tip:
                       </strong>{" "}
-                      Use the image button in the
-                      editor toolbar to upload images
-                      directly into the article.
+                      Use the image button
+                      in the editor toolbar
+                      to upload images
+                      directly into the
+                      article.
                     </p>
                   </div>
                 </section>
@@ -704,8 +886,9 @@ export default function CreateBlogModal({
                     </h3>
 
                     <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                      Organize the article and choose
-                      whether it should be published.
+                      Organize the article and
+                      choose whether it should
+                      be published.
                     </p>
                   </div>
 
@@ -717,21 +900,28 @@ export default function CreateBlogModal({
                       </Label>
 
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Add tags to categorize this blog.
+                        Add tags to categorize
+                        this blog.
                       </p>
                     </div>
 
                     <div className="flex gap-2">
                       <Input
                         value={tagInput}
-                        onChange={(event) =>
+                        onChange={(
+                          event,
+                        ) =>
                           setTagInput(
-                            event.target.value,
+                            event.target
+                              .value,
                           )
                         }
-                        onKeyDown={(event) => {
+                        onKeyDown={(
+                          event,
+                        ) => {
                           if (
-                            event.key === "Enter"
+                            event.key ===
+                            "Enter"
                           ) {
                             event.preventDefault();
                             addTag();
@@ -755,12 +945,17 @@ export default function CreateBlogModal({
 
                     <div className="flex flex-wrap gap-2">
                       {currentTags.map(
-                        (tag, index) => (
+                        (
+                          tag,
+                          index,
+                        ) => (
                           <div
                             key={`${tag}-${index}`}
                             className="flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-sm"
                           >
-                            <span>{tag}</span>
+                            <span>
+                              {tag}
+                            </span>
 
                             <button
                               type="button"
@@ -780,7 +975,10 @@ export default function CreateBlogModal({
 
                     {errors.tags && (
                       <p className="text-sm text-destructive">
-                        {errors.tags.message}
+                        {
+                          errors.tags
+                            .message
+                        }
                       </p>
                     )}
                   </div>
@@ -794,9 +992,13 @@ export default function CreateBlogModal({
                     <Controller
                       control={control}
                       name="status"
-                      render={({ field }) => (
+                      render={({
+                        field,
+                      }) => (
                         <Select
-                          value={field.value}
+                          value={
+                            field.value
+                          }
                           onValueChange={
                             field.onChange
                           }
@@ -818,6 +1020,26 @@ export default function CreateBlogModal({
                       )}
                     />
                   </div>
+
+                  <div className="rounded-xl border bg-muted/20 p-4">
+                    <p className="text-xs leading-5 text-muted-foreground">
+                      <strong className="text-navy">
+                        Publishing:
+                      </strong>{" "}
+                      When the status is set to
+                      Published, the current date
+                      and time will automatically be
+                      used as{" "}
+                      <code className="rounded bg-background px-1 py-0.5">
+                        publishedAt
+                      </code>
+                      . Drafts will use{" "}
+                      <code className="rounded bg-background px-1 py-0.5">
+                        null
+                      </code>
+                      .
+                    </p>
+                  </div>
                 </section>
               )}
 
@@ -830,12 +1052,14 @@ export default function CreateBlogModal({
                     </h3>
 
                     <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                      Configure the metadata used by
-                      search engines.
+                      Configure the metadata used
+                      by search engines and social
+                      sharing platforms.
                     </p>
                   </div>
 
-                  <div className="space-y-5 rounded-2xl border bg-muted/10 p-5">
+                  <div className="space-y-6 rounded-2xl border bg-muted/10 p-5">
+                    {/* Meta Title */}
                     <div className="space-y-2">
                       <Label
                         htmlFor="seo-meta-title"
@@ -851,17 +1075,9 @@ export default function CreateBlogModal({
                           "seo.metaTitle",
                         )}
                       />
-
-                      {errors.seo?.metaTitle && (
-                        <p className="text-sm text-destructive">
-                          {
-                            errors.seo.metaTitle
-                              .message
-                          }
-                        </p>
-                      )}
                     </div>
 
+                    {/* Meta Description */}
                     <div className="space-y-2">
                       <Label
                         htmlFor="seo-meta-description"
@@ -878,20 +1094,9 @@ export default function CreateBlogModal({
                           "seo.metaDescription",
                         )}
                       />
-
-                      {errors.seo
-                        ?.metaDescription && (
-                        <p className="text-sm text-destructive">
-                          {
-                            errors.seo
-                              .metaDescription
-                              .message
-                          }
-                        </p>
-                      )}
                     </div>
 
-                    {/* SEO Keywords */}
+                    {/* Keywords */}
                     <div className="space-y-3">
                       <div>
                         <Label className="text-sm font-semibold text-navy">
@@ -899,8 +1104,8 @@ export default function CreateBlogModal({
                         </Label>
 
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Add keywords relevant to this
-                          article.
+                          Add keywords relevant to
+                          this article.
                         </p>
                       </div>
 
@@ -909,13 +1114,18 @@ export default function CreateBlogModal({
                           value={
                             seoKeywordInput
                           }
-                          onChange={(event) =>
+                          onChange={(
+                            event,
+                          ) =>
                             setSeoKeywordInput(
-                              event.target
+                              event
+                                .target
                                 .value,
                             )
                           }
-                          onKeyDown={(event) => {
+                          onKeyDown={(
+                            event,
+                          ) => {
                             if (
                               event.key ===
                               "Enter"
@@ -953,7 +1163,9 @@ export default function CreateBlogModal({
                               className="flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-sm"
                             >
                               <span>
-                                {keyword}
+                                {
+                                  keyword
+                                }
                               </span>
 
                               <button
@@ -972,14 +1184,144 @@ export default function CreateBlogModal({
                         )}
                       </div>
 
-                      {errors.seo?.keywords && (
+                      {errors.seo
+                        ?.keywords && (
                         <p className="text-sm text-destructive">
                           {
-                            errors.seo.keywords
+                            errors
+                              .seo
+                              .keywords
                               .message
                           }
                         </p>
                       )}
+                    </div>
+
+                    {/* Canonical URL */}
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="seo-canonical-url"
+                        className="text-sm font-semibold text-navy"
+                      >
+                        Canonical URL
+                      </Label>
+
+                      <Input
+                        id="seo-canonical-url"
+                        placeholder="https://enviroshield.com/blog/example"
+                        {...register(
+                          "seo.canonicalUrl",
+                        )}
+                      />
+
+                      <p className="text-xs text-muted-foreground">
+                        Optional. Use this when
+                        the article has a preferred
+                        canonical URL.
+                      </p>
+                    </div>
+
+                    {/* Open Graph */}
+                    <div className="space-y-5 rounded-xl border bg-background p-4">
+                      <div>
+                        <h4 className="text-sm font-bold text-navy">
+                          Open Graph
+                        </h4>
+
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Configure how the article
+                          appears when shared on
+                          social platforms.
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="seo-og-title"
+                          className="text-sm font-semibold text-navy"
+                        >
+                          OG Title
+                        </Label>
+
+                        <Input
+                          id="seo-og-title"
+                          placeholder="Why Environmental Responsibility Matters"
+                          {...register(
+                            "seo.ogTitle",
+                          )}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="seo-og-description"
+                          className="text-sm font-semibold text-navy"
+                        >
+                          OG Description
+                        </Label>
+
+                        <Textarea
+                          id="seo-og-description"
+                          placeholder="Explore the importance of environmental responsibility and sustainable practices."
+                          className="min-h-24 resize-none"
+                          {...register(
+                            "seo.ogDescription",
+                          )}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="seo-og-image"
+                          className="text-sm font-semibold text-navy"
+                        >
+                          OG Image URL
+                        </Label>
+
+                        <Input
+                          id="seo-og-image"
+                          placeholder="https://example.com/images/blog-og.jpg"
+                          {...register(
+                            "seo.ogImage",
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* No Index */}
+                    <div className="flex items-center justify-between rounded-xl border bg-background p-4">
+                      <div className="pr-6">
+                        <Label
+                          htmlFor="seo-no-index"
+                          className="text-sm font-semibold text-navy"
+                        >
+                          No Index
+                        </Label>
+
+                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                          Prevent search engines
+                          from indexing this
+                          article.
+                        </p>
+                      </div>
+
+                      <Controller
+                        control={control}
+                        name="seo.noIndex"
+                        render={({
+                          field,
+                        }) => (
+                          <Switch
+                            id="seo-no-index"
+                            checked={
+                              field.value
+                            }
+                            onCheckedChange={
+                              field.onChange
+                            }
+                          />
+                        )}
+                      />
                     </div>
                   </div>
                 </section>
@@ -1024,7 +1366,9 @@ export default function CreateBlogModal({
                       icon={
                         <ChevronRight className="h-4 w-4" />
                       }
-                      onClick={handleNextStep}
+                      onClick={
+                        handleNextStep
+                      }
                       disabled={isLoading}
                     >
                       Continue
@@ -1040,7 +1384,6 @@ export default function CreateBlogModal({
                           <Plus className="h-4 w-4" />
                         )
                       }
-                      className="min-h-10 rounded-xl px-5 text-xs font-bold"
                     >
                       {isLoading
                         ? "Creating..."

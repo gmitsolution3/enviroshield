@@ -52,6 +52,7 @@ import DashboardError from "../../DashboardError";
 import DashboardLoading from "../../DashboardLoading";
 
 import CreateBlogModal from "./CreateBlogModal";
+import EditBlogModal from "./EditBlogModal";
 
 const features = tableFeatures({});
 
@@ -63,6 +64,12 @@ export default function BlogDashboard() {
   const [filterStatus, setFilterStatus] = useState<string>("");
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+
+  const [selectedBlog, setSelectedBlog] = useState<IBlog | null>(
+    null,
+  );
 
   const { data, isLoading, isError, refetch } =
     useFetch<IBlogResponse>(
@@ -77,7 +84,8 @@ export default function BlogDashboard() {
   };
 
   const handleEdit = (blog: IBlog) => {
-    console.log("Edit blog:", blog);
+    setSelectedBlog(blog);
+    setIsUpdateModalOpen(true);
   };
 
   const handleDelete = (blog: IBlog) => {
@@ -466,6 +474,17 @@ export default function BlogDashboard() {
         isModalOpen={isCreateModalOpen}
         setIsModalOpen={setIsCreateModalOpen}
         onSuccess={() => refetch()}
+      />
+
+      <EditBlogModal
+        blog={selectedBlog}
+        open={isUpdateModalOpen}
+        revalidateKey="/blog"
+        onClose={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedBlog(null);
+          refetch();
+        }}
       />
     </section>
   );

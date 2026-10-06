@@ -1,9 +1,3 @@
-export interface IBlogContent {
-  type: string;
-  content?: IBlogContent[];
-  text?: string;
-}
-
 export interface IBlogImage {
   url: string;
   alt: string;
@@ -11,10 +5,21 @@ export interface IBlogImage {
 }
 
 export interface IBlogSeo {
-  metaTitle: string;
-  metaDescription: string;
-  keywords: string[];
-  noIndex: boolean;
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
+  canonicalUrl?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  noIndex?: boolean;
+}
+
+export interface IBlogAuthor {
+  id: string;
+  name: string;
+  email: string;
+  image?: string | null;
 }
 
 export interface IBlog {
@@ -24,22 +29,24 @@ export interface IBlog {
   slug: string;
   excerpt: string;
 
-  content: IBlogContent;
+  content: Record<string, unknown>;
 
-  coverImage?: IBlogImage;
+  coverImage: IBlogImage;
 
   tags: string[];
 
   authorId: string;
 
-  status: "published" | "draft";
+  status: "draft" | "published";
 
-  publishedAt?: string;
+  publishedAt?: string | null;
 
   seo?: IBlogSeo;
 
   createdAt: string;
   updatedAt: string;
+
+  author?: IBlogAuthor | null;
 }
 
 export interface IBlogResponse {
@@ -55,4 +62,12 @@ export interface IBlogResponse {
   };
 
   data: IBlog[];
+}
+
+export interface IBlogSingleResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+
+  data: IBlog;
 }
