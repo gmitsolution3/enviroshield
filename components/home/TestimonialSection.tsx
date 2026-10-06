@@ -1,9 +1,24 @@
+import { getPublishedTestimonials } from "@/lib/api/testimonials";
 import Container from "../Container";
 import { Reveal } from "../Reveal";
 import { SectionHeader } from "../SectionHeader";
 import { TestimonialCarousel } from "../TestimonialCarousel";
+import {ITestimonial} from "@/types";
 
-export default function TestimonialSection() {
+export default async function TestimonialSection() {
+  let testimonials: ITestimonial[] = [];
+
+  try {
+    const result = await getPublishedTestimonials({
+      page: 1,
+      limit: 10,
+    });
+
+    testimonials = result.data;
+  } catch {
+    testimonials = [];
+  }
+
   return (
     <section
       aria-labelledby="testimonials-heading"
@@ -17,9 +32,11 @@ export default function TestimonialSection() {
           headingId="testimonials-heading"
         />
 
-        <Reveal dir="up" delay={0.1}>
-          <TestimonialCarousel />
-        </Reveal>
+        {testimonials.length > 0 ? (
+          <Reveal dir="up" delay={0.1}>
+            <TestimonialCarousel testimonials={testimonials} />
+          </Reveal>
+        ) : null}
       </Container>
     </section>
   );

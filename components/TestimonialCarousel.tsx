@@ -1,5 +1,6 @@
 "use client";
 
+import type { ITestimonial } from "@/types/admin/testimonial.type";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import {
   AnimatePresence,
@@ -9,46 +10,50 @@ import {
 import { useEffect, useState } from "react";
 import { EASE } from "./animations/variants";
 
-export function TestimonialCarousel() {
+type TestimonialCarouselProps = {
+  testimonials: ITestimonial[];
+};
+
+export function TestimonialCarousel({
+  testimonials,
+}: TestimonialCarouselProps) {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const reduce = useReducedMotion();
 
-  const items = [
-    {
-      quote:
-        "Enviroshield completely transformed our living room. The finish was flawless and the team was incredibly professional.",
-      name: "Maya R.",
-      role: "Homeowner, North London",
-    },
-    {
-      quote:
-        "From preparation to final cleanup, everything was handled with care. The result exceeded our expectations.",
-      name: "Daniel K.",
-      role: "Property manager",
-    },
-    {
-      quote:
-        "We needed a bold feature wall for our studio and Enviroshield delivered exactly what we envisioned.",
-      name: "Aisha T.",
-      role: "Studio founder",
-    },
-  ];
-
   useEffect(() => {
+    if (testimonials.length <= 1) {
+      return;
+    }
+
     const timer = setInterval(() => {
       setDirection(1);
-      setIndex((prev) => (prev + 1) % items.length);
+      setIndex((prev) => (prev + 1) % testimonials.length);
     }, 5500);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [testimonials.length]);
 
-  const current = items[index];
+  useEffect(() => {
+    if (index >= testimonials.length) {
+      setIndex(0);
+    }
+  }, [index, testimonials.length]);
+
+  if (testimonials.length === 0) {
+    return null;
+  }
+
+  const current = testimonials[index];
 
   const go = (dir: number) => {
     setDirection(dir);
-    setIndex((prev) => (prev + dir + items.length) % items.length);
+
+    setIndex(
+      (prev) =>
+        (prev + dir + testimonials.length) %
+        testimonials.length,
+    );
   };
 
   return (
@@ -67,21 +72,34 @@ export function TestimonialCarousel() {
 
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
-            key={index}
+            key={current._id}
             custom={direction}
-            initial={reduce ? { opacity: 0 } : { opacity: 0, x: 30 }}
+            initial={
+              reduce
+                ? { opacity: 0 }
+                : { opacity: 0, x: 30 }
+            }
             animate={{ opacity: 1, x: 0 }}
-            exit={reduce ? { opacity: 0 } : { opacity: 0, x: -30 }}
+            exit={
+              reduce
+                ? { opacity: 0 }
+                : { opacity: 0, x: -30 }
+            }
             transition={{ duration: 0.4, ease: EASE }}
             className="relative z-10"
             aria-live="polite"
           >
-            <div className="mb-[22px] flex gap-[5px] text-[#f4a623]">
+            <div
+              className="mb-[22px] flex gap-[5px] text-[#f4a623]"
+              aria-label={`${current.rating} out of 5 stars`}
+            >
               {[1, 2, 3, 4, 5].map((star) => (
                 <motion.span
                   key={star}
                   initial={
-                    reduce ? false : { opacity: 0, scale: 0.8 }
+                    reduce
+                      ? false
+                      : { opacity: 0, scale: 0.8 }
                   }
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{
@@ -90,33 +108,53 @@ export function TestimonialCarousel() {
                   }}
                   aria-hidden="true"
                 >
-                  <Star size={17} fill="currentColor" />
+                  <Star
+                    size={17}
+                    fill={
+                      star <= current.rating
+                        ? "currentColor"
+                        : "none"
+                    }
+                  />
                 </motion.span>
               ))}
             </div>
 
             <blockquote className="mb-[32px] text-[clamp(21px,2.5vw,30px)] leading-[1.35] tracking-[-0.025em] text-navy">
-              {current.quote}
+              "{current.content}"
             </blockquote>
 
             <motion.div
               className="flex items-center gap-3"
-              initial={reduce ? false : { opacity: 0, scale: 0.9 }}
+              initial={
+                reduce
+                  ? false
+                  : { opacity: 0, scale: 0.9 }
+              }
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.15, duration: 0.4 }}
             >
-              <div className="grid size-10 place-items-center rounded-full bg-gradient-to-br from-[#cfe5f9] to-[#a2cdf5] font-extrabold text-blue shadow-inner">
-                {current.name[0]}
-              </div>
+              {current.clientImage?.url ? (
+                <div className="size-10 overflow-hidden rounded-full bg-white shadow-inner">
+                  <img
+                    src={current.clientImage.url}
+                    alt={
+                      current.clientImage.alt ||
+                      current.clientName
+                    }
+                    className="size-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="grid size-10 place-items-center rounded-full bg-gradient-to-br from-[#cfe5f9] to-[#a2cdf5] font-extrabold text-blue shadow-inner">
+                  {current.clientName.charAt(0)}
+                </div>
+              )}
 
               <div>
                 <strong className="block text-[13px] text-navy">
-                  {current.name}
+                  {current.clientName}
                 </strong>
-
-                <span className="mt-[3px] block text-[12px] text-ink">
-                  {current.role}
-                </span>
               </div>
             </motion.div>
           </motion.div>
@@ -124,38 +162,49 @@ export function TestimonialCarousel() {
       </div>
 
       {/* Controls */}
-      <div className="mt-[18px] flex items-center justify-end gap-[14px] text-[12px] text-ink">
-        <motion.button
-          aria-label="Previous testimonial"
-          onClick={() => go(-1)}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.95 }}
-          className="grid size-[38px] place-items-center rounded-full border border-white/70 bg-white/50 text-navy backdrop-blur-md backdrop-saturate-150 shadow-[0_4px_12px_rgba(0,51,78,0.06),_inset_0_1px_1px_rgba(255,255,255,0.8)] transition-all duration-200 hover:border-blue hover:bg-blue hover:text-white"
-        >
-          <ChevronLeft size={18} aria-hidden="true" />
-        </motion.button>
-
-        <span className="font-medium tracking-wider">
-          0{index + 1}{" "}
-          <i
-            className="mx-[5px] not-italic text-[#b1bdc6]"
-            aria-hidden="true"
+      {testimonials.length > 1 ? (
+        <div className="mt-[18px] flex items-center justify-end gap-[14px] text-[12px] text-ink">
+          <motion.button
+            aria-label="Previous testimonial"
+            onClick={() => go(-1)}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+            className="grid size-[38px] place-items-center rounded-full border border-white/70 bg-white/50 text-navy backdrop-blur-md backdrop-saturate-150 shadow-[0_4px_12px_rgba(0,51,78,0.06),_inset_0_1px_1px_rgba(255,255,255,0.8)] transition-all duration-200 hover:border-blue hover:bg-blue hover:text-white"
           >
-            /
-          </i>{" "}
-          0{items.length}
-        </span>
+            <ChevronLeft
+              size={18}
+              aria-hidden="true"
+            />
+          </motion.button>
 
-        <motion.button
-          aria-label="Next testimonial"
-          onClick={() => go(1)}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.95 }}
-          className="grid size-[38px] place-items-center rounded-full border border-white/70 bg-white/50 text-navy backdrop-blur-md backdrop-saturate-150 shadow-[0_4px_12px_rgba(0,51,78,0.06),_inset_0_1px_1px_rgba(255,255,255,0.8)] transition-all duration-200 hover:border-blue hover:bg-blue hover:text-white"
-        >
-          <ChevronRight size={18} aria-hidden="true" />
-        </motion.button>
-      </div>
+          <span className="font-medium tracking-wider">
+            {String(index + 1).padStart(2, "0")}{" "}
+            <i
+              className="mx-[5px] not-italic text-[#b1bdc6]"
+              aria-hidden="true"
+            >
+              /
+            </i>{" "}
+            {String(testimonials.length).padStart(
+              2,
+              "0",
+            )}
+          </span>
+
+          <motion.button
+            aria-label="Next testimonial"
+            onClick={() => go(1)}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+            className="grid size-[38px] place-items-center rounded-full border border-white/70 bg-white/50 text-navy backdrop-blur-md backdrop-saturate-150 shadow-[0_4px_12px_rgba(0,51,78,0.06),_inset_0_1px_1px_rgba(255,255,255,0.8)] transition-all duration-200 hover:border-blue hover:bg-blue hover:text-white"
+          >
+            <ChevronRight
+              size={18}
+              aria-hidden="true"
+            />
+          </motion.button>
+        </div>
+      ) : null}
     </div>
   );
 }
