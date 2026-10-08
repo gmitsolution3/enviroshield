@@ -19,42 +19,40 @@ export default function ServicesSectionContent({
 
   return (
     <section
-      className="
-        relative overflow-hidden
-        bg-[linear-gradient(to_bottom,var(--deep)_0,var(--deep)_368px,#fff_368px,#fff_100%)]
-        py-[76px] pb-[106px]
-        md:bg-[linear-gradient(to_bottom,var(--deep)_0,var(--deep)_330px,#fff_330px,#fff_100%)]
-        md:py-[58px] md:pb-[76px]
-      "
+      className="relative overflow-hidden bg-white"
       aria-labelledby="services-heading"
     >
-      <Container>
-        <motion.div
-          className="
-            mb-[31px] block min-h-0
-            md:flex md:min-h-[165px] md:items-start md:justify-between md:gap-8
-          "
-          initial={reduce ? false : { opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={viewportOnce}
-          transition={{ duration: 0.65, ease: EASE }}
-        >
-          <SectionHeader
-            eyebrow="OUR SERVICES"
-            title="Professional Waterproofing & Protective Solutions"
-            light
-            headingId="services-heading"
-          />
-
-          <Button
-            href="/services"
-            variant="light"
-            className="mt-[25px] shrink-0 md:mt-[38px]"
+      {/* Blue band: bottom padding = half card height + breathing room */}
+      <div className="bg-[var(--deep)] pt-[76px] pb-[280px] md:pt-[58px] md:pb-[310px]">
+        <Container>
+          <motion.div
+            className="block md:flex md:items-start md:justify-between md:gap-8"
+            initial={reduce ? false : { opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={viewportOnce}
+            transition={{ duration: 0.65, ease: EASE }}
           >
-            View all services
-          </Button>
-        </motion.div>
+            <SectionHeader
+              eyebrow="OUR SERVICES"
+              title="Complete Protection for Every Surface"
+              text="From waterproofing and flooring to heat insulation and protective construction solutions, Enviro Shield delivers reliable systems designed to protect, strengthen, and extend the life of your property."
+              light
+              headingId="services-heading"
+            />
 
+            <Button
+              href="/services"
+              variant="light"
+              className="mt-[25px] shrink-0 md:mt-[38px]"
+            >
+              View all services
+            </Button>
+          </motion.div>
+        </Container>
+      </div>
+
+      {/* Cards: pulled up by exactly half the card height (220px / 240px) */}
+      <Container className="relative z-10 -mt-[220px] pb-[106px] md:-mt-[240px] md:pb-[76px]">
         {services.length > 0 ? (
           <div
             className="
@@ -67,11 +65,11 @@ export default function ServicesSectionContent({
             aria-label="Featured services"
           >
             <div
-  className="
-    flex w-max gap-[14px]
-    md:grid md:w-auto md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] md:gap-5
-  "
->
+              className="
+                flex w-max gap-[14px]
+                md:grid md:w-auto md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] md:gap-5
+              "
+            >
               {services.map((service, index) => (
                 <div
                   key={service._id}
@@ -93,7 +91,7 @@ export default function ServicesSectionContent({
               border border-white/10
               bg-white
               px-6 py-12
-              text-center z-10 shadow
+              text-center shadow
             "
             initial={reduce ? false : { opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
