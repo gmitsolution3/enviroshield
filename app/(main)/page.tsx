@@ -12,7 +12,7 @@ import WorkProcessSection from "@/components/home/WorkProcessSection";
 
 export const metadata: Metadata = {
   title:
-    "Waterproofing, Flooring & Protective Coating Solutions | Enviroshield",
+    "Best Waterproofing, Flooring & Protective Coating Solutions In Bangladesh | Enviroshield",
   description:
     "Enviroshield provides professional waterproofing, flooring, heat insulation, injection grouting, polished concrete, and protective coating solutions for residential, commercial, and industrial spaces.",
 };

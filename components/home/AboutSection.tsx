@@ -32,9 +32,33 @@ const avatars = [
 ];
 
 const photoClass =
-  "group relative h-[270px] overflow-hidden rounded-[18px] max-[600px]:h-[170px]";
+  "group relative h-[340px] overflow-hidden rounded-[18px] max-[600px]:h-[210px]";
 const imgClass =
   "object-cover transition-transform duration-[0.6s] group-hover:scale-[1.04]";
+
+function PhotoFx() {
+  return (
+    <>
+      {/* soft darken */}
+      <span
+        className="pointer-events-none absolute inset-0 bg-navy/25 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        aria-hidden="true"
+      />
+
+      {/* inner frame */}
+      <span
+        className="pointer-events-none absolute inset-3 scale-110 rounded-[12px] border border-white/80 opacity-0 transition-all duration-500 ease-out group-hover:scale-100 group-hover:opacity-100"
+        aria-hidden="true"
+      />
+
+      {/* diagonal shine */}
+      <span
+        className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/45 to-transparent transition-transform duration-[900ms] ease-out group-hover:translate-x-[500%]"
+        aria-hidden="true"
+      />
+    </>
+  );
+}
 
 export default function AboutSection() {
   return (
@@ -42,7 +66,7 @@ export default function AboutSection() {
       aria-labelledby="about-heading"
       className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
     >
-      <Container className="grid grid-cols-2 items-center gap-24 max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
+      <Container className="grid grid-cols-2 items-center gap-16 max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
         {/* ---------- Left: image collage ---------- */}
         <Reveal dir="image">
           <div className="grid grid-cols-2 gap-5 max-[900px]:mx-auto max-[900px]:w-full max-[900px]:max-w-[580px] max-[600px]:gap-3">
@@ -56,6 +80,7 @@ export default function AboutSection() {
                   sizes="(max-width: 900px) 45vw, 25vw"
                   className={imgClass}
                 />
+                <PhotoFx />
               </div>
 
               <div className="flex h-[128px] flex-col items-center justify-center gap-2 rounded-[18px] bg-mist max-[600px]:h-[100px]">
@@ -95,6 +120,7 @@ export default function AboutSection() {
                   sizes="(max-width: 900px) 45vw, 25vw"
                   className={imgClass}
                 />
+                <PhotoFx />
               </div>
               <div className={photoClass}>
                 <Image
@@ -104,6 +130,7 @@ export default function AboutSection() {
                   sizes="(max-width: 900px) 45vw, 25vw"
                   className={imgClass}
                 />
+                <PhotoFx />
               </div>
             </div>
           </div>
@@ -131,7 +158,7 @@ export default function AboutSection() {
                 className="flex items-center gap-2 text-[15px] font-medium text-navy"
               >
                 <span
-                  className="grid h-5 w-5 flex-none place-items-center rounded-full bg-navy text-white"
+                  className="grid h-5 w-5 flex-none place-items-center rounded-full bg-blue text-white"
                   aria-hidden="true"
                 >
                   <Check size={12} strokeWidth={3.5} />
