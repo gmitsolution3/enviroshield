@@ -193,6 +193,13 @@ const values = [
   },
 ];
 
+const CHAIRMAN = {
+  name: "Chairman Name", // replace
+  title: "Chairman, Enviro Shield", // replace
+  image: "/images/chairman.jpg", // replace with the real photo (portrait works best)
+  alt: "Portrait of the Chairman of Enviro Shield",
+};
+
 export default function AboutPage() {
   return (
     <>
@@ -314,6 +321,120 @@ export default function AboutPage() {
                   </StaggerItem>
                 ))}
               </StaggerContainer>
+            </div>
+          </Reveal>
+        </Container>
+      </section>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* CHAIRMAN                                                           */}
+      {/* ------------------------------------------------------------------ */}
+
+      <section
+        aria-labelledby="chairman-heading"
+        className="bg-soft pb-[112px] pt-[120px] max-[900px]:pb-20 max-[900px]:pt-[110px] max-[600px]:pb-16"
+      >
+        <Container>
+          <Reveal dir="up">
+            <div className="relative rounded-[32px] bg-gradient-to-br from-blue via-blue to-navy px-14 pb-14 pt-14 shadow-[0_40px_80px_-30px_rgba(1,110,220,0.6)] max-[900px]:px-8 max-[900px]:pb-10 max-[600px]:px-6 max-[600px]:pt-[150px]">
+              {/* decoration, clipped to the panel */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 overflow-hidden rounded-[32px]"
+              >
+                <span className="absolute -right-24 -top-24 size-80 rounded-full bg-white/10 blur-3xl" />
+                <span className="absolute -bottom-32 left-1/4 size-80 rounded-full bg-paste/20 blur-3xl" />
+                <span className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.14)_1px,transparent_1px)] bg-[length:24px_24px]" />
+                <span className="absolute -bottom-10 right-10 select-none font-serif text-[360px] leading-none text-white/[0.07] max-[900px]:hidden">
+                  &rdquo;
+                </span>
+              </div>
+
+              <div className="relative grid grid-cols-[0.8fr_1.2fr] items-center gap-16 max-[900px]:grid-cols-1 max-[900px]:gap-10">
+                {/* Portrait: pops out of the top of the panel */}
+                <div className="relative -mt-28 max-[900px]:mx-auto max-[900px]:w-full max-[900px]:max-w-[360px] max-[600px]:absolute max-[600px]:-top-[110px] max-[600px]:left-1/2 max-[600px]:mt-0 max-[600px]:w-[240px] max-[600px]:-translate-x-1/2">
+                  {/* offset frame */}
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-0 translate-x-4 translate-y-4 rounded-[28px] border-2 border-white/40"
+                  />
+
+                  <div className="group relative aspect-[4/5] overflow-hidden rounded-[28px] border-[6px] border-white bg-navy shadow-[0_30px_60px_-20px_rgba(0,18,33,0.7)]">
+                    <Image
+                      src={CHAIRMAN.image}
+                      alt={CHAIRMAN.alt}
+                      fill
+                      sizes="(max-width: 900px) 70vw, 30vw"
+                      className={`${imgClass} object-top`}
+                    />
+                    <PhotoFx />
+                  </div>
+
+                  {/* name plate */}
+                  <div className="absolute -bottom-6 left-1/2 w-[86%] -translate-x-1/2 rounded-[16px] bg-white px-5 py-3.5 text-center shadow-[0_20px_40px_-12px_rgba(0,18,33,0.45)] max-[600px]:-bottom-5 max-[600px]:px-3 max-[600px]:py-2.5">
+                    <strong className="block text-[17px] font-extrabold tracking-[-0.02em] text-navy max-[600px]:text-[15px]">
+                      {CHAIRMAN.name}
+                    </strong>
+                    <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-blue">
+                      {CHAIRMAN.title}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Message */}
+                <div className="max-[900px]:pt-6">
+                  <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
+                    <span
+                      className="h-[2px] w-7 bg-current"
+                      aria-hidden="true"
+                    />
+                    MESSAGE FROM THE CHAIRMAN
+                  </div>
+
+                  <h2
+                    id="chairman-heading"
+                    className="mb-6 text-[clamp(30px,3.6vw,46px)] font-extrabold leading-[1.1] tracking-[-0.04em] text-white"
+                  >
+                    Protection is a promise we build into{" "}
+                    <span className="text-paste">
+                      every property.
+                    </span>
+                  </h2>
+
+                  {/* Replace with the Chairman's real message */}
+                  <div className="space-y-4 border-l-[3px] border-paste pl-6 text-[16px] leading-[1.75] text-white/85 max-[600px]:pl-4">
+                    <p>
+                      Since 2009, our goal has been simple: to bring
+                      dependable protection and honest workmanship to
+                      every project we take on. Behind every finished
+                      surface is careful preparation, quality
+                      materials, and a team that takes pride in
+                      lasting results.
+                    </p>
+                    <p>
+                      We will keep investing in our people, our
+                      technology, and our relationships, so that every
+                      client can trust Enviro Shield to protect what
+                      matters most.
+                    </p>
+                  </div>
+
+                  <div className="mt-8 flex items-center gap-4">
+                    <span
+                      aria-hidden="true"
+                      className="h-px w-14 bg-white/40"
+                    />
+                    <div>
+                      <strong className="block text-[18px] font-extrabold text-white">
+                        {CHAIRMAN.name}
+                      </strong>
+                      <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-white/65">
+                        {CHAIRMAN.title}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </Reveal>
         </Container>
