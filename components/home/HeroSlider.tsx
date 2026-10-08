@@ -21,35 +21,47 @@ import { useEffect, useState } from "react";
 const slides: ISlide[] = [
   {
     id: 1,
-    bg: "https://images.pexels.com/photos/7546769/pexels-photo-7546769.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600",
-    alt: "Professionally painted and finished interior space",
-    eyebrow: "TRANSFORM YOUR SPACE",
-    heading: "Beautiful walls.\nBetter spaces.",
-    text: "Professional painting and wall finishing solutions designed to transform your home or business with precision and care.",
-    cta: "Start your transformation",
+    bg: "/images/slide-one.webp",
+    alt: "Professional waterproofing work protecting a building structure",
+    eyebrow: "GLOBAL EXPERTISE. LOCAL PRESENCE.",
+    heading: "An *Australian Brand* in Bangladesh\nSince 2009",
+    text: "Trusted waterproofing company in Bangladesh offering expert solutions to protect your property from water damage, ensuring durability and structural integrity.",
+    cta: "Talk to our experts",
     href: "/contact",
   },
   {
     id: 2,
-    bg: "https://images.pexels.com/photos/16751235/pexels-photo-16751235.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600",
-    alt: "Interior space with a professionally finished feature wall",
-    eyebrow: "TRANSFORM YOUR SPACE",
-    heading: "Color that changes\neverything.",
-    text: "From subtle finishes to bold statement walls, we bring your vision to life with exceptional craftsmanship.",
-    cta: "Explore our services",
-    href: "/services",
+    bg: "/images/slide-two.png",
+    alt: "Professional application of high-performance protective solutions",
+    eyebrow: "PROTECTION. PERFORMANCE. PRECISION.",
+    heading: "Built to protect.\n*Engineered to last.*",
+    text: "From waterproofing and flooring to heat insulation and construction solutions, we deliver reliable systems designed for lasting performance.",
+    cta: "Get in touch",
+    href: "/contact",
   },
   {
     id: 3,
-    bg: "https://images.pexels.com/photos/8135503/pexels-photo-8135503.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600",
-    alt: "Interior surface with professional painting and finishing",
-    eyebrow: "TRANSFORM YOUR SPACE",
-    heading: "Crafted for lasting\nimpressions.",
-    text: "Premium surface preparation, painting, and finishing solutions built around quality, detail, and reliability.",
-    cta: "Get a free quote",
+    bg: "/images/slide-three.webp",
+    alt: "Modern building protected with professional construction solutions",
+    eyebrow: "EXPERTISE YOU CAN TRUST",
+    heading: "Stronger protection.\n*Smarter solutions.*",
+    text: "We combine proven technology, quality materials, and technical expertise to deliver dependable protection for residential, commercial, and industrial projects.",
+    cta: "Start your project",
     href: "/contact",
   },
 ];
+
+function renderHeadingLine(line: string) {
+  return line.split(/(\*[^*]+\*)/g).map((part, i) =>
+    part.length > 2 && part.startsWith("*") && part.endsWith("*") ? (
+      <span key={i} className="text-paste">
+        {part.slice(1, -1)}
+      </span>
+    ) : (
+      part
+    ),
+  );
+}
 
 export default function Hero() {
   const [index, setIndex] = useState(0);
@@ -78,7 +90,7 @@ export default function Hero() {
 
   return (
     <section
-      className="relative flex min-h-[670px] items-center overflow-hidden bg-[#123] max-[900px]:min-h-[620px] max-[600px]:min-h-[680px]"
+      className="relative flex min-h-[700px] items-center overflow-hidden bg-[#123] max-[900px]:min-h-[620px] max-[600px]:min-h-[680px]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -103,6 +115,7 @@ export default function Hero() {
             fill
             priority={index === 0}
             sizes="100vw"
+            style={{ objectFit: "cover", objectPosition: "center" }}
           />
         </motion.div>
       </AnimatePresence>
@@ -154,7 +167,7 @@ export default function Hero() {
               >
                 {headingLines.map((line, i) => (
                   <span key={i}>
-                    {line}
+                    {renderHeadingLine(line)}
                     {i < headingLines.length - 1 && <br />}
                   </span>
                 ))}
