@@ -89,7 +89,7 @@ export default function ServicesSectionContent({
               flex min-h-[280px] flex-col items-center justify-center
               rounded-[24px]
               border border-white/10
-              bg-white
+              bg-mist
               px-6 py-12
               text-center shadow
             "

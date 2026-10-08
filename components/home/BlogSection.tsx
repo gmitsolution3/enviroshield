@@ -24,19 +24,20 @@ export default async function BlogSection() {
   return (
     <section
       aria-labelledby="blog-heading"
-      className="py-[112px] pb-[120px] max-[900px]:py-20 max-[900px]:pb-[120px] max-[600px]:py-16 max-[600px]:pb-[120px]"
+      className="py-[112px] pb-[120px] max-[900px]:py-20 max-[900px]:pb-[120px] max-[600px]:py-16 max-[600px]:pb-[120px] shadow"
     >
       <Container>
         <div className="mb-12 flex items-end justify-between max-[900px]:flex-col max-[900px]:items-start max-[900px]:gap-[25px]">
           <SectionHeader
-            eyebrow="OUR JOURNAL"
-            title="Insights, ideas & inspiration"
+            eyebrow="ENVIRO SHIELD INSIGHTS"
+            title="Expert insights for better protection"
+            text="Discover practical advice, industry insights, and expert guidance on waterproofing, flooring, heat insulation, and protecting your property for the long term."
             headingId="blog-heading"
           />
 
           <Reveal dir="up" delay={0.1}>
             <Button href="/blog" variant="outline">
-              View all articles
+              Explore all insights
             </Button>
           </Reveal>
         </div>
@@ -52,12 +53,13 @@ export default async function BlogSection() {
         ) : (
           <div className="rounded-[18px] border border-line bg-mist px-6 py-12 text-center">
             <h3 className="text-[24px] font-extrabold tracking-[-0.03em] text-navy">
-              No articles available
+              Our insights are coming soon
             </h3>
 
             <p className="mx-auto mt-3 max-w-[560px] text-[14px] leading-[1.7] text-ink">
-              We&apos;re currently updating our journal. Please check
-              back soon.
+              We&apos;re preparing practical insights and expert
+              guidance on waterproofing, flooring, insulation, and
+              long-term building protection. Please check back soon.
             </p>
           </div>
         )}
