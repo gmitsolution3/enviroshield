@@ -1,9 +1,9 @@
 import { getPublishedTestimonials } from "@/lib/api/testimonials";
+import { ITestimonial } from "@/types";
 import Container from "../Container";
 import { Reveal } from "../Reveal";
 import { SectionHeader } from "../SectionHeader";
 import { TestimonialCarousel } from "../TestimonialCarousel";
-import {ITestimonial} from "@/types";
 
 export default async function TestimonialSection() {
   let testimonials: ITestimonial[] = [];
@@ -26,9 +26,9 @@ export default async function TestimonialSection() {
     >
       <Container className="grid grid-cols-2 items-center gap-[90px] max-[900px]:grid-cols-1 max-[900px]:gap-[30px]">
         <SectionHeader
-          eyebrow="TESTIMONIALS"
-          title="What our clients are saying"
-          text="Real experiences from homeowners and businesses we have helped transform."
+          eyebrow="CLIENT TESTIMONIALS"
+          title="Trusted by clients. Proven through results."
+          text="Hear from the people and businesses who have trusted Enviro Shield to protect their properties with reliable, professional waterproofing and construction solutions."
           headingId="testimonials-heading"
         />
 
