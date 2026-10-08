@@ -27,7 +27,7 @@ export default function ServiceCard({
 
   return (
     <motion.article
-      className="group relative isolate flex aspect-[4/5.4] flex-col justify-end overflow-hidden rounded-[32px] bg-navy shadow-[0_2px_8px_rgba(0,51,78,0.08)] transition-shadow duration-500 hover:shadow-[0_24px_48px_-12px_rgba(1,110,220,0.35)]"
+      className="group relative isolate flex h-[440px] flex-col justify-end overflow-hidden rounded-[32px] bg-navy shadow-[0_2px_8px_rgba(0,51,78,0.08)] transition-shadow duration-500 hover:shadow-[0_24px_48px_-12px_rgba(1,110,220,0.35)] md:h-[480px]"
       variants={fadeUp}
       initial="hidden"
       whileInView="visible"
@@ -116,23 +116,23 @@ export default function ServiceCard({
         {/* CTA: collapsed until the card is hovered or focused */}
         <div
           className="
-    relative z-30 -mt-[14px] grid grid-rows-[0fr]
-    transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]
-    group-hover:grid-rows-[1fr] group-focus-within:grid-rows-[1fr]
-    [@media(hover:none)]:grid-rows-[1fr]
-    motion-reduce:transition-none
-  "
+            relative z-30 -mt-[14px] grid grid-rows-[0fr]
+            transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]
+            group-hover:grid-rows-[1fr] group-focus-within:grid-rows-[1fr]
+            [@media(hover:none)]:grid-rows-[1fr]
+            motion-reduce:transition-none
+          "
         >
           <div className="min-h-0 overflow-hidden">
             <div
               className="
-        pt-[18px] opacity-0 translate-y-3
-        transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]
-        group-hover:opacity-100 group-hover:translate-y-0 group-hover:delay-100
-        group-focus-within:opacity-100 group-focus-within:translate-y-0
-        [@media(hover:none)]:opacity-100 [@media(hover:none)]:translate-y-0
-        motion-reduce:transition-none
-      "
+                pt-[18px] opacity-0 translate-y-3
+                transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]
+                group-hover:opacity-100 group-hover:translate-y-0 group-hover:delay-100
+                group-focus-within:opacity-100 group-focus-within:translate-y-0
+                [@media(hover:none)]:opacity-100 [@media(hover:none)]:translate-y-0
+                motion-reduce:transition-none
+              "
             >
               <Button
                 href={`/services/${service.slug}`}

@@ -67,12 +67,11 @@ export default function ServicesSectionContent({
             aria-label="Featured services"
           >
             <div
-              className="
-                flex w-max gap-[14px]
-                md:grid md:w-auto md:grid-cols-2 md:gap-5
-                lg:grid-cols-3
-              "
-            >
+  className="
+    flex w-max gap-[14px]
+    md:grid md:w-auto md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] md:gap-5
+  "
+>
               {services.map((service, index) => (
                 <div
                   key={service._id}
@@ -92,26 +91,26 @@ export default function ServicesSectionContent({
               flex min-h-[280px] flex-col items-center justify-center
               rounded-[24px]
               border border-white/10
-              bg-white/[0.04]
+              bg-white
               px-6 py-12
-              text-center
+              text-center z-10 shadow
             "
             initial={reduce ? false : { opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={viewportOnce}
             transition={{ duration: 0.55, ease: EASE }}
           >
-            <h3 className="text-[22px] font-semibold tracking-[-0.02em] text-white">
+            <h3 className="text-[22px] font-semibold tracking-[-0.02em] text-ink">
               No featured services available
             </h3>
 
-            <p className="mt-3 max-w-[520px] text-[14px] leading-[1.6] text-white/65">
+            <p className="mt-3 max-w-[520px] text-[14px] leading-[1.6] text-ink/65">
               We&apos;re currently updating our featured services.
               Please check back soon or explore all of our available
               services.
             </p>
 
-            <Button href="/services" variant="light" className="mt-6">
+            <Button href="/services" className="mt-6">
               Explore all services
             </Button>
           </motion.div>

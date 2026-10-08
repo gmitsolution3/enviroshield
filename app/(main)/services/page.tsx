@@ -107,7 +107,7 @@ export default async function ServicesPage({
 
   const result = await getPublishedServices({
     page,
-    limit: 10,
+    limit: 12,
   });
 
   const services = result.data;
@@ -135,12 +135,9 @@ export default async function ServicesPage({
 
           {services.length > 0 ? (
             <>
-              <StaggerContainer className="mt-12 grid grid-cols-3 gap-[22px] max-[900px]:grid-cols-2 max-[600px]:flex max-[600px]:overflow-auto max-[600px]:snap-x max-[600px]:snap-mandatory max-[600px]:mr-[-16px] max-[600px]:pr-4 max-[600px]:pb-2">
+              <StaggerContainer className="mt-12 grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-[22px]">
                 {services.map((service, index) => (
-                  <StaggerItem
-                    key={service._id}
-                    className="max-[600px]:min-w-[280px] max-[600px]:snap-start"
-                  >
+                  <StaggerItem key={service._id}>
                     <ServiceCard service={service} index={index} />
                   </StaggerItem>
                 ))}
