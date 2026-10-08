@@ -22,7 +22,7 @@ const slides: ISlide[] = [
   {
     id: 1,
     bg: "/images/slide-one.webp",
-    alt: "Professional waterproofing work protecting a building structure",
+    alt: "Professional roof waterproofing team applying protective coating to a commercial building",
     eyebrow: "GLOBAL EXPERTISE. LOCAL PRESENCE.",
     heading: "An *Australian Brand* in Bangladesh\nSince 2009",
     text: "Trusted waterproofing company in Bangladesh offering expert solutions to protect your property from water damage, ensuring durability and structural integrity.",
@@ -32,7 +32,7 @@ const slides: ISlide[] = [
   {
     id: 2,
     bg: "/images/slide-two.png",
-    alt: "Professional application of high-performance protective solutions",
+    alt: "Industrial epoxy flooring application for a durable and high-performance factory floor",
     eyebrow: "PROTECTION. PERFORMANCE. PRECISION.",
     heading: "Built to protect.\n*Engineered to last.*",
     text: "From waterproofing and flooring to heat insulation and construction solutions, we deliver reliable systems designed for lasting performance.",
@@ -42,7 +42,7 @@ const slides: ISlide[] = [
   {
     id: 3,
     bg: "/images/slide-three.webp",
-    alt: "Modern building protected with professional construction solutions",
+    alt: "Professional rooftop waterproofing application protecting a commercial building from water damage",
     eyebrow: "EXPERTISE YOU CAN TRUST",
     heading: "Stronger protection.\n*Smarter solutions.*",
     text: "We combine proven technology, quality materials, and technical expertise to deliver dependable protection for residential, commercial, and industrial projects.",

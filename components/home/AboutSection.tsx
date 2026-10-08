@@ -138,24 +138,24 @@ export default function AboutSection() {
 
         <div>
           <SectionHeader
-            eyebrow="ABOUT US"
-            title="We don’t just paint walls. We transform spaces."
-            text="At Enviroshield, we believe walls are more than surfaces. They are opportunities to express personality, comfort, and style. Our team combines professional craftsmanship with thoughtful design to create spaces that feel truly yours."
+            eyebrow="ABOUT ENVIRO SHIELD"
+            title="Protecting what matters. Building with confidence."
+            text="Since 2009, Enviro Shield has been delivering professional waterproofing and protective construction solutions in Bangladesh. As an Australian brand, we combine proven expertise, quality materials, and dependable workmanship to help protect buildings and extend their service life."
             headingId="about-heading"
           />
 
           <StaggerContainer className="mb-[30px] grid grid-cols-2 gap-x-[22px] gap-y-[15px] max-[600px]:grid-cols-1 max-[600px]:gap-3">
             {[
-              "Your Vision Our Expertise",
-              "Your Space Is Our Inspiration",
-              "Walls Are Our Canvas",
-              "Beautiful Walls, Built on Trust",
-              "24/7 Availability",
-              "Passionate About Quality",
+              "Australian Expertise, Local Experience",
+              "Solutions Built for Long-Term Protection",
+              "Quality Materials, Professional Application",
+              "Residential, Commercial & Industrial Solutions",
+              "Technical Expertise You Can Rely On",
+              "Committed to Quality & Customer Satisfaction",
             ].map((item) => (
               <StaggerItem
                 key={item}
-                className="flex items-center gap-2 text-[15px] font-medium text-navy"
+                className="flex items-center gap-2 text-[15px] font-medium text-navy whitespace-nowrap"
               >
                 <span
                   className="grid h-5 w-5 flex-none place-items-center rounded-full bg-blue text-white"
@@ -186,10 +186,19 @@ export default function AboutSection() {
                 Projects completed
               </span>
             </div>
+
+            <div>
+              <strong className="block text-[34px] tracking-[-0.04em] text-navy max-[600px]:text-[28px]">
+                <AnimatedCounter value={17} suffix="+" />
+              </strong>
+              <span className="text-[12px] text-ink">
+                Years of experience
+              </span>
+            </div>
           </div>
 
           <Button href="/about" variant="outline">
-            More about us
+            Discover our story
           </Button>
         </div>
       </Container>
