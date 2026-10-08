@@ -4,6 +4,7 @@ import {
   FileText,
   FolderKanban,
   LayoutDashboard,
+  Mail,
   MessageSquareQuote,
   Settings,
   User,
@@ -23,6 +24,7 @@ export const dashboardIcons = {
   services: Wrench,
   projects: FolderKanban,
   testimonials: MessageSquareQuote,
+  contacts: Mail,
 } satisfies Record<string, LucideIcon>;
 
 export type DashboardIcon = keyof typeof dashboardIcons;
@@ -87,6 +89,11 @@ export const dashboardNavigation: Record<
       title: "Blog Management",
       href: "/dashboard/blogs",
       icon: "documents",
+    },
+    {
+      title: "Contact Management",
+      href: "/dashboard/contacts",
+      icon: "contacts",
     },
     {
       title: "Users",
