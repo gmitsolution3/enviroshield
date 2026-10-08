@@ -45,7 +45,7 @@ export default function ContactSection({
             viewport={viewportOnce}
             transition={{ delay: reduce ? 0 : 0.05 }}
           >
-            Let&rsquo;s create something beautiful together.
+            Let&rsquo;s protect your property together.
           </motion.h2>
 
           <motion.p
@@ -56,9 +56,9 @@ export default function ContactSection({
             viewport={viewportOnce}
             transition={{ delay: reduce ? 0 : 0.1 }}
           >
-            Have a room in mind? Tell us a little about it and
-            we&rsquo;ll help you find the right finish, feel, and way
-            forward.
+            Have a waterproofing or construction project in mind? Tell
+            us about your requirements and our team will help you find
+            the right solution for lasting protection and performance.
           </motion.p>
 
           <motion.address

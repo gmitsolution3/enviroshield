@@ -18,8 +18,8 @@ export default function Footer() {
       links: [
         { label: "About us", href: "/about" },
         { label: "Our services", href: "/services" },
-        { label: "Products", href: "/products" },
-        { label: "Journal", href: "/blog" },
+        { label: "Projects", href: "/projects" },
+        { label: "Insights", href: "/blog" },
       ],
     },
   ];
@@ -38,8 +38,9 @@ export default function Footer() {
           <Logo light />
 
           <p className="mb-[22px] mt-[22px] max-w-[230px] text-[13px] leading-[1.7] text-[#91afbd]">
-            Thoughtful painting and wall finishing for spaces that
-            feel beautifully yours.
+            Australian expertise delivering trusted waterproofing and
+            protective construction solutions in Bangladesh since
+            2009.
           </p>
 
           <div className="flex gap-2">
@@ -162,8 +163,10 @@ export default function Footer() {
 
       {/* Bottom */}
       <Container className="flex flex-col justify-between gap-2 border-t border-[#214a5d] py-5 text-[11px] text-[#7797a5] min-[601px]:flex-row">
-        <span>© 2026 Enviroshield. All rights reserved.</span>
-        <span>Crafted for better spaces.</span>
+        <span>© 2026 Enviro Shield. All rights reserved.</span>
+        <span>
+          Protecting what matters. Building with confidence.
+        </span>
       </Container>
     </footer>
   );
