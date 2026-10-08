@@ -27,7 +27,7 @@ export default function ServiceCard({
 
   return (
     <motion.article
-      className="group relative isolate flex h-[440px] flex-col justify-end overflow-hidden rounded-[32px] bg-navy shadow-[0_2px_8px_rgba(0,51,78,0.08)] transition-shadow duration-500 hover:shadow-[0_24px_48px_-12px_rgba(1,110,220,0.35)] md:h-[480px]"
+      className="group relative isolate flex h-[440px] flex-col justify-end overflow-hidden rounded-[32px] bg-navy shadow-[0_2px_8px_rgba(0,51,78,0.08)] transition-shadow duration-500 hover:shadow-[0_28px_56px_-14px_rgba(1,110,220,0.5)] md:h-[480px]"
       variants={fadeUp}
       initial="hidden"
       whileInView="visible"
@@ -41,13 +41,19 @@ export default function ServiceCard({
         alt={service.primaryImage.alt || service.name}
         fill
         sizes="(max-width: 768px) 90vw, 33vw"
-        className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+        className="object-cover object-top transition-transform duration-[900ms] ease-out group-hover:scale-[1.07]"
       />
 
       {/* Fade: image melts into the dark panel */}
       <div
         aria-hidden="true"
         className="absolute inset-0 bg-linear-to-t from-navy from-45% via-navy/85 via-60% to-transparent to-85%"
+      />
+
+      {/* Diagonal shine on hover */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-[1100ms] ease-out group-hover:translate-x-[500%] motion-reduce:hidden"
       />
 
       {/* Hairline ring */}
@@ -59,7 +65,7 @@ export default function ServiceCard({
       {/* Top-right glass button (decorative, link overlay handles click) */}
       <span
         aria-hidden="true"
-        className="absolute right-[16px] top-[16px] grid size-[44px] place-items-center rounded-full bg-white/20 text-white ring-1 ring-white/25 backdrop-blur-md transition-colors duration-300 group-hover:bg-blue"
+        className="absolute right-[16px] top-[16px] grid size-[44px] place-items-center rounded-full bg-white/20 text-white ring-1 ring-white/25 backdrop-blur-md transition-all duration-300 group-hover:scale-105 group-hover:bg-blue"
       >
         <ArrowUpRight
           size={18}

@@ -13,14 +13,14 @@ interface ProjectsSectionContentProps {
 }
 
 const masonryHeights = [
-  "h-[520px]",
-  "h-[360px]",
-  "h-[440px]",
+  "h-[500px]",
   "h-[400px]",
-  "h-[540px]",
-  "h-[380px]",
-  "h-[470px]",
+  "h-[450px]",
   "h-[420px]",
+  "h-[520px]",
+  "h-[400px]",
+  "h-[470px]",
+  "h-[430px]",
   "h-[500px]",
 ] as const;
 
@@ -37,41 +37,31 @@ export default function ProjectsSectionContent({
       <Container>
         <div className="mb-11 flex items-end justify-between max-[900px]:flex-col max-[900px]:items-start max-[900px]:gap-[25px]">
           <SectionHeader
-            eyebrow="OUR WORK"
-            title="See our work in action"
-            text="A few spaces we have had the pleasure of helping take shape."
+            eyebrow="OUR PROJECTS"
+            title="Protection in action."
+            text="Explore selected projects where our waterproofing, flooring, insulation, and protective construction solutions help buildings perform better and last longer."
             light
             headingId="projects-heading"
           />
 
           <Button href="/projects" variant="light">
-            View all projects
+            Explore our projects
           </Button>
         </div>
 
         {projects.length > 0 ? (
-          <div className="columns-3 gap-[18px] max-[900px]:columns-2 max-[600px]:columns-1">
+          <div className="columns-[320px] gap-[18px]">
             {projects.map((project, index) => (
               <motion.div
                 key={project._id}
-                className={`mb-[18px] break-inside-avoid ${masonryHeights[index % masonryHeights.length]} max-[600px]:h-[380px]`}
-                initial={
-                  reduce
-                    ? false
-                    : {
-                        opacity: 0,
-                        y: 30,
-                      }
-                }
-                whileInView={{
-                  opacity: 1,
-                  y: 0,
-                }}
+                className={`mb-[18px] break-inside-avoid ${masonryHeights[index % masonryHeights.length]} max-[600px]:h-[400px]`}
+                initial={reduce ? false : { opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={viewportOnce}
                 transition={{
                   duration: 0.6,
                   ease: EASE,
-                  delay: index * 0.08,
+                  delay: (index % 4) * 0.08,
                 }}
               >
                 <ProjectCard project={project} />
@@ -87,16 +77,18 @@ export default function ProjectsSectionContent({
             transition={{ duration: 0.6, ease: EASE }}
           >
             <h3 className="text-2xl font-semibold text-white">
-              No featured projects available
+              Our project portfolio is being updated
             </h3>
 
             <p className="mt-3 max-w-[560px] text-sm leading-6 text-white/65">
-              We're currently updating our featured projects. Please
-              check back soon or explore our full project portfolio.
+              We&apos;re currently updating our featured projects.
+              Explore our full portfolio to discover the protection
+              and construction solutions we deliver across different
+              applications.
             </p>
 
             <Button href="/projects" variant="light" className="mt-6">
-              Explore all projects
+              Explore our projects
             </Button>
           </motion.div>
         )}

@@ -94,15 +94,15 @@ export async function generateMetadata({
 }
 
 const masonryHeights = [
-  "h-[560px]",
-  "h-[390px]",
+  "h-[500px]",
+  "h-[400px]",
+  "h-[450px]",
+  "h-[420px]",
+  "h-[520px]",
+  "h-[400px]",
   "h-[470px]",
   "h-[430px]",
-  "h-[580px]",
-  "h-[380px]",
   "h-[500px]",
-  "h-[420px]",
-  "h-[540px]",
 ] as const;
 
 export default async function ProjectsPage({
@@ -117,7 +117,7 @@ export default async function ProjectsPage({
 
   const result = await getPublishedProjects({
     page,
-    limit: 10,
+    limit: 12,
   });
 
   const projects = result.data;
@@ -146,7 +146,7 @@ export default async function ProjectsPage({
 
           {projects.length > 0 ? (
             <>
-              <StaggerContainer className="mt-12 columns-3 gap-5 max-[900px]:columns-2 max-[600px]:columns-1">
+              <StaggerContainer className="mt-12 columns-[320px] gap-[18px]">
                 {projects.map((project, index) => {
                   const height =
                     masonryHeights[index % masonryHeights.length];
@@ -154,7 +154,7 @@ export default async function ProjectsPage({
                   return (
                     <StaggerItem
                       key={project._id}
-                      className={`mb-5 break-inside-avoid ${height}`}
+                      className={`mb-[18px] break-inside-avoid ${height} max-[600px]:h-[400px]`}
                     >
                       <ProjectCard project={project} />
                     </StaggerItem>
