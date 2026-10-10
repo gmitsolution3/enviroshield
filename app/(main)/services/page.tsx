@@ -40,8 +40,8 @@ export async function generateMetadata({
     : `Waterproofing, Flooring & Protective Coating Services — Page ${page} | Enviroshield`;
 
   const description = isFirstPage
-    ? "Explore Enviroshield's professional waterproofing, flooring, heat insulation, injection grouting, polished concrete, and protective coating solutions for residential, commercial, and industrial spaces."
-    : `Explore more of Enviroshield's waterproofing, flooring, insulation, and protective coating services on page ${page}.`;
+    ? "Explore Enviroshield's waterproofing, waterproofing paint, heatproofing, epoxy and PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy floors, floor hardeners, and ETP coating in Bangladesh."
+    : `Explore more of Enviroshield's waterproofing, flooring, heatproofing, grouting, and protective coating services on page ${page}.`;
 
   const canonical = isFirstPage
     ? "/services"
@@ -52,17 +52,22 @@ export async function generateMetadata({
     description,
 
     keywords: [
+      "waterproofing",
       "waterproofing solutions",
       "waterproofing services",
       "waterproofing paint",
+      "heatproofing",
       "heat insulation",
       "epoxy flooring",
       "PU flooring",
       "injection grouting",
+      "expansion joint sealing",
       "sports flooring",
       "polished concrete",
+      "3D epoxy floor",
       "3D epoxy flooring",
       "floor hardener",
+      "ETP coating",
       "ETP protective coating",
       "Enviroshield",
     ],
@@ -141,7 +146,7 @@ export default async function ServicesPage({
       <PageHero
         eyebrow="OUR SERVICES"
         title="Professional waterproofing, flooring & protective coating solutions."
-        text="From waterproofing and heat insulation to epoxy, PU, sports flooring, injection grouting, polished concrete, and protective coatings, Enviroshield delivers durable solutions for residential, commercial, and industrial spaces."
+        text="Our core services include waterproofing, waterproofing paint, heatproofing, epoxy flooring, PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy floors, floor hardener, and ETP coating for residential, commercial, and industrial properties."
         image="/images/service-hero.jpg"
       />
 
@@ -189,7 +194,7 @@ export default async function ServicesPage({
           <SectionHeader
             eyebrow="WHAT WE DO"
             title="Complete waterproofing, flooring & protective coating solutions"
-            text="Explore our full range of professional solutions for waterproofing, flooring, insulation, grouting, concrete finishing, and protective coatings."
+            text="Explore our 12 core services: waterproofing, waterproofing paint, heatproofing, epoxy flooring, PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy floor, floor hardener, and ETP coating."
             headingId="services-page-heading"
           />
 
