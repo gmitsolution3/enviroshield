@@ -1,28 +1,45 @@
 "use client";
 
-import Link from "next/link";
-
+import SocialIcon from "@/components/icon/SocialIcons";
+import { Mail, MapPin, Phone } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-
+import Link from "next/link";
 import { fadeUp, viewportOnce } from "./animations/variants";
-
 import Container from "./Container";
 import Logo from "./Logo";
 
+const socials = [
+  {
+    name: "facebook",
+    label: "Facebook",
+    href: "https://www.facebook.com/",
+  },
+  {
+    name: "linkedin",
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/",
+  },
+  {
+    name: "instagram",
+    label: "Instagram",
+    href: "https://www.instagram.com/",
+  },
+];
+
+const cols = [
+  {
+    title: "Explore",
+    links: [
+      { label: "About us", href: "/about" },
+      { label: "Our services", href: "/services" },
+      { label: "Projects", href: "/projects" },
+      { label: "Insights", href: "/blog" },
+    ],
+  },
+];
+
 export default function Footer() {
   const reduce = useReducedMotion();
-
-  const cols = [
-    {
-      title: "Explore",
-      links: [
-        { label: "About us", href: "/about" },
-        { label: "Our services", href: "/services" },
-        { label: "Projects", href: "/projects" },
-        { label: "Insights", href: "/blog" },
-      ],
-    },
-  ];
 
   return (
     <footer className="bg-[#00283d] pt-[55px] text-[#a9c1ce] min-[601px]:pt-[75px]">
@@ -37,25 +54,29 @@ export default function Footer() {
         >
           <Logo light />
 
-          <p className="mb-[22px] mt-[22px] max-w-[230px] text-[13px] leading-[1.7] text-[#91afbd]">
-            Australian expertise delivering trusted waterproofing and
-            protective construction solutions in Bangladesh since
-            2009.
+          <p className="mb-[22px] mt-[22px] max-w-[280px] text-[13px] leading-[1.7] text-[#91afbd]">
+            Since 2009, Enviro Shield has delivered professional
+            waterproofing, heatproofing, flooring, grouting, and
+            protective coating solutions for residential, commercial,
+            and industrial properties in Bangladesh.
           </p>
 
           <div className="flex gap-2">
-            {["ig", "in", "f"].map((s) => (
-              <motion.span
-                key={s}
-                aria-hidden="true"
-                className="grid size-[29px] place-items-center rounded-[11px] border border-[#547482] text-[12px] text-[#d8e7ee]"
+            {socials.map((social) => (
+              <motion.a
+                key={social.name}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={social.label}
+                className="grid size-[34px] place-items-center rounded-[11px] border border-[#547482] text-[#d8e7ee] transition-colors duration-200 hover:border-white hover:bg-white/10 hover:text-white"
                 whileHover={
                   reduce ? undefined : { scale: 1.08, y: -2 }
                 }
                 transition={{ duration: 0.2 }}
               >
-                {s}
-              </motion.span>
+                <SocialIcon name={social.name} size={16} />
+              </motion.a>
             ))}
           </div>
         </motion.div>
@@ -139,25 +160,43 @@ export default function Footer() {
             Get in touch
           </h4>
 
-          <a
-            href="tel:+11234567890"
-            className="mb-[10px] block text-[13px] leading-[1.7] transition-colors duration-200 hover:text-white"
-          >
-            +1 123 456 7890
-          </a>
+          <div className="space-y-4">
+            <a
+              href="tel:+8801613220101"
+              className="flex items-start gap-3 text-[13px] leading-[1.7] transition-colors duration-200 hover:text-white"
+            >
+              <Phone
+                size={16}
+                className="mt-0.5 shrink-0 text-[#91afbd]"
+                aria-hidden="true"
+              />
+              <span>+8801613220101</span>
+            </a>
 
-          <a
-            href="mailto:hello@enviroshield.com"
-            className="mb-[10px] block text-[13px] leading-[1.7] transition-colors duration-200 hover:text-white"
-          >
-            hello@enviroshield.com
-          </a>
+            <a
+              href="mailto:enviroshield.bd@gmail.com"
+              className="flex items-start gap-3 text-[13px] leading-[1.7] transition-colors duration-200 hover:text-white"
+            >
+              <Mail
+                size={16}
+                className="mt-0.5 shrink-0 text-[#91afbd]"
+                aria-hidden="true"
+              />
+              <span>enviroshield.bd@gmail.com</span>
+            </a>
 
-          <p className="mb-[10px] text-[13px] leading-[1.7]">
-            45 Bridge Street
-            <br />
-            Brooklyn, NY 11201
-          </p>
+            <div className="flex items-start gap-3 text-[13px] leading-[1.7]">
+              <MapPin
+                size={16}
+                className="mt-0.5 shrink-0 text-[#91afbd]"
+                aria-hidden="true"
+              />
+              <span>
+                House No: 22/13-15, Block-B, Bauniabad R/A,
+                <br /> Mirpur 11, Pallabi, Dhaka 1216
+              </span>
+            </div>
+          </div>
         </motion.div>
       </Container>
 

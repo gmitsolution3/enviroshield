@@ -269,19 +269,23 @@ export default function AboutPage() {
                 Driven by protection.
               </h2>
 
-              <p className="mb-5 text-[18px] leading-[1.7] text-navy/85">
-                Since 2009, Enviro Shield has brought Australian
-                expertise to Bangladesh, providing professional
-                waterproofing and protective construction solutions
-                for properties across residential, commercial, and
-                industrial applications.
+              <p className="mb-5 text-[17px] leading-[1.7] text-navy/85">
+                Enviro Shield operates with two branches in Australia
+                and Bangladesh, specializing in industrial,
+                commercial, and residential flooring, waterproofing,
+                and construction chemical applications. The company
+                delivers a wide range of solutions including 7 layer
+                waterproofing systems, Waterproofing paint, floor
+                hardeners, Epoxy Floor Coatings, PU Flooring.
               </p>
 
-              <p className="mb-8 text-base leading-[1.75] text-ink">
-                Our approach combines quality materials, proven
-                technologies, technical expertise, and dependable
-                workmanship to deliver solutions built for durability,
-                performance, and long-term protection.
+              <p className="mb-8 text-[15px] leading-[1.75] text-ink">
+                Enviro Shield also provides Injection Grouting, Sports Flooring, Polished Concrete, 3D Epoxy Floor, heat insulation solutions, and ETP Protective Coating systems, ensuring durable, high-performance protection for various construction needs. 
+
+                <br />
+                <br />
+
+                The company is guided by its Chief Adviser, Engr. Tony Stephen, a well-known consultant and waterproofing specialist in Australia. Engr. Md. Mahbubur Rahman, the Chief Executive Officer, is certified and highly experienced in construction and waterproofing practices from Australia, ensuring international-quality standards across all projects.
               </p>
 
               <ul className="divide-y divide-line border-y border-line">

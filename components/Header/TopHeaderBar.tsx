@@ -7,24 +7,25 @@ export default function TopHeaderBar() {
       <Container className="flex h-full items-center justify-between">
         <span className="flex items-center gap-[7px] font-normal">
           <MapPin size={14} aria-hidden="true" />
-          Serving homes and businesses with care
+          House No: 22/13-15, Block-B, Bauniabad R/A, Mirpur 11,
+          Pallabi, Dhaka 1216
         </span>
 
         <span className="flex items-center gap-6">
           <a
-            href="mailto:hello@enviroshield.com"
+            href="mailto:enviroshield.bd@gmail.com"
             className="flex items-center gap-[7px]"
           >
             <Mail size={14} aria-hidden="true" />
-            hello@enviroshield.com
+            enviroshield.bd@gmail.com
           </a>
 
           <a
-            href="tel:+11234567890"
+            href="tel:+8801613220101"
             className="flex items-center gap-[7px]"
           >
             <Phone size={14} aria-hidden="true" />
-            +1 123 456 7890
+            +8801613220101
           </a>
         </span>
       </Container>
