@@ -185,6 +185,7 @@ export default function AboutPage() {
         eyebrow="ABOUT ENVIRO SHIELD"
         title="Australian expertise. Trusted protection since 2009."
         text="Enviro Shield is an Australian brand in Bangladesh delivering professional waterproofing and protective construction solutions designed to protect properties and extend their service life."
+        image="/images/service-hero.jpg"
       />
 
       {/* ------------------------------------------------------------------ */}

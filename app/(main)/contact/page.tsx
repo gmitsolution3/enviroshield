@@ -39,7 +39,7 @@ export default function ContactPage() {
         eyebrow="CONTACT US"
         title="Let's create something beautiful together."
         text="Tell us a little about your space and what you have in mind. We will get back to you with clear next steps."
-        image="https://images.pexels.com/photos/6474305/pexels-photo-6474305.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600"
+        image="/images/service-hero.jpg"
       />
 
       <ContactSection full />
@@ -59,8 +59,8 @@ export default function ContactPage() {
               </h2>
 
               <p className="mb-9 text-ink">
-                A few things we are often asked. If your question is not here,
-                just send us a message.
+                A few things we are often asked. If your question is
+                not here, just send us a message.
               </p>
             </Reveal>
 
@@ -72,7 +72,9 @@ export default function ContactPage() {
                       {faq.q}
                     </summary>
 
-                    <p className="mt-3 leading-[1.7] text-ink">{faq.a}</p>
+                    <p className="mt-3 leading-[1.7] text-ink">
+                      {faq.a}
+                    </p>
                   </details>
                 </StaggerItem>
               ))}

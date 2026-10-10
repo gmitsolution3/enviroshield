@@ -27,7 +27,7 @@ export default function ProductsPage() {
         eyebrow="PRODUCTS"
         title="Finishes and materials you can trust."
         text="A curated range of paints, primers, coatings and wallcoverings — chosen for performance, feel, and longevity."
-        image="https://images.pexels.com/photos/9222200/pexels-photo-9222200.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600"
+        image="/images/service-hero.jpg"
       />
 
       <section

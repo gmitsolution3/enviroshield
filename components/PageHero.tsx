@@ -10,13 +10,13 @@ export default function PageHero({
   eyebrow,
   title,
   text,
-  image = images.hero,
+  image,
   imageAlt,
 }: {
   eyebrow: string;
   title: string;
   text: string;
-  image?: string;
+  image: string;
   imageAlt?: string;
 }) {
   const reduce = useReducedMotion();

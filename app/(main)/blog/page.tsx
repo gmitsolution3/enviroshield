@@ -134,7 +134,7 @@ export default async function BlogPage({
         eyebrow="JOURNAL"
         title="Ideas, guides and inspiration for better spaces."
         text="Practical advice and thoughtful ideas from our team — from choosing a colour to preparing a wall properly."
-        image="https://images.pexels.com/photos/7546558/pexels-photo-7546558.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600"
+        image="/images/service-hero.jpg"
       />
 
       <section
