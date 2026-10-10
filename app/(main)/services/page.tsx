@@ -1,4 +1,6 @@
+import { AnimatedCounter } from "@/components/animations/animated-counter";
 import {
+  Reveal,
   StaggerContainer,
   StaggerItem,
 } from "@/components/animations/reveal";
@@ -10,7 +12,10 @@ import { SectionHeader } from "@/components/SectionHeader";
 import ServiceCard from "@/components/ServiceCard";
 import ServicesPagination from "@/components/services/ServicesPagination";
 import { getPublishedServices } from "@/lib/api/services";
+import { ArrowUpRight, Briefcase, ListChecks } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 
 type ServicesPageProps = {
   searchParams: Promise<{
@@ -111,6 +116,25 @@ export default async function ServicesPage({
   });
 
   const services = result.data;
+  const total = result.meta.total;
+
+  // Spotlight: first featured service, first page only
+  const featured =
+    page === 1 ? services.find((s) => s.isFeatured) : undefined;
+
+  const gridServices = featured
+    ? services.filter((s) => s._id !== featured._id)
+    : services;
+
+  const featuredProjects = featured?.projects?.length ?? 0;
+  const featuredSteps = featured?.process?.items?.length ?? 0;
+
+  const stats = [
+    { value: total, label: "Services offered" },
+    { value: 17, suffix: "+", label: "Years of experience" },
+    { value: 500, suffix: "+", label: "Projects completed" },
+    { value: 99, suffix: "%", label: "Customer satisfaction" },
+  ];
 
   return (
     <>
@@ -120,6 +144,42 @@ export default async function ServicesPage({
         text="From waterproofing and heat insulation to epoxy, PU, sports flooring, injection grouting, polished concrete, and protective coatings, Enviroshield delivers durable solutions for residential, commercial, and industrial spaces."
         image="/images/service-hero.jpg"
       />
+
+      {/* ------------------------------------------------------------------ */}
+      {/* STATS                                                              */}
+      {/* ------------------------------------------------------------------ */}
+
+      {total > 0 && (
+        <section
+          aria-label="Services at a glance"
+          className="bg-blue text-white"
+        >
+          <Container>
+            <div className="grid grid-cols-4 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
+              {stats.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="border-l border-white/20 px-8 py-12 first:border-l-0 max-[900px]:border-b max-[900px]:[&:nth-child(odd)]:border-l-0 max-[600px]:border-l-0 max-[600px]:px-0 max-[600px]:py-8"
+                >
+                  <div className="mb-2 text-[clamp(40px,4.4vw,60px)] font-extrabold leading-none tracking-[-0.05em]">
+                    <AnimatedCounter
+                      value={stat.value}
+                      suffix={stat.suffix}
+                    />
+                  </div>
+                  <p className="text-[14px] text-white/80">
+                    {stat.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
+
+      {/* ------------------------------------------------------------------ */}
+      {/* SERVICES                                                           */}
+      {/* ------------------------------------------------------------------ */}
 
       <section
         aria-labelledby="services-page-heading"
@@ -135,13 +195,112 @@ export default async function ServicesPage({
 
           {services.length > 0 ? (
             <>
-              <StaggerContainer className="mt-12 grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-[22px]">
-                {services.map((service, index) => (
-                  <StaggerItem key={service._id}>
-                    <ServiceCard service={service} index={index} />
-                  </StaggerItem>
-                ))}
-              </StaggerContainer>
+              {/* Spotlight */}
+              {featured && (
+                <Reveal dir="up">
+                  <Link
+                    href={`/services/${featured.slug}`}
+                    aria-label={`Learn more about ${featured.name}`}
+                    className="group mt-12 grid grid-cols-[1.15fr_0.85fr] overflow-hidden rounded-[20px] bg-navy max-[900px]:grid-cols-1"
+                  >
+                    <div className="relative min-h-[460px] overflow-hidden max-[900px]:aspect-[4/3] max-[900px]:min-h-0">
+                      <Image
+                        src={featured.primaryImage.url}
+                        alt={
+                          featured.primaryImage.alt || featured.name
+                        }
+                        fill
+                        sizes="(max-width: 900px) 100vw, 55vw"
+                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                      />
+                    </div>
+
+                    <div className="flex flex-col justify-center p-12 max-[900px]:p-8 max-[600px]:p-6">
+                      <div className="mb-5 flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
+                        <span
+                          className="h-[2px] w-7 bg-current"
+                          aria-hidden="true"
+                        />
+                        FEATURED SERVICE
+                      </div>
+
+                      <h3 className="mb-4 text-[clamp(28px,3vw,40px)] font-extrabold leading-[1.1] tracking-[-0.04em] text-white">
+                        {featured.name}
+                      </h3>
+
+                      {featured.description && (
+                        <p className="mb-6 line-clamp-4 text-[15px] leading-[1.75] text-white/70">
+                          {featured.description}
+                        </p>
+                      )}
+
+                      {(featuredProjects > 0 || featuredSteps > 0) && (
+                        <div className="mb-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-white/15 pt-5 text-[13px] text-white/75">
+                          {featuredProjects > 0 && (
+                            <span className="flex items-center gap-2">
+                              <Briefcase
+                                size={15}
+                                aria-hidden="true"
+                                className="text-paste"
+                              />
+                              {featuredProjects}{" "}
+                              {featuredProjects === 1
+                                ? "project"
+                                : "projects"}
+                            </span>
+                          )}
+                          {featuredSteps > 0 && (
+                            <span className="flex items-center gap-2">
+                              <ListChecks
+                                size={15}
+                                aria-hidden="true"
+                                className="text-paste"
+                              />
+                              {featuredSteps}-step process
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      <span className="inline-flex items-center gap-2 text-[14px] font-bold text-white transition-[gap] duration-200 group-hover:gap-3">
+                        Explore service
+                        <ArrowUpRight size={18} aria-hidden="true" />
+                      </span>
+                    </div>
+                  </Link>
+                </Reveal>
+              )}
+
+              {/* Grid */}
+              {gridServices.length > 0 && (
+                <>
+                  {featured && (
+                    <div className="mb-8 mt-16 flex items-end justify-between border-b border-line pb-4">
+                      <h3 className="text-[24px] font-extrabold tracking-[-0.03em] text-navy">
+                        More services
+                      </h3>
+                      <span className="text-[14px] text-ink">
+                        {total} in total
+                      </span>
+                    </div>
+                  )}
+
+                  <StaggerContainer
+                    className={`grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-[22px] ${
+                      featured ? "" : "mt-12"
+                    }`}
+                  >
+                    {gridServices.map((service, index) => (
+                      <StaggerItem key={service._id}>
+                        <ServiceCard
+                          service={service}
+                          index={index}
+                        />
+                      </StaggerItem>
+                    ))}
+                  </StaggerContainer>
+                </>
+              )}
 
               <ServicesPagination
                 currentPage={result.meta.page}
