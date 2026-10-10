@@ -8,9 +8,9 @@ import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
 
 export const metadata = {
-  title: "Contact Enviroshield | Painting & Wall Finishing",
+  title: "Contact Enviroshield | Waterproofing & Flooring Bangladesh",
   description:
-    "Contact Enviroshield to discuss your painting, wallpaper, or wall finishing project and get clear next steps for your space.",
+    "Contact Enviroshield in Bangladesh for waterproofing, waterproofing paint, heatproofing, epoxy and PU flooring, injection grouting, and other protective construction solutions. Request a consultation for your project.",
 };
 
 const faqs = [

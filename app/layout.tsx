@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Enviroshield",
     description:
-      "Professional waterproofing, flooring, heat insulation, injection grouting, polished concrete, and protective coating solutions.",
+      "Professional waterproofing, waterproofing paint, heatproofing, epoxy and PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy floors, floor hardener, and ETP coating in Bangladesh.",
   },
 
   other: {
