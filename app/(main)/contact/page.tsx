@@ -8,9 +8,26 @@ import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
 
 export const metadata = {
-  title: "Contact Enviroshield | Waterproofing & Flooring Bangladesh",
+  title:
+    "Contact Enviro Shield | Waterproofing & Flooring Bangladesh",
   description:
-    "Contact Enviroshield in Bangladesh for waterproofing, waterproofing paint, heatproofing, epoxy and PU flooring, injection grouting, and other protective construction solutions. Request a consultation for your project.",
+    "Contact Enviro Shield in Bangladesh for waterproofing, waterproofing paint, heatproofing, epoxy flooring, PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy flooring, floor hardener, and ETP coating. Request a consultation for your project.",
+  keywords: [
+    "contact Enviro Shield",
+    "waterproofing services Bangladesh",
+    "waterproofing paint",
+    "heatproofing services",
+    "epoxy flooring Bangladesh",
+    "PU flooring Bangladesh",
+    "injection grouting services",
+    "expansion joint sealing",
+    "sports flooring",
+    "polished concrete",
+    "3D epoxy flooring",
+    "floor hardener",
+    "ETP coating",
+    "construction consultation Bangladesh",
+  ],
 };
 
 const faqs = [

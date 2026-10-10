@@ -25,9 +25,27 @@ import {
 import Image from "next/image";
 
 export const metadata = {
-  title: "About Enviro Shield | Australian Expertise Since 2009",
+  title:
+    "About Enviro Shield | Waterproofing & Flooring Experts in Bangladesh",
   description:
-    "Learn about Enviro Shield, an Australian brand in Bangladesh since 2009, delivering professional waterproofing, flooring, insulation, and protective construction solutions.",
+    "Learn about Enviro Shield, delivering professional waterproofing, waterproofing paint, heatproofing, epoxy flooring, PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy flooring, floor hardener, and ETP coating in Bangladesh since 2009.",
+  keywords: [
+    "about Enviro Shield",
+    "Enviro Shield Bangladesh",
+    "waterproofing company Bangladesh",
+    "waterproofing paint",
+    "heatproofing",
+    "epoxy flooring",
+    "PU flooring",
+    "injection grouting",
+    "expansion joint sealing",
+    "sports flooring",
+    "polished concrete",
+    "3D epoxy flooring",
+    "floor hardener",
+    "ETP coating",
+    "protective construction solutions",
+  ],
 };
 
 /* -------------------------------------------------------------------------- */

@@ -36,12 +36,12 @@ export async function generateMetadata({
   const isFirstPage = page === 1;
 
   const title = isFirstPage
-    ? "Our Projects | Enviroshield"
-    : `Our Projects — Page ${page} | Enviroshield`;
+    ? "Waterproofing & Flooring Projects in Bangladesh | Enviro Shield"
+    : `Waterproofing & Flooring Projects — Page ${page} | Enviro Shield`;
 
   const description = isFirstPage
-    ? "Explore Enviroshield's completed waterproofing, flooring, heat insulation, injection grouting, polished concrete, and protective coating projects across residential, commercial, and industrial spaces."
-    : `Explore more of Enviroshield's completed waterproofing, flooring, insulation, and protective coating projects on page ${page}.`;
+    ? "Explore Enviro Shield projects featuring waterproofing, waterproofing paint, heatproofing, epoxy and PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy flooring, floor hardener, and ETP coating across Bangladesh."
+    : `Explore more Enviro Shield projects involving waterproofing, flooring, heatproofing, injection grouting, and protective coatings in Bangladesh. Browse project examples on page ${page}.`;
 
   const canonical = isFirstPage
     ? "/projects"
@@ -52,24 +52,22 @@ export async function generateMetadata({
     description,
 
     keywords: [
-      "Enviroshield projects",
-      "waterproofing projects",
+      "Enviro Shield projects",
       "waterproofing projects Bangladesh",
-      "waterproofing paint",
-      "flooring projects",
+      "waterproofing paint projects",
+      "heatproofing projects",
       "epoxy flooring projects",
       "PU flooring projects",
-      "heatproofing",
-      "heat insulation projects",
       "injection grouting projects",
-      "expansion joint sealing",
-      "sports flooring",
+      "expansion joint sealing projects",
+      "sports flooring projects",
       "polished concrete projects",
-      "3D epoxy floor",
-      "floor hardener",
-      "ETP coating",
-      "protective coating projects",
-      "construction projects Bangladesh",
+      "3D epoxy flooring projects",
+      "floor hardener projects",
+      "ETP coating projects",
+      "protective coating projects Bangladesh",
+      "commercial waterproofing projects",
+      "industrial flooring projects",
     ],
 
     alternates: {
@@ -171,9 +169,9 @@ export default async function ProjectsPage({
       <PageHero
         eyebrow="OUR PROJECTS"
         title="Projects built to perform."
-        text="Explore our completed waterproofing, flooring, insulation, and protective coating projects across residential, commercial, and industrial spaces."
+        text="Discover how Enviro Shield applies specialized waterproofing, flooring, insulation, grouting, and protective coating systems to residential, commercial, and industrial projects."
         image="/images/service-hero.jpg"
-        imageAlt="Enviroshield completed project"
+        imageAlt="Enviro Shield completed project"
       />
 
       {/* ------------------------------------------------------------------ */}
