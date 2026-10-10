@@ -45,8 +45,8 @@ export default function DeleteServiceDialog({
       toast.success("Service deleted successfully.");
 
       onClose();
-    } catch {
-      toast.error("Failed to delete service.");
+    } catch(error: any) {
+      toast.error(error.message || "Failed to delete service.");
     }
   };
 

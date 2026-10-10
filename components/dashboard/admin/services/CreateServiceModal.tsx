@@ -1007,7 +1007,6 @@ export default function CreateServiceModal({
                           <Plus className="h-4 w-4" />
                         )
                       }
-                      className="min-h-10 rounded-xl px-5 text-xs font-bold"
                     >
                       {isLoading ? "Creating..." : "Create Service"}
                     </DashboardButton>

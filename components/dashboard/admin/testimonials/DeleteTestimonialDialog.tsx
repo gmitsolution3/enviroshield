@@ -44,8 +44,8 @@ export default function DeleteTestimonialDialog({
       toast.success("Testimonial deleted successfully.");
 
       onClose();
-    } catch {
-      toast.error("Failed to delete testimonial.");
+    } catch(error: any) {
+      toast.error(error.message || "Failed to delete testimonial.");
     }
   };
 

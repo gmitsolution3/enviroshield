@@ -42,8 +42,8 @@ export default function DeleteBlogDialog({
       toast.success("Blog deleted successfully.");
 
       onClose();
-    } catch {
-      toast.error("Failed to delete blog.");
+    } catch(error: any) {
+      toast.error(error.message || "Failed to delete blog.");
     }
   };
 

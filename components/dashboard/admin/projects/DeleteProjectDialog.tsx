@@ -46,8 +46,8 @@ export default function DeleteProjectDialog({
       toast.success("Project deleted successfully.");
 
       onClose();
-    } catch {
-      toast.error("Failed to delete project.");
+    } catch(error: any) {
+      toast.error(error.message || "Failed to delete project.");
     }
   };
 
