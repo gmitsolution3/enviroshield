@@ -11,7 +11,7 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { images } from "@/lib/data/content";
 import {
   Award,
-  CheckCircle2,
+  Check,
   Compass,
   HandHeart,
   Layers,
@@ -29,28 +29,6 @@ export const metadata = {
   description:
     "Learn about Enviro Shield, an Australian brand in Bangladesh since 2009, delivering professional waterproofing, flooring, insulation, and protective construction solutions.",
 };
-
-/* -------------------------------------------------------------------------- */
-/* SHARED PIECES                                                              */
-/* -------------------------------------------------------------------------- */
-
-const imgClass =
-  "object-cover transition-transform duration-[0.9s] ease-out group-hover:scale-[1.06]";
-
-function PhotoFx() {
-  return (
-    <>
-      <span
-        className="pointer-events-none absolute inset-0 bg-navy/20 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        aria-hidden="true"
-      />
-      <span
-        className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-[1100ms] ease-out group-hover:translate-x-[500%]"
-        aria-hidden="true"
-      />
-    </>
-  );
-}
 
 /* -------------------------------------------------------------------------- */
 /* DATA                                                                       */
@@ -187,7 +165,7 @@ const values = [
     text: "We aim to be more than a contractor — we build lasting relationships through transparency, accountability, and dependable service.",
   },
   {
-    icon: CheckCircle2,
+    icon: Check,
     title: "Built to Last",
     text: "Our solutions are selected and applied with long-term durability, protection, and property performance in mind.",
   },
@@ -196,17 +174,13 @@ const values = [
 const CHAIRMAN = {
   name: "Chairman Name", // replace
   title: "Chairman, Enviro Shield", // replace
-  image: "/images/chairman.jpg", // replace with the real photo (portrait works best)
+  image: "/images/chairman.jpg", // replace with the real photo
   alt: "Portrait of the Chairman of Enviro Shield",
 };
 
 export default function AboutPage() {
   return (
     <>
-      {/* ------------------------------------------------------------------ */}
-      {/* HERO                                                               */}
-      {/* ------------------------------------------------------------------ */}
-
       <PageHero
         eyebrow="ABOUT ENVIRO SHIELD"
         title="Australian expertise. Trusted protection since 2009."
@@ -219,50 +193,41 @@ export default function AboutPage() {
 
       <section
         aria-labelledby="our-story-heading"
-        className="pb-20 pt-[112px] max-[900px]:pt-20 max-[600px]:pt-16"
+        className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
       >
-        <Container className="grid grid-cols-2 items-center gap-[80px] max-[900px]:grid-cols-1 max-[900px]:gap-[60px]">
+        <Container className="grid grid-cols-2 items-center gap-[80px] max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
           <Reveal dir="image">
-            <div className="relative mb-10 pr-6 max-[600px]:pr-0">
-              {/* main photo */}
-              <div className="group relative h-[560px] overflow-hidden rounded-[24px] max-[600px]:h-[380px]">
+            <div className="grid grid-cols-[1.2fr_0.8fr] gap-4">
+              <div className="relative h-[520px] overflow-hidden rounded-[16px] max-[600px]:h-[340px]">
                 <Image
                   src="https://images.pexels.com/photos/6473966/pexels-photo-6473966.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
                   alt="Professional construction worker applying protective material to a building surface"
                   fill
-                  sizes="(max-width: 900px) 100vw, 45vw"
-                  className={imgClass}
+                  sizes="(max-width: 900px) 60vw, 28vw"
+                  className="object-cover"
                 />
-                <PhotoFx />
               </div>
 
-              {/* secondary photo */}
-              <div className="group absolute -bottom-10 right-0 h-[210px] w-[46%] overflow-hidden rounded-[20px] border-[8px] border-white bg-white shadow-[0_20px_40px_-12px_rgba(0,51,78,0.3)] max-[600px]:-bottom-8 max-[600px]:h-[140px] max-[600px]:right-3 max-[600px]:border-[6px]">
-                <Image
-                  src={images.painter}
-                  alt="Painter carefully preparing an interior wall"
-                  fill
-                  sizes="(max-width: 900px) 45vw, 22vw"
-                  className={imgClass}
-                />
-                <PhotoFx />
-              </div>
-
-              {/* floating badge */}
-              <div className="absolute left-5 top-5 rounded-[18px] bg-blue px-5 py-4 text-white shadow-[0_18px_36px_-10px_rgba(1,110,220,0.7)] max-[600px]:left-3 max-[600px]:top-3 max-[600px]:px-4 max-[600px]:py-3">
-                <div className="text-[40px] font-extrabold leading-none tracking-[-0.04em] max-[600px]:text-[30px]">
-                  17+
+              <div className="flex flex-col gap-4">
+                <div className="relative flex-1 overflow-hidden rounded-[16px]">
+                  <Image
+                    src={images.painter}
+                    alt="Painter carefully preparing an interior wall"
+                    fill
+                    sizes="(max-width: 900px) 40vw, 18vw"
+                    className="object-cover"
+                  />
                 </div>
-                <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.12em] text-white/80">
-                  Years of expertise
+
+                <div className="rounded-[16px] bg-blue p-6 text-white max-[600px]:p-4">
+                  <div className="text-[44px] font-extrabold leading-none tracking-[-0.04em] max-[600px]:text-[32px]">
+                    17+
+                  </div>
+                  <div className="mt-2 text-[13px] text-white/85">
+                    Years in Bangladesh
+                  </div>
                 </div>
               </div>
-
-              {/* dotted accent */}
-              <span
-                aria-hidden="true"
-                className="absolute -left-6 bottom-12 -z-10 h-32 w-32 bg-[radial-gradient(circle,rgba(1,110,220,0.35)_1.5px,transparent_1.5px)] bg-[length:14px_14px] max-[600px]:hidden"
-              />
             </div>
           </Reveal>
 
@@ -278,13 +243,14 @@ export default function AboutPage() {
 
               <h2
                 id="our-story-heading"
-                className="mb-6 text-[clamp(34px,4vw,52px)] font-extrabold leading-[1.05] tracking-[-0.05em] text-navy"
+                className="mb-6 text-[clamp(36px,4.4vw,56px)] font-extrabold leading-[1.04] tracking-[-0.05em] text-navy"
               >
-                Built on expertise. Driven by{" "}
-                <span className="text-blue">protection.</span>
+                Built on expertise.
+                <br />
+                Driven by protection.
               </h2>
 
-              <p className="mb-5 text-[17px] leading-[1.75] text-navy/80">
+              <p className="mb-5 text-[18px] leading-[1.7] text-navy/85">
                 Since 2009, Enviro Shield has brought Australian
                 expertise to Bangladesh, providing professional
                 waterproofing and protective construction solutions
@@ -299,28 +265,29 @@ export default function AboutPage() {
                 performance, and long-term protection.
               </p>
 
-              <StaggerContainer className="grid grid-cols-2 gap-3 max-[600px]:grid-cols-1">
+              <ul className="divide-y divide-line border-y border-line">
                 {[
                   "Australian expertise since 2009",
                   "Professional waterproofing solutions",
                   "Quality materials and proven systems",
                   "Residential, commercial & industrial expertise",
                 ].map((item) => (
-                  <StaggerItem
+                  <li
                     key={item}
-                    className="flex items-center gap-3 rounded-[14px] border border-line bg-white px-4 py-3.5 text-[13px] font-medium text-navy shadow-[0_6px_18px_-10px_rgba(0,51,78,0.18)]"
+                    className="flex items-center gap-3 py-3.5 text-[15px] font-medium text-navy"
                   >
-                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-blue/10">
-                      <CheckCircle2
-                        size={16}
-                        aria-hidden="true"
-                        className="text-blue"
-                      />
-                    </span>
+                    <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-blue text-white">
+                    <Check
+                      size={18}
+                      aria-hidden="true"
+                      className="shrink-0 text-blue"
+                    />
+                  </span>
+                    
                     {item}
-                  </StaggerItem>
+                  </li>
                 ))}
-              </StaggerContainer>
+              </ul>
             </div>
           </Reveal>
         </Container>
@@ -332,107 +299,62 @@ export default function AboutPage() {
 
       <section
         aria-labelledby="chairman-heading"
-        className="bg-soft pb-[112px] pt-[120px] max-[900px]:pb-20 max-[900px]:pt-[110px] max-[600px]:pb-16"
+        className="pb-[112px] max-[900px]:pb-20 max-[600px]:pb-16"
       >
         <Container>
           <Reveal dir="up">
-            <div className="relative rounded-[32px] bg-gradient-to-br from-blue via-blue to-navy px-14 pb-14 pt-14 shadow-[0_40px_80px_-30px_rgba(1,110,220,0.6)] max-[900px]:px-8 max-[900px]:pb-10 max-[600px]:px-6 max-[600px]:pt-[150px]">
-              {/* decoration, clipped to the panel */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 overflow-hidden rounded-[32px]"
-              >
-                <span className="absolute -right-24 -top-24 size-80 rounded-full bg-white/10 blur-3xl" />
-                <span className="absolute -bottom-32 left-1/4 size-80 rounded-full bg-paste/20 blur-3xl" />
-                <span className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.14)_1px,transparent_1px)] bg-[length:24px_24px]" />
-                <span className="absolute -bottom-10 right-10 select-none font-serif text-[360px] leading-none text-white/[0.07] max-[900px]:hidden">
-                  &rdquo;
-                </span>
+            <div className="grid grid-cols-[0.85fr_1.15fr] overflow-hidden rounded-[20px] bg-navy max-[900px]:grid-cols-1">
+              <div className="relative min-h-[520px] max-[900px]:aspect-[4/5] max-[900px]:min-h-0 max-[600px]:aspect-[1/1]">
+                <Image
+                  src={CHAIRMAN.image}
+                  alt={CHAIRMAN.alt}
+                  fill
+                  sizes="(max-width: 900px) 100vw, 40vw"
+                  className="object-cover object-top"
+                />
               </div>
 
-              <div className="relative grid grid-cols-[0.8fr_1.2fr] items-center gap-16 max-[900px]:grid-cols-1 max-[900px]:gap-10">
-                {/* Portrait: pops out of the top of the panel */}
-                <div className="relative -mt-28 max-[900px]:mx-auto max-[900px]:w-full max-[900px]:max-w-[360px] max-[600px]:absolute max-[600px]:-top-[110px] max-[600px]:left-1/2 max-[600px]:mt-0 max-[600px]:w-[240px] max-[600px]:-translate-x-1/2">
-                  {/* offset frame */}
+              <div className="flex flex-col justify-center p-14 max-[900px]:p-8 max-[600px]:p-6">
+                <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
                   <span
+                    className="h-[2px] w-7 bg-current"
                     aria-hidden="true"
-                    className="absolute inset-0 translate-x-4 translate-y-4 rounded-[28px] border-2 border-white/40"
                   />
-
-                  <div className="group relative aspect-[4/5] overflow-hidden rounded-[28px] border-[6px] border-white bg-navy shadow-[0_30px_60px_-20px_rgba(0,18,33,0.7)]">
-                    <Image
-                      src={CHAIRMAN.image}
-                      alt={CHAIRMAN.alt}
-                      fill
-                      sizes="(max-width: 900px) 70vw, 30vw"
-                      className={`${imgClass} object-top`}
-                    />
-                    <PhotoFx />
-                  </div>
-
-                  {/* name plate */}
-                  <div className="absolute -bottom-6 left-1/2 w-[86%] -translate-x-1/2 rounded-[16px] bg-white px-5 py-3.5 text-center shadow-[0_20px_40px_-12px_rgba(0,18,33,0.45)] max-[600px]:-bottom-5 max-[600px]:px-3 max-[600px]:py-2.5">
-                    <strong className="block text-[17px] font-extrabold tracking-[-0.02em] text-navy max-[600px]:text-[15px]">
-                      {CHAIRMAN.name}
-                    </strong>
-                    <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-blue">
-                      {CHAIRMAN.title}
-                    </span>
-                  </div>
+                  MESSAGE FROM THE CHAIRMAN
                 </div>
 
-                {/* Message */}
-                <div className="max-[900px]:pt-6">
-                  <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
-                    <span
-                      className="h-[2px] w-7 bg-current"
-                      aria-hidden="true"
-                    />
-                    MESSAGE FROM THE CHAIRMAN
-                  </div>
+                <h2
+                  id="chairman-heading"
+                  className="mb-6 text-[clamp(28px,3.4vw,44px)] font-extrabold leading-[1.1] tracking-[-0.04em] text-white"
+                >
+                  Protection is a promise we build into every property.
+                </h2>
 
-                  <h2
-                    id="chairman-heading"
-                    className="mb-6 text-[clamp(30px,3.6vw,46px)] font-extrabold leading-[1.1] tracking-[-0.04em] text-white"
-                  >
-                    Protection is a promise we build into{" "}
-                    <span className="text-paste">
-                      every property.
-                    </span>
-                  </h2>
+                {/* Replace with the Chairman's real message */}
+                <div className="space-y-4 text-[16px] leading-[1.75] text-white/75">
+                  <p>
+                    Since 2009, our goal has been simple: to bring
+                    dependable protection and honest workmanship to
+                    every project we take on. Behind every finished
+                    surface is careful preparation, quality
+                    materials, and a team that takes pride in lasting
+                    results.
+                  </p>
+                  <p>
+                    We will keep investing in our people, our
+                    technology, and our relationships, so that every
+                    client can trust Enviro Shield to protect what
+                    matters most.
+                  </p>
+                </div>
 
-                  {/* Replace with the Chairman's real message */}
-                  <div className="space-y-4 border-l-[3px] border-paste pl-6 text-[16px] leading-[1.75] text-white/85 max-[600px]:pl-4">
-                    <p>
-                      Since 2009, our goal has been simple: to bring
-                      dependable protection and honest workmanship to
-                      every project we take on. Behind every finished
-                      surface is careful preparation, quality
-                      materials, and a team that takes pride in
-                      lasting results.
-                    </p>
-                    <p>
-                      We will keep investing in our people, our
-                      technology, and our relationships, so that every
-                      client can trust Enviro Shield to protect what
-                      matters most.
-                    </p>
-                  </div>
-
-                  <div className="mt-8 flex items-center gap-4">
-                    <span
-                      aria-hidden="true"
-                      className="h-px w-14 bg-white/40"
-                    />
-                    <div>
-                      <strong className="block text-[18px] font-extrabold text-white">
-                        {CHAIRMAN.name}
-                      </strong>
-                      <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-white/65">
-                        {CHAIRMAN.title}
-                      </span>
-                    </div>
-                  </div>
+                <div className="mt-8 border-t border-white/15 pt-6">
+                  <strong className="block text-[18px] font-extrabold text-white">
+                    {CHAIRMAN.name}
+                  </strong>
+                  <span className="text-[14px] text-white/60">
+                    {CHAIRMAN.title}
+                  </span>
                 </div>
               </div>
             </div>
@@ -441,54 +363,34 @@ export default function AboutPage() {
       </section>
 
       {/* ------------------------------------------------------------------ */}
-      {/* COMPANY HIGHLIGHTS (stats band)                                    */}
+      {/* STATS                                                              */}
       {/* ------------------------------------------------------------------ */}
 
       <section
         aria-label="Enviro Shield at a glance"
-        className="pb-[112px] max-[900px]:pb-20 max-[600px]:pb-16"
+        className="bg-blue text-white"
       >
         <Container>
-          <Reveal dir="up">
-            <div className="relative overflow-hidden rounded-[28px] bg-navy px-12 py-14 max-[900px]:px-8 max-[900px]:py-10 max-[600px]:px-6">
-              {/* glow + grid decoration */}
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-blue/30 blur-3xl"
-              />
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute -bottom-32 -left-16 size-72 rounded-full bg-paste/10 blur-3xl"
-              />
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[length:44px_44px]"
-              />
-
-              <div className="relative grid grid-cols-4 gap-y-10 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
-                {stats.map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="border-l border-white/15 pl-7"
-                  >
-                    <div className="mb-3 text-[clamp(40px,4.4vw,64px)] font-extrabold leading-none tracking-[-0.05em] text-white">
-                      {stat.static ? (
-                        stat.value
-                      ) : (
-                        <AnimatedCounter
-                          value={stat.value}
-                          suffix={stat.suffix}
-                        />
-                      )}
-                    </div>
-                    <p className="text-[13px] font-medium uppercase tracking-[0.1em] text-paste">
-                      {stat.label}
-                    </p>
-                  </div>
-                ))}
+          <div className="grid grid-cols-4 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
+            {stats.map((stat) => (
+              <div
+                key={stat.label}
+                className="border-l border-white/20 px-8 py-14 first:border-l-0 max-[900px]:border-b max-[900px]:[&:nth-child(odd)]:border-l-0 max-[600px]:border-l-0 max-[600px]:px-0 max-[600px]:py-8"
+              >
+                <div className="mb-2 text-[clamp(42px,4.6vw,64px)] font-extrabold leading-none tracking-[-0.05em]">
+                  {stat.static ? (
+                    stat.value
+                  ) : (
+                    <AnimatedCounter
+                      value={stat.value}
+                      suffix={stat.suffix}
+                    />
+                  )}
+                </div>
+                <p className="text-[14px] text-white/80">{stat.label}</p>
               </div>
-            </div>
-          </Reveal>
+            ))}
+          </div>
         </Container>
       </section>
 
@@ -498,14 +400,9 @@ export default function AboutPage() {
 
       <section
         aria-labelledby="why-enviroshield-heading"
-        className="relative overflow-hidden bg-soft py-[112px] max-[900px]:py-20 max-[600px]:py-16"
+        className="bg-soft py-[112px] max-[900px]:py-20 max-[600px]:py-16"
       >
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,rgba(0,51,78,0.09)_1px,transparent_1px)] bg-[length:26px_26px]"
-        />
-
-        <Container className="relative">
+        <Container>
           <SectionHeader
             eyebrow="WHY ENVIRO SHIELD"
             title="More than protection. A complete approach to building performance."
@@ -513,39 +410,22 @@ export default function AboutPage() {
             headingId="why-enviroshield-heading"
           />
 
-          <StaggerContainer className="mt-14 grid grid-cols-4 gap-5 max-[1000px]:grid-cols-2 max-[600px]:grid-cols-1">
-            {reasons.map((reason, index) => {
+          <StaggerContainer className="mt-12 grid grid-cols-4 gap-5 max-[1000px]:grid-cols-2 max-[600px]:grid-cols-1">
+            {reasons.map((reason) => {
               const Icon = reason.icon;
 
               return (
                 <StaggerItem key={reason.title}>
-                  <div className="group relative h-full overflow-hidden rounded-[20px] border border-line bg-white p-7 transition-all duration-300 hover:-translate-y-1.5 hover:border-blue/30 hover:shadow-[0_24px_44px_-16px_rgba(1,110,220,0.35)]">
-                    {/* top accent line grows on hover */}
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-x-0 top-0 h-[3px] origin-left scale-x-0 bg-gradient-to-r from-blue to-paste transition-transform duration-500 group-hover:scale-x-100"
-                    />
-
-                    <span
-                      aria-hidden="true"
-                      className="absolute right-5 top-4 text-[44px] font-extrabold leading-none tracking-[-0.05em] text-navy/[0.06]"
-                    >
-                      0{index + 1}
+                  <div className="group h-full rounded-[14px] bg-white p-7 transition-colors duration-300 hover:bg-navy shadow shadow-lg">
+                    <span className="mb-8 grid size-12 place-items-center rounded-[10px] bg-blue text-white">
+                      <Icon size={24} aria-hidden="true" />
                     </span>
 
-                    <div className="mb-7 grid size-[56px] place-items-center rounded-2xl bg-blue/10 transition-colors duration-300 group-hover:bg-blue">
-                      <Icon
-                        size={26}
-                        aria-hidden="true"
-                        className="text-blue transition-colors duration-300 group-hover:text-white"
-                      />
-                    </div>
-
-                    <h3 className="mb-[10px] text-[19px] font-semibold text-navy">
+                    <h3 className="mb-[10px] text-[20px] font-semibold leading-[1.25] text-navy transition-colors duration-300 group-hover:text-white">
                       {reason.title}
                     </h3>
 
-                    <p className="text-[13px] leading-[1.7] text-ink">
+                    <p className="text-[14px] leading-[1.7] text-ink transition-colors duration-300 group-hover:text-white/70">
                       {reason.text}
                     </p>
                   </div>
@@ -572,42 +452,28 @@ export default function AboutPage() {
             headingId="expertise-heading"
           />
 
-          <StaggerContainer className="mt-14 grid grid-cols-2 gap-5 max-[700px]:grid-cols-1">
+          <StaggerContainer className="mt-12 border-t border-navy">
             {expertise.map((item, index) => {
               const Icon = item.icon;
 
               return (
                 <StaggerItem key={item.title}>
-                  <div className="group relative h-full overflow-hidden rounded-[24px] border border-line bg-white p-9 transition-all duration-500 hover:-translate-y-1.5 hover:border-navy hover:bg-navy hover:shadow-[0_28px_56px_-16px_rgba(0,51,78,0.5)] max-[600px]:p-6">
-                    {/* glow that appears on hover */}
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-blue/0 blur-3xl transition-colors duration-500 group-hover:bg-blue/40"
-                    />
-
-                    {/* big outlined number */}
-                    <span
-                      aria-hidden="true"
-                      className="absolute -bottom-6 right-6 text-[120px] font-extrabold leading-none tracking-[-0.06em] text-navy/[0.05] transition-colors duration-500 group-hover:text-white/[0.07]"
-                    >
-                      0{index + 1}
+                  <div className="group grid grid-cols-[80px_1fr_1.1fr_auto] items-center gap-8 border-b border-line py-9 transition-colors duration-200 hover:bg-soft max-[900px]:grid-cols-[56px_1fr] max-[900px]:gap-x-5 max-[900px]:gap-y-3 max-[900px]:py-7">
+                    <span className="text-[22px] font-extrabold tracking-[-0.02em] text-blue">
+                      {String(index + 1).padStart(2, "0")}
                     </span>
 
-                    <div className="relative mb-10 grid size-[60px] place-items-center rounded-full bg-blue/10 transition-colors duration-500 group-hover:bg-blue">
-                      <Icon
-                        size={26}
-                        aria-hidden="true"
-                        className="text-blue transition-colors duration-500 group-hover:text-white"
-                      />
-                    </div>
-
-                    <h3 className="relative mb-3 text-[26px] font-semibold leading-[1.15] tracking-[-0.02em] text-navy transition-colors duration-500 group-hover:text-white">
+                    <h3 className="text-[clamp(22px,2.4vw,30px)] font-semibold leading-[1.15] tracking-[-0.02em] text-navy">
                       {item.title}
                     </h3>
 
-                    <p className="relative max-w-[480px] text-[14px] leading-[1.75] text-ink transition-colors duration-500 group-hover:text-white/70">
+                    <p className="text-[15px] leading-[1.7] text-ink max-[900px]:col-start-2">
                       {item.text}
                     </p>
+
+                    <span className="grid size-12 place-items-center rounded-full border border-line text-navy transition-colors duration-200 group-hover:border-blue group-hover:bg-blue group-hover:text-white max-[900px]:hidden">
+                      <Icon size={22} aria-hidden="true" />
+                    </span>
                   </div>
                 </StaggerItem>
               );
@@ -622,18 +488,9 @@ export default function AboutPage() {
 
       <section
         aria-labelledby="how-we-work-heading"
-        className="relative overflow-hidden bg-navy py-[112px] max-[900px]:py-20 max-[600px]:py-16"
+        className="bg-navy py-[112px] max-[900px]:py-20 max-[600px]:py-16"
       >
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute -left-24 top-10 size-80 rounded-full bg-blue/25 blur-3xl"
-        />
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute -bottom-24 right-0 size-80 rounded-full bg-paste/10 blur-3xl"
-        />
-
-        <Container className="relative">
+        <Container>
           <SectionHeader
             eyebrow="HOW WE WORK"
             title="A straightforward approach from assessment to completion."
@@ -642,35 +499,25 @@ export default function AboutPage() {
             headingId="how-we-work-heading"
           />
 
-          <div className="relative mt-16">
-            {/* connecting line (desktop) */}
-            <span
-              aria-hidden="true"
-              className="absolute left-[28px] right-[28px] top-[28px] h-px bg-gradient-to-r from-blue via-white/25 to-white/5 max-[900px]:hidden"
-            />
+          <StaggerContainer className="mt-14 grid grid-cols-4 gap-8 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
+            {process.map((item) => (
+              <StaggerItem key={item.number}>
+                <div className="h-full border-t-2 border-blue pt-6">
+                  <span className="mb-10 block text-[64px] font-extrabold leading-none tracking-[-0.05em] text-white">
+                    {item.number}
+                  </span>
 
-            <StaggerContainer className="grid grid-cols-4 gap-x-6 gap-y-12 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
-              {process.map((item) => (
-                <StaggerItem key={item.number}>
-                  <div className="group relative h-full">
-                    <div className="relative z-[1] mb-7 grid size-[56px] place-items-center rounded-full bg-blue text-[15px] font-extrabold tracking-[0.04em] text-white shadow-[0_0_0_8px_rgba(0,51,78,1),0_0_0_9px_rgba(255,255,255,0.15)] transition-transform duration-300 group-hover:scale-110">
-                      {item.number}
-                    </div>
+                  <h3 className="mb-3 text-[22px] font-semibold text-white">
+                    {item.title}
+                  </h3>
 
-                    <div className="rounded-[18px] border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm transition-colors duration-300 group-hover:border-blue/60 group-hover:bg-white/[0.08]">
-                      <h3 className="mb-3 text-[23px] font-medium text-white">
-                        {item.title}
-                      </h3>
-
-                      <p className="text-[13px] leading-[1.75] text-white/60">
-                        {item.text}
-                      </p>
-                    </div>
-                  </div>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
+                  <p className="text-[14px] leading-[1.7] text-white/65">
+                    {item.text}
+                  </p>
+                </div>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
         </Container>
       </section>
 
@@ -690,27 +537,23 @@ export default function AboutPage() {
             headingId="sectors-heading"
           />
 
-          <StaggerContainer className="mt-14 grid grid-cols-4 gap-5 max-[1000px]:grid-cols-2 max-[600px]:grid-cols-1">
+          <StaggerContainer className="mt-12 grid grid-cols-4 gap-5 max-[1000px]:grid-cols-2 max-[600px]:grid-cols-1">
             {sectors.map((sector, index) => (
               <StaggerItem key={sector.title}>
-                <div className="group relative h-full overflow-hidden rounded-[20px] bg-soft p-7 pb-9 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white hover:shadow-[0_24px_44px_-16px_rgba(0,51,78,0.25)]">
-                  <span className="mb-12 block text-[56px] font-extrabold leading-none tracking-[-0.05em] text-blue/20 transition-colors duration-300 group-hover:text-blue">
-                    0{index + 1}
+                <div className="group flex h-full min-h-[300px] flex-col justify-between rounded-[14px] bg-soft p-7 transition-colors duration-300 hover:bg-blue shadow shadow-lg">
+                  <span className="text-lg font-bold tracking-[0.12em] bg-blue text-muted transition-colors duration-300 group-hover:text-blue group-hover:bg-white group-hover:border-white border rounded-full w-[50px] h-[50px] grid place-items-center border-blue">
+                    {String(index + 1).padStart(2, "0")}
                   </span>
 
-                  <h3 className="mb-3 text-[22px] font-semibold text-navy">
-                    {sector.title}
-                  </h3>
+                  <div>
+                    <h3 className="mb-3 text-[26px] font-semibold tracking-[-0.02em] text-navy transition-colors duration-300 group-hover:text-white">
+                      {sector.title}
+                    </h3>
 
-                  <p className="text-[13px] leading-[1.7] text-ink">
-                    {sector.text}
-                  </p>
-
-                  {/* bottom bar grows on hover */}
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 bg-gradient-to-r from-blue to-paste transition-transform duration-500 group-hover:scale-x-100"
-                  />
+                    <p className="text-[14px] leading-[1.7] text-ink transition-colors duration-300 group-hover:text-white/85">
+                      {sector.text}
+                    </p>
+                  </div>
                 </div>
               </StaggerItem>
             ))}
@@ -741,13 +584,11 @@ export default function AboutPage() {
                 id="commitment-heading"
                 className="mb-6 text-[clamp(34px,4vw,52px)] font-extrabold leading-[1.05] tracking-[-0.05em] text-navy"
               >
-                Quality is not just the finished surface. It is{" "}
-                <span className="text-blue">
-                  everything behind it.
-                </span>
+                Quality is not just the finished surface. It is
+                everything behind it.
               </h2>
 
-              <p className="border-l-[3px] border-blue pl-5 text-base leading-[1.75] text-ink">
+              <p className="text-base leading-[1.75] text-ink">
                 We believe dependable results come from the right
                 combination of materials, preparation, technical
                 knowledge, and workmanship. That is why we focus on
@@ -758,32 +599,21 @@ export default function AboutPage() {
           </Reveal>
 
           <Reveal dir="image" delay={0.15}>
-            <div className="relative overflow-hidden rounded-[24px] bg-navy p-9 shadow-[0_30px_60px_-20px_rgba(0,51,78,0.5)] max-[600px]:p-6">
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full bg-blue/35 blur-3xl"
-              />
-
-              <StaggerContainer className="relative grid grid-cols-1 gap-3">
-                {commitments.map((item) => (
-                  <StaggerItem key={item}>
-                    <div className="flex items-center gap-4 rounded-[14px] border border-white/10 bg-white/[0.05] px-5 py-4 transition-colors duration-300 hover:border-blue/60 hover:bg-white/[0.09]">
-                      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-blue">
-                        <CheckCircle2
-                          size={17}
-                          aria-hidden="true"
-                          className="text-white"
-                        />
-                      </span>
-
-                      <span className="text-[14px] font-medium leading-[1.5] text-white">
-                        {item}
-                      </span>
-                    </div>
-                  </StaggerItem>
-                ))}
-              </StaggerContainer>
-            </div>
+            <ul className="grid grid-cols-2 gap-3 max-[600px]:grid-cols-1">
+              {commitments.map((item) => (
+                <li
+                  key={item}
+                  className="flex items-start gap-3 rounded-[12px] bg-white p-1"
+                >
+                  <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-blue text-white">
+                    <Check size={14} aria-hidden="true" />
+                  </span>
+                  <span className="text-[15px] font-medium leading-[1.5] text-navy">
+                    {item}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </Reveal>
         </Container>
       </section>
@@ -801,31 +631,26 @@ export default function AboutPage() {
             eyebrow="WHAT WE VALUE"
             title="The principles behind every solution."
             text="The standards that guide how we work, what we deliver, and the relationships we build."
-            align="center"
+            align="left"
             headingId="values-heading"
           />
 
-          <StaggerContainer className="mt-14 grid grid-cols-3 gap-5 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
+          <StaggerContainer className="mt-12 grid grid-cols-3 gap-5 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
             {values.map((value) => {
               const Icon = value.icon;
 
               return (
                 <StaggerItem key={value.title}>
-                  <div className="group relative h-full overflow-hidden rounded-[20px] border border-line bg-white p-8 transition-all duration-300 hover:-translate-y-1.5 hover:border-blue/30 hover:shadow-[0_24px_44px_-16px_rgba(1,110,220,0.3)]">
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full bg-blue/[0.06] transition-transform duration-500 group-hover:scale-[2.2]"
-                    />
+                  <div className="h-full rounded-[14px] border border-line p-8 transition-colors duration-200 hover:border-blue">
+                    <span className="mb-6 grid size-12 place-items-center rounded-[10px] bg-blue/10 text-blue">
+                      <Icon size={24} aria-hidden="true" />
+                    </span>
 
-                    <div className="relative mb-7 grid size-[56px] place-items-center rounded-2xl bg-gradient-to-br from-blue to-[#4da3ff] text-white shadow-[0_12px_24px_-8px_rgba(1,110,220,0.6)] transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105">
-                      <Icon size={26} aria-hidden="true" />
-                    </div>
-
-                    <h3 className="relative mb-[10px] text-[20px] font-semibold text-navy">
+                    <h3 className="mb-[10px] text-[20px] font-semibold text-navy">
                       {value.title}
                     </h3>
 
-                    <p className="relative text-[13px] leading-[1.7] text-ink">
+                    <p className="text-[14px] leading-[1.7] text-ink">
                       {value.text}
                     </p>
                   </div>
@@ -835,10 +660,6 @@ export default function AboutPage() {
           </StaggerContainer>
         </Container>
       </section>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* CONTACT CTA                                                        */}
-      {/* ------------------------------------------------------------------ */}
 
       <ContactSection />
     </>
