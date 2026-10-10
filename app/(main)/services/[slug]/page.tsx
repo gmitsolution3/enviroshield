@@ -1,20 +1,10 @@
-import {
-  ArrowUpRight,
-  CheckCircle2,
-  ChevronRight,
-  Layers,
-  ListChecks,
-} from "lucide-react";
+import { ArrowUpRight, Check, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AnimatedCounter } from "@/components/animations/animated-counter";
-import {
-  Reveal,
-  StaggerContainer,
-  StaggerItem,
-} from "@/components/animations/reveal";
+import { Reveal } from "@/components/animations/reveal";
 import { Button } from "@/components/Button";
 import Container from "@/components/Container";
 import ContactSection from "@/components/home/ContactSection";
@@ -143,28 +133,6 @@ export async function generateStaticParams() {
   } catch {
     return [];
   }
-}
-
-/* -------------------------------------------------------------------------- */
-/* SHARED PIECES                                                              */
-/* -------------------------------------------------------------------------- */
-
-const imgClass =
-  "object-cover transition-transform duration-[0.9s] ease-out group-hover:scale-[1.06]";
-
-function PhotoFx() {
-  return (
-    <>
-      <span
-        className="pointer-events-none absolute inset-0 bg-navy/20 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        aria-hidden="true"
-      />
-      <span
-        className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-[1100ms] ease-out group-hover:translate-x-[500%]"
-        aria-hidden="true"
-      />
-    </>
-  );
 }
 
 export default async function ServiceDetailPage({
@@ -339,7 +307,11 @@ export default async function ServiceDetailPage({
                 Home
               </Link>
             </li>
-            <ChevronRight size={14} aria-hidden="true" className="text-ink/40" />
+            <ChevronRight
+              size={14}
+              aria-hidden="true"
+              className="text-ink/40"
+            />
             <li>
               <Link
                 href="/services"
@@ -348,8 +320,15 @@ export default async function ServiceDetailPage({
                 Services
               </Link>
             </li>
-            <ChevronRight size={14} aria-hidden="true" className="text-ink/40" />
-            <li aria-current="page" className="font-semibold text-navy">
+            <ChevronRight
+              size={14}
+              aria-hidden="true"
+              className="text-ink/40"
+            />
+            <li
+              aria-current="page"
+              className="font-semibold text-navy"
+            >
               {service.name}
             </li>
           </ol>
@@ -362,93 +341,62 @@ export default async function ServiceDetailPage({
 
       <section
         aria-labelledby="service-overview-heading"
-        className="pb-[100px] pt-[112px] max-[900px]:pb-20 max-[900px]:pt-20 max-[600px]:pb-16 max-[600px]:pt-16"
+        className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
       >
-        <Container className="grid grid-cols-2 items-center gap-[80px] max-[900px]:grid-cols-1 max-[900px]:gap-[60px]">
+        <Container className="grid grid-cols-2 items-center gap-[80px] max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
           <Reveal dir="image">
-            <div className="relative pb-8 pr-6 max-[600px]:pr-0">
-              <div className="group relative h-[560px] overflow-hidden rounded-[24px] max-[600px]:h-[380px]">
+            <figure>
+              <div className="relative h-[520px] overflow-hidden rounded-[16px] max-[600px]:h-[340px]">
                 <Image
                   src={service.primaryImage.url}
                   alt={service.primaryImage.alt || service.name}
                   fill
                   sizes="(max-width: 900px) 100vw, 45vw"
-                  className={imgClass}
+                  className="object-cover"
                 />
-                <PhotoFx />
-
-                {/* caption, only if the service has one */}
-                {service.primaryImage.caption && (
-                  <span className="absolute inset-x-4 bottom-4 rounded-[14px] bg-navy/55 px-4 py-3 text-[12px] leading-[1.5] text-white ring-1 ring-white/20 backdrop-blur-xl">
-                    {service.primaryImage.caption}
-                  </span>
-                )}
               </div>
 
-              {/* floating badge: process steps */}
-              {stepCount > 0 && (
-                <div className="absolute left-5 top-5 flex items-center gap-3 rounded-[18px] bg-blue px-5 py-4 text-white shadow-[0_18px_36px_-10px_rgba(1,110,220,0.7)] max-[600px]:left-3 max-[600px]:top-3 max-[600px]:px-4 max-[600px]:py-3">
-                  <ListChecks size={26} aria-hidden="true" />
-                  <div>
-                    <div className="text-[28px] font-extrabold leading-none tracking-[-0.04em] max-[600px]:text-[22px]">
-                      {stepCount}
-                    </div>
-                    <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/80">
-                      Step process
-                    </div>
-                  </div>
-                </div>
+              {service.primaryImage.caption && (
+                <figcaption className="mt-3 text-[13px] leading-[1.6] text-ink/70">
+                  {service.primaryImage.caption}
+                </figcaption>
               )}
-
-              {/* floating card: projects */}
-              {projectCount > 0 && (
-                <div className="absolute -bottom-0 right-0 flex items-center gap-3 rounded-[18px] border-[6px] border-white bg-navy px-5 py-4 text-white shadow-[0_20px_40px_-12px_rgba(0,51,78,0.45)] max-[600px]:right-3">
-                  <Layers size={22} aria-hidden="true" className="text-paste" />
-                  <div>
-                    <div className="text-[22px] font-extrabold leading-none tracking-[-0.03em]">
-                      {projectCount}
-                    </div>
-                    <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/70">
-                      {projectCount === 1 ? "Project" : "Projects"}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* dotted accent */}
-              <span
-                aria-hidden="true"
-                className="absolute -left-6 bottom-16 -z-10 h-32 w-32 bg-[radial-gradient(circle,rgba(1,110,220,0.35)_1.5px,transparent_1.5px)] bg-[length:14px_14px] max-[600px]:hidden"
-              />
-            </div>
+            </figure>
           </Reveal>
 
           <Reveal dir="up" delay={0.15}>
             <div>
               <SectionHeader
                 eyebrow="OVERVIEW"
-                title={service.detailHeading?.trim() || `About ${service.name}`}
+                title={
+                  service.detailHeading?.trim() ||
+                  `About ${service.name}`
+                }
                 text={service.description}
                 headingId="service-overview-heading"
               />
 
-              <StaggerContainer className="mb-9 mt-8 grid grid-cols-2 gap-3 max-[600px]:grid-cols-1">
+              <ul className="mb-9 mt-8 divide-y divide-line border-y border-line">
                 {benefits.map((benefit) => (
-                  <StaggerItem
-                    key={benefit}
-                    className="flex items-center gap-3 rounded-[14px] border border-line bg-white px-4 py-3.5 text-[13px] font-medium text-navy shadow-[0_6px_18px_-10px_rgba(0,51,78,0.18)]"
-                  >
-                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-blue/10">
-                      <CheckCircle2
-                        size={16}
-                        aria-hidden="true"
-                        className="text-blue"
-                      />
-                    </span>
-                    {benefit}
-                  </StaggerItem>
+                  <>
+                    <li
+                      key={benefit}
+                      className="flex items-center gap-3 py-3.5 text-[15px] font-medium text-navy"
+                    >
+                      <span
+                        className={`mt-0.5 grid size-7 shrink-0 place-items-center rounded-full text-[12px] font-bold bg-blue/10 text-blue`}
+                      >
+                        <Check
+                          size={18}
+                          aria-hidden="true"
+                          className="shrink-0 text-blue"
+                        />
+                      </span>
+                      {benefit}
+                    </li>
+                  </>
                 ))}
-              </StaggerContainer>
+              </ul>
 
               <div className="flex flex-wrap items-center gap-5">
                 <Button href="/contact">Talk to an expert</Button>
@@ -469,49 +417,32 @@ export default async function ServiceDetailPage({
       </section>
 
       {/* ------------------------------------------------------------------ */}
-      {/* HIGHLIGHTS BAND                                                    */}
+      {/* HIGHLIGHTS                                                         */}
       {/* ------------------------------------------------------------------ */}
 
       <section
         aria-label={`${service.name} at a glance`}
-        className="pb-[100px] max-[900px]:pb-20 max-[600px]:pb-16"
+        className="bg-blue text-white"
       >
         <Container>
-          <Reveal dir="up">
-            <div className="relative overflow-hidden rounded-[28px] bg-navy px-12 py-12 max-[900px]:px-8 max-[900px]:py-10 max-[600px]:px-6">
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-blue/30 blur-3xl"
-              />
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute -bottom-32 -left-16 size-72 rounded-full bg-paste/10 blur-3xl"
-              />
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[length:44px_44px]"
-              />
-
-              <div className="relative grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-y-10">
-                {stats.map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="border-l border-white/15 pl-7"
-                  >
-                    <div className="mb-3 text-[clamp(38px,4vw,58px)] font-extrabold leading-none tracking-[-0.05em] text-white">
-                      <AnimatedCounter
-                        value={stat.value}
-                        suffix={stat.suffix}
-                      />
-                    </div>
-                    <p className="text-[12px] font-medium uppercase tracking-[0.1em] text-paste">
-                      {stat.label}
-                    </p>
-                  </div>
-                ))}
+          <div className="grid grid-cols-4 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
+            {stats.map((stat) => (
+              <div
+                key={stat.label}
+                className="border-l border-white/20 px-8 py-14 first:border-l-0 max-[900px]:border-b max-[900px]:[&:nth-child(odd)]:border-l-0 max-[600px]:border-l-0 max-[600px]:px-0 max-[600px]:py-8"
+              >
+                <div className="mb-2 text-[clamp(42px,4.6vw,64px)] font-extrabold leading-none tracking-[-0.05em]">
+                  <AnimatedCounter
+                    value={stat.value}
+                    suffix={stat.suffix}
+                  />
+                </div>
+                <p className="text-[14px] text-white/80">
+                  {stat.label}
+                </p>
               </div>
-            </div>
-          </Reveal>
+            ))}
+          </div>
         </Container>
       </section>
 
