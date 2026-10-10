@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   title:
     "Best Waterproofing, Flooring & Protective Coating Solutions In Bangladesh | Enviroshield",
   description:
-    "Enviroshield provides professional waterproofing, flooring, heat insulation, injection grouting, polished concrete, and protective coating solutions for residential, commercial, and industrial spaces.",
+    "Enviroshield provides waterproofing, waterproofing paint, heatproofing, epoxy and PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy floors, floor hardener, and ETP coating in Bangladesh.",
 };
 
 export default function HomePage() {
