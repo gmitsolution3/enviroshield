@@ -277,13 +277,13 @@ export default function AboutPage() {
                     className="flex items-center gap-3 py-3.5 text-[15px] font-medium text-navy"
                   >
                     <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-blue text-white">
-                    <Check
-                      size={18}
-                      aria-hidden="true"
-                      className="shrink-0 text-blue"
-                    />
-                  </span>
-                    
+                      <Check
+                        size={15}
+                        aria-hidden="true"
+                        className="shrink-0"
+                      />
+                    </span>
+
                     {item}
                   </li>
                 ))}
@@ -327,7 +327,8 @@ export default function AboutPage() {
                   id="chairman-heading"
                   className="mb-6 text-[clamp(28px,3.4vw,44px)] font-extrabold leading-[1.1] tracking-[-0.04em] text-white"
                 >
-                  Protection is a promise we build into every property.
+                  Protection is a promise we build into every
+                  property.
                 </h2>
 
                 {/* Replace with the Chairman's real message */}
@@ -336,9 +337,8 @@ export default function AboutPage() {
                     Since 2009, our goal has been simple: to bring
                     dependable protection and honest workmanship to
                     every project we take on. Behind every finished
-                    surface is careful preparation, quality
-                    materials, and a team that takes pride in lasting
-                    results.
+                    surface is careful preparation, quality materials,
+                    and a team that takes pride in lasting results.
                   </p>
                   <p>
                     We will keep investing in our people, our
@@ -387,7 +387,9 @@ export default function AboutPage() {
                     />
                   )}
                 </div>
-                <p className="text-[14px] text-white/80">{stat.label}</p>
+                <p className="text-[14px] text-white/80">
+                  {stat.label}
+                </p>
               </div>
             ))}
           </div>

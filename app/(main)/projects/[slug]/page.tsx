@@ -1,4 +1,12 @@
-import { CalendarDays, CheckCircle2, MapPin } from "lucide-react";
+import {
+  ArrowUpRight,
+  Building2,
+  CalendarDays,
+  CheckCircle2,
+  ChevronRight,
+  Layers,
+  MapPin,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,11 +21,13 @@ import { Button } from "@/components/Button";
 import Container from "@/components/Container";
 import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
+import ProjectCard from "@/components/projects/ProjectCard";
 import { SectionHeader } from "@/components/SectionHeader";
 import {
   getPublishedProjectBySlug,
   getPublishedProjects,
 } from "@/lib/api/projects";
+import type { IProject } from "@/types";
 
 type ProjectDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -138,6 +148,31 @@ export async function generateStaticParams() {
   }
 }
 
+const projectBenefits = [
+  "Professional surface preparation",
+  "Premium application materials",
+  "Experienced installation team",
+  "Durable long-term performance",
+];
+
+const steps = [
+  {
+    number: "01",
+    title: "Preparation",
+    text: "The project begins with careful assessment and preparation of the existing surface.",
+  },
+  {
+    number: "02",
+    title: "Application",
+    text: "The selected system is professionally installed using the appropriate materials and techniques.",
+  },
+  {
+    number: "03",
+    title: "Final result",
+    text: "The completed surface is inspected to ensure a clean, durable, and high-quality finish.",
+  },
+];
+
 export default async function ProjectDetailPage({
   params,
 }: ProjectDetailPageProps) {
@@ -163,6 +198,38 @@ export default async function ProjectDetailPage({
 
   const serviceName =
     project.serviceId?.name || "Enviroshield Solution";
+
+  const completionDate = project.completionDate
+    ? new Date(project.completionDate).toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+      })
+    : "";
+
+  const facts = [
+    { icon: MapPin, label: "Location", value: location },
+    { icon: CalendarDays, label: "Completed", value: completionDate },
+    { icon: Layers, label: "Service", value: serviceName },
+    { icon: Building2, label: "Client", value: project.client?.name },
+  ].filter((fact) => Boolean(fact.value)) as {
+    icon: typeof MapPin;
+    label: string;
+    value: string;
+  }[];
+
+  const gallery = project.gallery ?? [];
+
+  // More projects: skip the current one
+  let related: IProject[] = [];
+
+  try {
+    const result = await getPublishedProjects({ page: 1, limit: 4 });
+    related = result.data
+      .filter((item) => item._id !== project._id)
+      .slice(0, 3);
+  } catch {
+    related = [];
+  }
 
   const projectJsonLd = {
     "@context": "https://schema.org",
@@ -232,20 +299,6 @@ export default async function ProjectDetailPage({
     ],
   };
 
-  const completionDate = new Date(
-    project.completionDate,
-  ).toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
-
-  const projectBenefits = [
-    "Professional surface preparation",
-    "Premium application materials",
-    "Experienced installation team",
-    "Durable long-term performance",
-  ];
-
   return (
     <>
       <script
@@ -279,18 +332,68 @@ export default async function ProjectDetailPage({
         imageAlt={project.primaryImage.alt}
       />
 
+      {/* ------------------------------------------------------------------ */}
+      {/* BREADCRUMB                                                         */}
+      {/* ------------------------------------------------------------------ */}
+
+      <nav
+        aria-label="Breadcrumb"
+        className="border-b border-line bg-white"
+      >
+        <Container>
+          <ol className="flex flex-wrap items-center gap-1.5 py-4 text-[13px] text-ink">
+            <li>
+              <Link
+                href="/"
+                className="transition-colors hover:text-blue"
+              >
+                Home
+              </Link>
+            </li>
+            <ChevronRight
+              size={14}
+              aria-hidden="true"
+              className="text-ink/40"
+            />
+            <li>
+              <Link
+                href="/projects"
+                className="transition-colors hover:text-blue"
+              >
+                Projects
+              </Link>
+            </li>
+            <ChevronRight
+              size={14}
+              aria-hidden="true"
+              className="text-ink/40"
+            />
+            <li
+              aria-current="page"
+              className="font-semibold text-navy"
+            >
+              {project.title}
+            </li>
+          </ol>
+        </Container>
+      </nav>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* OVERVIEW                                                           */}
+      {/* ------------------------------------------------------------------ */}
+
       <section
         aria-labelledby="project-overview-heading"
         className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
       >
-        <Container className="grid grid-cols-2 items-center gap-[70px] max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
+        <Container className="grid grid-cols-2 items-center gap-[80px] max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
           <Reveal dir="image">
-            <div className="relative h-[530px] overflow-hidden rounded-[18px] max-[600px]:h-[340px]">
+            <div className="relative h-[600px] overflow-hidden rounded-[16px] max-[600px]:h-[340px]">
               <Image
                 src={project.primaryImage.url}
-                alt={project.primaryImage.alt}
+                alt={project.primaryImage.alt || project.title}
                 fill
-                sizes="45vw"
+                sizes="(max-width: 900px) 100vw, 45vw"
                 className="object-cover"
               />
             </div>
@@ -305,77 +408,50 @@ export default async function ProjectDetailPage({
                 headingId="project-overview-heading"
               />
 
-              <div className="mb-[30px] grid gap-4">
-                <div className="flex items-start gap-3">
-                  <MapPin
-                    size={18}
-                    aria-hidden="true"
-                    className="mt-0.5 shrink-0 text-blue"
-                  />
+              {/* Project details card */}
+              {facts.length > 0 && (
+                <dl className="mt-8 grid grid-cols-2 overflow-hidden rounded-[14px] border border-line bg-soft max-[600px]:grid-cols-1">
+                  {facts.map((fact) => {
+                    const Icon = fact.icon;
 
-                  <div>
-                    <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-navy">
-                      Location
-                    </p>
+                    return (
+                      <div
+                        key={fact.label}
+                        className="flex items-start gap-4 border-b border-r border-line p-5 [&:nth-child(2n)]:border-r-0 [&:nth-last-child(-n+2)]:border-b-0 max-[600px]:border-r-0 max-[600px]:[&:nth-last-child(2)]:border-b"
+                      >
+                        <span className="grid size-10 shrink-0 place-items-center rounded-[10px] bg-blue text-white">
+                          <Icon size={19} aria-hidden="true" />
+                        </span>
 
-                    <p className="mt-1 text-[14px] leading-[1.6] text-ink">
-                      {location}
-                    </p>
-                  </div>
-                </div>
+                        <div className="min-w-0">
+                          <dt className="mb-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-ink/60">
+                            {fact.label}
+                          </dt>
+                          <dd className="text-[15px] font-semibold leading-[1.4] text-navy">
+                            {fact.value}
+                          </dd>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </dl>
+              )}
 
-                <div className="flex items-start gap-3">
-                  <CalendarDays
-                    size={18}
-                    aria-hidden="true"
-                    className="mt-0.5 shrink-0 text-blue"
-                  />
-
-                  <div>
-                    <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-navy">
-                      Completed
-                    </p>
-
-                    <p className="mt-1 text-[14px] leading-[1.6] text-ink">
-                      {completionDate}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <CheckCircle2
-                    size={18}
-                    aria-hidden="true"
-                    className="mt-0.5 shrink-0 text-blue"
-                  />
-
-                  <div>
-                    <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-navy">
-                      Service
-                    </p>
-
-                    <p className="mt-1 text-[14px] leading-[1.6] text-ink">
-                      {serviceName}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <StaggerContainer className="mb-[30px] grid grid-cols-2 gap-x-[22px] gap-y-[15px] max-[600px]:grid-cols-1 max-[600px]:gap-3">
+              <ul className="mb-12 mt-8 grid grid-cols-2 gap-x-6 gap-y-3 max-[600px]:grid-cols-1">
                 {projectBenefits.map((benefit) => (
-                  <StaggerItem
+                  <li
                     key={benefit}
-                    className="flex items-center gap-2 text-[13px] text-ink"
+                    className="flex items-start gap-2 text-[14px] text-navy"
                   >
                     <CheckCircle2
-                      size={16}
+                      size={18}
                       aria-hidden="true"
-                      className="shrink-0 text-blue"
+                      className="mt-px shrink-0 text-blue"
                     />
                     {benefit}
-                  </StaggerItem>
+                  </li>
                 ))}
-              </StaggerContainer>
+              </ul>
 
               <Button href="/contact">Start a project</Button>
             </div>
@@ -383,100 +459,123 @@ export default async function ProjectDetailPage({
         </Container>
       </section>
 
+      {/* ------------------------------------------------------------------ */}
+      {/* CLIENT (only if the project has client details)                    */}
+      {/* ------------------------------------------------------------------ */}
+
+      {project.client?.description && (
+        <section
+          aria-labelledby="project-client-heading"
+          className="bg-soft py-[96px] max-[900px]:py-16"
+        >
+          <Container>
+            <Reveal dir="up">
+              <div className="grid grid-cols-[360px_1fr] items-stretch gap-12 max-[900px]:grid-cols-1 max-[900px]:gap-8">
+                {/* Logo tile */}
+                <div className="relative flex min-h-[300px] items-center justify-center rounded-[16px] border border-line bg-white p-10 max-[900px]:min-h-[220px]">
+                  <span className="absolute left-0 top-0 rounded-br-[12px] rounded-tl-[16px] bg-blue px-4 py-2.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-white">
+                    Our client
+                  </span>
+
+                  {project.client.logo?.url ? (
+                    <div className="relative h-[120px] w-full max-w-[240px]">
+                      <Image
+                        src={project.client.logo.url}
+                        alt={
+                          project.client.logo.alt ||
+                          project.client.name
+                        }
+                        fill
+                        sizes="240px"
+                        className="object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <span
+                      aria-hidden="true"
+                      className="grid size-[110px] place-items-center rounded-full bg-navy text-[44px] font-extrabold text-white"
+                    >
+                      {project.client.name?.charAt(0)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Client details */}
+                <div className="flex flex-col justify-center">
+                  <p className="mb-3 text-[13px] font-bold uppercase tracking-[0.14em] text-ink/60">
+                    Delivered for
+                  </p>
+
+                  <h2
+                    id="project-client-heading"
+                    className="mb-6 text-[clamp(36px,4.6vw,60px)] font-extrabold leading-[1.02] tracking-[-0.05em] text-navy"
+                  >
+                    {project.client.name}
+                  </h2>
+
+                  <p className="max-w-[680px] text-[18px] leading-[1.75] text-ink">
+                    {project.client.description}
+                  </p>
+
+                  <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
+                    <p className="text-[14px] text-ink">
+                      Service delivered:{" "}
+                      <strong className="font-bold text-navy">
+                        {serviceName}
+                      </strong>
+                    </p>
+
+                    <Link
+                      href="/contact"
+                      className="inline-flex items-center gap-[7px] text-[14px] font-extrabold text-navy transition-[gap,color] duration-200 hover:gap-[11px] hover:text-blue"
+                    >
+                      Start a similar project
+                      <ArrowUpRight size={16} aria-hidden="true" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          </Container>
+        </section>
+      )}
+
+      {/* ------------------------------------------------------------------ */}
+      {/* THE WORK                                                           */}
+      {/* ------------------------------------------------------------------ */}
+
       <section
         aria-labelledby="project-details-heading"
-        className="relative overflow-hidden bg-mist py-[120px] max-[900px]:py-20 max-[600px]:py-16"
+        className="bg-navy py-[112px] max-[900px]:py-20 max-[600px]:py-16"
       >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-[-180px] top-[100px] h-[420px] w-[420px] rounded-full bg-blue/5 blur-3xl"
-        />
-
         <Container>
           <SectionHeader
             eyebrow="PROJECT DETAILS"
             title="The work behind the result."
-            text={`A closer look at the ${serviceName.toLowerCase()} solution delivered for ${project.client.name}.`}
+            text={`A closer look at the ${serviceName.toLowerCase()} solution delivered${
+              project.client?.name
+                ? ` for ${project.client.name}`
+                : ""
+            }.`}
+            light
             headingId="project-details-heading"
           />
 
-          <StaggerContainer className="mt-12 grid grid-cols-3 gap-5 max-[900px]:grid-cols-1">
-            {[
-              {
-                number: "01",
-                title: "Preparation",
-                text: "The project begins with careful assessment and preparation of the existing surface.",
-              },
-              {
-                number: "02",
-                title: "Application",
-                text: "The selected system is professionally installed using the appropriate materials and techniques.",
-              },
-              {
-                number: "03",
-                title: "Final result",
-                text: "The completed surface is inspected to ensure a clean, durable, and high-quality finish.",
-              },
-            ].map((item) => (
+          <StaggerContainer className="mt-14 grid grid-cols-3 gap-8 max-[900px]:grid-cols-1">
+            {steps.map((item) => (
               <StaggerItem key={item.number}>
-                <article className="relative h-full rounded-[18px] border border-line bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(0,51,78,0.08)]">
-                  <span className="mb-7 block text-[11px] font-extrabold tracking-[0.15em] text-blue">
+                <div className="h-full border-t-2 border-blue pt-6">
+                  <span className="mb-10 block text-[64px] font-extrabold leading-none tracking-[-0.05em] text-white">
                     {item.number}
                   </span>
 
-                  <h3 className="mb-3 text-[22px] font-extrabold tracking-[-0.03em] text-navy">
+                  <h3 className="mb-3 text-[22px] font-semibold text-white">
                     {item.title}
                   </h3>
 
-                  <p className="text-[14px] leading-[1.7] text-ink">
+                  <p className="text-[14px] leading-[1.7] text-white/65">
                     {item.text}
                   </p>
-                </article>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-        </Container>
-      </section>
-
-      <section
-        aria-labelledby="project-gallery-heading"
-        className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
-      >
-        <Container>
-          <SectionHeader
-            eyebrow="PROJECT GALLERY"
-            title="A closer look at the project."
-            text="Explore selected views from this Enviroshield project."
-            headingId="project-gallery-heading"
-          />
-
-          <StaggerContainer className="mt-12 grid grid-cols-2 gap-5 max-[600px]:grid-cols-1">
-            {project.gallery.map((image, index) => (
-              <StaggerItem
-                key={`${image.url}-${index}`}
-                className={index === 0 ? "row-span-2" : ""}
-              >
-                <div
-                  className={`relative overflow-hidden rounded-[18px] ${
-                    index === 0
-                      ? "h-[620px] max-[900px]:h-[500px] max-[600px]:h-[340px]"
-                      : "h-[300px] max-[600px]:h-[280px]"
-                  }`}
-                >
-                  <Image
-                    src={image.url}
-                    alt={
-                      image.alt ||
-                      `${project.title} — project image ${index + 1}`
-                    }
-                    fill
-                    sizes={
-                      index === 0
-                        ? "(max-width: 600px) 100vw, 50vw"
-                        : "(max-width: 600px) 100vw, 25vw"
-                    }
-                    className="object-cover transition-transform duration-700 hover:scale-105"
-                  />
                 </div>
               </StaggerItem>
             ))}
@@ -484,25 +583,96 @@ export default async function ProjectDetailPage({
         </Container>
       </section>
 
-      <section
-        aria-label="Project navigation"
-        className="pb-[112px] max-[900px]:pb-20 max-[600px]:pb-16"
-      >
-        <Container>
-          <Reveal dir="up">
-            <div className="flex items-center justify-between gap-5 border-t border-line pt-8 max-[600px]:flex-col max-[600px]:items-start">
+      {/* ------------------------------------------------------------------ */}
+      {/* GALLERY                                                            */}
+      {/* ------------------------------------------------------------------ */}
+
+      {gallery.length > 0 && (
+        <section
+          aria-labelledby="project-gallery-heading"
+          className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
+        >
+          <Container>
+            <SectionHeader
+              eyebrow="PROJECT GALLERY"
+              title="A closer look at the project."
+              text="Explore selected views from this Enviroshield project."
+              headingId="project-gallery-heading"
+            />
+
+            <StaggerContainer className="mt-12 grid auto-rows-[260px] grid-cols-3 gap-4 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1 max-[600px]:auto-rows-[240px]">
+              {gallery.map((image, index) => {
+                const large = index === 0 && gallery.length > 2;
+
+                return (
+                  <StaggerItem
+                    key={`${image.url}-${index}`}
+                    className={
+                      large
+                        ? "col-span-2 row-span-2 max-[600px]:col-span-1 max-[600px]:row-span-1"
+                        : ""
+                    }
+                  >
+                    <div className="relative h-full overflow-hidden rounded-[14px] bg-mist">
+                      <Image
+                        src={image.url}
+                        alt={
+                          image.alt ||
+                          `${project.title} — project image ${index + 1}`
+                        }
+                        fill
+                        sizes={
+                          large
+                            ? "(max-width: 600px) 100vw, 66vw"
+                            : "(max-width: 600px) 100vw, 33vw"
+                        }
+                        className="object-cover"
+                      />
+                    </div>
+                  </StaggerItem>
+                );
+              })}
+            </StaggerContainer>
+          </Container>
+        </section>
+      )}
+
+      {/* ------------------------------------------------------------------ */}
+      {/* MORE PROJECTS                                                      */}
+      {/* ------------------------------------------------------------------ */}
+
+      {related.length > 0 && (
+        <section
+          aria-labelledby="more-projects-heading"
+          className="bg-soft py-[112px] max-[900px]:py-20 max-[600px]:py-16"
+        >
+          <Container>
+            <div className="mb-12 flex items-end justify-between gap-6 max-[600px]:flex-col max-[600px]:items-start">
+              <SectionHeader
+                eyebrow="KEEP EXPLORING"
+                title="More projects."
+                headingId="more-projects-heading"
+              />
+
               <Link
                 href="/projects"
-                className="text-[13px] font-bold text-navy transition-colors hover:text-blue"
+                className="inline-flex shrink-0 items-center gap-[7px] text-[14px] font-extrabold text-navy transition-[gap,color] duration-200 hover:gap-[11px] hover:text-blue"
               >
-                ← Back to all projects
+                View all projects
+                <ArrowUpRight size={16} aria-hidden="true" />
               </Link>
-
-              <Button href="/contact">Discuss your project</Button>
             </div>
-          </Reveal>
-        </Container>
-      </section>
+
+            <StaggerContainer className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-5">
+              {related.map((item) => (
+                <StaggerItem key={item._id} className="h-[440px]">
+                  <ProjectCard project={item} />
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          </Container>
+        </section>
+      )}
 
       <ContactSection />
     </>
