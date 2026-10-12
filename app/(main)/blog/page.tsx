@@ -14,6 +14,7 @@ import { ArrowUpRight, CalendarDays, User } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { title } from "process";
 
 type BlogPageProps = {
   searchParams: Promise<{
@@ -124,7 +125,9 @@ export default async function BlogPage({
       page: currentPage,
       limit: 12,
     });
-  } catch {
+  } catch (error) {
+    console.error("Failed to load blog articles:", error);
+
     result = {
       success: false,
       statusCode: 500,
@@ -142,8 +145,10 @@ export default async function BlogPage({
   const blogs = result.data;
   const total = result.meta.total;
 
-  // Spotlight: the latest article, first page only
+  // Spotlight: latest article on the first page only.
   const featured = currentPage === 1 ? blogs[0] : undefined;
+
+  // Keep the remaining articles in the regular card grid.
   const gridBlogs = featured ? blogs.slice(1) : blogs;
 
   const featuredDate = featured?.publishedAt
@@ -179,7 +184,7 @@ export default async function BlogPage({
 
           {blogs.length > 0 ? (
             <>
-              {/* Spotlight */}
+              {/* LATEST ARTICLE — ORIGINAL SPOTLIGHT DESIGN */}
               {featured && (
                 <Reveal dir="up">
                   <Link
@@ -187,20 +192,24 @@ export default async function BlogPage({
                     aria-label={`Read ${featured.title}`}
                     className="group mt-12 grid grid-cols-[1.15fr_0.85fr] overflow-hidden rounded-[20px] bg-navy max-[900px]:grid-cols-1"
                   >
+                    {/* Article cover */}
                     <div className="relative min-h-[460px] overflow-hidden max-[900px]:aspect-[4/3] max-[900px]:min-h-0">
-                      <Image
-                        src={featured.coverImage.url}
-                        alt={
-                          featured.coverImage.alt || featured.title
-                        }
-                        fill
-                        sizes="(max-width: 900px) 100vw, 55vw"
-                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                      />
+                      {featured.coverImage?.url && (
+                        <Image
+                          src={featured.coverImage.url}
+                          alt={
+                            featured.coverImage.alt || featured.title
+                          }
+                          fill
+                          sizes="(max-width: 900px) 100vw, 55vw"
+                          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                        />
+                      )}
                     </div>
 
+                    {/* Article information */}
                     <div className="flex flex-col justify-center p-12 max-[900px]:p-8 max-[600px]:p-6">
-                      <div className="mb-5 flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
+                      <div className="mb-5 flex flex-wrap items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
                         <span
                           className="h-[2px] w-7 bg-current"
                           aria-hidden="true"
@@ -209,7 +218,7 @@ export default async function BlogPage({
                         {featuredTag && (
                           <>
                             <span aria-hidden="true">·</span>
-                            {featuredTag}
+                            <span>{featuredTag}</span>
                           </>
                         )}
                       </div>
@@ -233,9 +242,11 @@ export default async function BlogPage({
                                 aria-hidden="true"
                                 className="text-paste"
                               />
+
                               {featuredAuthor}
                             </span>
                           )}
+
                           {featuredDate && (
                             <span className="flex items-center gap-2">
                               <CalendarDays
@@ -243,6 +254,7 @@ export default async function BlogPage({
                                 aria-hidden="true"
                                 className="text-paste"
                               />
+
                               {featuredDate}
                             </span>
                           )}
@@ -258,14 +270,15 @@ export default async function BlogPage({
                 </Reveal>
               )}
 
-              {/* Grid */}
+              {/* REMAINING ARTICLES — EXISTING CARD GRID */}
               {gridBlogs.length > 0 && (
                 <>
                   {featured && (
                     <div className="mb-8 mt-16 flex items-end justify-between border-b border-line pb-4">
                       <h3 className="text-[24px] font-extrabold tracking-[-0.03em] text-navy">
-                        More articles
+                        More Articles
                       </h3>
+
                       <span className="text-[14px] text-ink">
                         {total} in total
                       </span>
@@ -286,6 +299,7 @@ export default async function BlogPage({
                 </>
               )}
 
+              {/* PAGINATION */}
               <BlogPagination
                 currentPage={result.meta.page}
                 totalPages={result.meta.totalPages}

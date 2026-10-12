@@ -11,8 +11,15 @@ import PageHero from "@/components/PageHero";
 import ProjectCard from "@/components/projects/ProjectCard";
 import ProjectsPagination from "@/components/projects/ProjectsPagination";
 import { SectionHeader } from "@/components/SectionHeader";
-import { getPublishedProjects } from "@/lib/api/projects";
-import { ArrowUpRight, CalendarDays, MapPin } from "lucide-react";
+import {
+  getFeaturedProjects,
+  getPublishedProjects,
+} from "@/lib/api/projects";
+import {
+  ArrowUpRight,
+  CalendarDays,
+  MapPin,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -125,38 +132,33 @@ export default async function ProjectsPage({
     Number.parseInt(params.page || "1", 10) || 1,
   );
 
-  const result = await getPublishedProjects({
-    page,
-    limit: 12,
-  });
+  // Fetch published and featured projects concurrently.
+  const [result, allFeaturedProjects] = await Promise.all([
+    getPublishedProjects({
+      page,
+      limit: 12,
+    }),
+    getFeaturedProjects().catch((error) => {
+      console.error("Failed to fetch featured projects:", error);
+      return [];
+    }),
+  ]);
 
   const projects = result.data;
   const total = result.meta.total;
 
-  // Spotlight: first featured project, first page only
-  const featured =
-    page === 1 ? projects.find((p) => p.isFeatured) : undefined;
+  // Display all featured spotlights on the first page only.
+  const featuredProjects =
+    page === 1 ? allFeaturedProjects : [];
 
-  const gridProjects = featured
-    ? projects.filter((p) => p._id !== featured._id)
-    : projects;
+  // Exclude featured projects from the regular project grid.
+  const featuredIds = new Set(
+    allFeaturedProjects.map((project) => project._id),
+  );
 
-  const featuredLocation = featured
-    ? [
-        featured.location?.area,
-        featured.location?.city,
-        featured.location?.country,
-      ]
-        .filter(Boolean)
-        .join(", ")
-    : "";
-
-  const featuredDate = featured?.completionDate
-    ? new Date(featured.completionDate).toLocaleDateString("en-US", {
-        month: "short",
-        year: "numeric",
-      })
-    : null;
+  const gridProjects = projects.filter(
+    (project) => !featuredIds.has(project._id),
+  );
 
   const stats = [
     { value: total, suffix: "+", label: "Projects completed" },
@@ -174,10 +176,7 @@ export default async function ProjectsPage({
         imageAlt="Enviro Shield completed project"
       />
 
-      {/* ------------------------------------------------------------------ */}
-      {/* STATS                                                              */}
-      {/* ------------------------------------------------------------------ */}
-
+      {/* STATS */}
       {total > 0 && (
         <section
           aria-label="Projects at a glance"
@@ -196,6 +195,7 @@ export default async function ProjectsPage({
                       suffix={stat.suffix}
                     />
                   </div>
+
                   <p className="text-[14px] text-white/80">
                     {stat.label}
                   </p>
@@ -206,10 +206,7 @@ export default async function ProjectsPage({
         </section>
       )}
 
-      {/* ------------------------------------------------------------------ */}
-      {/* PROJECTS                                                           */}
-      {/* ------------------------------------------------------------------ */}
-
+      {/* PROJECTS */}
       <section
         aria-labelledby="projects-page-heading"
         className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
@@ -222,90 +219,154 @@ export default async function ProjectsPage({
             headingId="projects-page-heading"
           />
 
-          {projects.length > 0 ? (
+          {projects.length > 0 || featuredProjects.length > 0 ? (
             <>
-              {/* Spotlight */}
-              {featured && (
-                <Reveal dir="up">
-                  <Link
-                    href={`/projects/${featured.slug}`}
-                    aria-label={`View ${featured.title} project`}
-                    className="group mt-12 grid grid-cols-[1.15fr_0.85fr] overflow-hidden rounded-[20px] bg-navy max-[900px]:grid-cols-1"
-                  >
-                    <div className="relative min-h-[460px] overflow-hidden max-[900px]:aspect-[4/3] max-[900px]:min-h-0">
-                      <Image
-                        src={featured.primaryImage.url}
-                        alt={
-                          featured.primaryImage.alt ||
-                          `${featured.title} project completed by Enviroshield`
-                        }
-                        fill
-                        sizes="(max-width: 900px) 100vw, 55vw"
-                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                      />
-                    </div>
+              {/* FEATURED PROJECTS — ORIGINAL SPOTLIGHT DESIGN */}
+              {featuredProjects.length > 0 && (
+                <section
+                  aria-labelledby="featured-projects-heading"
+                  className="mt-12"
+                >
+                  <div className="mb-8 flex items-end justify-between border-b border-line pb-4">
+                    <div>
+                      <p className="mb-2 text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
+                        OUR BEST WORK
+                      </p>
 
-                    <div className="flex flex-col justify-center p-12 max-[900px]:p-8 max-[600px]:p-6">
-                      <div className="mb-5 flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
-                        <span
-                          className="h-[2px] w-7 bg-current"
-                          aria-hidden="true"
-                        />
-                        FEATURED PROJECT
-                      </div>
-
-                      <h3 className="mb-4 text-[clamp(28px,3vw,40px)] font-extrabold leading-[1.1] tracking-[-0.04em] text-white">
-                        {featured.title}
+                      <h3
+                        id="featured-projects-heading"
+                        className="text-[24px] font-extrabold tracking-[-0.03em] text-navy"
+                      >
+                        Featured Projects
                       </h3>
-
-                      {featured.description && (
-                        <p className="mb-6 line-clamp-4 text-[15px] leading-[1.75] text-white/70">
-                          {featured.description}
-                        </p>
-                      )}
-
-                      {(featuredLocation || featuredDate) && (
-                        <div className="mb-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-white/15 pt-5 text-[13px] text-white/75">
-                          {featuredLocation && (
-                            <span className="flex items-center gap-2">
-                              <MapPin
-                                size={15}
-                                aria-hidden="true"
-                                className="text-paste"
-                              />
-                              {featuredLocation}
-                            </span>
-                          )}
-                          {featuredDate && (
-                            <span className="flex items-center gap-2">
-                              <CalendarDays
-                                size={15}
-                                aria-hidden="true"
-                                className="text-paste"
-                              />
-                              {featuredDate}
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      <span className="inline-flex items-center gap-2 text-[14px] font-bold text-white transition-[gap] duration-200 group-hover:gap-3">
-                        View project
-                        <ArrowUpRight size={18} aria-hidden="true" />
-                      </span>
                     </div>
-                  </Link>
-                </Reveal>
+
+                    <span className="text-[14px] text-ink">
+                      {featuredProjects.length}{" "}
+                      {featuredProjects.length === 1
+                        ? "project"
+                        : "projects"}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col gap-8">
+                    {featuredProjects.map((featured) => {
+                      const featuredLocation = [
+                        featured.location?.area,
+                        featured.location?.city,
+                        featured.location?.country,
+                      ]
+                        .filter(Boolean)
+                        .join(", ");
+
+                      const featuredDate =
+                        featured.completionDate
+                          ? new Date(
+                              featured.completionDate,
+                            ).toLocaleDateString("en-US", {
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : null;
+
+                      return (
+                        <Reveal
+                          key={featured._id}
+                          dir="up"
+                        >
+                          <Link
+                            href={`/projects/${featured.slug}`}
+                            aria-label={`View ${featured.title} project`}
+                            className="group grid grid-cols-[1.15fr_0.85fr] overflow-hidden rounded-[20px] bg-navy max-[900px]:grid-cols-1"
+                          >
+                            {/* Project image */}
+                            <div className="relative min-h-[460px] overflow-hidden max-[900px]:aspect-[4/3] max-[900px]:min-h-0">
+                              <Image
+                                src={featured.primaryImage.url}
+                                alt={
+                                  featured.primaryImage.alt ||
+                                  `${featured.title} project completed by Enviroshield`
+                                }
+                                fill
+                                sizes="(max-width: 900px) 100vw, 55vw"
+                                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                              />
+                            </div>
+
+                            {/* Project information */}
+                            <div className="flex flex-col justify-center p-12 max-[900px]:p-8 max-[600px]:p-6">
+                              <div className="mb-5 flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
+                                <span
+                                  className="h-[2px] w-7 bg-current"
+                                  aria-hidden="true"
+                                />
+                                FEATURED PROJECT
+                              </div>
+
+                              <h4 className="mb-4 text-[clamp(28px,3vw,40px)] font-extrabold leading-[1.1] tracking-[-0.04em] text-white">
+                                {featured.title}
+                              </h4>
+
+                              {featured.description && (
+                                <p className="mb-6 line-clamp-4 text-[15px] leading-[1.75] text-white/70">
+                                  {featured.description}
+                                </p>
+                              )}
+
+                              {(featuredLocation ||
+                                featuredDate) && (
+                                <div className="mb-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-white/15 pt-5 text-[13px] text-white/75">
+                                  {featuredLocation && (
+                                    <span className="flex items-center gap-2">
+                                      <MapPin
+                                        size={15}
+                                        aria-hidden="true"
+                                        className="text-paste"
+                                      />
+
+                                      {featuredLocation}
+                                    </span>
+                                  )}
+
+                                  {featuredDate && (
+                                    <span className="flex items-center gap-2">
+                                      <CalendarDays
+                                        size={15}
+                                        aria-hidden="true"
+                                        className="text-paste"
+                                      />
+
+                                      {featuredDate}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+
+                              <span className="inline-flex items-center gap-2 text-[14px] font-bold text-white transition-[gap] duration-200 group-hover:gap-3">
+                                View project
+                                <ArrowUpRight
+                                  size={18}
+                                  aria-hidden="true"
+                                />
+                              </span>
+                            </div>
+                          </Link>
+                        </Reveal>
+                      );
+                    })}
+                  </div>
+                </section>
               )}
 
-              {/* Grid */}
+              {/* REGULAR PROJECTS — EXISTING MASONRY GRID */}
               {gridProjects.length > 0 && (
                 <>
-                  {featured && (
+                  {allFeaturedProjects.length > 0 && (
                     <div className="mb-8 mt-16 flex items-end justify-between border-b border-line pb-4">
                       <h3 className="text-[24px] font-extrabold tracking-[-0.03em] text-navy">
-                        More projects
+                        More Projects
                       </h3>
+
                       <span className="text-[14px] text-ink">
                         {total} in total
                       </span>
@@ -314,12 +375,16 @@ export default async function ProjectsPage({
 
                   <StaggerContainer
                     className={`columns-[320px] gap-[18px] ${
-                      featured ? "" : "mt-12"
+                      featuredProjects.length > 0
+                        ? ""
+                        : "mt-12"
                     }`}
                   >
                     {gridProjects.map((project, index) => {
                       const height =
-                        masonryHeights[index % masonryHeights.length];
+                        masonryHeights[
+                          index % masonryHeights.length
+                        ];
 
                       return (
                         <StaggerItem
@@ -334,6 +399,7 @@ export default async function ProjectsPage({
                 </>
               )}
 
+              {/* PAGINATION */}
               <ProjectsPagination
                 currentPage={result.meta.page}
                 totalPages={result.meta.totalPages}
@@ -352,7 +418,9 @@ export default async function ProjectsPage({
               </p>
 
               <div className="mt-7">
-                <Button href="/contact">Talk to our team</Button>
+                <Button href="/contact">
+                  Talk to our team
+                </Button>
               </div>
             </div>
           )}
