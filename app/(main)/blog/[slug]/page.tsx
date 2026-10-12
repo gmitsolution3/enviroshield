@@ -296,11 +296,11 @@ export default async function ArticlePage({
     description: post.excerpt,
 
     isPartOf: {
-      "@type": "WebSite",
-      "@id": "https://enviroshieldbd.com/#website",
-      url: "https://enviroshieldbd.com",
-      name: "Enviroshield",
-    },
+  "@type": "WebSite",
+  "@id": `${siteUrl}/#website`,
+  url: siteUrl,
+  name: "Enviroshield",
+},
 
     about: {
       "@id": `${articleUrl}#article`,
@@ -323,25 +323,25 @@ export default async function ArticlePage({
     "@id": `${articleUrl}#breadcrumb`,
 
     itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: "https://enviroshieldbd.com/",
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Blog",
-        item: "https://enviroshieldbd.com/blog",
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: post.title,
-        item: articleUrl,
-      },
-    ],
+  {
+    "@type": "ListItem",
+    position: 1,
+    name: "Home",
+    item: `${siteUrl}/`,
+  },
+  {
+    "@type": "ListItem",
+    position: 2,
+    name: "Blog",
+    item: `${siteUrl}/blog`,
+  },
+  {
+    "@type": "ListItem",
+    position: 3,
+    name: post.title,
+    item: articleUrl,
+  },
+],
   };
 
   return (

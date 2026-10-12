@@ -1,7 +1,8 @@
-import { IProject } from "./project.type";
+import type { IProject } from "./project.type";
 
 export interface IServiceImage {
   url: string;
+  publicId: string;
   alt: string;
   caption?: string;
 }
@@ -18,44 +19,49 @@ export interface IServiceContentSection {
 
 export interface IServiceProjectLocation {
   city: string;
-  area: string;
+  area?: string;
   country: string;
 }
 
 export interface IServiceProjectClientLogo {
   url: string;
+  publicId: string;
   alt: string;
 }
 
 export interface IServiceProjectClient {
   name: string;
-  description: string;
-  logo: IServiceProjectClientLogo;
+  description?: string;
+  logo?: IServiceProjectClientLogo;
 }
 
 export interface IServiceProjectSeo {
-  metaTitle: string;
-  metaDescription: string;
-  keywords: string[];
-  ogTitle: string;
-  ogDescription: string;
-  ogImage: string;
-  noIndex: boolean;
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  ogImagePublicId?: string;
+  noIndex?: boolean;
 }
 
 export interface IServiceProjectGalleryItem {
   url: string;
+  publicId: string;
   alt: string;
+  caption?: string;
 }
 
 export interface IServiceSeo {
-  metaTitle: string;
-  metaDescription: string;
-  keywords: string[];
-  ogTitle: string;
-  ogDescription: string;
-  ogImage: string;
-  noIndex: boolean;
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  ogImagePublicId?: string;
+  noIndex?: boolean;
 }
 
 export interface IService {
@@ -76,7 +82,7 @@ export interface IService {
   projects: IProject[];
 
   status: "published" | "draft";
-  publishedAt?: string;
+  publishedAt?: string | null;
 
   seo?: IServiceSeo;
 
@@ -88,13 +94,18 @@ export interface IServiceResponse {
   success: boolean;
   statusCode: number;
   message: string;
-
   meta: {
     page: number;
     limit: number;
     total: number;
     totalPages: number;
   };
-
   data: IService[];
+}
+
+export interface IServiceSingleResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: IService;
 }

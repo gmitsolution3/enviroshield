@@ -1,5 +1,6 @@
 export interface ITestimonialImage {
   url: string;
+  publicId: string;
   alt: string;
 }
 
@@ -19,13 +20,18 @@ export interface ITestimonialResponse {
   success: boolean;
   statusCode: number;
   message: string;
-
   meta: {
     page: number;
     limit: number;
     total: number;
     totalPages: number;
   };
-
   data: ITestimonial[];
+}
+
+export interface ITestimonialSingleResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: ITestimonial;
 }

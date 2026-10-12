@@ -1,5 +1,6 @@
 export interface IBlogImage {
   url: string;
+  publicId: string;
   alt: string;
   caption?: string;
 }
@@ -11,6 +12,7 @@ export interface IBlogSeo {
   ogTitle?: string;
   ogDescription?: string;
   ogImage?: string;
+  ogImagePublicId?: string;
   noIndex?: boolean;
 }
 
@@ -23,28 +25,18 @@ export interface IBlogAuthor {
 
 export interface IBlog {
   _id: string;
-
   title: string;
   slug: string;
   excerpt: string;
-
   content: Record<string, unknown>;
-
   coverImage: IBlogImage;
-
   tags: string[];
-
   authorId: string;
-
   status: "draft" | "published";
-
   publishedAt?: string | null;
-
   seo?: IBlogSeo;
-
   createdAt: string;
   updatedAt: string;
-
   author?: IBlogAuthor | null;
 }
 
@@ -52,14 +44,12 @@ export interface IBlogResponse {
   success: boolean;
   statusCode: number;
   message: string;
-
   meta: {
     page: number;
     limit: number;
     total: number;
     totalPages: number;
   };
-
   data: IBlog[];
 }
 
@@ -67,6 +57,5 @@ export interface IBlogSingleResponse {
   success: boolean;
   statusCode: number;
   message: string;
-
   data: IBlog;
 }
