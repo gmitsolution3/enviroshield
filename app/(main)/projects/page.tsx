@@ -1,6 +1,5 @@
 import { AnimatedCounter } from "@/components/animations/animated-counter";
 import {
-  Reveal,
   StaggerContainer,
   StaggerItem,
 } from "@/components/animations/reveal";
@@ -8,6 +7,7 @@ import { Button } from "@/components/Button";
 import Container from "@/components/Container";
 import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
+import FeaturedProjectCard from "@/components/projects/FeaturedProjectCard";
 import ProjectCard from "@/components/projects/ProjectCard";
 import ProjectsPagination from "@/components/projects/ProjectsPagination";
 import { SectionHeader } from "@/components/SectionHeader";
@@ -15,14 +15,7 @@ import {
   getFeaturedProjects,
   getPublishedProjects,
 } from "@/lib/api/projects";
-import {
-  ArrowUpRight,
-  CalendarDays,
-  MapPin,
-} from "lucide-react";
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 
 type ProjectsPageProps = {
   searchParams: Promise<{
@@ -148,8 +141,7 @@ export default async function ProjectsPage({
   const total = result.meta.total;
 
   // Display all featured spotlights on the first page only.
-  const featuredProjects =
-    page === 1 ? allFeaturedProjects : [];
+  const featuredProjects = page === 1 ? allFeaturedProjects : [];
 
   // Exclude featured projects from the regular project grid.
   const featuredIds = new Set(
@@ -250,110 +242,12 @@ export default async function ProjectsPage({
                   </div>
 
                   <div className="flex flex-col gap-8">
-                    {featuredProjects.map((featured) => {
-                      const featuredLocation = [
-                        featured.location?.area,
-                        featured.location?.city,
-                        featured.location?.country,
-                      ]
-                        .filter(Boolean)
-                        .join(", ");
-
-                      const featuredDate =
-                        featured.completionDate
-                          ? new Date(
-                              featured.completionDate,
-                            ).toLocaleDateString("en-US", {
-                              month: "short",
-                              year: "numeric",
-                            })
-                          : null;
-
-                      return (
-                        <Reveal
-                          key={featured._id}
-                          dir="up"
-                        >
-                          <Link
-                            href={`/projects/${featured.slug}`}
-                            aria-label={`View ${featured.title} project`}
-                            className="group grid grid-cols-[1.15fr_0.85fr] overflow-hidden rounded-[20px] bg-navy max-[900px]:grid-cols-1"
-                          >
-                            {/* Project image */}
-                            <div className="relative min-h-[460px] overflow-hidden max-[900px]:aspect-[4/3] max-[900px]:min-h-0">
-                              <Image
-                                src={featured.primaryImage.url}
-                                alt={
-                                  featured.primaryImage.alt ||
-                                  `${featured.title} project completed by Enviroshield`
-                                }
-                                fill
-                                sizes="(max-width: 900px) 100vw, 55vw"
-                                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                              />
-                            </div>
-
-                            {/* Project information */}
-                            <div className="flex flex-col justify-center p-12 max-[900px]:p-8 max-[600px]:p-6">
-                              <div className="mb-5 flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
-                                <span
-                                  className="h-[2px] w-7 bg-current"
-                                  aria-hidden="true"
-                                />
-                                FEATURED PROJECT
-                              </div>
-
-                              <h4 className="mb-4 text-[clamp(28px,3vw,40px)] font-extrabold leading-[1.1] tracking-[-0.04em] text-white">
-                                {featured.title}
-                              </h4>
-
-                              {featured.description && (
-                                <p className="mb-6 line-clamp-4 text-[15px] leading-[1.75] text-white/70">
-                                  {featured.description}
-                                </p>
-                              )}
-
-                              {(featuredLocation ||
-                                featuredDate) && (
-                                <div className="mb-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-white/15 pt-5 text-[13px] text-white/75">
-                                  {featuredLocation && (
-                                    <span className="flex items-center gap-2">
-                                      <MapPin
-                                        size={15}
-                                        aria-hidden="true"
-                                        className="text-paste"
-                                      />
-
-                                      {featuredLocation}
-                                    </span>
-                                  )}
-
-                                  {featuredDate && (
-                                    <span className="flex items-center gap-2">
-                                      <CalendarDays
-                                        size={15}
-                                        aria-hidden="true"
-                                        className="text-paste"
-                                      />
-
-                                      {featuredDate}
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-
-                              <span className="inline-flex items-center gap-2 text-[14px] font-bold text-white transition-[gap] duration-200 group-hover:gap-3">
-                                View project
-                                <ArrowUpRight
-                                  size={18}
-                                  aria-hidden="true"
-                                />
-                              </span>
-                            </div>
-                          </Link>
-                        </Reveal>
-                      );
-                    })}
+                    {featuredProjects.map((project) => (
+                      <FeaturedProjectCard
+                        key={project._id}
+                        project={project}
+                      />
+                    ))}
                   </div>
                 </section>
               )}
@@ -375,16 +269,12 @@ export default async function ProjectsPage({
 
                   <StaggerContainer
                     className={`columns-[320px] gap-[18px] ${
-                      featuredProjects.length > 0
-                        ? ""
-                        : "mt-12"
+                      featuredProjects.length > 0 ? "" : "mt-12"
                     }`}
                   >
                     {gridProjects.map((project, index) => {
                       const height =
-                        masonryHeights[
-                          index % masonryHeights.length
-                        ];
+                        masonryHeights[index % masonryHeights.length];
 
                       return (
                         <StaggerItem
@@ -418,9 +308,7 @@ export default async function ProjectsPage({
               </p>
 
               <div className="mt-7">
-                <Button href="/contact">
-                  Talk to our team
-                </Button>
+                <Button href="/contact">Talk to our team</Button>
               </div>
             </div>
           )}

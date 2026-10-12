@@ -1,20 +1,16 @@
 import {
-  Reveal,
   StaggerContainer,
   StaggerItem,
 } from "@/components/animations/reveal";
 import BlogCard from "@/components/blog/BlogCard";
 import BlogPagination from "@/components/blog/BlogPagination";
+import FeaturedBlogCard from "@/components/blog/FeaturedBlogCard";
 import { Button } from "@/components/Button";
 import Container from "@/components/Container";
 import PageHero from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
 import { getPublishedBlogs } from "@/lib/api/blogs";
-import { ArrowUpRight, CalendarDays, User } from "lucide-react";
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import { title } from "process";
 
 type BlogPageProps = {
   searchParams: Promise<{
@@ -185,90 +181,7 @@ export default async function BlogPage({
           {blogs.length > 0 ? (
             <>
               {/* LATEST ARTICLE — ORIGINAL SPOTLIGHT DESIGN */}
-              {featured && (
-                <Reveal dir="up">
-                  <Link
-                    href={`/blog/${featured.slug}`}
-                    aria-label={`Read ${featured.title}`}
-                    className="group mt-12 grid grid-cols-[1.15fr_0.85fr] overflow-hidden rounded-[20px] bg-navy max-[900px]:grid-cols-1"
-                  >
-                    {/* Article cover */}
-                    <div className="relative min-h-[460px] overflow-hidden max-[900px]:aspect-[4/3] max-[900px]:min-h-0">
-                      {featured.coverImage?.url && (
-                        <Image
-                          src={featured.coverImage.url}
-                          alt={
-                            featured.coverImage.alt || featured.title
-                          }
-                          fill
-                          sizes="(max-width: 900px) 100vw, 55vw"
-                          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                        />
-                      )}
-                    </div>
-
-                    {/* Article information */}
-                    <div className="flex flex-col justify-center p-12 max-[900px]:p-8 max-[600px]:p-6">
-                      <div className="mb-5 flex flex-wrap items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
-                        <span
-                          className="h-[2px] w-7 bg-current"
-                          aria-hidden="true"
-                        />
-                        LATEST ARTICLE
-                        {featuredTag && (
-                          <>
-                            <span aria-hidden="true">·</span>
-                            <span>{featuredTag}</span>
-                          </>
-                        )}
-                      </div>
-
-                      <h3 className="mb-4 text-[clamp(28px,3vw,40px)] font-extrabold leading-[1.1] tracking-[-0.04em] text-white">
-                        {featured.title}
-                      </h3>
-
-                      {featured.excerpt && (
-                        <p className="mb-6 line-clamp-4 text-[15px] leading-[1.75] text-white/70">
-                          {featured.excerpt}
-                        </p>
-                      )}
-
-                      {(featuredDate || featuredAuthor) && (
-                        <div className="mb-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-white/15 pt-5 text-[13px] text-white/75">
-                          {featuredAuthor && (
-                            <span className="flex items-center gap-2">
-                              <User
-                                size={15}
-                                aria-hidden="true"
-                                className="text-paste"
-                              />
-
-                              {featuredAuthor}
-                            </span>
-                          )}
-
-                          {featuredDate && (
-                            <span className="flex items-center gap-2">
-                              <CalendarDays
-                                size={15}
-                                aria-hidden="true"
-                                className="text-paste"
-                              />
-
-                              {featuredDate}
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      <span className="inline-flex items-center gap-2 text-[14px] font-bold text-white transition-[gap] duration-200 group-hover:gap-3">
-                        Read article
-                        <ArrowUpRight size={18} aria-hidden="true" />
-                      </span>
-                    </div>
-                  </Link>
-                </Reveal>
-              )}
+              {featured && <FeaturedBlogCard post={featured} />}
 
               {/* REMAINING ARTICLES — EXISTING CARD GRID */}
               {gridBlogs.length > 0 && (

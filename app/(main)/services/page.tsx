@@ -1,6 +1,5 @@
 import { AnimatedCounter } from "@/components/animations/animated-counter";
 import {
-  Reveal,
   StaggerContainer,
   StaggerItem,
 } from "@/components/animations/reveal";
@@ -9,20 +8,14 @@ import Container from "@/components/Container";
 import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
+import FeaturedServiceCard from "@/components/services/FeaturedServiceCard";
 import ServiceCard from "@/components/services/ServiceCard";
 import ServicesPagination from "@/components/services/ServicesPagination";
 import {
   getFeaturedServices,
   getPublishedServices,
 } from "@/lib/api/services";
-import {
-  ArrowUpRight,
-  Briefcase,
-  ListChecks,
-} from "lucide-react";
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 
 type ServicesPageProps = {
   searchParams: Promise<{
@@ -138,8 +131,7 @@ export default async function ServicesPage({
   const total = result.meta.total;
 
   // Display featured spotlights on the first page only.
-  const featuredServices =
-    page === 1 ? allFeaturedServices : [];
+  const featuredServices = page === 1 ? allFeaturedServices : [];
 
   // Avoid displaying featured services a second time in the grid.
   const featuredIds = new Set(
@@ -240,101 +232,12 @@ export default async function ServicesPage({
                   </div>
 
                   <div className="flex flex-col gap-8">
-                    {featuredServices.map((featured) => {
-                      const featuredProjects =
-                        featured.projects?.length ?? 0;
-
-                      const featuredSteps =
-                        featured.process?.items?.length ?? 0;
-
-                      return (
-                        <Reveal
-                          key={featured._id}
-                          dir="up"
-                        >
-                          <Link
-                            href={`/services/${featured.slug}`}
-                            aria-label={`Learn more about ${featured.name}`}
-                            className="group grid grid-cols-[1.15fr_0.85fr] overflow-hidden rounded-[20px] bg-navy max-[900px]:grid-cols-1"
-                          >
-                            {/* Featured image */}
-                            <div className="relative min-h-[460px] overflow-hidden max-[900px]:aspect-[4/3] max-[900px]:min-h-0">
-                              <Image
-                                src={featured.primaryImage.url}
-                                alt={
-                                  featured.primaryImage.alt ||
-                                  featured.name
-                                }
-                                fill
-                                sizes="(max-width: 900px) 100vw, 55vw"
-                                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                              />
-                            </div>
-
-                            {/* Featured information */}
-                            <div className="flex flex-col justify-center p-12 max-[900px]:p-8 max-[600px]:p-6">
-                              <div className="mb-5 flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
-                                <span
-                                  className="h-[2px] w-7 bg-current"
-                                  aria-hidden="true"
-                                />
-                                FEATURED SERVICE
-                              </div>
-
-                              <h4 className="mb-4 text-[clamp(28px,3vw,40px)] font-extrabold leading-[1.1] tracking-[-0.04em] text-white">
-                                {featured.name}
-                              </h4>
-
-                              {featured.description && (
-                                <p className="mb-6 line-clamp-4 text-[15px] leading-[1.75] text-white/70">
-                                  {featured.description}
-                                </p>
-                              )}
-
-                              {(featuredProjects > 0 ||
-                                featuredSteps > 0) && (
-                                <div className="mb-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-white/15 pt-5 text-[13px] text-white/75">
-                                  {featuredProjects > 0 && (
-                                    <span className="flex items-center gap-2">
-                                      <Briefcase
-                                        size={15}
-                                        aria-hidden="true"
-                                        className="text-paste"
-                                      />
-
-                                      {featuredProjects}{" "}
-                                      {featuredProjects === 1
-                                        ? "project"
-                                        : "projects"}
-                                    </span>
-                                  )}
-
-                                  {featuredSteps > 0 && (
-                                    <span className="flex items-center gap-2">
-                                      <ListChecks
-                                        size={15}
-                                        aria-hidden="true"
-                                        className="text-paste"
-                                      />
-
-                                      {featuredSteps}-step process
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-
-                              <span className="inline-flex items-center gap-2 text-[14px] font-bold text-white transition-[gap] duration-200 group-hover:gap-3">
-                                Explore service
-                                <ArrowUpRight
-                                  size={18}
-                                  aria-hidden="true"
-                                />
-                              </span>
-                            </div>
-                          </Link>
-                        </Reveal>
-                      );
-                    })}
+                    {featuredServices.map((service) => (
+                      <FeaturedServiceCard
+                        key={service._id}
+                        service={service}
+                      />
+                    ))}
                   </div>
                 </section>
               )}
@@ -356,9 +259,7 @@ export default async function ServicesPage({
 
                   <StaggerContainer
                     className={`grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-[22px] ${
-                      featuredServices.length > 0
-                        ? ""
-                        : "mt-12"
+                      featuredServices.length > 0 ? "" : "mt-12"
                     }`}
                   >
                     {gridServices.map((service, index) => (
@@ -392,9 +293,7 @@ export default async function ServicesPage({
               </p>
 
               <div className="mt-7">
-                <Button href="/contact">
-                  Talk to our team
-                </Button>
+                <Button href="/contact">Talk to our team</Button>
               </div>
             </div>
           )}
