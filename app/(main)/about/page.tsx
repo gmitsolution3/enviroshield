@@ -196,6 +196,33 @@ const CHAIRMAN = {
   alt: "Portrait of the Chairman of Enviro Shield",
 };
 
+const imgClass =
+  "object-cover transition-transform duration-[0.6s] group-hover:scale-[1.04]";
+
+function PhotoFx() {
+  return (
+    <>
+      {/* soft darken */}
+      <span
+        className="pointer-events-none absolute inset-0 bg-navy/25 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        aria-hidden="true"
+      />
+
+      {/* inner frame */}
+      <span
+        className="pointer-events-none absolute inset-3 scale-110 rounded-[12px] border border-white/80 opacity-0 transition-all duration-500 ease-out group-hover:scale-100 group-hover:opacity-100"
+        aria-hidden="true"
+      />
+
+      {/* diagonal shine */}
+      <span
+        className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/45 to-transparent transition-transform duration-[900ms] ease-out group-hover:translate-x-[500%]"
+        aria-hidden="true"
+      />
+    </>
+  );
+}
+
 export default function AboutPage() {
   return (
     <>
@@ -217,25 +244,27 @@ export default function AboutPage() {
         <Container className="grid grid-cols-2 items-center gap-[80px] max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
           <Reveal dir="image">
             <div className="grid grid-cols-[1.2fr_0.8fr] gap-4">
-              <div className="relative h-[520px] overflow-hidden rounded-[16px] max-[600px]:h-[340px]">
+              <div className="group relative h-[520px] overflow-hidden rounded-[16px] max-[600px]:h-[340px]">
                 <Image
                   src="https://images.pexels.com/photos/6473966/pexels-photo-6473966.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
                   alt="Professional construction worker applying protective material to a building surface"
                   fill
                   sizes="(max-width: 900px) 60vw, 28vw"
-                  className="object-cover"
+                  className={imgClass}
                 />
+                <PhotoFx />
               </div>
 
               <div className="flex flex-col gap-4">
-                <div className="relative flex-1 overflow-hidden rounded-[16px]">
+                <div className="group relative flex-1 overflow-hidden rounded-[16px]">
                   <Image
                     src={images.painter}
                     alt="Painter carefully preparing an interior wall"
                     fill
                     sizes="(max-width: 900px) 40vw, 18vw"
-                    className="object-cover"
+                    className={imgClass}
                   />
+                  <PhotoFx />
                 </div>
 
                 <div className="rounded-[16px] bg-blue p-6 text-white max-[600px]:p-4">
@@ -280,12 +309,20 @@ export default function AboutPage() {
               </p>
 
               <p className="mb-8 text-[15px] leading-[1.75] text-ink">
-                Enviro Shield also provides Injection Grouting, Sports Flooring, Polished Concrete, 3D Epoxy Floor, heat insulation solutions, and ETP Protective Coating systems, ensuring durable, high-performance protection for various construction needs. 
-
+                Enviro Shield also provides Injection Grouting, Sports
+                Flooring, Polished Concrete, 3D Epoxy Floor, heat
+                insulation solutions, and ETP Protective Coating
+                systems, ensuring durable, high-performance protection
+                for various construction needs.
                 <br />
                 <br />
-
-                The company is guided by its Chief Adviser, Engr. Tony Stephen, a well-known consultant and waterproofing specialist in Australia. Engr. Md. Mahbubur Rahman, the Chief Executive Officer, is certified and highly experienced in construction and waterproofing practices from Australia, ensuring international-quality standards across all projects.
+                The company is guided by its Chief Adviser, Engr. Tony
+                Stephen, a well-known consultant and waterproofing
+                specialist in Australia. Engr. Md. Mahbubur Rahman,
+                the Chief Executive Officer, is certified and highly
+                experienced in construction and waterproofing
+                practices from Australia, ensuring
+                international-quality standards across all projects.
               </p>
 
               <ul className="divide-y divide-line border-y border-line">
@@ -327,14 +364,15 @@ export default function AboutPage() {
         <Container>
           <Reveal dir="up">
             <div className="grid grid-cols-[0.85fr_1.15fr] overflow-hidden rounded-[20px] bg-navy max-[900px]:grid-cols-1">
-              <div className="relative min-h-[520px] max-[900px]:aspect-[4/5] max-[900px]:min-h-0 max-[600px]:aspect-[1/1]">
+              <div className="group relative min-h-[520px] overflow-hidden max-[900px]:aspect-[4/5] max-[900px]:min-h-0 max-[600px]:aspect-[1/1]">
                 <Image
                   src={CHAIRMAN.image}
                   alt={CHAIRMAN.alt}
                   fill
                   sizes="(max-width: 900px) 100vw, 40vw"
-                  className="object-cover object-top"
+                  className={`${imgClass} object-top`}
                 />
+                <PhotoFx />
               </div>
 
               <div className="flex flex-col justify-center p-14 max-[900px]:p-8 max-[600px]:p-6">

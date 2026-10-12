@@ -7,6 +7,30 @@ import Image from "next/image";
 import Link from "next/link";
 import { fadeUp, viewportOnce } from "../animations/variants";
 
+function PhotoFx() {
+  return (
+    <>
+      {/* soft darken */}
+      <span
+        className="pointer-events-none absolute inset-0 bg-navy/25 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        aria-hidden="true"
+      />
+
+      {/* inner frame */}
+      <span
+        className="pointer-events-none absolute inset-3 scale-110 rounded-[12px] border border-white/80 opacity-0 transition-all duration-500 ease-out group-hover:scale-100 group-hover:opacity-100"
+        aria-hidden="true"
+      />
+
+      {/* diagonal shine */}
+      <span
+        className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/45 to-transparent transition-transform duration-[900ms] ease-out group-hover:translate-x-[500%]"
+        aria-hidden="true"
+      />
+    </>
+  );
+}
+
 export default function BlogCard({
   post,
   index = 0,
@@ -53,12 +77,14 @@ export default function BlogCard({
               alt={post.coverImage.alt || post.title}
               fill
               sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw"
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+              className="object-cover transition-transform duration-[0.6s] group-hover:scale-[1.04]"
             />
           )}
 
+          <PhotoFx />
+
           {primaryTag && (
-            <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-navy">
+            <span className="absolute left-4 top-4 z-10 rounded-full bg-white px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-navy">
               {primaryTag}
             </span>
           )}

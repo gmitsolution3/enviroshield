@@ -9,7 +9,7 @@ import Container from "@/components/Container";
 import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
-import ServiceCard from "@/components/ServiceCard";
+import ServiceCard from "@/components/services/ServiceCard";
 import ServicesPagination from "@/components/services/ServicesPagination";
 import { getPublishedServices } from "@/lib/api/services";
 import { ArrowUpRight, Briefcase, ListChecks } from "lucide-react";
@@ -239,7 +239,8 @@ export default async function ServicesPage({
                         </p>
                       )}
 
-                      {(featuredProjects > 0 || featuredSteps > 0) && (
+                      {(featuredProjects > 0 ||
+                        featuredSteps > 0) && (
                         <div className="mb-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-white/15 pt-5 text-[13px] text-white/75">
                           {featuredProjects > 0 && (
                             <span className="flex items-center gap-2">

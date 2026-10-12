@@ -4,7 +4,7 @@ import { EASE, viewportOnce } from "@/components/animations/variants";
 import { Button } from "@/components/Button";
 import Container from "@/components/Container";
 import { SectionHeader } from "@/components/SectionHeader";
-import ServiceCard from "@/components/ServiceCard";
+import ServiceCard from "@/components/services/ServiceCard";
 import type { IService } from "@/types";
 import { motion, useReducedMotion } from "motion/react";
 
