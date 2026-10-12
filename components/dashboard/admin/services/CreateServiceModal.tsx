@@ -70,11 +70,6 @@ const seoSchema = z.object({
     .array(z.string().min(1, "Keyword cannot be empty"))
     .min(1, "At least one keyword is required"),
 
-  canonicalUrl: z
-    .string()
-    .min(1, "Canonical URL is required")
-    .url("Enter a valid canonical URL"),
-
   ogTitle: z.string().min(1, "OG title is required"),
 
   ogDescription: z.string().min(1, "OG description is required"),
@@ -169,7 +164,6 @@ const defaultValues: FormValues = {
     metaTitle: "",
     metaDescription: "",
     keywords: [],
-    canonicalUrl: "",
     ogTitle: "",
     ogDescription: "",
     ogImage: "",
@@ -350,7 +344,6 @@ export default function CreateServiceModal({
           metaTitle: data.seo.metaTitle,
           metaDescription: data.seo.metaDescription,
           keywords: data.seo.keywords,
-          canonicalUrl: data.seo.canonicalUrl,
           ogTitle: data.seo.ogTitle,
           ogDescription: data.seo.ogDescription,
           ogImage: data.seo.ogImage,
@@ -855,25 +848,6 @@ export default function CreateServiceModal({
                               {error.message}
                             </p>
                           ),
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="seo-canonical-url">
-                        Canonical URL
-                      </Label>
-
-                      <Input
-                        id="seo-canonical-url"
-                        type="url"
-                        placeholder="https://enviroshield.com/services/roof-waterproofing"
-                        {...register("seo.canonicalUrl")}
-                      />
-
-                      {errors.seo?.canonicalUrl && (
-                        <p className="text-sm text-destructive">
-                          {errors.seo.canonicalUrl.message}
-                        </p>
                       )}
                     </div>
 

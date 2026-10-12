@@ -73,10 +73,6 @@ const seoSchema = z.object({
   keywords: z
     .array(z.string().min(1, "Keyword cannot be empty"))
     .min(1, "At least one keyword is required"),
-  canonicalUrl: z
-    .string()
-    .min(1, "Canonical URL is required")
-    .url("Enter a valid canonical URL"),
   ogTitle: z.string().min(1, "OG title is required"),
   ogDescription: z.string().min(1, "OG description is required"),
   ogImage: z
@@ -159,7 +155,6 @@ const defaultValues: FormValues = {
     metaTitle: "",
     metaDescription: "",
     keywords: [],
-    canonicalUrl: "",
     ogTitle: "",
     ogDescription: "",
     ogImage: "",
@@ -283,7 +278,6 @@ const getServiceFormValues = (service: IService): FormValues => ({
     metaTitle: service.seo?.metaTitle ?? "",
     metaDescription: service.seo?.metaDescription ?? "",
     keywords: service.seo?.keywords ?? [],
-    canonicalUrl: service.seo?.canonicalUrl ?? "",
     ogTitle: service.seo?.ogTitle ?? "",
     ogDescription: service.seo?.ogDescription ?? "",
     ogImage: service.seo?.ogImage ?? "",
@@ -817,16 +811,6 @@ export default function UpdateServiceModal({
                       </p>
                     )}
                   </div>
-
-                  <Field
-                    label="Canonical URL"
-                    error={errors.seo?.canonicalUrl?.message}
-                  >
-                    <Input
-                      {...register("seo.canonicalUrl")}
-                      placeholder="https://example.com/service"
-                    />
-                  </Field>
 
                   <div className="grid gap-6 md:grid-cols-2">
                     <Field

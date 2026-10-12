@@ -215,9 +215,7 @@ export default function ViewBlogModal({
           ===================================================== */}
 
           <div className="space-y-6 p-5 sm:p-8">
-            {/* ===================================================
-                BLOG INFORMATION
-            =================================================== */}
+            {/* BLOG INFORMATION */}
 
             <section>
               <SectionHeading
@@ -279,9 +277,7 @@ export default function ViewBlogModal({
               </div>
             </section>
 
-            {/* ===================================================
-                AUTHOR
-            =================================================== */}
+            {/* AUTHOR */}
 
             {blog.author && (
               <section>
@@ -320,9 +316,7 @@ export default function ViewBlogModal({
               </section>
             )}
 
-            {/* ===================================================
-                TAGS
-            =================================================== */}
+            {/* TAGS */}
 
             <section>
               <SectionHeading
@@ -353,9 +347,7 @@ export default function ViewBlogModal({
               </div>
             </section>
 
-            {/* ===================================================
-                BLOG CONTENT
-            =================================================== */}
+            {/* BLOG CONTENT */}
 
             <section>
               <SectionHeading
@@ -369,9 +361,7 @@ export default function ViewBlogModal({
               </div>
             </section>
 
-            {/* ===================================================
-                SEO
-            =================================================== */}
+            {/* SEO */}
 
             {blog.seo && (
               <section>
@@ -422,12 +412,6 @@ export default function ViewBlogModal({
                     <SeoCard
                       label="OG Description"
                       value={blog.seo.ogDescription || "Not provided"}
-                    />
-
-                    <SeoCard
-                      label="Canonical URL"
-                      value={blog.seo.canonicalUrl || "Not provided"}
-                      link={Boolean(blog.seo.canonicalUrl)}
                     />
 
                     <SeoCard
@@ -485,9 +469,7 @@ export default function ViewBlogModal({
               </section>
             )}
 
-            {/* ===================================================
-                TIMELINE
-            =================================================== */}
+            {/* TIMELINE */}
 
             <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
@@ -531,9 +513,7 @@ export default function ViewBlogModal({
               </div>
             </section>
 
-            {/* ===================================================
-                FOOTER
-            =================================================== */}
+            {/* FOOTER */}
 
             <div className="flex justify-end border-t border-slate-200 pt-5">
               <DashboardButton

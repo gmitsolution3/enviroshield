@@ -59,8 +59,6 @@ const seoSchema = z.object({
 
   keywords: z.array(z.string().min(1, "Keyword cannot be empty")),
 
-  canonicalUrl: z.string().optional(),
-
   ogTitle: z.string().optional(),
   ogDescription: z.string().optional(),
   ogImage: z.string().optional(),
@@ -132,7 +130,6 @@ const defaultValues: FormValues = {
     metaTitle: "",
     metaDescription: "",
     keywords: [],
-    canonicalUrl: "",
     ogTitle: "",
     ogDescription: "",
     ogImage: "",
@@ -196,8 +193,6 @@ const getBlogFormValues = (blog: IBlog): FormValues => ({
     keywords: Array.isArray(blog.seo?.keywords)
       ? blog.seo.keywords
       : [],
-
-    canonicalUrl: blog.seo?.canonicalUrl ?? "",
 
     ogTitle: blog.seo?.ogTitle ?? "",
 
@@ -429,8 +424,6 @@ export default function EditBlogModal({
             metaDescription: values.seo.metaDescription || "",
 
             keywords: values.seo.keywords,
-
-            canonicalUrl: values.seo.canonicalUrl || "",
 
             ogTitle: values.seo.ogTitle || "",
 
@@ -1006,22 +999,6 @@ export default function EditBlogModal({
                           </div>
                         ))}
                       </div>
-                    </div>
-
-                    {/* Canonical URL */}
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="edit-seo-canonical"
-                        className="text-sm font-semibold text-navy"
-                      >
-                        Canonical URL
-                      </Label>
-
-                      <Input
-                        id="edit-seo-canonical"
-                        placeholder="https://enviroshield.com/blog/example"
-                        {...register("seo.canonicalUrl")}
-                      />
                     </div>
 
                     {/* Open Graph */}

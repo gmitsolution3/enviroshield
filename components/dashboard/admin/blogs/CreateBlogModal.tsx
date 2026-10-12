@@ -60,8 +60,6 @@ const seoSchema = z.object({
     z.string().min(1, "Keyword cannot be empty"),
   ),
 
-  canonicalUrl: z.string().optional(),
-
   ogTitle: z.string().optional(),
 
   ogDescription: z.string().optional(),
@@ -143,7 +141,6 @@ const defaultValues: FormValues = {
     metaTitle: "",
     metaDescription: "",
     keywords: [],
-    canonicalUrl: "",
     ogTitle: "",
     ogDescription: "",
     ogImage: "",
@@ -403,9 +400,6 @@ export default function CreateBlogModal({
             data.seo.metaDescription || "",
 
           keywords: data.seo.keywords,
-
-          canonicalUrl:
-            data.seo.canonicalUrl || "",
 
           ogTitle:
             data.seo.ogTitle || "",
@@ -1195,30 +1189,6 @@ export default function CreateBlogModal({
                           }
                         </p>
                       )}
-                    </div>
-
-                    {/* Canonical URL */}
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="seo-canonical-url"
-                        className="text-sm font-semibold text-navy"
-                      >
-                        Canonical URL
-                      </Label>
-
-                      <Input
-                        id="seo-canonical-url"
-                        placeholder="https://enviroshield.com/blog/example"
-                        {...register(
-                          "seo.canonicalUrl",
-                        )}
-                      />
-
-                      <p className="text-xs text-muted-foreground">
-                        Optional. Use this when
-                        the article has a preferred
-                        canonical URL.
-                      </p>
                     </div>
 
                     {/* Open Graph */}

@@ -457,12 +457,6 @@ export default function ViewServiceModal({
                     />
 
                     <SeoCard
-                      label="Canonical URL"
-                      value={service.seo.canonicalUrl}
-                      link
-                    />
-
-                    <SeoCard
                       label="OG Image"
                       value={service.seo.ogImage}
                       link
