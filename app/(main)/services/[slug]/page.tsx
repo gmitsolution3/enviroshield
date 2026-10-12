@@ -38,30 +38,7 @@ export async function generateMetadata({
 
     const keywords = seo?.keywords?.filter(Boolean) ?? [];
 
-    const defaultCanonical = `https://enviroshieldbd.com/services/${service.slug}`;
-
-    const canonical = (() => {
-      const configuredCanonical = seo?.canonicalUrl?.trim();
-
-      if (!configuredCanonical) {
-        return defaultCanonical;
-      }
-
-      try {
-        const parsed = new URL(
-          configuredCanonical,
-          "https://enviroshieldbd.com",
-        );
-
-        if (parsed.origin !== "https://enviroshieldbd.com") {
-          return defaultCanonical;
-        }
-
-        return parsed.toString();
-      } catch {
-        return defaultCanonical;
-      }
-    })();
+    const canonical = `https://enviroshieldbd.com/services/${service.slug}`;
 
     const ogTitle = seo?.ogTitle?.trim() || title;
 
