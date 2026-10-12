@@ -11,6 +11,7 @@ import {
   getPublishedBlogBySlug,
   getPublishedBlogs,
 } from "@/lib/api/blogs";
+import { siteUrl } from "@/lib/site-url";
 import type { IBlog } from "@/types/admin/blog.type";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import type { Metadata } from "next";
@@ -41,7 +42,7 @@ export async function generateMetadata({
 
     const keywords = seo?.keywords?.filter(Boolean) ?? [];
 
-    const canonical = `https://enviroshieldbd.com/blog/${post.slug}`;
+    const canonical = `${siteUrl}/blog/${post.slug}`;
 
     const ogTitle = seo?.ogTitle?.trim() || title;
 
@@ -192,7 +193,7 @@ export default async function ArticlePage({
   const authorImage = post.author?.image;
   const tags = post.tags ?? [];
 
-  const articleUrl = `https://enviroshieldbd.com/blog/${post.slug}`;
+  const articleUrl = `${siteUrl}/blog/${post.slug}`;
 
   // More articles: the latest ones, excluding this post
   let related: IBlog[] = [];
@@ -260,9 +261,9 @@ export default async function ArticlePage({
 
     publisher: {
       "@type": "Organization",
-      "@id": "https://enviroshieldbd.com/#organization",
+      "@id": `${siteUrl}/#organization`,
       name: "Enviroshield",
-      url: "https://enviroshieldbd.com",
+      url: siteUrl,
     },
 
     mainEntityOfPage: {

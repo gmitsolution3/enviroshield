@@ -1,5 +1,6 @@
 import ClientIsland from "@/components/client-island";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { siteUrl } from "@/lib/site-url";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Fustat, Geist } from "next/font/google";
@@ -17,8 +18,6 @@ const fustat = Fustat({
   subsets: ["latin"],
   display: "swap",
 });
-
-const siteUrl = "https://enviroshieldbd.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -76,22 +75,21 @@ export default function RootLayout({
                 "@graph": [
                   {
                     "@type": "Organization",
-                    "@id": "https://enviroshieldbd.com/#organization",
+                    "@id": `${siteUrl}/#organization`,
                     name: "EnviroShield Pvt. Ltd.",
-                    url: "https://enviroshieldbd.com",
+                    url: siteUrl,
                     logo: {
                       "@type": "ImageObject",
-                      url: "https://enviroshieldbd.com/images/logo.png",
+                      url: `${siteUrl}/images/logo.png`,
                     },
                   },
                   {
                     "@type": "WebSite",
-                    "@id": "https://enviroshieldbd.com/#website",
-                    url: "https://enviroshieldbd.com",
+                    "@id": `${siteUrl}/#website`,
+                    url: siteUrl,
                     name: "EnviroShield",
                     publisher: {
-                      "@id":
-                        "https://enviroshieldbd.com/#organization",
+                      "@id": `${siteUrl}/#organization`,
                     },
                   },
                 ],

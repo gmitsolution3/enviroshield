@@ -4,8 +4,7 @@ import { getPublishedBlogs } from "@/lib/api/blogs";
 import { getPublishedProjects } from "@/lib/api/projects";
 import { getPublishedServices } from "@/lib/api/services";
 import { products } from "@/lib/data/content";
-
-const siteUrl = "https://enviroshieldbd.com";
+import { siteUrl } from "@/lib/site-url";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [

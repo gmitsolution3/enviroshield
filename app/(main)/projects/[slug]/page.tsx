@@ -27,6 +27,7 @@ import {
   getPublishedProjectBySlug,
   getPublishedProjects,
 } from "@/lib/api/projects";
+import { siteUrl } from "@/lib/site-url";
 import type { IProject } from "@/types";
 
 type ProjectDetailPageProps = {
@@ -51,7 +52,7 @@ export async function generateMetadata({
 
     const keywords = seo?.keywords?.filter(Boolean) ?? [];
 
-    const canonical = `https://enviroshieldbd.com/projects/${project.slug}`;
+    const canonical = `${siteUrl}/projects/${project.slug}`;
 
     const ogTitle = seo?.ogTitle?.trim() || title;
 
@@ -163,7 +164,7 @@ export default async function ProjectDetailPage({
     notFound();
   }
 
-  const projectUrl = `https://enviroshieldbd.com/projects/${project.slug}`;
+  const projectUrl = `${siteUrl}/projects/${project.slug}`;
 
   const location = [
     project.location?.area,
@@ -218,9 +219,9 @@ export default async function ProjectDetailPage({
     image: project.primaryImage.url,
     creator: {
       "@type": "Organization",
-      "@id": "https://enviroshieldbd.com/#organization",
+      "@id": `${siteUrl}/#organization`,
       name: "Enviroshield",
-      url: "https://enviroshieldbd.com",
+      url: siteUrl,
     },
     locationCreated: {
       "@type": "Place",
@@ -241,8 +242,8 @@ export default async function ProjectDetailPage({
     description: project.description,
     isPartOf: {
       "@type": "WebSite",
-      "@id": "https://enviroshieldbd.com/#website",
-      url: "https://enviroshieldbd.com",
+      "@id": `${siteUrl}/#website`,
+      url: siteUrl,
       name: "Enviroshield",
     },
     about: {
@@ -259,13 +260,13 @@ export default async function ProjectDetailPage({
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://enviroshieldbd.com/",
+        item: `${siteUrl}/`,
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Projects",
-        item: "https://enviroshieldbd.com/projects",
+        item: `${siteUrl}/projects`,
       },
       {
         "@type": "ListItem",

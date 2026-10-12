@@ -16,6 +16,7 @@ import {
   getPublishedServiceBySlug,
   getPublishedServices,
 } from "@/lib/api/services";
+import { siteUrl } from "@/lib/site-url";
 import { Metadata } from "next";
 
 export async function generateMetadata({
@@ -38,7 +39,7 @@ export async function generateMetadata({
 
     const keywords = seo?.keywords?.filter(Boolean) ?? [];
 
-    const canonical = `https://enviroshieldbd.com/services/${service.slug}`;
+    const canonical = `${siteUrl}/services/${service.slug}`;
 
     const ogTitle = seo?.ogTitle?.trim() || title;
 
@@ -163,7 +164,7 @@ export default async function ServiceDetailPage({
     label: string;
   }[];
 
-  const serviceUrl = `https://enviroshieldbd.com/services/${service.slug}`;
+  const serviceUrl = `${siteUrl}/services/${service.slug}`;
 
   const serviceJsonLd = {
     "@context": "https://schema.org",
@@ -177,9 +178,9 @@ export default async function ServiceDetailPage({
 
     provider: {
       "@type": "Organization",
-      "@id": "https://enviroshieldbd.com/#organization",
+      "@id": `${siteUrl}/#organization`,
       name: "Enviroshield",
-      url: "https://enviroshieldbd.com",
+      url: siteUrl,
     },
 
     mainEntityOfPage: {
@@ -199,8 +200,8 @@ export default async function ServiceDetailPage({
     description: service.description,
     isPartOf: {
       "@type": "WebSite",
-      "@id": "https://enviroshieldbd.com/#website",
-      url: "https://enviroshieldbd.com",
+      "@id": `${siteUrl}/#website`,
+      url: siteUrl,
       name: "Enviroshield",
     },
     about: {
@@ -217,13 +218,13 @@ export default async function ServiceDetailPage({
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://enviroshieldbd.com/",
+        item: `${siteUrl}/`,
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Services",
-        item: "https://enviroshieldbd.com/services",
+        item: `${siteUrl}/services`,
       },
       {
         "@type": "ListItem",
