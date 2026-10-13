@@ -475,18 +475,10 @@ export default function CreateServiceModal({
 
               {/* Step 1 — Basic Information */}
               {currentStep === 0 && (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-base font-semibold text-navy">
-                      Basic Information
-                    </h3>
-
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Configure the basic information for this
-                      service.
-                    </p>
-                  </div>
-
+                <FormSection
+                  title="Basic Information"
+                  description="Configure the basic information for this service."
+                >
                   <div className="grid gap-5 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label
@@ -659,7 +651,7 @@ export default function CreateServiceModal({
                       </p>
                     )}
                   </div>
-                </div>
+                </FormSection>
               )}
 
               {/* Step 2 — Why Enviroshield */}
@@ -709,18 +701,10 @@ export default function CreateServiceModal({
 
               {/* Step 5 — SEO */}
               {currentStep === 4 && (
-                <div className="space-y-5 rounded-xl border bg-muted/20 p-5">
-                  <div>
-                    <h3 className="text-base font-semibold text-navy">
-                      SEO
-                    </h3>
-
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Configure search engine and social sharing
-                      information for this service.
-                    </p>
-                  </div>
-
+                <FormSection
+                  title="SEO"
+                  description="Configure search engine and social sharing information for this service."
+                >
                   <div className="space-y-5">
                     <div className="space-y-2">
                       <Label htmlFor="seo-meta-title">
@@ -992,7 +976,7 @@ export default function CreateServiceModal({
                       )}
                     />
                   </div>
-                </div>
+                </FormSection>
               )}
 
               {/* Navigation */}
@@ -1193,202 +1177,189 @@ function ContentSection({
   watch,
 }: ContentSectionProps) {
   return (
-    <section className="space-y-6">
-      <div>
-        <h3 className="text-lg font-bold text-navy">{title}</h3>
+    <FormSection title={title} description={description}>
+      <div className="space-y-5 rounded-2xl border bg-muted/10 p-5">
+        <div>
+          <h4 className="text-sm font-bold text-navy">
+            Section Image
+          </h4>
 
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          {description}
-        </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Upload the image and provide accessible metadata.
+          </p>
+        </div>
+
+        <Controller
+          control={control}
+          name={`${sectionName}.image.url`}
+          render={({ field }: any) => (
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold">Image</Label>
+
+              <ImageUploader
+                value={field.value}
+                imagePublicId={watch(`${sectionName}.image.publicId`)}
+                onChange={(url, publicId) => {
+                  field.onChange(url);
+
+                  setValue(
+                    `${sectionName}.image.publicId`,
+                    publicId,
+                    {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    },
+                  );
+                }}
+              />
+
+              {errors?.[sectionName]?.image?.url && (
+                <p className="text-xs text-red-600">
+                  {errors[sectionName].image.url.message}
+                </p>
+              )}
+            </div>
+          )}
+        />
+
+        <div className="grid gap-5 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-navy">
+              Alt Text
+            </Label>
+
+            <Input
+              {...register(`${sectionName}.image.alt`)}
+              placeholder="Describe the image"
+            />
+
+            {errors?.[sectionName]?.image?.alt && (
+              <p className="text-xs text-red-600">
+                {errors[sectionName].image.alt.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-navy">
+              Caption
+            </Label>
+
+            <Input
+              {...register(`${sectionName}.image.caption`)}
+              placeholder="Image caption"
+            />
+
+            {errors?.[sectionName]?.image?.caption && (
+              <p className="text-xs text-red-600">
+                {errors[sectionName].image.caption.message}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-5">
-        <div className="space-y-5 rounded-2xl border bg-muted/10 p-5">
+      <div className="space-y-4">
+        <div className="flex items-end justify-between gap-4">
           <div>
             <h4 className="text-sm font-bold text-navy">
-              Section Image
+              Content Items
             </h4>
 
             <p className="mt-1 text-xs text-muted-foreground">
-              Upload the image and provide accessible metadata.
+              Add the points you want to highlight in this section.
             </p>
           </div>
 
-          <Controller
-            control={control}
-            name={`${sectionName}.image.url`}
-            render={({ field }: any) => (
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold">Image</Label>
-
-                <ImageUploader
-                  value={field.value}
-                  imagePublicId={watch(
-                    `${sectionName}.image.publicId`,
-                  )}
-                  onChange={(url, publicId) => {
-                    field.onChange(url);
-
-                    setValue(
-                      `${sectionName}.image.publicId`,
-                      publicId,
-                      {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                      },
-                    );
-                  }}
-                />
-
-                {errors?.[sectionName]?.image?.url && (
-                  <p className="text-xs text-red-600">
-                    {errors[sectionName].image.url.message}
-                  </p>
-                )}
-              </div>
-            )}
-          />
-
-          <div className="grid gap-5 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold text-navy">
-                Alt Text
-              </Label>
-
-              <Input
-                {...register(`${sectionName}.image.alt`)}
-                placeholder="Describe the image"
-              />
-
-              {errors?.[sectionName]?.image?.alt && (
-                <p className="text-xs text-red-600">
-                  {errors[sectionName].image.alt.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold text-navy">
-                Caption
-              </Label>
-
-              <Input
-                {...register(`${sectionName}.image.caption`)}
-                placeholder="Image caption"
-              />
-
-              {errors?.[sectionName]?.image?.caption && (
-                <p className="text-xs text-red-600">
-                  {errors[sectionName].image.caption.message}
-                </p>
-              )}
-            </div>
-          </div>
+          <DashboardButton
+            type="button"
+            icon={<Plus className="h-4 w-4" />}
+            onClick={() =>
+              fields.append({ title: "", description: "" })
+            }
+            className="min-h-9 rounded-xl bg-blue px-4 text-xs font-bold text-white hover:bg-[#005cb9]"
+          >
+            Add Item
+          </DashboardButton>
         </div>
 
         <div className="space-y-4">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <h4 className="text-sm font-bold text-navy">
-                Content Items
-              </h4>
+          {fields.fields.map(
+            (field: { id: string }, index: number) => (
+              <div
+                key={field.id}
+                className="rounded-2xl border bg-muted/10 p-5"
+              >
+                <div className="mb-5 flex items-center justify-between">
+                  <p className="text-xs font-bold uppercase tracking-[0.08em] text-blue">
+                    Item {String(index + 1).padStart(2, "0")}
+                  </p>
 
-              <p className="mt-1 text-xs text-muted-foreground">
-                Add the points you want to highlight in this section.
-              </p>
-            </div>
+                  {fields.fields.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => fields.remove(index)}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 text-red-500 transition-colors hover:bg-red-50"
+                      aria-label={`Remove item ${index + 1}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
 
-            <DashboardButton
-              type="button"
-              icon={<Plus className="h-4 w-4" />}
-              onClick={() =>
-                fields.append({ title: "", description: "" })
-              }
-              className="min-h-9 rounded-xl bg-blue px-4 text-xs font-bold text-white hover:bg-[#005cb9]"
-            >
-              Add Item
-            </DashboardButton>
-          </div>
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-navy">
+                      Title
+                    </Label>
 
-          <div className="space-y-4">
-            {fields.fields.map(
-              (field: { id: string }, index: number) => (
-                <div
-                  key={field.id}
-                  className="rounded-2xl border bg-muted/10 p-5"
-                >
-                  <div className="mb-5 flex items-center justify-between">
-                    <p className="text-xs font-bold uppercase tracking-[0.08em] text-blue">
-                      Item {String(index + 1).padStart(2, "0")}
-                    </p>
+                    <Input
+                      {...register(
+                        `${sectionName}.items.${index}.title`,
+                      )}
+                      placeholder="Content item title"
+                    />
 
-                    {fields.fields.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => fields.remove(index)}
-                        className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 text-red-500 transition-colors hover:bg-red-50"
-                        aria-label={`Remove item ${index + 1}`}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                    {errors?.[sectionName]?.items?.[index]?.title && (
+                      <p className="text-xs text-red-600">
+                        {
+                          errors[sectionName].items[index].title
+                            .message
+                        }
+                      </p>
                     )}
                   </div>
 
-                  <div className="space-y-5">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-navy">
-                        Title
-                      </Label>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-navy">
+                      Description
+                    </Label>
 
-                      <Input
-                        {...register(
-                          `${sectionName}.items.${index}.title`,
-                        )}
-                        placeholder="Content item title"
-                      />
-
-                      {errors?.[sectionName]?.items?.[index]
-                        ?.title && (
-                        <p className="text-xs text-red-600">
-                          {
-                            errors[sectionName].items[index].title
-                              .message
-                          }
-                        </p>
+                    <Textarea
+                      {...register(
+                        `${sectionName}.items.${index}.description`,
                       )}
-                    </div>
+                      placeholder="Describe this point..."
+                      className="min-h-28 resize-none"
+                    />
 
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-navy">
-                        Description
-                      </Label>
-
-                      <Textarea
-                        {...register(
-                          `${sectionName}.items.${index}.description`,
-                        )}
-                        placeholder="Describe this point..."
-                        className="min-h-28 resize-none"
-                      />
-
-                      {errors?.[sectionName]?.items?.[index]
-                        ?.description && (
-                        <p className="text-xs text-red-600">
-                          {
-                            errors[sectionName].items[index]
-                              .description.message
-                          }
-                        </p>
-                      )}
-                    </div>
+                    {errors?.[sectionName]?.items?.[index]
+                      ?.description && (
+                      <p className="text-xs text-red-600">
+                        {
+                          errors[sectionName].items[index].description
+                            .message
+                        }
+                      </p>
+                    )}
                   </div>
                 </div>
-              ),
-            )}
-          </div>
+              </div>
+            ),
+          )}
         </div>
       </div>
-    </section>
+    </FormSection>
   );
 }
 
