@@ -34,6 +34,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { usePost } from "@/hooks/swr/usePost";
+import { usePersistentFormDraft } from "@/hooks/usePersistentFormDraft";
 import type { IService } from "@/types";
 import { generateSlug } from "@/utils/generateSlug";
 
@@ -41,12 +42,14 @@ import DashboardButton from "../../DashboardButton";
 
 const imageSchema = z.object({
   url: z.string().min(1, "Image is required"),
+  publicId: z.string().min(1, "Image public ID is required"),
   alt: z.string().min(1, "Image alt text is required"),
   caption: z.string().min(1, "Image caption is required"),
 });
 
 const galleryItemSchema = z.object({
   url: z.string().min(1, "Gallery image is required"),
+  publicId: z.string().min(1, "Gallery image public ID is required"),
   alt: z.string().min(1, "Gallery image alt text is required"),
 });
 
@@ -61,6 +64,7 @@ const clientSchema = z.object({
   description: z.string().min(1, "Client description is required"),
   logo: z.object({
     url: z.string().min(1, "Client logo is required"),
+    publicId: z.string().min(1, "Client logo public ID is required"),
     alt: z.string().min(1, "Client logo alt text is required"),
   }),
 });
@@ -83,6 +87,7 @@ const seoSchema = z.object({
     .min(1, "OG image is required")
     .url("Enter a valid OG image URL"),
 
+  ogImagePublicId: z.string(),
   noIndex: z.boolean(),
 });
 
@@ -140,6 +145,7 @@ const defaultValues: FormValues = {
 
   primaryImage: {
     url: "",
+    publicId: "",
     alt: "",
     caption: "",
   },
@@ -157,6 +163,7 @@ const defaultValues: FormValues = {
   gallery: [
     {
       url: "",
+      publicId: "",
       alt: "",
     },
   ],
@@ -166,6 +173,7 @@ const defaultValues: FormValues = {
     description: "",
     logo: {
       url: "",
+      publicId: "",
       alt: "",
     },
   },
@@ -183,6 +191,7 @@ const defaultValues: FormValues = {
     ogTitle: "",
     ogDescription: "",
     ogImage: "",
+    ogImagePublicId: "",
     noIndex: false,
   },
 };
@@ -230,6 +239,7 @@ export default function CreateProjectModal({
 }: CreateProjectModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [seoKeywordInput, setSeoKeywordInput] = useState("");
+  const [ogImageCustomized, setOgImageCustomized] = useState(false);
 
   const { mutate: postProject, isLoading } = usePost("/project", {
     revalidateKey: "/project",
@@ -249,22 +259,48 @@ export default function CreateProjectModal({
     defaultValues,
   });
 
-  console.log(errors);
+  const { clearDraft } = usePersistentFormDraft<FormValues>({
+    storageKey: "enviroshield:draft:create-project",
+    watch,
+    reset,
+    defaultValues,
+  });
 
   const galleryItems = useFieldArray({
     control,
     name: "gallery",
   });
 
-  const currentKeywords = watch("seo.keywords");
+  const currentKeywords = watch("seo.keywords") ?? [];
+  const currentMetaTitle = watch("seo.metaTitle");
+  const currentOgTitle = watch("seo.ogTitle");
+  const currentMetaDescription = watch("seo.metaDescription");
+  const currentOgDescription = watch("seo.ogDescription");
+
+  // Keep the OG image synced with the primary image until a custom
+  // OG image is uploaded.
+  const syncOgImageWithPrimary = (url: string, publicId: string) => {
+    if (ogImageCustomized) return;
+
+    setValue("seo.ogImage", url, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+
+    setValue("seo.ogImagePublicId", publicId, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
 
   const handleClose = () => {
     if (isLoading) return;
 
+    // Do not reset the form here: the persistent hook keeps the draft.
     setIsModalOpen(false);
-    reset(defaultValues);
     setSeoKeywordInput("");
     setCurrentStep(0);
+    setOgImageCustomized(false);
   };
 
   const handleNextStep = async (
@@ -362,6 +398,7 @@ export default function CreateProjectModal({
 
         primaryImage: {
           url: data.primaryImage.url,
+          publicId: data.primaryImage.publicId,
           alt: data.primaryImage.alt,
           caption: data.primaryImage.caption,
         },
@@ -378,6 +415,7 @@ export default function CreateProjectModal({
 
         gallery: data.gallery.map((item) => ({
           url: item.url,
+          publicId: item.publicId,
           alt: item.alt,
         })),
 
@@ -386,6 +424,7 @@ export default function CreateProjectModal({
           description: data.client.description,
           logo: {
             url: data.client.logo.url,
+            publicId: data.client.logo.publicId,
             alt: data.client.logo.alt,
           },
         },
@@ -403,6 +442,7 @@ export default function CreateProjectModal({
           ogTitle: data.seo.ogTitle,
           ogDescription: data.seo.ogDescription,
           ogImage: data.seo.ogImage,
+          ogImagePublicId: data.seo.ogImagePublicId,
           noIndex: data.seo.noIndex,
         },
       };
@@ -412,10 +452,12 @@ export default function CreateProjectModal({
       if (response?.success) {
         toast.success(response.message);
 
+        // Clear the saved draft only after the API succeeds.
+        clearDraft();
         setIsModalOpen(false);
-        reset(defaultValues);
         setSeoKeywordInput("");
         setCurrentStep(0);
+        setOgImageCustomized(false);
 
         onSuccess?.();
       }
@@ -579,9 +621,12 @@ export default function CreateProjectModal({
                     control={control}
                     register={register}
                     errors={errors.primaryImage}
+                    setValue={setValue}
+                    watch={watch}
                     name="primaryImage"
                     title="Primary Image"
                     showCaption
+                    onImageChange={syncOgImageWithPrimary}
                   />
 
                   <div className="grid gap-4 md:grid-cols-2">
@@ -612,35 +657,32 @@ export default function CreateProjectModal({
                       control={control}
                       name="status"
                       render={({ field }) => (
-                        <Field
-                          label="Status"
-                          error={errors.status?.message}
-                        >
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
+                        <div className="flex items-center justify-between rounded-xl border bg-muted/20 p-4">
+                          <div className="pr-4">
+                            <Label className="font-semibold text-navy">
+                              Publish Project
+                            </Label>
 
-                            <SelectContent>
-                              <SelectItem value="draft">
-                                Draft
-                              </SelectItem>
+                            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                              Turn on to publish this project. Turn
+                              off to save it as a draft.
+                            </p>
+                          </div>
 
-                              <SelectItem value="published">
-                                Published
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </Field>
+                          <Switch
+                            checked={field.value === "published"}
+                            onCheckedChange={(checked) =>
+                              field.onChange(
+                                checked ? "published" : "draft",
+                              )
+                            }
+                          />
+                        </div>
                       )}
                     />
                   </div>
                 </FormSection>
               )}
-
               {/* STEP 2 — LOCATION & SERVICE */}
               {currentStep === 1 && (
                 <FormSection
@@ -790,6 +832,8 @@ export default function CreateProjectModal({
                     control={control}
                     register={register}
                     errors={errors.client?.logo}
+                    setValue={setValue}
+                    watch={watch}
                     name="client.logo"
                     title="Client Logo"
                   />
@@ -819,6 +863,7 @@ export default function CreateProjectModal({
                       onClick={() =>
                         galleryItems.append({
                           url: "",
+                          publicId: "",
                           alt: "",
                         })
                       }
@@ -865,9 +910,21 @@ export default function CreateProjectModal({
 
                                 <ImageUploader
                                   value={field.value}
-                                  onChange={(url) =>
-                                    field.onChange(url)
-                                  }
+                                  imagePublicId={watch(
+                                    `gallery.${index}.publicId`,
+                                  )}
+                                  onChange={(url, publicId) => {
+                                    field.onChange(url);
+
+                                    setValue(
+                                      `gallery.${index}.publicId`,
+                                      publicId,
+                                      {
+                                        shouldDirty: true,
+                                        shouldValidate: true,
+                                      },
+                                    );
+                                  }}
                                 />
 
                                 {errors.gallery?.[index]?.url && (
@@ -922,7 +979,21 @@ export default function CreateProjectModal({
                     error={errors.seo?.metaTitle?.message}
                   >
                     <Input
-                      {...register("seo.metaTitle")}
+                      {...register("seo.metaTitle", {
+                        onChange: (event) => {
+                          const nextValue = event.target.value;
+
+                          if (
+                            !currentOgTitle ||
+                            currentOgTitle === currentMetaTitle
+                          ) {
+                            setValue("seo.ogTitle", nextValue, {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            });
+                          }
+                        },
+                      })}
                       placeholder="Industrial Roof Waterproofing Project"
                     />
                   </Field>
@@ -932,7 +1003,22 @@ export default function CreateProjectModal({
                     error={errors.seo?.metaDescription?.message}
                   >
                     <Textarea
-                      {...register("seo.metaDescription")}
+                      {...register("seo.metaDescription", {
+                        onChange: (event) => {
+                          const nextValue = event.target.value;
+
+                          if (
+                            !currentOgDescription ||
+                            currentOgDescription ===
+                              currentMetaDescription
+                          ) {
+                            setValue("seo.ogDescription", nextValue, {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            });
+                          }
+                        },
+                      })}
                       placeholder="Industrial roof waterproofing project completed by Enviroshield."
                       className="min-h-28 resize-none"
                     />
@@ -988,7 +1074,6 @@ export default function CreateProjectModal({
                       ))}
                     </div>
 
-                    {/* Validation error */}
                     {errors.seo?.keywords && (
                       <p className="text-sm text-destructive">
                         {errors.seo.keywords.message}
@@ -1020,13 +1105,33 @@ export default function CreateProjectModal({
                     </Field>
 
                     <Field
-                      label="OG Image URL"
+                      label="OG Image"
                       error={errors.seo?.ogImage?.message}
                     >
-                      <Input
-                        type="url"
-                        {...register("seo.ogImage")}
-                        placeholder="https://example.com/projects/roof-main.jpg"
+                      <Controller
+                        control={control}
+                        name="seo.ogImage"
+                        render={({ field }) => (
+                          <ImageUploader
+                            value={field.value}
+                            imagePublicId={watch(
+                              "seo.ogImagePublicId",
+                            )}
+                            onChange={(url, publicId) => {
+                              setOgImageCustomized(true);
+                              field.onChange(url);
+
+                              setValue(
+                                "seo.ogImagePublicId",
+                                publicId,
+                                {
+                                  shouldDirty: true,
+                                  shouldValidate: true,
+                                },
+                              );
+                            }}
+                          />
+                        )}
                       />
                     </Field>
                   </div>
@@ -1154,18 +1259,24 @@ type ImageFieldsProps = {
   control: any;
   register: any;
   errors: any;
+  setValue: any;
+  watch: any;
   name: string;
   title: string;
   showCaption?: boolean;
+  onImageChange?: (url: string, publicId: string) => void;
 };
 
 function ImageFields({
   control,
   register,
   errors,
+  setValue,
+  watch,
   name,
   title,
   showCaption = false,
+  onImageChange,
 }: ImageFieldsProps) {
   return (
     <div className="space-y-5 rounded-2xl border bg-muted/10 p-5">
@@ -1186,7 +1297,17 @@ function ImageFields({
 
             <ImageUploader
               value={field.value}
-              onChange={(url) => field.onChange(url)}
+              imagePublicId={watch(`${name}.publicId`)}
+              onChange={(url, publicId) => {
+                field.onChange(url);
+
+                setValue(`${name}.publicId`, publicId, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+
+                onImageChange?.(url, publicId);
+              }}
             />
 
             {errors?.url && (
