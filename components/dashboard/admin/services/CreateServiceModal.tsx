@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +15,6 @@ import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { usePost } from "@/hooks/swr/usePost";
-
 import { ImageUploader } from "@/components/image-uploader";
 import {
   Dialog,
@@ -43,13 +43,11 @@ const contentItemSchema = z.object({
     .string()
     .min(1, "Title is required")
     .max(100, "Title must be 100 characters or less"),
-
   description: z.string().min(1, "Description is required"),
 });
 
 const contentSectionSchema = z.object({
   image: imageSchema,
-
   items: z
     .array(contentItemSchema)
     .min(1, "At least one item is required"),
@@ -57,24 +55,17 @@ const contentSectionSchema = z.object({
 
 const seoSchema = z.object({
   metaTitle: z.string().min(1, "Meta title is required"),
-
   metaDescription: z.string().min(1, "Meta description is required"),
-
   keywords: z
     .array(z.string().min(1, "Keyword cannot be empty"))
     .min(1, "At least one keyword is required"),
-
   ogTitle: z.string().min(1, "OG title is required"),
-
   ogDescription: z.string().min(1, "OG description is required"),
-
   ogImage: z
     .string()
     .min(1, "OG image is required")
     .url("Enter a valid OG image URL"),
-
   ogImagePublicId: z.string(),
-
   noIndex: z.boolean(),
 });
 
@@ -83,7 +74,6 @@ const formSchema = z.object({
     .string()
     .min(1, "Service name is required")
     .max(100, "Service name must be 100 characters or less"),
-
   slug: z
     .string()
     .min(1, "Slug is required")
@@ -91,23 +81,14 @@ const formSchema = z.object({
       /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
       "Slug can only contain lowercase letters, numbers, and hyphens",
     ),
-
   isFeatured: z.boolean(),
-
   primaryImage: imageSchema,
-
   detailHeading: z.string().min(1, "Detail heading is required"),
-
   description: z.string().min(1, "Description is required"),
-
   whyEnviroshield: contentSectionSchema,
-
   process: contentSectionSchema,
-
   benefits: contentSectionSchema,
-
   status: z.enum(["draft", "published"]),
-
   seo: seoSchema,
 });
 
@@ -126,38 +107,25 @@ const createDefaultContentSection = () => ({
     alt: "",
     caption: "",
   },
-
-  items: [
-    {
-      title: "",
-      description: "",
-    },
-  ],
+  items: [{ title: "", description: "" }],
 });
 
 const defaultValues: FormValues = {
   name: "",
   slug: "",
   isFeatured: false,
-
   primaryImage: {
     url: "",
     alt: "",
     publicId: "",
     caption: "",
   },
-
   detailHeading: "",
   description: "",
-
   whyEnviroshield: createDefaultContentSection(),
-
   process: createDefaultContentSection(),
-
   benefits: createDefaultContentSection(),
-
   status: "draft",
-
   seo: {
     metaTitle: "",
     metaDescription: "",
@@ -211,6 +179,10 @@ export default function CreateServiceModal({
   const [seoKeywordInput, setSeoKeywordInput] = useState("");
   const [currentStep, setCurrentStep] = useState(0);
 
+  // Once the user chooses a custom OG image, do not replace it
+  // automatically when the primary image changes.
+  const [ogImageCustomized, setOgImageCustomized] = useState(false);
+
   const { mutate: postService, isLoading } = usePost("/service", {
     revalidateKey: "/service",
   });
@@ -222,6 +194,7 @@ export default function CreateServiceModal({
     reset,
     setValue,
     watch,
+    getValues,
     trigger,
     formState: { errors },
   } = useForm<FormValues>({
@@ -244,7 +217,12 @@ export default function CreateServiceModal({
     name: "benefits.items",
   });
 
-  const currentKeywords = watch("seo.keywords");
+  const currentKeywords = watch("seo.keywords") ?? [];
+
+  const currentMetaTitle = watch("seo.metaTitle");
+  const currentOgTitle = watch("seo.ogTitle");
+  const currentMetaDescription = watch("seo.metaDescription");
+  const currentOgDescription = watch("seo.ogDescription");
 
   const stepFields = [
     [
@@ -269,6 +247,7 @@ export default function CreateServiceModal({
     reset(defaultValues);
     setSeoKeywordInput("");
     setCurrentStep(0);
+    setOgImageCustomized(false);
   };
 
   const handleNextStep = async (
@@ -290,8 +269,25 @@ export default function CreateServiceModal({
 
   const handleStepClick = async (stepIndex: number) => {
     if (stepIndex >= currentStep) return;
-
     setCurrentStep(stepIndex);
+  };
+
+  // Keep OG image in sync with the primary image until customized.
+  const syncOgImageWithPrimary = (
+    url: string,
+    publicId: string,
+  ) => {
+    if (ogImageCustomized) return;
+
+    setValue("seo.ogImage", url, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+
+    setValue("seo.ogImagePublicId", publicId, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
   };
 
   const onSubmit = async (data: FormValues) => {
@@ -364,6 +360,7 @@ export default function CreateServiceModal({
         reset(defaultValues);
         setSeoKeywordInput("");
         setCurrentStep(0);
+        setOgImageCustomized(false);
         onSuccess?.();
       }
     } catch (error: any) {
@@ -382,9 +379,7 @@ export default function CreateServiceModal({
     <Dialog
       open={isModalOpen}
       onOpenChange={(open) => {
-        if (!open) {
-          handleClose();
-        }
+        if (!open) handleClose();
       }}
     >
       <DialogContent className="max-h-[92vh] !max-w-5xl overflow-hidden rounded-2xl border-0 p-0 shadow-2xl">
@@ -409,6 +404,7 @@ export default function CreateServiceModal({
               <div className="border-b bg-muted/20 px-5 py-5 sm:px-8">
                 <div className="relative">
                   <div className="absolute left-[7%] right-[7%] top-5 hidden h-px bg-border md:block" />
+
                   <div className="relative grid grid-cols-5 gap-2">
                     {steps.map((step, index) => {
                       const isCompleted = index < currentStep;
@@ -450,6 +446,7 @@ export default function CreateServiceModal({
                             >
                               {step.title}
                             </p>
+
                             <p className="mt-1 text-[11px] text-muted-foreground">
                               {step.description}
                             </p>
@@ -481,8 +478,7 @@ export default function CreateServiceModal({
                     </h3>
 
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Configure the basic information for this
-                      service.
+                      Configure the basic information for this service.
                     </p>
                   </div>
 
@@ -586,8 +582,6 @@ export default function CreateServiceModal({
                     )}
                   </div>
 
-                  {/* Primary Image */}
-
                   <ImageFields
                     title="Primary Image"
                     urlName="primaryImage.url"
@@ -599,6 +593,7 @@ export default function CreateServiceModal({
                     errors={errors}
                     setValue={setValue}
                     watch={watch}
+                    onImageChange={syncOgImageWithPrimary}
                   />
 
                   <div className="grid gap-5 md:grid-cols-2">
@@ -611,6 +606,7 @@ export default function CreateServiceModal({
                             <Label className="font-semibold text-navy">
                               Featured Service
                             </Label>
+
                             <p className="mt-1 text-sm text-muted-foreground">
                               Highlight this service on the website.
                             </p>
@@ -624,7 +620,6 @@ export default function CreateServiceModal({
                       )}
                     />
 
-                    {/* Status switch */}
                     <Controller
                       control={control}
                       name="status"
@@ -634,20 +629,30 @@ export default function CreateServiceModal({
                             <Label className="font-semibold text-navy">
                               Publish Service
                             </Label>
+
                             <p className="mt-1 text-sm text-muted-foreground">
-                              Turn on to publish this service. Turn off to save it as a draft.
+                              Turn on to publish this service. Turn off
+                              to save it as a draft.
                             </p>
                           </div>
 
                           <Switch
                             checked={field.value === "published"}
                             onCheckedChange={(checked) =>
-                              field.onChange(checked ? "published" : "draft")
+                              field.onChange(
+                                checked ? "published" : "draft",
+                              )
                             }
                           />
                         </div>
                       )}
                     />
+
+                    {errors.status && (
+                      <p className="text-sm text-destructive">
+                        {errors.status.message}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
@@ -720,7 +725,21 @@ export default function CreateServiceModal({
                       <Input
                         id="seo-meta-title"
                         placeholder="Roof Waterproofing Services in Bangladesh | Enviroshield"
-                        {...register("seo.metaTitle")}
+                        {...register("seo.metaTitle", {
+                          onChange: (event) => {
+                            const nextValue = event.target.value;
+
+                            if (
+                              !currentOgTitle ||
+                              currentOgTitle === currentMetaTitle
+                            ) {
+                              setValue("seo.ogTitle", nextValue, {
+                                shouldDirty: true,
+                                shouldValidate: true,
+                              });
+                            }
+                          },
+                        })}
                       />
 
                       {errors.seo?.metaTitle && (
@@ -739,7 +758,26 @@ export default function CreateServiceModal({
                         id="seo-meta-description"
                         rows={3}
                         placeholder="Professional roof waterproofing solutions..."
-                        {...register("seo.metaDescription")}
+                        {...register("seo.metaDescription", {
+                          onChange: (event) => {
+                            const nextValue = event.target.value;
+
+                            if (
+                              !currentOgDescription ||
+                              currentOgDescription ===
+                                currentMetaDescription
+                            ) {
+                              setValue(
+                                "seo.ogDescription",
+                                nextValue,
+                                {
+                                  shouldDirty: true,
+                                  shouldValidate: true,
+                                },
+                              );
+                            }
+                          },
+                        })}
                       />
 
                       {errors.seo?.metaDescription && (
@@ -759,7 +797,6 @@ export default function CreateServiceModal({
                         </p>
                       </div>
 
-                      {/* Add keyword */}
                       <div className="flex gap-2">
                         <Input
                           value={seoKeywordInput}
@@ -777,10 +814,7 @@ export default function CreateServiceModal({
                             const keyword = seoKeywordInput.trim();
 
                             if (!keyword) return;
-
-                            if (currentKeywords.includes(keyword)) {
-                              return;
-                            }
+                            if (currentKeywords.includes(keyword)) return;
 
                             setValue(
                               "seo.keywords",
@@ -799,7 +833,6 @@ export default function CreateServiceModal({
                         </DashboardButton>
                       </div>
 
-                      {/* Added keywords */}
                       <div className="flex flex-wrap gap-2">
                         {currentKeywords.map((keyword, index) => (
                           <div
@@ -835,7 +868,6 @@ export default function CreateServiceModal({
                         ))}
                       </div>
 
-                      {/* Validation error */}
                       {errors.seo?.keywords?.root && (
                         <p className="text-sm text-destructive">
                           {errors.seo.keywords.root.message}
@@ -884,12 +916,15 @@ export default function CreateServiceModal({
                               imagePublicId={watch(
                                 "seo.ogImagePublicId",
                               )}
-                              onChange={(url, public_id) => {
+                              onChange={(url, publicId) => {
+                                // A manual OG upload opts out of
+                                // automatic primary-image syncing.
+                                setOgImageCustomized(true);
                                 field.onChange(url);
 
                                 setValue(
                                   "seo.ogImagePublicId",
-                                  public_id,
+                                  publicId,
                                   {
                                     shouldDirty: true,
                                     shouldValidate: true,
@@ -936,9 +971,10 @@ export default function CreateServiceModal({
                             <Label className="font-semibold text-navy">
                               No Index
                             </Label>
+
                             <p className="mt-1 text-sm text-muted-foreground">
-                              Prevent search engines from indexing
-                              this service.
+                              Prevent search engines from indexing this
+                              service.
                             </p>
                           </div>
 
@@ -1026,6 +1062,7 @@ type ImageFieldsProps = {
   errors: any;
   setValue: any;
   watch: any;
+  onImageChange?: (url: string, publicId: string) => void;
 };
 
 function ImageFields({
@@ -1039,6 +1076,7 @@ function ImageFields({
   errors,
   setValue,
   watch,
+  onImageChange,
 }: ImageFieldsProps) {
   const fieldName = urlName.split(".")[0];
   const imageErrors = errors?.[fieldName];
@@ -1047,6 +1085,7 @@ function ImageFields({
     <div className="space-y-5 rounded-2xl border bg-muted/10 p-5">
       <div>
         <h4 className="text-sm font-bold text-navy">{title}</h4>
+
         <p className="mt-1 text-xs text-muted-foreground">
           Upload the image and provide accessible metadata.
         </p>
@@ -1058,18 +1097,22 @@ function ImageFields({
         render={({ field }: any) => (
           <div className="space-y-2">
             <Label className="text-xs font-semibold">Image</Label>
+
             <ImageUploader
               value={field.value}
               imagePublicId={watch(publicIdName)}
-              onChange={(url, public_id) => {
+              onChange={(url, publicId) => {
                 field.onChange(url);
 
-                setValue(publicIdName, public_id, {
+                setValue(publicIdName, publicId, {
                   shouldDirty: true,
                   shouldValidate: true,
                 });
+
+                onImageChange?.(url, publicId);
               }}
             />
+
             {imageErrors?.url && (
               <p className="text-xs text-red-600">
                 {imageErrors.url.message}
@@ -1084,10 +1127,12 @@ function ImageFields({
           <Label className="text-sm font-semibold text-navy">
             Alt Text
           </Label>
+
           <Input
             placeholder="Describe the image"
             {...register(altName)}
           />
+
           {imageErrors?.alt && (
             <p className="text-xs text-red-600">
               {imageErrors.alt.message}
@@ -1099,10 +1144,12 @@ function ImageFields({
           <Label className="text-sm font-semibold text-navy">
             Caption
           </Label>
+
           <Input
             placeholder="Image caption"
             {...register(captionName)}
           />
+
           {imageErrors?.caption && (
             <p className="text-xs text-red-600">
               {imageErrors.caption.message}
@@ -1143,6 +1190,7 @@ function ContentSection({
     <section className="space-y-6">
       <div>
         <h3 className="text-lg font-bold text-navy">{title}</h3>
+
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
           {description}
         </p>
@@ -1154,6 +1202,7 @@ function ContentSection({
             <h4 className="text-sm font-bold text-navy">
               Section Image
             </h4>
+
             <p className="mt-1 text-xs text-muted-foreground">
               Upload the image and provide accessible metadata.
             </p>
@@ -1171,12 +1220,12 @@ function ContentSection({
                   imagePublicId={watch(
                     `${sectionName}.image.publicId`,
                   )}
-                  onChange={(url, public_id) => {
+                  onChange={(url, publicId) => {
                     field.onChange(url);
 
                     setValue(
                       `${sectionName}.image.publicId`,
-                      public_id,
+                      publicId,
                       {
                         shouldDirty: true,
                         shouldValidate: true,
@@ -1199,10 +1248,12 @@ function ContentSection({
               <Label className="text-sm font-semibold text-navy">
                 Alt Text
               </Label>
+
               <Input
                 {...register(`${sectionName}.image.alt`)}
                 placeholder="Describe the image"
               />
+
               {errors?.[sectionName]?.image?.alt && (
                 <p className="text-xs text-red-600">
                   {errors[sectionName].image.alt.message}
@@ -1214,10 +1265,12 @@ function ContentSection({
               <Label className="text-sm font-semibold text-navy">
                 Caption
               </Label>
+
               <Input
                 {...register(`${sectionName}.image.caption`)}
                 placeholder="Image caption"
               />
+
               {errors?.[sectionName]?.image?.caption && (
                 <p className="text-xs text-red-600">
                   {errors[sectionName].image.caption.message}
@@ -1233,6 +1286,7 @@ function ContentSection({
               <h4 className="text-sm font-bold text-navy">
                 Content Items
               </h4>
+
               <p className="mt-1 text-xs text-muted-foreground">
                 Add the points you want to highlight in this section.
               </p>
@@ -1279,14 +1333,15 @@ function ContentSection({
                       <Label className="text-sm font-semibold text-navy">
                         Title
                       </Label>
+
                       <Input
                         {...register(
                           `${sectionName}.items.${index}.title`,
                         )}
                         placeholder="Content item title"
                       />
-                      {errors?.[sectionName]?.items?.[index]
-                        ?.title && (
+
+                      {errors?.[sectionName]?.items?.[index]?.title && (
                         <p className="text-xs text-red-600">
                           {
                             errors[sectionName].items[index].title
@@ -1300,6 +1355,7 @@ function ContentSection({
                       <Label className="text-sm font-semibold text-navy">
                         Description
                       </Label>
+
                       <Textarea
                         {...register(
                           `${sectionName}.items.${index}.description`,
@@ -1307,6 +1363,7 @@ function ContentSection({
                         placeholder="Describe this point..."
                         className="min-h-28 resize-none"
                       />
+
                       {errors?.[sectionName]?.items?.[index]
                         ?.description && (
                         <p className="text-xs text-red-600">
@@ -1341,6 +1398,7 @@ function FormSection({
     <section className="space-y-6">
       <div>
         <h3 className="text-lg font-bold text-navy">{title}</h3>
+
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
           {description}
         </p>
