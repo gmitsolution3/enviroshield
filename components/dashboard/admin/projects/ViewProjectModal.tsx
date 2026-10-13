@@ -5,7 +5,6 @@ import {
   CheckCircle,
   Clock,
   ExternalLink,
-  Globe,
   ImageIcon,
   MapPin,
   Search,
@@ -81,9 +80,7 @@ export default function ViewProjectModal({
                 {project.primaryImage?.url ? (
                   <Image
                     src={project.primaryImage.url}
-                    alt={
-                      project.primaryImage.alt || project.title
-                    }
+                    alt={project.primaryImage.alt || project.title}
                     fill
                     priority
                     className="object-cover"
@@ -211,22 +208,12 @@ export default function ViewProjectModal({
 
                 <InfoCard
                   label="Featured"
-                  value={
-                    project.isFeatured
-                      ? "Featured"
-                      : "Standard"
-                  }
+                  value={project.isFeatured ? "Featured" : "Standard"}
                   icon={<Star className="h-4 w-4" />}
-                  accent={
-                    project.isFeatured ? "amber" : "gray"
-                  }
+                  accent={project.isFeatured ? "amber" : "gray"}
                 />
 
-                <InfoCard
-                  label="Slug"
-                  value={project.slug}
-                  mono
-                />
+                <InfoCard label="Slug" value={project.slug} mono />
 
                 <InfoCard
                   label="Project ID"
@@ -292,9 +279,7 @@ export default function ViewProjectModal({
                   <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
                     {project.serviceId?.primaryImage?.url ? (
                       <Image
-                        src={
-                          project.serviceId.primaryImage.url
-                        }
+                        src={project.serviceId.primaryImage.url}
                         alt={
                           project.serviceId.primaryImage.alt ||
                           project.serviceId.name
@@ -481,10 +466,9 @@ export default function ViewProjectModal({
                     value={project.seo.ogDescription}
                   />
 
-                  <SeoCard
-                    label="OG Image"
+                  <OgImagePreview
                     value={project.seo.ogImage}
-                    link
+                    label="OG Image"
                   />
                 </div>
 
@@ -496,16 +480,14 @@ export default function ViewProjectModal({
 
                     <div className="mt-3 flex flex-wrap gap-2">
                       {project.seo.keywords?.length ? (
-                        project.seo.keywords.map(
-                          (keyword, index) => (
-                            <span
-                              key={`${keyword}-${index}`}
-                              className="rounded-full border border-blue/15 bg-blue/5 px-3 py-1.5 text-xs font-medium text-blue"
-                            >
-                              {keyword}
-                            </span>
-                          ),
-                        )
+                        project.seo.keywords.map((keyword, index) => (
+                          <span
+                            key={`${keyword}-${index}`}
+                            className="rounded-full border border-blue/15 bg-blue/5 px-3 py-1.5 text-xs font-medium text-blue"
+                          >
+                            {keyword}
+                          </span>
+                        ))
                       ) : (
                         <span className="text-sm text-slate-500">
                           No keywords
@@ -726,9 +708,48 @@ function SeoCard({
           <ExternalLink className="mt-1 h-3.5 w-3.5 shrink-0" />
         </a>
       ) : (
-        <p className="mt-2 text-sm leading-6 text-navy">
-          {value}
-        </p>
+        <p className="mt-2 text-sm leading-6 text-navy">{value}</p>
+      )}
+    </div>
+  );
+}
+
+function OgImagePreview({
+  value,
+  label,
+}: {
+  value?: string;
+  label: string;
+}) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
+      <p className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">
+        {label}
+      </p>
+
+      {value ? (
+        <a
+          href={value}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group mt-3 block overflow-hidden rounded-xl border border-slate-200 bg-slate-50"
+          aria-label={`Open ${label} in a new tab`}
+        >
+          <div className="relative aspect-[1200/630] w-full">
+            <Image
+              src={value}
+              alt={label}
+              fill
+              sizes="(max-width: 768px) 100vw, 600px"
+              className="object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+              unoptimized
+            />
+          </div>
+        </a>
+      ) : (
+        <div className="mt-3 flex aspect-[1200/630] items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-sm text-slate-400">
+          No OG image provided
+        </div>
       )}
     </div>
   );
@@ -777,9 +798,7 @@ function EmptyState({
         {icon}
       </div>
 
-      <p className="mt-3 text-sm font-semibold text-navy">
-        {title}
-      </p>
+      <p className="mt-3 text-sm font-semibold text-navy">{title}</p>
 
       <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-slate-500">
         {description}

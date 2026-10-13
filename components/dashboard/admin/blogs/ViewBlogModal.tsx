@@ -414,10 +414,9 @@ export default function ViewBlogModal({
                       value={blog.seo.ogDescription || "Not provided"}
                     />
 
-                    <SeoCard
+                    <OgImagePreview
+                      value={blog.seo.ogImage}
                       label="OG Image"
-                      value={blog.seo.ogImage || "Not provided"}
-                      link={Boolean(blog.seo.ogImage)}
                     />
                   </div>
 
@@ -907,6 +906,47 @@ function SeoCard({
         </a>
       ) : (
         <p className="mt-2 text-sm leading-6 text-navy">{value}</p>
+      )}
+    </div>
+  );
+}
+
+function OgImagePreview({
+  value,
+  label,
+}: {
+  value?: string;
+  label: string;
+}) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
+      <p className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">
+        {label}
+      </p>
+
+      {value ? (
+        <a
+          href={value}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group mt-3 block overflow-hidden rounded-xl border border-slate-200 bg-slate-50"
+          aria-label={`Open ${label} in a new tab`}
+        >
+          <div className="relative aspect-[1200/630] w-full">
+            <Image
+              src={value}
+              alt={label}
+              fill
+              sizes="(max-width: 768px) 100vw, 600px"
+              className="object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+              unoptimized
+            />
+          </div>
+        </a>
+      ) : (
+        <div className="mt-3 flex aspect-[1200/630] items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-sm text-slate-400">
+          No OG image provided
+        </div>
       )}
     </div>
   );
