@@ -33,14 +33,14 @@ export interface IProjectClient {
 }
 
 export interface IProjectSeo {
-  metaTitle?: string;
-  metaDescription?: string;
-  keywords?: string[];
-  ogTitle?: string;
-  ogDescription?: string;
-  ogImage?: string;
-  ogImagePublicId?: string;
-  noIndex?: boolean;
+  metaTitle: string;
+  metaDescription: string;
+  keywords: string[];
+  ogTitle: string;
+  ogDescription: string;
+  ogImage: string;
+  ogImagePublicId: string;
+  noIndex: boolean;
 }
 
 export interface IProject {
@@ -53,13 +53,10 @@ export interface IProject {
   completionDate: string;
   gallery: IProjectGalleryItem[];
   client: IProjectClient;
-
-  // Some endpoints return an ID; read endpoints may return a populated service.
-  serviceId: string | IService;
-
+  serviceId: IService;
   status: "published" | "draft";
   isFeatured: boolean;
-  seo?: IProjectSeo;
+  seo: IProjectSeo;
   createdAt: string;
   updatedAt: string;
   __v?: number;

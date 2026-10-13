@@ -6,14 +6,14 @@ export interface IBlogImage {
 }
 
 export interface IBlogSeo {
-  metaTitle?: string;
-  metaDescription?: string;
-  keywords?: string[];
-  ogTitle?: string;
-  ogDescription?: string;
-  ogImage?: string;
-  ogImagePublicId?: string;
-  noIndex?: boolean;
+  metaTitle: string;
+  metaDescription: string;
+  keywords: string[];
+  ogTitle: string;
+  ogDescription: string;
+  ogImage: string;
+  ogImagePublicId: string;
+  noIndex: boolean;
 }
 
 export interface IBlogAuthor {

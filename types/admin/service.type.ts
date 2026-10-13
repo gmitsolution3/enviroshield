@@ -17,51 +17,15 @@ export interface IServiceContentSection {
   items: IServiceContentItem[];
 }
 
-export interface IServiceProjectLocation {
-  city: string;
-  area?: string;
-  country: string;
-}
-
-export interface IServiceProjectClientLogo {
-  url: string;
-  publicId: string;
-  alt: string;
-}
-
-export interface IServiceProjectClient {
-  name: string;
-  description?: string;
-  logo?: IServiceProjectClientLogo;
-}
-
-export interface IServiceProjectSeo {
-  metaTitle?: string;
-  metaDescription?: string;
-  keywords?: string[];
-  ogTitle?: string;
-  ogDescription?: string;
-  ogImage?: string;
-  ogImagePublicId?: string;
-  noIndex?: boolean;
-}
-
-export interface IServiceProjectGalleryItem {
-  url: string;
-  publicId: string;
-  alt: string;
-  caption?: string;
-}
-
 export interface IServiceSeo {
-  metaTitle?: string;
-  metaDescription?: string;
-  keywords?: string[];
-  ogTitle?: string;
-  ogDescription?: string;
-  ogImage?: string;
-  ogImagePublicId?: string;
-  noIndex?: boolean;
+  metaTitle: string;
+  metaDescription: string;
+  keywords: string[];
+  ogTitle: string;
+  ogDescription: string;
+  ogImage: string;
+  ogImagePublicId: string;
+  noIndex: boolean;
 }
 
 export interface IService {
