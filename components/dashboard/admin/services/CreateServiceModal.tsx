@@ -25,13 +25,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { generateSlug } from "@/utils/generateSlug";
@@ -631,40 +624,30 @@ export default function CreateServiceModal({
                       )}
                     />
 
-                    <div className="space-y-2">
-                      <Label>Status</Label>
+                    {/* Status switch */}
+                    <Controller
+                      control={control}
+                      name="status"
+                      render={({ field }) => (
+                        <div className="flex items-center justify-between rounded-xl border bg-muted/20 p-4">
+                          <div>
+                            <Label className="font-semibold text-navy">
+                              Publish Service
+                            </Label>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              Turn on to publish this service. Turn off to save it as a draft.
+                            </p>
+                          </div>
 
-                      <Controller
-                        control={control}
-                        name="status"
-                        render={({ field }) => (
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
-                            <SelectTrigger className="h-10 w-full">
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-
-                            <SelectContent>
-                              <SelectItem value="draft">
-                                Draft
-                              </SelectItem>
-
-                              <SelectItem value="published">
-                                Published
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        )}
-                      />
-
-                      {errors.status && (
-                        <p className="text-sm text-destructive">
-                          {errors.status.message}
-                        </p>
+                          <Switch
+                            checked={field.value === "published"}
+                            onCheckedChange={(checked) =>
+                              field.onChange(checked ? "published" : "draft")
+                            }
+                          />
+                        </div>
                       )}
-                    </div>
+                    />
                   </div>
                 </div>
               )}
