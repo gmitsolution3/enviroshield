@@ -17,13 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { usePatch } from "@/hooks/swr/usePatch";
 import type { ITestimonial } from "@/types";
@@ -37,9 +31,15 @@ type UpdateTestimonialModalProps = {
   onClose: () => void;
 };
 
+/**
+ * Keep publicId as a string without requiring it to be non-empty.
+ * This allows older testimonials to load while ensuring new uploads
+ * store their Cloudinary publicId.
+ */
 const imageSchema = z.object({
   url: z.string().optional(),
-  alt: z.string().optional(),
+  publicId: z.string(),
+  alt: z.string().trim().min(1, "Image alt text is required"),
 });
 
 const formSchema = z.object({
@@ -48,7 +48,22 @@ const formSchema = z.object({
     .min(1, "Client name is required")
     .max(100, "Client name must be 100 characters or less"),
 
-  clientImage: imageSchema.optional(),
+  clientImage: z
+    .object({
+      url: z.string().optional(),
+      publicId: z.string(),
+      alt: z.string().trim(),
+    })
+    .optional()
+    .superRefine((image, ctx) => {
+      if (image?.url?.trim() && !image.alt) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["alt"],
+          message: "Image alt text is required",
+        });
+      }
+    }),
 
   rating: z
     .number()
@@ -69,6 +84,7 @@ const defaultValues: FormValues = {
   clientName: "",
   clientImage: {
     url: "",
+    publicId: "",
     alt: "",
   },
   rating: 5,
@@ -83,6 +99,7 @@ const getTestimonialFormValues = (
 
   clientImage: {
     url: testimonial.clientImage?.url ?? "",
+    publicId: testimonial.clientImage?.publicId ?? "",
     alt: testimonial.clientImage?.alt ?? "",
   },
 
@@ -115,6 +132,8 @@ export default function UpdateTestimonialModal({
     control,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -145,6 +164,7 @@ export default function UpdateTestimonialModal({
           ? {
               clientImage: {
                 url: values.clientImage.url,
+                publicId: values.clientImage.publicId,
                 alt: values.clientImage.alt || "",
               },
             }
@@ -165,6 +185,7 @@ export default function UpdateTestimonialModal({
       onClose();
       reset(defaultValues);
     } catch (error: any) {
+      console.log(error);
       const message =
         error?.response?.data?.message ||
         error?.response?.data?.error ||
@@ -234,8 +255,8 @@ export default function UpdateTestimonialModal({
                   </h3>
 
                   <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                    Update the customer's name and optional profile
-                    image.
+                    Update the customer&apos;s name and optional
+                    profile image.
                   </p>
                 </div>
 
@@ -262,43 +283,42 @@ export default function UpdateTestimonialModal({
                     )}
                   </div>
 
-                  {/* Status */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-navy">
-                      Status
-                    </Label>
+                  {/* Publish / Draft Switch */}
+                  <Controller
+                    control={control}
+                    name="status"
+                    render={({ field }) => (
+                      <div className="flex items-center justify-between rounded-xl border bg-muted/20 p-4">
+                        <div className="pr-4">
+                          <Label className="font-semibold text-navy">
+                            Publish Testimonial
+                          </Label>
 
-                    <Controller
-                      control={control}
-                      name="status"
-                      render={({ field }) => (
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <SelectTrigger className="h-10 w-full">
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
+                          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                            Turn on to publish this testimonial. Turn
+                            off to save it as a draft.
+                          </p>
+                        </div>
 
-                          <SelectContent>
-                            <SelectItem value="draft">
-                              Draft
-                            </SelectItem>
-
-                            <SelectItem value="published">
-                              Published
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
-                    />
-
-                    {errors.status && (
-                      <p className="text-sm text-destructive">
-                        {errors.status.message}
-                      </p>
+                        <Switch
+                          checked={field.value === "published"}
+                          onCheckedChange={(checked) =>
+                            field.onChange(
+                              checked ? "published" : "draft",
+                            )
+                          }
+                          disabled={isLoading}
+                          aria-label="Publish testimonial"
+                        />
+                      </div>
                     )}
-                  </div>
+                  />
+
+                  {errors.status && (
+                    <p className="text-sm text-destructive">
+                      {errors.status.message}
+                    </p>
+                  )}
                 </div>
 
                 {/* Client Image */}
@@ -326,7 +346,21 @@ export default function UpdateTestimonialModal({
 
                         <ImageUploader
                           value={field.value}
-                          onChange={(url) => field.onChange(url)}
+                          imagePublicId={watch(
+                            "clientImage.publicId",
+                          )}
+                          onChange={(url, publicId) => {
+                            field.onChange(url);
+
+                            setValue(
+                              "clientImage.publicId",
+                              publicId,
+                              {
+                                shouldDirty: true,
+                                shouldValidate: true,
+                              },
+                            );
+                          }}
                         />
 
                         {errors.clientImage?.url && (
@@ -338,7 +372,6 @@ export default function UpdateTestimonialModal({
                     )}
                   />
 
-                  {/* Alt Text */}
                   <div className="space-y-2">
                     <Label
                       htmlFor="testimonial-image-alt"
@@ -349,19 +382,22 @@ export default function UpdateTestimonialModal({
 
                     <Input
                       id="testimonial-image-alt"
-                      placeholder="Rahim Ahmed"
+                      placeholder="e.g. Rahim Ahmed"
+                      aria-required={!!watch("clientImage.url")}
                       {...register("clientImage.alt")}
                     />
 
                     {errors.clientImage?.alt && (
-                      <p className="text-sm text-destructive">
+                      <p
+                        className="text-sm text-destructive"
+                        role="alert"
+                      >
                         {errors.clientImage.alt.message}
                       </p>
                     )}
                   </div>
                 </div>
               </section>
-
               {/* Testimonial */}
               <section className="space-y-5">
                 <div>
@@ -370,7 +406,7 @@ export default function UpdateTestimonialModal({
                   </h3>
 
                   <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                    Update the customer's rating and feedback.
+                    Update the customer&apos;s rating and feedback.
                   </p>
                 </div>
 
@@ -394,6 +430,7 @@ export default function UpdateTestimonialModal({
                               key={rating}
                               type="button"
                               onClick={() => field.onChange(rating)}
+                              disabled={isLoading}
                               className={[
                                 "flex h-11 w-11 items-center justify-center rounded-xl border transition-all duration-200",
                                 isActive
@@ -441,6 +478,7 @@ export default function UpdateTestimonialModal({
                     id="testimonial-content"
                     placeholder="Write the customer's testimonial..."
                     className="min-h-40 resize-none"
+                    disabled={isLoading}
                     {...register("content")}
                   />
 

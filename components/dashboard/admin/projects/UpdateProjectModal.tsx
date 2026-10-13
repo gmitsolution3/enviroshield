@@ -41,12 +41,14 @@ import DashboardButton from "../../DashboardButton";
 
 const imageSchema = z.object({
   url: z.string().min(1, "Image is required"),
+  publicId: z.string(),
   alt: z.string().min(1, "Image alt text is required"),
   caption: z.string().min(1, "Image caption is required"),
 });
 
 const galleryItemSchema = z.object({
   url: z.string().min(1, "Gallery image is required"),
+  publicId: z.string(),
   alt: z.string().min(1, "Gallery image alt text is required"),
 });
 
@@ -61,6 +63,7 @@ const clientSchema = z.object({
   description: z.string().min(1, "Client description is required"),
   logo: z.object({
     url: z.string().min(1, "Client logo is required"),
+    publicId: z.string(),
     alt: z.string().min(1, "Client logo alt text is required"),
   }),
 });
@@ -82,6 +85,8 @@ const seoSchema = z.object({
     .string()
     .min(1, "OG image is required")
     .url("Enter a valid OG image URL"),
+
+  ogImagePublicId: z.string(),
 
   noIndex: z.boolean(),
 });
@@ -141,6 +146,7 @@ const defaultValues: FormValues = {
 
   primaryImage: {
     url: "",
+    publicId: "",
     alt: "",
     caption: "",
   },
@@ -158,6 +164,7 @@ const defaultValues: FormValues = {
   gallery: [
     {
       url: "",
+      publicId: "",
       alt: "",
     },
   ],
@@ -167,6 +174,7 @@ const defaultValues: FormValues = {
     description: "",
     logo: {
       url: "",
+      publicId: "",
       alt: "",
     },
   },
@@ -184,6 +192,7 @@ const defaultValues: FormValues = {
     ogTitle: "",
     ogDescription: "",
     ogImage: "",
+    ogImagePublicId: "",
     noIndex: false,
   },
 };
@@ -221,14 +230,13 @@ const steps = [
   },
 ];
 
-const getProjectFormValues = (
-  project: IProject,
-): FormValues => ({
+const getProjectFormValues = (project: IProject): FormValues => ({
   title: project.title ?? "",
   slug: project.slug ?? "",
 
   primaryImage: {
     url: project.primaryImage?.url ?? "",
+    publicId: project.primaryImage?.publicId ?? "",
     alt: project.primaryImage?.alt ?? "",
     caption: project.primaryImage?.caption ?? "",
   },
@@ -249,11 +257,13 @@ const getProjectFormValues = (
     project.gallery?.length > 0
       ? project.gallery.map((item) => ({
           url: item.url ?? "",
+          publicId: item.publicId ?? "",
           alt: item.alt ?? "",
         }))
       : [
           {
             url: "",
+            publicId: "",
             alt: "",
           },
         ],
@@ -263,14 +273,15 @@ const getProjectFormValues = (
     description: project.client?.description ?? "",
     logo: {
       url: project.client?.logo?.url ?? "",
+      publicId: project.client?.logo?.publicId ?? "",
       alt: project.client?.logo?.alt ?? "",
     },
   },
 
   serviceId:
     typeof project.serviceId === "object"
-      ? project.serviceId?._id ?? ""
-      : project.serviceId ?? "",
+      ? (project.serviceId?._id ?? "")
+      : (project.serviceId ?? ""),
 
   status:
     project.status === "published" || project.status === "draft"
@@ -286,6 +297,7 @@ const getProjectFormValues = (
     ogTitle: project.seo?.ogTitle ?? "",
     ogDescription: project.seo?.ogDescription ?? "",
     ogImage: project.seo?.ogImage ?? "",
+    ogImagePublicId: project.seo?.ogImagePublicId ?? "",
     noIndex: project.seo?.noIndex ?? false,
   },
 });
@@ -302,12 +314,9 @@ export default function UpdateProjectModal({
   const [currentStep, setCurrentStep] = useState(0);
   const [seoKeywordInput, setSeoKeywordInput] = useState("");
 
-  const { mutate: updateProject, isLoading } = usePatch(
-    "/project",
-    {
-      revalidateKey,
-    },
-  );
+  const { mutate: updateProject, isLoading } = usePatch("/project", {
+    revalidateKey,
+  });
 
   const {
     register,
@@ -390,9 +399,7 @@ export default function UpdateProjectModal({
 
     if (!isValid) return;
 
-    setCurrentStep((step) =>
-      Math.min(step + 1, steps.length - 1),
-    );
+    setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
   };
 
   const handlePreviousStep = () => {
@@ -415,14 +422,10 @@ export default function UpdateProjectModal({
       return;
     }
 
-    setValue(
-      "seo.keywords",
-      [...currentKeywords, keyword],
-      {
-        shouldDirty: true,
-        shouldValidate: true,
-      },
-    );
+    setValue("seo.keywords", [...currentKeywords, keyword], {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
 
     setSeoKeywordInput("");
   };
@@ -452,6 +455,7 @@ export default function UpdateProjectModal({
           url: data.primaryImage.url,
           alt: data.primaryImage.alt,
           caption: data.primaryImage.caption,
+          publicId: data.primaryImage.publicId,
         },
 
         description: data.description,
@@ -466,6 +470,7 @@ export default function UpdateProjectModal({
 
         gallery: data.gallery.map((item) => ({
           url: item.url,
+          publicId: item.publicId,
           alt: item.alt,
         })),
 
@@ -474,6 +479,7 @@ export default function UpdateProjectModal({
           description: data.client.description,
           logo: {
             url: data.client.logo.url,
+            publicId: data.client.logo.publicId,
             alt: data.client.logo.alt,
           },
         },
@@ -491,6 +497,7 @@ export default function UpdateProjectModal({
           ogTitle: data.seo.ogTitle,
           ogDescription: data.seo.ogDescription,
           ogImage: data.seo.ogImage,
+          ogImagePublicId: data.seo.ogImagePublicId,
           noIndex: data.seo.noIndex,
         },
       };
@@ -519,10 +526,7 @@ export default function UpdateProjectModal({
 
       toast.error(message);
 
-      console.error(
-        "Failed to update project:",
-        message,
-      );
+      console.error("Failed to update project:", message);
     }
   };
 
@@ -543,8 +547,8 @@ export default function UpdateProjectModal({
             </DialogTitle>
 
             <DialogDescription className="text-sm leading-6">
-              Update the project, client, gallery, and SEO
-              information for{" "}
+              Update the project, client, gallery, and SEO information
+              for{" "}
               <span className="font-semibold text-foreground">
                 {project?.title ?? "this project"}
               </span>
@@ -642,9 +646,7 @@ export default function UpdateProjectModal({
                           onChange: (event) => {
                             setValue(
                               "slug",
-                              generateSlug(
-                                event.target.value,
-                              ),
+                              generateSlug(event.target.value),
                               {
                                 shouldValidate: true,
                                 shouldDirty: true,
@@ -656,10 +658,7 @@ export default function UpdateProjectModal({
                       />
                     </Field>
 
-                    <Field
-                      label="Slug"
-                      error={errors.slug?.message}
-                    >
+                    <Field label="Slug" error={errors.slug?.message}>
                       <Input
                         {...register("slug")}
                         placeholder="industrial-roof-waterproofing-project"
@@ -683,6 +682,8 @@ export default function UpdateProjectModal({
                     register={register}
                     errors={errors.primaryImage}
                     name="primaryImage"
+                    watch={watch}
+                    setValue={setValue}
                     title="Primary Image"
                     showCaption
                   />
@@ -699,8 +700,7 @@ export default function UpdateProjectModal({
                             </Label>
 
                             <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                              Highlight this project on the
-                              website.
+                              Highlight this project on the website.
                             </p>
                           </div>
 
@@ -716,35 +716,32 @@ export default function UpdateProjectModal({
                       control={control}
                       name="status"
                       render={({ field }) => (
-                        <Field
-                          label="Status"
-                          error={errors.status?.message}
-                        >
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
+                        <div className="flex items-center justify-between rounded-xl border bg-muted/20 p-4">
+                          <div className="pr-4">
+                            <Label className="font-semibold text-navy">
+                              Publish Project
+                            </Label>
 
-                            <SelectContent>
-                              <SelectItem value="draft">
-                                Draft
-                              </SelectItem>
+                            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                              Turn on to publish this project. Turn
+                              off to save it as a draft.
+                            </p>
+                          </div>
 
-                              <SelectItem value="published">
-                                Published
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </Field>
+                          <Switch
+                            checked={field.value === "published"}
+                            onCheckedChange={(checked) =>
+                              field.onChange(
+                                checked ? "published" : "draft",
+                              )
+                            }
+                          />
+                        </div>
                       )}
                     />
                   </div>
                 </FormSection>
               )}
-
               {/* STEP 2 — LOCATION & SERVICE */}
               {currentStep === 1 && (
                 <FormSection
@@ -825,8 +822,7 @@ export default function UpdateProjectModal({
                               {field.value
                                 ? services.find(
                                     (service) =>
-                                      service._id ===
-                                      field.value,
+                                      service._id === field.value,
                                   )?.name
                                 : undefined}
                             </SelectValue>
@@ -846,8 +842,7 @@ export default function UpdateProjectModal({
 
                         {servicesError && (
                           <p className="text-sm text-destructive">
-                            Failed to load services. Please try
-                            again.
+                            Failed to load services. Please try again.
                           </p>
                         )}
 
@@ -897,6 +892,8 @@ export default function UpdateProjectModal({
                     register={register}
                     errors={errors.client?.logo}
                     name="client.logo"
+                    watch={watch}
+                    setValue={setValue}
                     title="Client Logo"
                   />
                 </FormSection>
@@ -925,6 +922,7 @@ export default function UpdateProjectModal({
                       onClick={() =>
                         galleryItems.append({
                           url: "",
+                          publicId: "",
                           alt: "",
                         })
                       }
@@ -935,95 +933,89 @@ export default function UpdateProjectModal({
                   </div>
 
                   <div className="space-y-4">
-                    {galleryItems.fields.map(
-                      (field, index) => (
-                        <div
-                          key={field.id}
-                          className="rounded-2xl border bg-muted/10 p-5"
-                        >
-                          <div className="mb-5 flex items-center justify-between">
-                            <p className="text-xs font-bold uppercase tracking-[0.08em] text-blue">
-                              Image{" "}
-                              {String(index + 1).padStart(
-                                2,
-                                "0",
-                              )}
-                            </p>
+                    {galleryItems.fields.map((field, index) => (
+                      <div
+                        key={field.id}
+                        className="rounded-2xl border bg-muted/10 p-5"
+                      >
+                        <div className="mb-5 flex items-center justify-between">
+                          <p className="text-xs font-bold uppercase tracking-[0.08em] text-blue">
+                            Image {String(index + 1).padStart(2, "0")}
+                          </p>
 
-                            {galleryItems.fields.length >
-                              1 && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  galleryItems.remove(index)
-                                }
-                                className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 text-red-500 transition-colors hover:bg-red-50"
-                                aria-label={`Remove image ${
-                                  index + 1
-                                }`}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            )}
-                          </div>
+                          {galleryItems.fields.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                galleryItems.remove(index)
+                              }
+                              className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 text-red-500 transition-colors hover:bg-red-50"
+                              aria-label={`Remove image ${index + 1}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
 
-                          <div className="space-y-5">
-                            <Controller
-                              control={control}
-                              name={`gallery.${index}.url`}
-                              render={({ field }) => (
-                                <div className="space-y-2">
-                                  <Label className="text-xs font-semibold">
-                                    Image
-                                  </Label>
+                        <div className="space-y-5">
+                          <Controller
+                            control={control}
+                            name={`gallery.${index}.url`}
+                            render={({ field: imageField }) => (
+                              <div className="space-y-2">
+                                <Label className="text-xs font-semibold">
+                                  Image
+                                </Label>
 
-                                  <ImageUploader
-                                    value={field.value}
-                                    onChange={(url) =>
-                                      field.onChange(url)
-                                    }
-                                  />
-
-                                  {errors.gallery?.[
-                                    index
-                                  ]?.url && (
-                                    <p className="text-xs text-red-600">
-                                      {
-                                        errors.gallery[index]
-                                          .url?.message
-                                      }
-                                    </p>
+                                <ImageUploader
+                                  value={imageField.value}
+                                  imagePublicId={watch(
+                                    `gallery.${index}.publicId`,
                                   )}
-                                </div>
-                              )}
+                                  onChange={(url, publicId) => {
+                                    imageField.onChange(url);
+                                    setValue(
+                                      `gallery.${index}.publicId`,
+                                      publicId,
+                                      {
+                                        shouldDirty: true,
+                                        shouldValidate: true,
+                                      },
+                                    );
+                                  }}
+                                />
+
+                                {errors.gallery?.[index]?.url && (
+                                  <p className="text-xs text-red-600">
+                                    {
+                                      errors.gallery[index].url
+                                        ?.message
+                                    }
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          />
+
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-navy">
+                              Alt Text
+                            </Label>
+
+                            <Input
+                              {...register(`gallery.${index}.alt`)}
+                              placeholder="Describe the gallery image"
                             />
 
-                            <div className="space-y-2">
-                              <Label className="text-sm font-semibold text-navy">
-                                Alt Text
-                              </Label>
-
-                              <Input
-                                {...register(
-                                  `gallery.${index}.alt`,
-                                )}
-                                placeholder="Describe the gallery image"
-                              />
-
-                              {errors.gallery?.[index]
-                                ?.alt && (
-                                <p className="text-xs text-red-600">
-                                  {
-                                    errors.gallery[index].alt
-                                      ?.message
-                                  }
-                                </p>
-                              )}
-                            </div>
+                            {errors.gallery?.[index]?.alt && (
+                              <p className="text-xs text-red-600">
+                                {errors.gallery[index].alt?.message}
+                              </p>
+                            )}
                           </div>
                         </div>
-                      ),
-                    )}
+                      </div>
+                    ))}
                   </div>
 
                   {errors.gallery?.root && (
@@ -1052,9 +1044,7 @@ export default function UpdateProjectModal({
 
                   <Field
                     label="Meta Description"
-                    error={
-                      errors.seo?.metaDescription?.message
-                    }
+                    error={errors.seo?.metaDescription?.message}
                   >
                     <Textarea
                       {...register("seo.metaDescription")}
@@ -1077,9 +1067,7 @@ export default function UpdateProjectModal({
                       <Input
                         value={seoKeywordInput}
                         onChange={(event) =>
-                          setSeoKeywordInput(
-                            event.target.value,
-                          )
+                          setSeoKeywordInput(event.target.value)
                         }
                         placeholder="e.g. roof waterproofing"
                       />
@@ -1096,27 +1084,23 @@ export default function UpdateProjectModal({
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      {currentKeywords.map(
-                        (keyword, index) => (
-                          <div
-                            key={`${keyword}-${index}`}
-                            className="flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-sm"
-                          >
-                            <span>{keyword}</span>
+                      {currentKeywords.map((keyword, index) => (
+                        <div
+                          key={`${keyword}-${index}`}
+                          className="flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-sm"
+                        >
+                          <span>{keyword}</span>
 
-                            <button
-                              type="button"
-                              onClick={() =>
-                                removeKeyword(index)
-                              }
-                              className="text-muted-foreground transition-colors hover:text-destructive"
-                              aria-label={`Remove ${keyword}`}
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        ),
-                      )}
+                          <button
+                            type="button"
+                            onClick={() => removeKeyword(index)}
+                            className="text-muted-foreground transition-colors hover:text-destructive"
+                            aria-label={`Remove ${keyword}`}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
 
                     {errors.seo?.keywords && (
@@ -1125,16 +1109,15 @@ export default function UpdateProjectModal({
                       </p>
                     )}
 
-                    {errors.seo?.keywords?.map?.(
-                      (error, index) =>
-                        error && (
-                          <p
-                            key={index}
-                            className="text-sm text-destructive"
-                          >
-                            {error.message}
-                          </p>
-                        ),
+                    {errors.seo?.keywords?.map?.((error, index) =>
+                      error ? (
+                        <p
+                          key={index}
+                          className="text-sm text-destructive"
+                        >
+                          {error.message}
+                        </p>
+                      ) : null,
                     )}
                   </div>
 
@@ -1149,23 +1132,39 @@ export default function UpdateProjectModal({
                       />
                     </Field>
 
-                    <Field
-                      label="OG Image URL"
-                      error={errors.seo?.ogImage?.message}
-                    >
-                      <Input
-                        type="url"
-                        {...register("seo.ogImage")}
-                        placeholder="https://example.com/projects/roof-main.jpg"
-                      />
-                    </Field>
+                    <Controller
+                      control={control}
+                      name="seo.ogImage"
+                      render={({ field }) => (
+                        <Field
+                          label="OG Image"
+                          error={errors.seo?.ogImage?.message}
+                        >
+                          <ImageUploader
+                            value={field.value}
+                            imagePublicId={watch(
+                              "seo.ogImagePublicId",
+                            )}
+                            onChange={(url, publicId) => {
+                              field.onChange(url);
+                              setValue(
+                                "seo.ogImagePublicId",
+                                publicId,
+                                {
+                                  shouldDirty: true,
+                                  shouldValidate: true,
+                                },
+                              );
+                            }}
+                          />
+                        </Field>
+                      )}
+                    />
                   </div>
 
                   <Field
                     label="OG Description"
-                    error={
-                      errors.seo?.ogDescription?.message
-                    }
+                    error={errors.seo?.ogDescription?.message}
                   >
                     <Textarea
                       {...register("seo.ogDescription")}
@@ -1185,8 +1184,8 @@ export default function UpdateProjectModal({
                           </Label>
 
                           <p className="mt-1 text-sm text-muted-foreground">
-                            Prevent search engines from indexing
-                            this project.
+                            Prevent search engines from indexing this
+                            project.
                           </p>
                         </div>
 
@@ -1207,9 +1206,7 @@ export default function UpdateProjectModal({
                     <DashboardButton
                       type="button"
                       variant="outline"
-                      icon={
-                        <ChevronLeft className="h-4 w-4" />
-                      }
+                      icon={<ChevronLeft className="h-4 w-4" />}
                       onClick={handlePreviousStep}
                       disabled={isLoading}
                       className="min-h-10 rounded-xl px-4 text-xs font-bold"
@@ -1233,9 +1230,7 @@ export default function UpdateProjectModal({
                   {currentStep < steps.length - 1 ? (
                     <DashboardButton
                       type="button"
-                      icon={
-                        <ChevronRight className="h-4 w-4" />
-                      }
+                      icon={<ChevronRight className="h-4 w-4" />}
                       onClick={handleNextStep}
                       disabled={isLoading}
                     >
@@ -1253,9 +1248,7 @@ export default function UpdateProjectModal({
                         )
                       }
                     >
-                      {isLoading
-                        ? "Updating..."
-                        : "Update Project"}
+                      {isLoading ? "Updating..." : "Update Project"}
                     </DashboardButton>
                   )}
                 </div>
@@ -1274,11 +1267,7 @@ type FieldProps = {
   children: ReactNode;
 };
 
-function Field({
-  label,
-  error,
-  children,
-}: FieldProps) {
+function Field({ label, error, children }: FieldProps) {
   return (
     <div className="space-y-2">
       <Label className="text-sm font-semibold text-navy">
@@ -1287,11 +1276,7 @@ function Field({
 
       {children}
 
-      {error && (
-        <p className="text-sm text-destructive">
-          {error}
-        </p>
-      )}
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
 }
@@ -1299,6 +1284,8 @@ function Field({
 type ImageFieldsProps = {
   control: any;
   register: any;
+  watch: any;
+  setValue: any;
   errors: any;
   name: string;
   title: string;
@@ -1308,6 +1295,8 @@ type ImageFieldsProps = {
 function ImageFields({
   control,
   register,
+  watch,
+  setValue,
   errors,
   name,
   title,
@@ -1316,9 +1305,7 @@ function ImageFields({
   return (
     <div className="space-y-5 rounded-2xl border bg-muted/10 p-5">
       <div>
-        <h4 className="text-sm font-bold text-navy">
-          {title}
-        </h4>
+        <h4 className="text-sm font-bold text-navy">{title}</h4>
 
         <p className="mt-1 text-xs text-muted-foreground">
           Upload the image and provide accessible metadata.
@@ -1330,13 +1317,18 @@ function ImageFields({
         name={`${name}.url`}
         render={({ field }) => (
           <div className="space-y-2">
-            <Label className="text-xs font-semibold">
-              Image
-            </Label>
+            <Label className="text-xs font-semibold">Image</Label>
 
             <ImageUploader
               value={field.value}
-              onChange={(url) => field.onChange(url)}
+              imagePublicId={watch(`${name}.publicId`)}
+              onChange={(url, publicId) => {
+                field.onChange(url);
+                setValue(`${name}.publicId`, publicId, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+              }}
             />
 
             {errors?.url && (
@@ -1351,9 +1343,7 @@ function ImageFields({
       <div
         className={[
           "grid gap-5",
-          showCaption
-            ? "md:grid-cols-2"
-            : "md:grid-cols-1",
+          showCaption ? "md:grid-cols-2" : "md:grid-cols-1",
         ].join(" ")}
       >
         <div className="space-y-2">
@@ -1408,18 +1398,14 @@ function FormSection({
   return (
     <section className="space-y-6">
       <div>
-        <h3 className="text-lg font-bold text-navy">
-          {title}
-        </h3>
+        <h3 className="text-lg font-bold text-navy">{title}</h3>
 
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
           {description}
         </p>
       </div>
 
-      <div className="space-y-5">
-        {children}
-      </div>
+      <div className="space-y-5">{children}</div>
     </section>
   );
 }

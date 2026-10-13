@@ -24,13 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
 import { usePatch } from "@/hooks/swr/usePatch";
@@ -40,15 +34,10 @@ import { generateSlug } from "@/utils/generateSlug";
 import DashboardButton from "../../DashboardButton";
 import BlogEditor from "./BlogEditor";
 
-type EditBlogModalProps = {
-  blog: IBlog | null;
-  open: boolean;
-  revalidateKey: string;
-  onClose: () => void;
-};
-
 const imageSchema = z.object({
   url: z.string().min(1, "Cover image is required"),
+  // Empty publicIds are allowed for older images.
+  publicId: z.string(),
   alt: z.string().min(1, "Image alt text is required"),
   caption: z.string().optional(),
 });
@@ -62,6 +51,8 @@ const seoSchema = z.object({
   ogTitle: z.string().optional(),
   ogDescription: z.string().optional(),
   ogImage: z.string().optional(),
+  // Empty publicIds are allowed for older OG images.
+  ogImagePublicId: z.string(),
 
   noIndex: z.boolean(),
 });
@@ -118,6 +109,7 @@ const defaultValues: FormValues = {
 
   coverImage: {
     url: "",
+    publicId: "",
     alt: "",
     caption: "",
   },
@@ -133,6 +125,7 @@ const defaultValues: FormValues = {
     ogTitle: "",
     ogDescription: "",
     ogImage: "",
+    ogImagePublicId: "",
     noIndex: false,
   },
 };
@@ -178,6 +171,7 @@ const getBlogFormValues = (blog: IBlog): FormValues => ({
 
   coverImage: {
     url: blog.coverImage?.url ?? "",
+    publicId: blog.coverImage?.publicId ?? "",
     alt: blog.coverImage?.alt ?? "",
     caption: blog.coverImage?.caption ?? "",
   },
@@ -195,10 +189,9 @@ const getBlogFormValues = (blog: IBlog): FormValues => ({
       : [],
 
     ogTitle: blog.seo?.ogTitle ?? "",
-
     ogDescription: blog.seo?.ogDescription ?? "",
-
     ogImage: blog.seo?.ogImage ?? "",
+    ogImagePublicId: blog.seo?.ogImagePublicId ?? "",
 
     noIndex: blog.seo?.noIndex ?? false,
   },
@@ -408,6 +401,7 @@ export default function EditBlogModal({
 
           coverImage: {
             url: values.coverImage.url,
+            publicId: values.coverImage.publicId,
             alt: values.coverImage.alt,
             caption: values.coverImage.caption || "",
           },
@@ -420,17 +414,12 @@ export default function EditBlogModal({
 
           seo: {
             metaTitle: values.seo.metaTitle || "",
-
             metaDescription: values.seo.metaDescription || "",
-
             keywords: values.seo.keywords,
-
             ogTitle: values.seo.ogTitle || "",
-
             ogDescription: values.seo.ogDescription || "",
-
             ogImage: values.seo.ogImage || "",
-
+            ogImagePublicId: values.seo.ogImagePublicId || "",
             noIndex: values.seo.noIndex,
           },
         },
@@ -491,14 +480,13 @@ export default function EditBlogModal({
               <div className="relative grid grid-cols-4 gap-2">
                 {steps.map((step, index) => {
                   const isCompleted = index < currentStep;
-
                   const isActive = index === currentStep;
 
                   return (
                     <button
                       key={step.number}
                       type="button"
-                      disabled={index >= currentStep}
+                      disabled={index >= currentStep || isLoading}
                       onClick={() => handleStepClick(index)}
                       className="group flex flex-col items-center text-center disabled:cursor-default"
                     >
@@ -672,17 +660,31 @@ export default function EditBlogModal({
 
                           <ImageUploader
                             value={field.value}
-                            onChange={(url) => field.onChange(url)}
+                            imagePublicId={watch(
+                              "coverImage.publicId",
+                            )}
+                            onChange={(url, publicId) => {
+                              field.onChange(url);
+
+                              setValue(
+                                "coverImage.publicId",
+                                publicId,
+                                {
+                                  shouldDirty: true,
+                                  shouldValidate: true,
+                                },
+                              );
+                            }}
                           />
+
+                          {errors.coverImage?.url && (
+                            <p className="text-sm text-destructive">
+                              {errors.coverImage.url.message}
+                            </p>
+                          )}
                         </div>
                       )}
                     />
-
-                    {errors.coverImage?.url && (
-                      <p className="text-sm text-destructive">
-                        {errors.coverImage.url.message}
-                      </p>
-                    )}
 
                     <div className="grid gap-5 md:grid-cols-2">
                       <div className="space-y-2">
@@ -724,7 +726,6 @@ export default function EditBlogModal({
                   </div>
                 </section>
               )}
-
               {/* STEP 2 */}
               {currentStep === 1 && (
                 <section className="space-y-6">
@@ -734,8 +735,7 @@ export default function EditBlogModal({
                     </h3>
 
                     <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                      Edit the article using the same reusable rich
-                      text editor used by the Create Blog modal.
+                      Edit the article using the rich-text editor.
                     </p>
                   </div>
 
@@ -766,11 +766,9 @@ export default function EditBlogModal({
 
                   <div className="rounded-xl border bg-muted/20 p-4">
                     <p className="text-xs leading-5 text-muted-foreground">
-                      <strong className="text-navy">Tip:</strong> You
-                      can edit existing content, upload new images,
-                      resize images, align images, add links,
-                      headings, lists, code blocks, and other rich
-                      content directly inside the editor.
+                      <strong className="text-navy">Tip:</strong> Edit
+                      your existing article, including headings,
+                      images, links, lists, and other rich content.
                     </p>
                   </div>
                 </section>
@@ -840,6 +838,7 @@ export default function EditBlogModal({
                             type="button"
                             onClick={() => removeTag(index)}
                             className="text-muted-foreground transition-colors hover:text-destructive"
+                            aria-label={`Remove tag ${tag}`}
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
@@ -854,43 +853,42 @@ export default function EditBlogModal({
                     )}
                   </div>
 
-                  {/* Status */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-navy">
-                      Status
-                    </Label>
+                  {/* Publish / Draft Switch */}
+                  <Controller
+                    control={control}
+                    name="status"
+                    render={({ field }) => (
+                      <div className="flex items-center justify-between rounded-xl border bg-muted/20 p-4">
+                        <div className="pr-4">
+                          <Label className="font-semibold text-navy">
+                            Publish Blog
+                          </Label>
 
-                    <Controller
-                      control={control}
-                      name="status"
-                      render={({ field }) => (
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <SelectTrigger className="h-10 w-full">
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            Turn on to publish this blog. Turn off to
+                            save it as a draft.
+                          </p>
+                        </div>
 
-                          <SelectContent>
-                            <SelectItem value="draft">
-                              Draft
-                            </SelectItem>
-
-                            <SelectItem value="published">
-                              Published
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
-                    />
-
-                    {errors.status && (
-                      <p className="text-sm text-destructive">
-                        {errors.status.message}
-                      </p>
+                        <Switch
+                          checked={field.value === "published"}
+                          onCheckedChange={(checked) =>
+                            field.onChange(
+                              checked ? "published" : "draft",
+                            )
+                          }
+                          disabled={isLoading}
+                          aria-label="Publish blog"
+                        />
+                      </div>
                     )}
-                  </div>
+                  />
+
+                  {errors.status && (
+                    <p className="text-sm text-destructive">
+                      {errors.status.message}
+                    </p>
+                  )}
                 </section>
               )}
 
@@ -942,7 +940,7 @@ export default function EditBlogModal({
                       />
                     </div>
 
-                    {/* Keywords */}
+                    {/* SEO Keywords */}
                     <div className="space-y-3">
                       <div>
                         <Label className="text-sm font-semibold text-navy">
@@ -993,6 +991,7 @@ export default function EditBlogModal({
                               type="button"
                               onClick={() => removeSeoKeyword(index)}
                               className="text-muted-foreground transition-colors hover:text-destructive"
+                              aria-label={`Remove keyword ${keyword}`}
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
@@ -1043,18 +1042,30 @@ export default function EditBlogModal({
                         />
                       </div>
 
+                      {/* OG Image */}
                       <div className="space-y-2">
-                        <Label
-                          htmlFor="edit-og-image"
-                          className="text-sm font-semibold text-navy"
-                        >
-                          OG Image URL
+                        <Label className="text-sm font-semibold text-navy">
+                          OG Image
                         </Label>
 
-                        <Input
-                          id="edit-og-image"
-                          placeholder="https://..."
-                          {...register("seo.ogImage")}
+                        <ImageUploader
+                          value={watch("seo.ogImage")}
+                          imagePublicId={watch("seo.ogImagePublicId")}
+                          onChange={(url, publicId) => {
+                            setValue("seo.ogImage", url, {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            });
+
+                            setValue(
+                              "seo.ogImagePublicId",
+                              publicId,
+                              {
+                                shouldDirty: true,
+                                shouldValidate: true,
+                              },
+                            );
+                          }}
                         />
                       </div>
                     </div>
@@ -1076,23 +1087,12 @@ export default function EditBlogModal({
                             </p>
                           </div>
 
-                          <button
-                            type="button"
-                            onClick={() =>
-                              field.onChange(!field.value)
-                            }
-                            className={[
-                              "relative h-6 w-11 rounded-full transition-colors",
-                              field.value ? "bg-blue" : "bg-muted",
-                            ].join(" ")}
-                          >
-                            <span
-                              className={[
-                                "absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform",
-                                field.value ? "left-6" : "left-1",
-                              ].join(" ")}
-                            />
-                          </button>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            disabled={isLoading}
+                            aria-label="Prevent search engine indexing"
+                          />
                         </div>
                       )}
                     />
@@ -1140,7 +1140,7 @@ export default function EditBlogModal({
                   ) : (
                     <DashboardButton
                       type="submit"
-                      disabled={isLoading}
+                      disabled={isLoading || !blog}
                       icon={
                         isLoading ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -1161,3 +1161,10 @@ export default function EditBlogModal({
     </Dialog>
   );
 }
+
+type EditBlogModalProps = {
+  blog: IBlog | null;
+  open: boolean;
+  revalidateKey: string;
+  onClose: () => void;
+};
