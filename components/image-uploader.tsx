@@ -2,12 +2,13 @@
 
 import { UploadCloud, X } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { deleteImage } from "@/utils/deleteImage";
+import { toast } from "sonner";
 
 interface ImageUploaderProps {
   value?: string;
@@ -24,119 +25,229 @@ export const ImageUploader = ({
     value || null,
   );
   const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [progress, setProgress] = useState(0);
-
   const [imagePublicId, setImagePublicId] = useState(
     imagePublicInitialId || "",
   );
+
+  const inputRef = useRef<HTMLInputElement>(null);
+  const localPreviewRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    setPreview(value || null);
+    setImagePublicId(imagePublicInitialId || "");
+  }, [value, imagePublicInitialId]);
+
+  useEffect(() => {
+    return () => {
+      if (localPreviewRef.current) {
+        URL.revokeObjectURL(localPreviewRef.current);
+      }
+    };
+  }, []);
 
   const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
+
     if (!file) return;
 
-    const localPreview = URL.createObjectURL(file);
+    // Allow selecting the same file again.
+    e.target.value = "";
 
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file.");
+      return;
+    }
+
+    const previousLocalPreview = localPreviewRef.current;
+    if (previousLocalPreview) {
+      URL.revokeObjectURL(previousLocalPreview);
+    }
+
+    const localPreview = URL.createObjectURL(file);
+    localPreviewRef.current = localPreview;
     setPreview(localPreview);
 
     const formData = new FormData();
     formData.append("file", file);
 
+    setUploading(true);
+    setProgress(0);
+
     try {
-      setUploading(true);
-      setProgress(0);
+      const data = await new Promise<{
+        url: string;
+        public_id: string;
+      }>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/api/upload");
 
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", "/api/upload");
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            setProgress(
+              Math.round((event.loaded * 100) / event.total),
+            );
+          }
+        };
 
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percent = Math.round(
-            (event.loaded * 100) / event.total,
-          );
+        xhr.onload = () => {
+          if (xhr.status < 200 || xhr.status >= 300) {
+            reject(new Error("Image upload failed."));
+            return;
+          }
 
-          setProgress(percent);
-        }
-      };
+          try {
+            const result = JSON.parse(xhr.responseText);
 
-      xhr.onload = () => {
-        const data = JSON.parse(xhr.responseText);
+            if (!result.url || !result.public_id) {
+              reject(
+                new Error(
+                  "Upload response is missing image information.",
+                ),
+              );
+              return;
+            }
 
-        const url = data.url;
-        const public_id = data.public_id;
+            resolve(result);
+          } catch {
+            reject(
+              new Error("Invalid response from the upload endpoint."),
+            );
+          }
+        };
 
-        onChange(url, public_id);
-        setImagePublicId(public_id);
-        setPreview(url);
-        setUploading(false);
-      };
+        xhr.onerror = () =>
+          reject(new Error("Network error during upload."));
+        xhr.onabort = () =>
+          reject(new Error("Image upload was cancelled."));
+        xhr.send(formData);
+      });
 
-      xhr.onerror = () => {
-        console.error("Upload failed");
-        setUploading(false);
-      };
+      if (localPreviewRef.current) {
+        URL.revokeObjectURL(localPreviewRef.current);
+        localPreviewRef.current = null;
+      }
 
-      xhr.send(formData);
-    } catch (err) {
-      console.error(err);
+      setImagePublicId(data.public_id);
+      setPreview(data.url);
+      onChange(data.url, data.public_id);
+    } catch (error) {
+      if (localPreviewRef.current) {
+        URL.revokeObjectURL(localPreviewRef.current);
+        localPreviewRef.current = null;
+      }
+
+      setPreview(value || null);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Image upload failed.";
+
+      toast.error(message);
+    } finally {
       setUploading(false);
+      setProgress(0);
     }
   };
 
-  const removeImage = () => {
-    setPreview(null);
+  const removeImage = async () => {
+    if (uploading || deleting) return;
 
-    console.log(imagePublicId);
+    // No uploaded Cloudinary image to delete.
+    if (!imagePublicId) {
+      setPreview(null);
+      onChange("", "");
+      return;
+    }
 
-    deleteImage(imagePublicId);
-    setImagePublicId("");
-    onChange("", "");
+    setDeleting(true);
+
+    try {
+      await deleteImage(imagePublicId);
+
+      if (localPreviewRef.current) {
+        URL.revokeObjectURL(localPreviewRef.current);
+        localPreviewRef.current = null;
+      }
+
+      setPreview(null);
+      setImagePublicId("");
+      onChange("", "");
+      toast.success("Image removed successfully.");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to remove image.";
+
+      toast.error(message);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
-    <Card className="w-full p-4 border-dashed border-2 flex flex-col items-center justify-center gap-3">
+    <Card className="flex w-full flex-col items-center justify-center gap-3 border-2 border-dashed p-4">
       {preview ? (
-        <div className="relative w-full h-60">
+        <div className="relative h-60 w-full">
           <Image
             src={preview}
-            alt="preview"
+            alt="Image preview"
             fill
-            className="object-cover rounded-md"
+            unoptimized={preview.startsWith("blob:")}
+            className="rounded-md object-cover"
           />
 
           <Button
+            type="button"
             size="icon"
             variant="destructive"
-            className="absolute top-2 right-2"
+            className="absolute right-2 top-2"
             onClick={removeImage}
+            disabled={uploading || deleting}
+            aria-label="Remove image"
           >
             <X size={16} />
           </Button>
 
-          {uploading && (
-            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2 rounded-md px-6">
-              <Progress value={progress} className="w-full" />
-
-              <p className="text-xs text-white">
-                {progress}% uploading
-              </p>
+          {(uploading || deleting) && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-md bg-black/60 px-6">
+              {uploading ? (
+                <>
+                  <Progress value={progress} className="w-full" />
+                  <p className="text-xs text-white">
+                    {progress}% uploading
+                  </p>
+                </>
+              ) : (
+                <p className="text-xs text-white">
+                  Removing image...
+                </p>
+              )}
             </div>
           )}
         </div>
       ) : (
-        <label className="flex flex-col items-center gap-2 cursor-pointer">
+        <label className="flex cursor-pointer flex-col items-center gap-2">
           <UploadCloud className="h-8 w-8 text-muted-foreground" />
 
           <span className="text-sm text-muted-foreground">
-            Click to upload image
+            {uploading
+              ? "Uploading image..."
+              : "Click to upload image"}
           </span>
 
           <input
+            ref={inputRef}
             type="file"
             accept="image/*"
             className="hidden"
             onChange={handleFileChange}
+            disabled={uploading || deleting}
           />
         </label>
       )}
