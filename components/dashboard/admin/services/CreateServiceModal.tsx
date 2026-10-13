@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +13,6 @@ import { useState, type ReactNode } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { usePost } from "@/hooks/swr/usePost";
 import { ImageUploader } from "@/components/image-uploader";
 import {
   Dialog,
@@ -27,9 +25,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { usePost } from "@/hooks/swr/usePost";
 import { generateSlug } from "@/utils/generateSlug";
 import { toast } from "sonner";
 import DashboardButton from "../../DashboardButton";
+
+import { usePersistentFormDraft } from "@/hooks/usePersistentFormDraft";
 
 const imageSchema = z.object({
   url: z.string().min(1, "Image is required"),
@@ -202,6 +203,13 @@ export default function CreateServiceModal({
     defaultValues,
   });
 
+  const { clearDraft } = usePersistentFormDraft<FormValues>({
+    storageKey: "enviroshield:draft:create-service",
+    watch,
+    reset,
+    defaultValues,
+  });
+
   const whyEnviroshieldItems = useFieldArray({
     control,
     name: "whyEnviroshield.items",
@@ -244,7 +252,6 @@ export default function CreateServiceModal({
     if (isLoading) return;
 
     setIsModalOpen(false);
-    reset(defaultValues);
     setSeoKeywordInput("");
     setCurrentStep(0);
     setOgImageCustomized(false);
@@ -273,10 +280,7 @@ export default function CreateServiceModal({
   };
 
   // Keep OG image in sync with the primary image until customized.
-  const syncOgImageWithPrimary = (
-    url: string,
-    publicId: string,
-  ) => {
+  const syncOgImageWithPrimary = (url: string, publicId: string) => {
     if (ogImageCustomized) return;
 
     setValue("seo.ogImage", url, {
@@ -356,8 +360,8 @@ export default function CreateServiceModal({
       if (response?.success) {
         toast.success(response.message);
 
+        clearDraft();
         setIsModalOpen(false);
-        reset(defaultValues);
         setSeoKeywordInput("");
         setCurrentStep(0);
         setOgImageCustomized(false);
@@ -478,7 +482,8 @@ export default function CreateServiceModal({
                     </h3>
 
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Configure the basic information for this service.
+                      Configure the basic information for this
+                      service.
                     </p>
                   </div>
 
@@ -631,8 +636,8 @@ export default function CreateServiceModal({
                             </Label>
 
                             <p className="mt-1 text-sm text-muted-foreground">
-                              Turn on to publish this service. Turn off
-                              to save it as a draft.
+                              Turn on to publish this service. Turn
+                              off to save it as a draft.
                             </p>
                           </div>
 
@@ -814,7 +819,8 @@ export default function CreateServiceModal({
                             const keyword = seoKeywordInput.trim();
 
                             if (!keyword) return;
-                            if (currentKeywords.includes(keyword)) return;
+                            if (currentKeywords.includes(keyword))
+                              return;
 
                             setValue(
                               "seo.keywords",
@@ -973,8 +979,8 @@ export default function CreateServiceModal({
                             </Label>
 
                             <p className="mt-1 text-sm text-muted-foreground">
-                              Prevent search engines from indexing this
-                              service.
+                              Prevent search engines from indexing
+                              this service.
                             </p>
                           </div>
 
@@ -1341,7 +1347,8 @@ function ContentSection({
                         placeholder="Content item title"
                       />
 
-                      {errors?.[sectionName]?.items?.[index]?.title && (
+                      {errors?.[sectionName]?.items?.[index]
+                        ?.title && (
                         <p className="text-xs text-red-600">
                           {
                             errors[sectionName].items[index].title
