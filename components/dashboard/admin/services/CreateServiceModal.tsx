@@ -40,6 +40,7 @@ import DashboardButton from "../../DashboardButton";
 
 const imageSchema = z.object({
   url: z.string().min(1, "Image is required"),
+  publicId: z.string().min(1, "Image public ID is required"),
   alt: z.string().min(1, "Image alt text is required"),
   caption: z.string().min(1, "Image caption is required"),
 });
@@ -78,6 +79,8 @@ const seoSchema = z.object({
     .string()
     .min(1, "OG image is required")
     .url("Enter a valid OG image URL"),
+
+  ogImagePublicId: z.string(),
 
   noIndex: z.boolean(),
 });
@@ -126,6 +129,7 @@ type CreateServiceModalProps = {
 const createDefaultContentSection = () => ({
   image: {
     url: "",
+    publicId: "",
     alt: "",
     caption: "",
   },
@@ -146,6 +150,7 @@ const defaultValues: FormValues = {
   primaryImage: {
     url: "",
     alt: "",
+    publicId: "",
     caption: "",
   },
 
@@ -167,6 +172,7 @@ const defaultValues: FormValues = {
     ogTitle: "",
     ogDescription: "",
     ogImage: "",
+    ogImagePublicId: "",
     noIndex: false,
   },
 };
@@ -304,6 +310,7 @@ export default function CreateServiceModal({
 
         primaryImage: {
           url: data.primaryImage.url,
+          publicId: data.primaryImage.publicId,
           alt: data.primaryImage.alt,
           caption: data.primaryImage.caption,
         },
@@ -314,6 +321,7 @@ export default function CreateServiceModal({
         whyEnviroshield: {
           image: {
             url: data.whyEnviroshield.image.url,
+            publicId: data.whyEnviroshield.image.publicId,
             alt: data.whyEnviroshield.image.alt,
             caption: data.whyEnviroshield.image.caption,
           },
@@ -323,6 +331,7 @@ export default function CreateServiceModal({
         process: {
           image: {
             url: data.process.image.url,
+            publicId: data.process.image.publicId,
             alt: data.process.image.alt,
             caption: data.process.image.caption,
           },
@@ -332,6 +341,7 @@ export default function CreateServiceModal({
         benefits: {
           image: {
             url: data.benefits.image.url,
+            publicId: data.benefits.image.publicId,
             alt: data.benefits.image.alt,
             caption: data.benefits.image.caption,
           },
@@ -347,6 +357,7 @@ export default function CreateServiceModal({
           ogTitle: data.seo.ogTitle,
           ogDescription: data.seo.ogDescription,
           ogImage: data.seo.ogImage,
+          ogImagePublicId: data.seo.ogImagePublicId,
           noIndex: data.seo.noIndex,
         },
       };
@@ -583,14 +594,18 @@ export default function CreateServiceModal({
                   </div>
 
                   {/* Primary Image */}
+
                   <ImageFields
                     title="Primary Image"
                     urlName="primaryImage.url"
+                    publicIdName="primaryImage.publicId"
                     altName="primaryImage.alt"
                     captionName="primaryImage.caption"
                     control={control}
                     register={register}
                     errors={errors}
+                    setValue={setValue}
+                    watch={watch}
                   />
 
                   <div className="grid gap-5 md:grid-cols-2">
@@ -664,6 +679,8 @@ export default function CreateServiceModal({
                   register={register}
                   errors={errors}
                   fields={whyEnviroshieldItems}
+                  setValue={setValue}
+                  watch={watch}
                 />
               )}
 
@@ -677,6 +694,8 @@ export default function CreateServiceModal({
                   register={register}
                   errors={errors}
                   fields={processItems}
+                  setValue={setValue}
+                  watch={watch}
                 />
               )}
 
@@ -690,6 +709,8 @@ export default function CreateServiceModal({
                   register={register}
                   errors={errors}
                   fields={benefitsItems}
+                  setValue={setValue}
+                  watch={watch}
                 />
               )}
 
@@ -869,15 +890,31 @@ export default function CreateServiceModal({
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="seo-og-image">
-                          OG Image URL
-                        </Label>
+                        <Label>OG Image</Label>
 
-                        <Input
-                          id="seo-og-image"
-                          type="url"
-                          placeholder="https://example.com/services/roof-waterproofing.jpg"
-                          {...register("seo.ogImage")}
+                        <Controller
+                          control={control}
+                          name="seo.ogImage"
+                          render={({ field }) => (
+                            <ImageUploader
+                              value={field.value}
+                              imagePublicId={watch(
+                                "seo.ogImagePublicId",
+                              )}
+                              onChange={(url, public_id) => {
+                                field.onChange(url);
+
+                                setValue(
+                                  "seo.ogImagePublicId",
+                                  public_id,
+                                  {
+                                    shouldDirty: true,
+                                    shouldValidate: true,
+                                  },
+                                );
+                              }}
+                            />
+                          )}
                         />
 
                         {errors.seo?.ogImage && (
@@ -998,21 +1035,27 @@ export default function CreateServiceModal({
 type ImageFieldsProps = {
   title: string;
   urlName: any;
+  publicIdName: any;
   altName: any;
   captionName: any;
   control: any;
   register: any;
   errors: any;
+  setValue: any;
+  watch: any;
 };
 
 function ImageFields({
   title,
   urlName,
+  publicIdName,
   altName,
   captionName,
   control,
   register,
   errors,
+  setValue,
+  watch,
 }: ImageFieldsProps) {
   const fieldName = urlName.split(".")[0];
   const imageErrors = errors?.[fieldName];
@@ -1034,7 +1077,15 @@ function ImageFields({
             <Label className="text-xs font-semibold">Image</Label>
             <ImageUploader
               value={field.value}
-              onChange={(url) => field.onChange(url)}
+              imagePublicId={watch(publicIdName)}
+              onChange={(url, public_id) => {
+                field.onChange(url);
+
+                setValue(publicIdName, public_id, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+              }}
             />
             {imageErrors?.url && (
               <p className="text-xs text-red-600">
@@ -1090,6 +1141,8 @@ type ContentSectionProps = {
   register: any;
   errors: any;
   fields: any;
+  setValue: any;
+  watch: any;
 };
 
 function ContentSection({
@@ -1100,6 +1153,8 @@ function ContentSection({
   register,
   errors,
   fields,
+  setValue,
+  watch,
 }: ContentSectionProps) {
   return (
     <section className="space-y-6">
@@ -1127,10 +1182,26 @@ function ContentSection({
             render={({ field }: any) => (
               <div className="space-y-2">
                 <Label className="text-xs font-semibold">Image</Label>
+
                 <ImageUploader
                   value={field.value}
-                  onChange={(url) => field.onChange(url)}
+                  imagePublicId={watch(
+                    `${sectionName}.image.publicId`,
+                  )}
+                  onChange={(url, public_id) => {
+                    field.onChange(url);
+
+                    setValue(
+                      `${sectionName}.image.publicId`,
+                      public_id,
+                      {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      },
+                    );
+                  }}
                 />
+
                 {errors?.[sectionName]?.image?.url && (
                   <p className="text-xs text-red-600">
                     {errors[sectionName].image.url.message}
