@@ -1,10 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Settings } from "lucide-react";
+import { ChevronDown, Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import {
   Sidebar,
@@ -14,6 +15,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 
 import {
@@ -44,6 +48,27 @@ export function DashboardSidebar({
   navigation,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
+
+  const [expandedItems, setExpandedItems] = useState<
+    Record<string, boolean>
+  >({});
+
+  useEffect(() => {
+    const activeGroup = navigation.find((item) =>
+      item.children?.some(
+        (child) =>
+          pathname === child.href ||
+          pathname.startsWith(`${child.href}/`),
+      ),
+    );
+
+    if (activeGroup) {
+      setExpandedItems((previous) => ({
+        ...previous,
+        [activeGroup.title]: true,
+      }));
+    }
+  }, [pathname, navigation]);
 
   const initials = user.name
     .split(" ")
@@ -105,48 +130,138 @@ export function DashboardSidebar({
           {navigation.map((item) => {
             const Icon = dashboardIcons[item.icon];
 
-            const isActive =
-              item.href === "/dashboard"
+            const hasActiveChild =
+              item.children?.some(
+                (child) =>
+                  pathname === child.href ||
+                  pathname.startsWith(`${child.href}/`),
+              ) ?? false;
+
+            const isActive = item.children
+              ? hasActiveChild
+              : item.href === "/dashboard"
                 ? pathname === "/dashboard"
-                : pathname.startsWith(item.href);
+                : Boolean(
+                    item.href && pathname.startsWith(item.href),
+                  );
+
+            const isExpanded =
+              expandedItems[item.title] ?? hasActiveChild;
 
             return (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  isActive={isActive}
-                  tooltip={item.title}
-                  className={cn(
-                    "relative h-9 rounded-md px-2.5",
-                    "text-[14px] !font-medium text-ink/80",
-                    "transition-all duration-200",
-                    "hover:bg-blue/[0.10] hover:text-blue",
+              <SidebarMenuItem key={item.title}>
+                {item.children ? (
+                  <>
+                    <SidebarMenuButton
+                      isActive={isActive}
+                      tooltip={item.title}
+                      aria-expanded={isExpanded}
+                      onClick={() =>
+                        setExpandedItems((previous) => ({
+                          ...previous,
+                          [item.title]: !isExpanded,
+                        }))
+                      }
+                      className={cn(
+                        "relative h-9 rounded-md px-2.5",
+                        "text-[14px] !font-medium text-ink/80",
+                        "transition-all duration-200",
+                        "hover:bg-blue/[0.10] hover:text-blue",
+                        isActive && "!bg-blue/[0.10]",
+                        isActive && "!text-blue",
+                        isActive && "!font-semibold",
+                        isActive && "hover:bg-blue/[0.09]",
+                        isActive &&
+                          "before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-blue",
+                        "group-data-[collapsible=icon]:justify-center",
+                        "group-data-[collapsible=icon]:px-0",
+                      )}
+                    >
+                      <Icon className="h-[15px] w-[15px] shrink-0" />
 
-                    // Active state
-                    isActive && "!bg-blue/[0.10]",
-                    isActive && "!text-blue",
-                    isActive && "!font-semibold",
-                    isActive && "hover:bg-blue/[0.09]",
+                      <span className="min-w-0 flex-1 truncate text-left group-data-[collapsible=icon]:hidden">
+                        {item.title}
+                      </span>
 
-                    // Reference-style left active indicator
-                    isActive &&
-                      "before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-blue",
+                      <ChevronDown
+                        className={cn(
+                          "ml-auto h-4 w-4 shrink-0 transition-transform duration-200",
+                          isExpanded && "rotate-180",
+                          "group-data-[collapsible=icon]:hidden",
+                        )}
+                      />
+                    </SidebarMenuButton>
 
-                    // Collapsed state
-                    "group-data-[collapsible=icon]:justify-center",
-                    "group-data-[collapsible=icon]:px-0",
-                  )}
-                >
-                  <Link
-                    href={item.href}
-                    className="flex min-w-0 w-full items-center gap-2.5"
+                    {isExpanded && (
+                      <SidebarMenuSub className="ml-4 mr-0 mt-1 border-l border-line/80 pl-3">
+                        {item.children.map((child) => {
+                          const childIsActive =
+                            pathname === child.href ||
+                            pathname.startsWith(`${child.href}/`);
+
+                          return (
+                            <SidebarMenuSubItem key={child.href}>
+                              <SidebarMenuSubButton
+                                render={<Link href={child.href} />}
+                                isActive={childIsActive}
+                                className={cn(
+                                  "h-8 rounded-md text-[13px] transition-colors",
+                                  "hover:bg-blue/[0.08] hover:text-blue",
+                                  childIsActive &&
+                                    "bg-blue/[0.10] font-semibold text-blue",
+                                )}
+                              >
+                                {child.icon &&
+                                  (() => {
+                                    const ChildIcon =
+                                      dashboardIcons[child.icon];
+
+                                    return (
+                                      <ChildIcon className="h-3.5 w-3.5 shrink-0" />
+                                    );
+                                  })()}
+
+                                <span className="truncate">
+                                  {child.title}
+                                </span>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          );
+                        })}
+                      </SidebarMenuSub>
+                    )}
+                  </>
+                ) : (
+                  <SidebarMenuButton
+                    isActive={isActive}
+                    tooltip={item.title}
+                    className={cn(
+                      "relative h-9 rounded-md px-2.5",
+                      "text-[14px] !font-medium text-ink/80",
+                      "transition-all duration-200",
+                      "hover:bg-blue/[0.10] hover:text-blue",
+                      isActive && "!bg-blue/[0.10]",
+                      isActive && "!text-blue",
+                      isActive && "!font-semibold",
+                      isActive && "hover:bg-blue/[0.09]",
+                      isActive &&
+                        "before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-blue",
+                      "group-data-[collapsible=icon]:justify-center",
+                      "group-data-[collapsible=icon]:px-0",
+                    )}
                   >
-                    <Icon className="h-[15px] w-[15px] shrink-0" />
+                    <Link
+                      href={item.href!}
+                      className="flex min-w-0 w-full items-center gap-2.5"
+                    >
+                      <Icon className="h-[15px] w-[15px] shrink-0" />
 
-                    <span className="truncate group-data-[collapsible=icon]:hidden">
-                      {item.title}
-                    </span>
-                  </Link>
-                </SidebarMenuButton>
+                      <span className="truncate group-data-[collapsible=icon]:hidden">
+                        {item.title}
+                      </span>
+                    </Link>
+                  </SidebarMenuButton>
+                )}
               </SidebarMenuItem>
             );
           })}

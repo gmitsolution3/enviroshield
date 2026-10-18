@@ -1,3 +1,4 @@
+
 import {
   BarChart3,
   CirclePile,
@@ -7,6 +8,7 @@ import {
   Mail,
   MessageSquareQuote,
   Settings,
+  ShoppingCart,
   User,
   Users,
   Wrench,
@@ -25,16 +27,24 @@ export const dashboardIcons = {
   projects: FolderKanban,
   testimonials: MessageSquareQuote,
   contacts: Mail,
+  ecommerce: ShoppingCart,
 } satisfies Record<string, LucideIcon>;
 
 export type DashboardIcon = keyof typeof dashboardIcons;
 
 export type DashboardRole = "user" | "admin" | string;
 
-export type DashboardNavItem = {
+export type DashboardNavChild = {
   title: string;
   href: string;
+  icon?: DashboardIcon;
+};
+
+export type DashboardNavItem = {
+  title: string;
+  href?: string;
   icon: DashboardIcon;
+  children?: DashboardNavChild[];
 };
 
 export const dashboardNavigation: Record<
@@ -90,6 +100,32 @@ export const dashboardNavigation: Record<
       href: "/dashboard/blogs",
       icon: "documents",
     },
+    {
+  title: "Ecommerce",
+  icon: "ecommerce",
+  children: [
+    {
+      title: "Products",
+      href: "/dashboard/ecommerce/products",
+      icon: "documents",
+    },
+    {
+      title: "Categories",
+      href: "/dashboard/ecommerce/categories",
+      icon: "circlepile",
+    },
+    {
+      title: "Orders",
+      href: "/dashboard/ecommerce/orders",
+      icon: "documents",
+    },
+    {
+      title: "Inventory",
+      href: "/dashboard/ecommerce/inventory",
+      icon: "analytics",
+    },
+  ],
+},
     {
       title: "Contact Management",
       href: "/dashboard/contacts",
