@@ -142,7 +142,9 @@ export function DashboardSidebar({
               : item.href === "/dashboard"
                 ? pathname === "/dashboard"
                 : Boolean(
-                    item.href && pathname.startsWith(item.href),
+                    item.href &&
+                    (pathname === item.href ||
+                      pathname.startsWith(`${item.href}/`)),
                   );
 
             const isExpanded =
@@ -205,10 +207,17 @@ export function DashboardSidebar({
                                 render={<Link href={child.href} />}
                                 isActive={childIsActive}
                                 className={cn(
-                                  "h-8 rounded-md text-[13px] transition-colors",
-                                  "hover:bg-blue/[0.08] hover:text-blue",
+                                  "relative h-9 rounded-md px-2.5",
+                                  "text-[14px] !font-medium text-ink/80",
+                                  "transition-all duration-200",
+                                  "hover:bg-blue/[0.10] hover:text-blue",
+                                  childIsActive && "!bg-blue/[0.10]",
+                                  childIsActive && "!text-blue",
+                                  childIsActive && "!font-semibold",
                                   childIsActive &&
-                                    "bg-blue/[0.10] font-semibold text-blue",
+                                    "hover:bg-blue/[0.10]",
+                                  childIsActive &&
+                                    "before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-blue",
                                 )}
                               >
                                 {child.icon &&
@@ -217,7 +226,7 @@ export function DashboardSidebar({
                                       dashboardIcons[child.icon];
 
                                     return (
-                                      <ChildIcon className="h-3.5 w-3.5 shrink-0" />
+                                      <ChildIcon className="h-[15px] w-[15px] shrink-0" />
                                     );
                                   })()}
 
@@ -240,10 +249,9 @@ export function DashboardSidebar({
                       "text-[14px] !font-medium text-ink/80",
                       "transition-all duration-200",
                       "hover:bg-blue/[0.10] hover:text-blue",
-                      isActive && "!bg-blue/[0.10]",
-                      isActive && "!text-blue",
-                      isActive && "!font-semibold",
-                      isActive && "hover:bg-blue/[0.09]",
+                      isActive &&
+                        "bg-blue/[0.10] text-blue font-semibold",
+                      isActive && "hover:bg-blue/[0.10]",
                       isActive &&
                         "before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-blue",
                       "group-data-[collapsible=icon]:justify-center",
