@@ -105,14 +105,14 @@ export const dashboardNavigation: Record<
   icon: "ecommerce",
   children: [
     {
-      title: "Products",
-      href: "/dashboard/ecommerce/products",
-      icon: "documents",
-    },
-    {
       title: "Categories",
       href: "/dashboard/ecommerce/categories",
       icon: "circlepile",
+    },
+    {
+      title: "Products",
+      href: "/dashboard/ecommerce/products",
+      icon: "documents",
     },
     {
       title: "Orders",
