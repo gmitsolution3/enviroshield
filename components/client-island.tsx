@@ -14,17 +14,12 @@ export default function ClientIsland() {
         grid!.querySelectorAll("[data-category]").forEach((card) => {
           const el = card as HTMLElement;
           el.style.display =
-            cat === "All" || el.dataset.category === cat
-              ? ""
-              : "none";
+            cat === "All" || el.dataset.category === cat ? "" : "none";
         });
       }
       buttons.forEach((btn) => {
         btn.addEventListener("click", () =>
-          apply(
-            btn.dataset.category || "All",
-            btn as HTMLButtonElement,
-          ),
+          apply(btn.dataset.category || "All", btn as HTMLButtonElement),
         );
       });
     }

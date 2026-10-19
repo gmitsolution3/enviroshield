@@ -64,10 +64,7 @@ const contactSchema = z.object({
     .min(7, "Please enter a valid phone number.")
     .max(30, "Phone number is too long."),
 
-  email: z
-    .string()
-    .trim()
-    .email("Please enter a valid email address."),
+  email: z.string().trim().email("Please enter a valid email address."),
 
   companyName: z
     .string()
@@ -216,8 +213,7 @@ export function ContactForm() {
 
       if (response?.success) {
         toast.success(
-          response.message ||
-            "Your message has been sent successfully.",
+          response.message || "Your message has been sent successfully.",
         );
 
         setSent(true);
@@ -278,8 +274,8 @@ export function ContactForm() {
         </h3>
 
         <p className="mx-auto mb-[22px] max-w-[330px] text-[14px] leading-[1.6] text-ink">
-          Your message is with our team. We will be in touch shortly
-          to talk through your space.
+          Your message is with our team. We will be in touch shortly to talk
+          through your space.
         </p>
 
         <button
@@ -394,9 +390,7 @@ export function ContactForm() {
             autoComplete="email"
             placeholder="you@email.com"
             aria-invalid={Boolean(errors.email)}
-            aria-describedby={
-              errors.email ? "contact-email-error" : undefined
-            }
+            aria-describedby={errors.email ? "contact-email-error" : undefined}
             {...register("email")}
             className={inputClassName}
           />
@@ -489,9 +483,7 @@ export function ContactForm() {
             placeholder="Your project name"
             aria-invalid={Boolean(errors.projectName)}
             aria-describedby={
-              errors.projectName
-                ? "contact-project-name-error"
-                : undefined
+              errors.projectName ? "contact-project-name-error" : undefined
             }
             {...register("projectName")}
             className={inputClassName}
@@ -521,14 +513,10 @@ export function ContactForm() {
         <Select
           value={projectType}
           onValueChange={(value) =>
-            setValue(
-              "projectType",
-              value as ContactFormValues["projectType"],
-              {
-                shouldDirty: true,
-                shouldValidate: true,
-              },
-            )
+            setValue("projectType", value as ContactFormValues["projectType"], {
+              shouldDirty: true,
+              shouldValidate: true,
+            })
           }
         >
           <SelectTrigger
@@ -570,9 +558,7 @@ export function ContactForm() {
             autoComplete="address-level2"
             placeholder="Dhaka"
             aria-invalid={Boolean(errors.city)}
-            aria-describedby={
-              errors.city ? "contact-city-error" : undefined
-            }
+            aria-describedby={errors.city ? "contact-city-error" : undefined}
             {...register("city")}
             className={inputClassName}
           />
@@ -638,9 +624,7 @@ export function ContactForm() {
             placeholder="5000"
             aria-invalid={Boolean(errors.projectAreaSize)}
             aria-describedby={
-              errors.projectAreaSize
-                ? "contact-area-error"
-                : undefined
+              errors.projectAreaSize ? "contact-area-error" : undefined
             }
             {...register("projectAreaSize", {
               valueAsNumber: true,
@@ -815,11 +799,7 @@ export function ContactForm() {
       >
         {isLoading ? (
           <>
-            <Loader2
-              size={17}
-              className="animate-spin"
-              aria-hidden="true"
-            />
+            <Loader2 size={17} className="animate-spin" aria-hidden="true" />
             Sending…
           </>
         ) : (

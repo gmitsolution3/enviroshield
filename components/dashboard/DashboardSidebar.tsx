@@ -20,11 +20,7 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import {
   dashboardIcons,
@@ -49,16 +45,15 @@ export function DashboardSidebar({
 }: DashboardSidebarProps) {
   const pathname = usePathname();
 
-  const [expandedItems, setExpandedItems] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
+    {},
+  );
 
   useEffect(() => {
     const activeGroup = navigation.find((item) =>
       item.children?.some(
         (child) =>
-          pathname === child.href ||
-          pathname.startsWith(`${child.href}/`),
+          pathname === child.href || pathname.startsWith(`${child.href}/`),
       ),
     );
 
@@ -147,8 +142,7 @@ export function DashboardSidebar({
                       pathname.startsWith(`${item.href}/`)),
                   );
 
-            const isExpanded =
-              expandedItems[item.title] ?? hasActiveChild;
+            const isExpanded = expandedItems[item.title] ?? hasActiveChild;
 
             return (
               <SidebarMenuItem key={item.title}>
@@ -214,10 +208,11 @@ export function DashboardSidebar({
                                   childIsActive && "!bg-blue/[0.10]",
                                   childIsActive && "!text-blue",
                                   childIsActive && "!font-semibold",
-                                  childIsActive &&
-                                    "hover:bg-blue/[0.10]",
+                                  childIsActive && "hover:bg-blue/[0.10]",
                                   childIsActive &&
                                     "before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-blue",
+                                  "group-data-[collapsible=icon]:justify-center",
+                                  "group-data-[collapsible=icon]:px-0",
                                 )}
                               >
                                 {child.icon &&
@@ -226,13 +221,16 @@ export function DashboardSidebar({
                                       dashboardIcons[child.icon];
 
                                     return (
-                                      <ChildIcon className="h-[15px] w-[15px] shrink-0" />
+                                      <ChildIcon
+                                        className={cn(
+                                          "h-[15px] w-[15px] shrink-0",
+                                          childIsActive && "!text-blue",
+                                        )}
+                                      />
                                     );
                                   })()}
 
-                                <span className="truncate">
-                                  {child.title}
-                                </span>
+                                <span className="truncate">{child.title}</span>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
                           );
@@ -249,8 +247,7 @@ export function DashboardSidebar({
                       "text-[14px] !font-medium text-ink/80",
                       "transition-all duration-200",
                       "hover:bg-blue/[0.10] hover:text-blue",
-                      isActive &&
-                        "bg-blue/[0.10] text-blue font-semibold",
+                      isActive && "bg-blue/[0.10] text-blue font-semibold",
                       isActive && "hover:bg-blue/[0.10]",
                       isActive &&
                         "before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-blue",
@@ -290,12 +287,9 @@ export function DashboardSidebar({
                 "hover:bg-blue/[0.10] hover:text-blue",
 
                 // Active state
-                pathname.startsWith("/dashboard/settings") &&
-                  "!bg-blue/[0.10]",
-                pathname.startsWith("/dashboard/settings") &&
-                  "!text-blue",
-                pathname.startsWith("/dashboard/settings") &&
-                  "!font-semibold",
+                pathname.startsWith("/dashboard/settings") && "!bg-blue/[0.10]",
+                pathname.startsWith("/dashboard/settings") && "!text-blue",
+                pathname.startsWith("/dashboard/settings") && "!font-semibold",
                 pathname.startsWith("/dashboard/settings") &&
                   "hover:bg-blue/[0.09]",
 
@@ -328,10 +322,7 @@ export function DashboardSidebar({
           "
         >
           <Avatar className="h-10 w-10 shrink-0 border border-line">
-            <AvatarImage
-              src={user.image ?? undefined}
-              alt={user.name}
-            />
+            <AvatarImage src={user.image ?? undefined} alt={user.name} />
 
             <AvatarFallback className="bg-navy text-[10px] font-semibold text-white">
               {initials}
@@ -343,9 +334,7 @@ export function DashboardSidebar({
               {user.name}
             </p>
 
-            <p className="truncate !text-[12px] text-ink/45">
-              {user.email}
-            </p>
+            <p className="truncate !text-[12px] text-ink/45">{user.email}</p>
           </div>
         </Link>
       </SidebarFooter>

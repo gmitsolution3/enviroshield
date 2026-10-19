@@ -1,4 +1,3 @@
-
 import {
   BarChart3,
   CirclePile,
@@ -101,31 +100,31 @@ export const dashboardNavigation: Record<
       icon: "documents",
     },
     {
-  title: "Ecommerce",
-  icon: "ecommerce",
-  children: [
-    {
-      title: "Categories",
-      href: "/dashboard/ecommerce/categories",
-      icon: "circlepile",
+      title: "Store",
+      icon: "ecommerce",
+      children: [
+        {
+          title: "Categories",
+          href: "/dashboard/ecommerce/categories",
+          icon: "circlepile",
+        },
+        {
+          title: "Products",
+          href: "/dashboard/ecommerce/products",
+          icon: "documents",
+        },
+        {
+          title: "Orders",
+          href: "/dashboard/ecommerce/orders",
+          icon: "documents",
+        },
+        {
+          title: "Inventory",
+          href: "/dashboard/ecommerce/inventory",
+          icon: "analytics",
+        },
+      ],
     },
-    {
-      title: "Products",
-      href: "/dashboard/ecommerce/products",
-      icon: "documents",
-    },
-    {
-      title: "Orders",
-      href: "/dashboard/ecommerce/orders",
-      icon: "documents",
-    },
-    {
-      title: "Inventory",
-      href: "/dashboard/ecommerce/inventory",
-      icon: "analytics",
-    },
-  ],
-},
     {
       title: "Contact Management",
       href: "/dashboard/contacts",
