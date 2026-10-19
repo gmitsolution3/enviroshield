@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -54,23 +53,14 @@ const imageSchema = z.object({
 
 const seoSchema = z.object({
   metaTitle: z.string().trim().min(1, "Meta title is required"),
-  metaDescription: z
-    .string()
-    .trim()
-    .min(1, "Meta description is required"),
+  metaDescription: z.string().trim().min(1, "Meta description is required"),
   keywords: z
     .array(z.string().trim().min(1))
     .min(1, "Add at least one SEO keyword"),
   ogTitle: z.string().trim().min(1, "OG title is required"),
-  ogDescription: z
-    .string()
-    .trim()
-    .min(1, "OG description is required"),
+  ogDescription: z.string().trim().min(1, "OG description is required"),
   ogImage: z.string().trim().url("Enter a valid OG image URL"),
-  ogImagePublicId: z
-    .string()
-    .trim()
-    .min(1, "OG image public ID is required"),
+  ogImagePublicId: z.string().trim().min(1, "OG image public ID is required"),
   noIndex: z.boolean(),
 });
 
@@ -86,10 +76,7 @@ const formSchema = z.object({
     ),
   sku: z.string().trim().min(1, "SKU is required"),
   categoryId: z.string().min(1, "Select a category"),
-  shortDescription: z
-    .string()
-    .trim()
-    .min(1, "Short description is required"),
+  shortDescription: z.string().trim().min(1, "Short description is required"),
   description: z.any(),
   primaryImage: imageSchema,
   gallery: z.array(imageSchema).min(1, "Add at least one gallery image"),
@@ -98,10 +85,7 @@ const formSchema = z.object({
   weight: z.coerce.number().positive("Weight must be greater than zero"),
   tdsUrl: z.string().trim().url("Enter a valid TDS URL"),
   tdsPublicId: z.string().trim().min(1, "TDS public ID is required"),
-  stockQuantity: z.coerce
-    .number()
-    .int()
-    .min(0, "Stock cannot be negative"),
+  stockQuantity: z.coerce.number().int().min(0, "Stock cannot be negative"),
   lowStockThreshold: z.coerce
     .number()
     .int()
@@ -265,9 +249,7 @@ export default function CreateProductModal({
     setGalleryImage({ url: "", publicId: "" });
   };
 
-  const handleNextStep = async (
-    event: React.MouseEvent<HTMLButtonElement>,
-  ) => {
+  const handleNextStep = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -316,11 +298,10 @@ export default function CreateProductModal({
       return;
     }
 
-    setValue(
-      "gallery",
-      [...currentGallery, { ...galleryImage, alt }],
-      { shouldDirty: true, shouldValidate: true },
-    );
+    setValue("gallery", [...currentGallery, { ...galleryImage, alt }], {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
 
     setGalleryImage({ url: "", publicId: "" });
     setGalleryAlt("");
@@ -424,8 +405,8 @@ export default function CreateProductModal({
               Add Product
             </DialogTitle>
             <DialogDescription className="text-sm leading-6">
-              Create a product with details, rich content, images,
-              pricing, inventory and SEO settings.
+              Create a product with details, rich content, images, pricing,
+              inventory and SEO settings.
             </DialogDescription>
           </DialogHeader>
 
@@ -514,7 +495,10 @@ export default function CreateProductModal({
 
                   <div className="grid gap-5 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="product-name" className="font-semibold text-navy">
+                      <Label
+                        htmlFor="product-name"
+                        className="font-semibold text-navy"
+                      >
                         Product Name *
                       </Label>
                       <Input
@@ -536,66 +520,117 @@ export default function CreateProductModal({
                           },
                         })}
                       />
-                      {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+                      {errors.name && (
+                        <p className="text-sm text-destructive">
+                          {errors.name.message}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="product-slug" className="font-semibold text-navy">
+                      <Label
+                        htmlFor="product-slug"
+                        className="font-semibold text-navy"
+                      >
                         Slug *
                       </Label>
-                      <Input id="product-slug" placeholder="waterproofing-coating" {...register("slug")} />
-                      {errors.slug && <p className="text-sm text-destructive">{errors.slug.message}</p>}
+                      <Input
+                        id="product-slug"
+                        placeholder="waterproofing-coating"
+                        {...register("slug")}
+                      />
+                      {errors.slug && (
+                        <p className="text-sm text-destructive">
+                          {errors.slug.message}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="product-sku" className="font-semibold text-navy">
+                      <Label
+                        htmlFor="product-sku"
+                        className="font-semibold text-navy"
+                      >
                         SKU *
                       </Label>
-                      <Input id="product-sku" placeholder="WS-001" {...register("sku")} />
-                      {errors.sku && <p className="text-sm text-destructive">{errors.sku.message}</p>}
+                      <Input
+                        id="product-sku"
+                        placeholder="WS-001"
+                        {...register("sku")}
+                      />
+                      {errors.sku && (
+                        <p className="text-sm text-destructive">
+                          {errors.sku.message}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="font-semibold text-navy">Category *</Label>
+                      <Label className="font-semibold text-navy">
+                        Category *
+                      </Label>
+
                       <Controller
                         control={control}
                         name="categoryId"
-                        render={({ field }) => (
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            disabled={isLoadingCategories}
-                          >
-                            <SelectTrigger>
-                              <SelectValue
-                                placeholder={
-                                  isLoadingCategories
-                                    ? "Loading categories..."
-                                    : "Select a category"
-                                }
-                              />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {categories.map((category) => (
-                                <SelectItem key={category._id} value={category._id}>
-                                  {category.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
+                        render={({ field }) => {
+                          const selectedCategory = categories.find(
+                            (category) => category._id === field.value,
+                          );
+
+                          return (
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              disabled={isLoadingCategories}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue
+                                  placeholder={
+                                    isLoadingCategories
+                                      ? "Loading categories..."
+                                      : "Select a category"
+                                  }
+                                >
+                                  {selectedCategory?.name}
+                                </SelectValue>
+                              </SelectTrigger>
+
+                              <SelectContent>
+                                {categories.map((category) => (
+                                  <SelectItem
+                                    key={category._id}
+                                    value={category._id}
+                                  >
+                                    {category.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          );
+                        }}
                       />
-                      {errors.categoryId && <p className="text-sm text-destructive">{errors.categoryId.message}</p>}
+
+                      {errors.categoryId && (
+                        <p className="text-sm text-destructive">
+                          {errors.categoryId.message}
+                        </p>
+                      )}
+
                       {!isLoadingCategories && categories.length === 0 && (
                         <p className="text-sm text-destructive">
-                          No categories found. Create a category before adding a product.
+                          No categories found. Create a category before adding a
+                          product.
                         </p>
                       )}
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="product-short-description" className="font-semibold text-navy">
+                    <Label
+                      htmlFor="product-short-description"
+                      className="font-semibold text-navy"
+                    >
                       Short Description *
                     </Label>
                     <Textarea
@@ -604,7 +639,11 @@ export default function CreateProductModal({
                       className="min-h-28 resize-none"
                       {...register("shortDescription")}
                     />
-                    {errors.shortDescription && <p className="text-sm text-destructive">{errors.shortDescription.message}</p>}
+                    {errors.shortDescription && (
+                      <p className="text-sm text-destructive">
+                        {errors.shortDescription.message}
+                      </p>
+                    )}
                   </div>
                 </section>
               )}
@@ -613,14 +652,18 @@ export default function CreateProductModal({
               {currentStep === 1 && (
                 <section className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-bold text-navy">Content & Images</h3>
+                    <h3 className="text-lg font-bold text-navy">
+                      Content & Images
+                    </h3>
                     <p className="mt-1 text-sm leading-6 text-muted-foreground">
                       Write the product description and add its images.
                     </p>
                   </div>
 
                   <div className="space-y-3">
-                    <Label className="font-semibold text-navy">Product Description *</Label>
+                    <Label className="font-semibold text-navy">
+                      Product Description *
+                    </Label>
                     <Controller
                       control={control}
                       name="description"
@@ -634,14 +677,19 @@ export default function CreateProductModal({
                     />
                     {errors.description && (
                       <p className="text-sm text-destructive">
-                        {String(errors.description.message || "Product description is required")}
+                        {String(
+                          errors.description.message ||
+                            "Product description is required",
+                        )}
                       </p>
                     )}
                   </div>
 
                   <div className="space-y-5 rounded-2xl border bg-muted/10 p-5">
                     <div>
-                      <h4 className="text-sm font-bold text-navy">Primary Image *</h4>
+                      <h4 className="text-sm font-bold text-navy">
+                        Primary Image *
+                      </h4>
                       <p className="mt-1 text-xs text-muted-foreground">
                         Upload the main image used to represent this product.
                       </p>
@@ -665,20 +713,37 @@ export default function CreateProductModal({
                         />
                       )}
                     />
-                    {errors.primaryImage?.url && <p className="text-sm text-destructive">{errors.primaryImage.url.message}</p>}
+                    {errors.primaryImage?.url && (
+                      <p className="text-sm text-destructive">
+                        {errors.primaryImage.url.message}
+                      </p>
+                    )}
 
                     <div className="space-y-2">
-                      <Label htmlFor="primary-image-alt" className="font-semibold text-navy">
+                      <Label
+                        htmlFor="primary-image-alt"
+                        className="font-semibold text-navy"
+                      >
                         Primary Image Alt Text *
                       </Label>
-                      <Input id="primary-image-alt" placeholder="Waterproofing coating container" {...register("primaryImage.alt")} />
-                      {errors.primaryImage?.alt && <p className="text-sm text-destructive">{errors.primaryImage.alt.message}</p>}
+                      <Input
+                        id="primary-image-alt"
+                        placeholder="Waterproofing coating container"
+                        {...register("primaryImage.alt")}
+                      />
+                      {errors.primaryImage?.alt && (
+                        <p className="text-sm text-destructive">
+                          {errors.primaryImage.alt.message}
+                        </p>
+                      )}
                     </div>
                   </div>
 
                   <div className="space-y-5 rounded-2xl border bg-muted/10 p-5">
                     <div>
-                      <h4 className="text-sm font-bold text-navy">Product Gallery *</h4>
+                      <h4 className="text-sm font-bold text-navy">
+                        Product Gallery *
+                      </h4>
                       <p className="mt-1 text-xs text-muted-foreground">
                         Add at least one additional product image.
                       </p>
@@ -723,8 +788,12 @@ export default function CreateProductModal({
                           className="flex items-center justify-between gap-3 rounded-xl border bg-background p-3"
                         >
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold">{image.alt}</p>
-                            <p className="truncate text-xs text-muted-foreground">{image.publicId}</p>
+                            <p className="truncate text-sm font-semibold">
+                              {image.alt}
+                            </p>
+                            <p className="truncate text-xs text-muted-foreground">
+                              {image.publicId}
+                            </p>
                           </div>
                           <button
                             type="button"
@@ -745,62 +814,169 @@ export default function CreateProductModal({
               {currentStep === 2 && (
                 <section className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-bold text-navy">Pricing & Inventory</h3>
+                    <h3 className="text-lg font-bold text-navy">
+                      Pricing & Inventory
+                    </h3>
                     <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                      Enter pricing, stock levels, product weight and technical data sheet details.
+                      Enter pricing, stock levels, product weight and technical
+                      data sheet details.
                     </p>
                   </div>
 
                   <div className="grid gap-5 md:grid-cols-3">
                     <div className="space-y-2">
-                      <Label htmlFor="product-price" className="font-semibold text-navy">Selling Price *</Label>
-                      <Input id="product-price" type="number" min="0.01" step="0.01" {...register("price")} />
-                      {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
+                      <Label
+                        htmlFor="product-price"
+                        className="font-semibold text-navy"
+                      >
+                        Selling Price *
+                      </Label>
+                      <Input
+                        id="product-price"
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        {...register("price")}
+                      />
+                      {errors.price && (
+                        <p className="text-sm text-destructive">
+                          {errors.price.message}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="product-cost-price" className="font-semibold text-navy">Cost Price *</Label>
-                      <Input id="product-cost-price" type="number" min="0" step="0.01" {...register("costPrice")} />
-                      {errors.costPrice && <p className="text-sm text-destructive">{errors.costPrice.message}</p>}
+                      <Label
+                        htmlFor="product-cost-price"
+                        className="font-semibold text-navy"
+                      >
+                        Cost Price *
+                      </Label>
+                      <Input
+                        id="product-cost-price"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        {...register("costPrice")}
+                      />
+                      {errors.costPrice && (
+                        <p className="text-sm text-destructive">
+                          {errors.costPrice.message}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="product-weight" className="font-semibold text-navy">Weight *</Label>
-                      <Input id="product-weight" type="number" min="0.01" step="0.01" {...register("weight")} />
-                      {errors.weight && <p className="text-sm text-destructive">{errors.weight.message}</p>}
+                      <Label
+                        htmlFor="product-weight"
+                        className="font-semibold text-navy"
+                      >
+                        Weight *
+                      </Label>
+                      <Input
+                        id="product-weight"
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        {...register("weight")}
+                      />
+                      {errors.weight && (
+                        <p className="text-sm text-destructive">
+                          {errors.weight.message}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="product-stock" className="font-semibold text-navy">Stock Quantity *</Label>
-                      <Input id="product-stock" type="number" min="0" step="1" {...register("stockQuantity")} />
-                      {errors.stockQuantity && <p className="text-sm text-destructive">{errors.stockQuantity.message}</p>}
+                      <Label
+                        htmlFor="product-stock"
+                        className="font-semibold text-navy"
+                      >
+                        Stock Quantity *
+                      </Label>
+                      <Input
+                        id="product-stock"
+                        type="number"
+                        min="0"
+                        step="1"
+                        {...register("stockQuantity")}
+                      />
+                      {errors.stockQuantity && (
+                        <p className="text-sm text-destructive">
+                          {errors.stockQuantity.message}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="product-low-stock" className="font-semibold text-navy">Low Stock Threshold *</Label>
-                      <Input id="product-low-stock" type="number" min="0" step="1" {...register("lowStockThreshold")} />
-                      {errors.lowStockThreshold && <p className="text-sm text-destructive">{errors.lowStockThreshold.message}</p>}
+                      <Label
+                        htmlFor="product-low-stock"
+                        className="font-semibold text-navy"
+                      >
+                        Low Stock Threshold *
+                      </Label>
+                      <Input
+                        id="product-low-stock"
+                        type="number"
+                        min="0"
+                        step="1"
+                        {...register("lowStockThreshold")}
+                      />
+                      {errors.lowStockThreshold && (
+                        <p className="text-sm text-destructive">
+                          {errors.lowStockThreshold.message}
+                        </p>
+                      )}
                     </div>
                   </div>
 
                   <div className="space-y-5 rounded-2xl border bg-muted/10 p-5">
                     <div>
-                      <h4 className="text-sm font-bold text-navy">Technical Data Sheet (TDS)</h4>
+                      <h4 className="text-sm font-bold text-navy">
+                        Technical Data Sheet (TDS)
+                      </h4>
                       <p className="mt-1 text-xs text-muted-foreground">
                         Enter the document URL and public ID manually for now.
                       </p>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="product-tds-url" className="font-semibold text-navy">TDS URL *</Label>
-                      <Input id="product-tds-url" type="url" placeholder="https://example.com/product-tds.pdf" {...register("tdsUrl")} />
-                      {errors.tdsUrl && <p className="text-sm text-destructive">{errors.tdsUrl.message}</p>}
+                      <Label
+                        htmlFor="product-tds-url"
+                        className="font-semibold text-navy"
+                      >
+                        TDS URL *
+                      </Label>
+                      <Input
+                        id="product-tds-url"
+                        type="url"
+                        placeholder="https://example.com/product-tds.pdf"
+                        {...register("tdsUrl")}
+                      />
+                      {errors.tdsUrl && (
+                        <p className="text-sm text-destructive">
+                          {errors.tdsUrl.message}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="product-tds-public-id" className="font-semibold text-navy">TDS Public ID *</Label>
-                      <Input id="product-tds-public-id" placeholder="enviroshield/products/product-tds" {...register("tdsPublicId")} />
-                      {errors.tdsPublicId && <p className="text-sm text-destructive">{errors.tdsPublicId.message}</p>}
+                      <Label
+                        htmlFor="product-tds-public-id"
+                        className="font-semibold text-navy"
+                      >
+                        TDS Public ID *
+                      </Label>
+                      <Input
+                        id="product-tds-public-id"
+                        placeholder="enviroshield/products/product-tds"
+                        {...register("tdsPublicId")}
+                      />
+                      {errors.tdsPublicId && (
+                        <p className="text-sm text-destructive">
+                          {errors.tdsPublicId.message}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </section>
@@ -810,31 +986,63 @@ export default function CreateProductModal({
               {currentStep === 3 && (
                 <section className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-bold text-navy">SEO & Publishing</h3>
+                    <h3 className="text-lg font-bold text-navy">
+                      SEO & Publishing
+                    </h3>
                     <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                      Complete the required search metadata and publishing settings.
+                      Complete the required search metadata and publishing
+                      settings.
                     </p>
                   </div>
 
                   <div className="space-y-5 rounded-2xl border bg-muted/10 p-5">
                     <div className="space-y-2">
-                      <Label htmlFor="product-meta-title" className="font-semibold text-navy">Meta Title *</Label>
-                      <Input id="product-meta-title" {...register("seo.metaTitle")} />
-                      {errors.seo?.metaTitle && <p className="text-sm text-destructive">{errors.seo.metaTitle.message}</p>}
+                      <Label
+                        htmlFor="product-meta-title"
+                        className="font-semibold text-navy"
+                      >
+                        Meta Title *
+                      </Label>
+                      <Input
+                        id="product-meta-title"
+                        {...register("seo.metaTitle")}
+                      />
+                      {errors.seo?.metaTitle && (
+                        <p className="text-sm text-destructive">
+                          {errors.seo.metaTitle.message}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="product-meta-description" className="font-semibold text-navy">Meta Description *</Label>
-                      <Textarea id="product-meta-description" className="min-h-24 resize-none" {...register("seo.metaDescription")} />
-                      {errors.seo?.metaDescription && <p className="text-sm text-destructive">{errors.seo.metaDescription.message}</p>}
+                      <Label
+                        htmlFor="product-meta-description"
+                        className="font-semibold text-navy"
+                      >
+                        Meta Description *
+                      </Label>
+                      <Textarea
+                        id="product-meta-description"
+                        className="min-h-24 resize-none"
+                        {...register("seo.metaDescription")}
+                      />
+                      {errors.seo?.metaDescription && (
+                        <p className="text-sm text-destructive">
+                          {errors.seo.metaDescription.message}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-3">
-                      <Label className="font-semibold text-navy">SEO Keywords *</Label>
+                      <Label className="font-semibold text-navy">
+                        SEO Keywords *
+                      </Label>
                       <div className="flex gap-2">
                         <Input
                           value={seoKeywordInput}
-                          onChange={(event) => setSeoKeywordInput(event.target.value)}
+                          onChange={(event) =>
+                            setSeoKeywordInput(event.target.value)
+                          }
                           onKeyDown={(event) => {
                             if (event.key === "Enter") {
                               event.preventDefault();
@@ -856,7 +1064,10 @@ export default function CreateProductModal({
 
                       <div className="flex flex-wrap gap-2">
                         {currentKeywords.map((keyword, index) => (
-                          <div key={`${keyword}-${index}`} className="flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-sm">
+                          <div
+                            key={`${keyword}-${index}`}
+                            className="flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-sm"
+                          >
                             <span>{keyword}</span>
                             <button
                               type="button"
@@ -870,31 +1081,65 @@ export default function CreateProductModal({
                         ))}
                       </div>
 
-                      {errors.seo?.keywords && <p className="text-sm text-destructive">{errors.seo.keywords.message}</p>}
+                      {errors.seo?.keywords && (
+                        <p className="text-sm text-destructive">
+                          {errors.seo.keywords.message}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-5 border-t pt-5">
                       <div>
-                        <h4 className="text-sm font-bold text-navy">Open Graph</h4>
+                        <h4 className="text-sm font-bold text-navy">
+                          Open Graph
+                        </h4>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Metadata and image displayed when this product is shared.
+                          Metadata and image displayed when this product is
+                          shared.
                         </p>
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="product-og-title" className="font-semibold text-navy">OG Title *</Label>
-                        <Input id="product-og-title" {...register("seo.ogTitle")} />
-                        {errors.seo?.ogTitle && <p className="text-sm text-destructive">{errors.seo.ogTitle.message}</p>}
+                        <Label
+                          htmlFor="product-og-title"
+                          className="font-semibold text-navy"
+                        >
+                          OG Title *
+                        </Label>
+                        <Input
+                          id="product-og-title"
+                          {...register("seo.ogTitle")}
+                        />
+                        {errors.seo?.ogTitle && (
+                          <p className="text-sm text-destructive">
+                            {errors.seo.ogTitle.message}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="product-og-description" className="font-semibold text-navy">OG Description *</Label>
-                        <Textarea id="product-og-description" className="min-h-24 resize-none" {...register("seo.ogDescription")} />
-                        {errors.seo?.ogDescription && <p className="text-sm text-destructive">{errors.seo.ogDescription.message}</p>}
+                        <Label
+                          htmlFor="product-og-description"
+                          className="font-semibold text-navy"
+                        >
+                          OG Description *
+                        </Label>
+                        <Textarea
+                          id="product-og-description"
+                          className="min-h-24 resize-none"
+                          {...register("seo.ogDescription")}
+                        />
+                        {errors.seo?.ogDescription && (
+                          <p className="text-sm text-destructive">
+                            {errors.seo.ogDescription.message}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="font-semibold text-navy">OG Image *</Label>
+                        <Label className="font-semibold text-navy">
+                          OG Image *
+                        </Label>
                         <ImageUploader
                           value={ogImageUrl}
                           imagePublicId={ogImagePublicId}
@@ -909,10 +1154,19 @@ export default function CreateProductModal({
                             });
                           }}
                         />
-                        {errors.seo?.ogImage && <p className="text-sm text-destructive">{errors.seo.ogImage.message}</p>}
-                        {errors.seo?.ogImagePublicId && <p className="text-sm text-destructive">{errors.seo.ogImagePublicId.message}</p>}
+                        {errors.seo?.ogImage && (
+                          <p className="text-sm text-destructive">
+                            {errors.seo.ogImage.message}
+                          </p>
+                        )}
+                        {errors.seo?.ogImagePublicId && (
+                          <p className="text-sm text-destructive">
+                            {errors.seo.ogImagePublicId.message}
+                          </p>
+                        )}
                         <p className="text-xs text-muted-foreground">
-                          Initially synced with the primary image. Upload another image here to customize it.
+                          Initially synced with the primary image. Upload
+                          another image here to customize it.
                         </p>
                       </div>
                     </div>
@@ -923,7 +1177,9 @@ export default function CreateProductModal({
                       render={({ field }) => (
                         <div className="flex items-center justify-between rounded-xl border bg-background p-4">
                           <div className="pr-4">
-                            <Label className="font-semibold text-navy">No Index</Label>
+                            <Label className="font-semibold text-navy">
+                              No Index
+                            </Label>
                             <p className="mt-1 text-xs leading-5 text-muted-foreground">
                               Ask search engines not to index this product.
                             </p>
@@ -944,7 +1200,9 @@ export default function CreateProductModal({
                       render={({ field }) => (
                         <div className="flex items-center justify-between rounded-xl border bg-background p-4">
                           <div className="pr-4">
-                            <Label className="font-semibold text-navy">Featured Product</Label>
+                            <Label className="font-semibold text-navy">
+                              Featured Product
+                            </Label>
                             <p className="mt-1 text-xs leading-5 text-muted-foreground">
                               Highlight this product in featured product areas.
                             </p>
@@ -965,14 +1223,18 @@ export default function CreateProductModal({
                       render={({ field }) => (
                         <div className="flex items-center justify-between rounded-xl border bg-background p-4">
                           <div className="pr-4">
-                            <Label className="font-semibold text-navy">Publish Product</Label>
+                            <Label className="font-semibold text-navy">
+                              Publish Product
+                            </Label>
                             <p className="mt-1 text-xs leading-5 text-muted-foreground">
                               Turn on to publish now; otherwise save as a draft.
                             </p>
                           </div>
                           <Switch
                             checked={field.value === "published"}
-                            onCheckedChange={(checked) => field.onChange(checked ? "published" : "draft")}
+                            onCheckedChange={(checked) =>
+                              field.onChange(checked ? "published" : "draft")
+                            }
                             disabled={isLoading}
                             aria-label="Publish product"
                           />
@@ -1024,7 +1286,11 @@ export default function CreateProductModal({
                 ) : (
                   <DashboardButton
                     type="submit"
-                    disabled={isLoading || isLoadingCategories || categories.length === 0}
+                    disabled={
+                      isLoading ||
+                      isLoadingCategories ||
+                      categories.length === 0
+                    }
                     icon={
                       isLoading ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
