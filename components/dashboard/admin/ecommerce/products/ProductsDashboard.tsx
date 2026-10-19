@@ -8,6 +8,7 @@ import {
   Eye,
   Filter,
   Package,
+  Plus,
   Search,
   XCircle,
   Edit,
@@ -43,6 +44,7 @@ import DashboardEmpty from "@/components/dashboard/DashboardEmpty";
 import DashboardError from "@/components/dashboard/DashboardError";
 import DashboardLoading from "@/components/dashboard/DashboardLoading";
 
+import CreateProductModal from "./CreateProductModal";
 import ViewProductModal from "./ViewProductModal";
 import DeleteProductDialog from "./DeleteProductDialog";
 
@@ -66,6 +68,7 @@ export default function ProductsDashboard() {
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
 
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -423,6 +426,13 @@ export default function ProductsDashboard() {
             </p>
           )}
         </div>
+
+        <DashboardButton
+          icon={<Plus className="h-4 w-4" />}
+          onClick={() => setIsCreateModalOpen(true)}
+        >
+          Add Product
+        </DashboardButton>
       </div>
 
       {/* Search and filters */}
@@ -535,9 +545,11 @@ export default function ProductsDashboard() {
           description={
             hasActiveFilters
               ? "Try changing your search or filters."
-              : "There are no products to display yet."
+              : "Your product catalogue is empty. Add your first product to get started."
           }
           icon={<Package className="h-6 w-6" />}
+          actionLabel={hasActiveFilters ? undefined : "Add Your First Product"}
+          onAction={() => setIsCreateModalOpen(true)}
         />
       ) : (
         <Card className="overflow-hidden border p-0 shadow-sm">
@@ -626,6 +638,13 @@ export default function ProductsDashboard() {
           </div>
         </div>
       )}
+
+      <CreateProductModal
+        isModalOpen={isCreateModalOpen}
+        setIsModalOpen={setIsCreateModalOpen}
+        revalidateKey={`/product?page=${currentPage}&limit=${limit}`}
+        onSuccess={() => refetch()}
+      />
 
       {/* VIEW PRODUCT */}
       <ViewProductModal
