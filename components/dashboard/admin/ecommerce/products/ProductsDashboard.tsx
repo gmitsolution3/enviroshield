@@ -45,6 +45,7 @@ import DashboardError from "@/components/dashboard/DashboardError";
 import DashboardLoading from "@/components/dashboard/DashboardLoading";
 
 import CreateProductModal from "./CreateProductModal";
+import EditProductModal from "./EditProductModal";
 import ViewProductModal from "./ViewProductModal";
 import DeleteProductDialog from "./DeleteProductDialog";
 
@@ -69,6 +70,7 @@ export default function ProductsDashboard() {
   const [sortOrder, setSortOrder] = useState("desc");
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -159,6 +161,11 @@ export default function ProductsDashboard() {
   const handleView = (product: IProduct) => {
     setSelectedProduct(product);
     setIsViewModalOpen(true);
+  };
+
+  const handleEdit = (product: IProduct) => {
+    setSelectedProduct(product);
+    setIsEditModalOpen(true);
   };
 
   const handleDelete = (product: IProduct) => {
@@ -639,11 +646,24 @@ export default function ProductsDashboard() {
         </div>
       )}
 
+      {/* CREATE PRODUCT */}
       <CreateProductModal
         isModalOpen={isCreateModalOpen}
         setIsModalOpen={setIsCreateModalOpen}
         revalidateKey={`/product?page=${currentPage}&limit=${limit}`}
         onSuccess={() => refetch()}
+      />
+      
+      {/* EDIT PRODUCT */}
+      <EditProductModal
+        product={selectedProduct}
+        open={isEditModalOpen}
+        revalidateKey={endpoint}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedProduct(null);
+          refetch();
+        }}
       />
 
       {/* VIEW PRODUCT */}
