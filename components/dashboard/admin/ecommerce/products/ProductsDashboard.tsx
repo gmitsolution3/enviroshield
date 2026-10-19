@@ -14,6 +14,8 @@ import {
   Edit,
   MoreHorizontal,
   Trash,
+  Send,
+  EyeOff,
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
@@ -48,6 +50,7 @@ import CreateProductModal from "./CreateProductModal";
 import EditProductModal from "./EditProductModal";
 import ViewProductModal from "./ViewProductModal";
 import DeleteProductDialog from "./DeleteProductDialog";
+import ProductStatusDialog from "./ProductStatusDialog";
 
 import { useFetch } from "@/hooks/swr/useFetch";
 import type { IProduct, IProductResponse } from "@/types";
@@ -76,6 +79,10 @@ export default function ProductsDashboard() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const [productToDelete, setProductToDelete] = useState<IProduct | null>(null);
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+  const [productToChangeStatus, setProductToChangeStatus] = useState<
+    IProduct | null
+  >(null);
 
   // Debounce search input before requesting the API.
   useEffect(() => {
@@ -166,6 +173,11 @@ export default function ProductsDashboard() {
   const handleEdit = (product: IProduct) => {
     setSelectedProduct(product);
     setIsEditModalOpen(true);
+  };
+
+  const handleProductStatusAction = (product: IProduct) => {
+    setProductToChangeStatus(product);
+    setIsStatusDialogOpen(true);
   };
 
   const handleDelete = (product: IProduct) => {
@@ -367,6 +379,18 @@ export default function ProductsDashboard() {
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
                   <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => handleProductStatusAction(product)}
+                  >
+                    {product.status === "published" ? (
+                      <EyeOff className="mr-2 h-4 w-4" />
+                    ) : (
+                      <Send className="mr-2 h-4 w-4" />
+                    )}
+                    {product.status === "published" ? "Unpublish" : "Publish"}
+                  </DropdownMenuItem>
 
                   <DropdownMenuItem
                     className="cursor-pointer"
@@ -676,6 +700,17 @@ export default function ProductsDashboard() {
           if (!open) {
             setSelectedProduct(null);
           }
+        }}
+      />
+
+      {/* PRODUCT STATUS */}
+      <ProductStatusDialog
+        product={productToChangeStatus}
+        open={isStatusDialogOpen}
+        revalidateKey={endpoint}
+        onClose={() => {
+          setIsStatusDialogOpen(false);
+          setProductToChangeStatus(null);
         }}
       />
 
