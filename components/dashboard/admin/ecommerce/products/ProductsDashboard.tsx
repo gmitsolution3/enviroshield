@@ -5,10 +5,14 @@ import {
   CheckCircle,
   ChevronLeft,
   ChevronRight,
+  Eye,
   Filter,
   Package,
   Search,
   XCircle,
+  Edit,
+  MoreHorizontal,
+  Trash,
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
@@ -24,11 +28,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import DashboardButton from "@/components/dashboard/DashboardButton";
 import DashboardEmpty from "@/components/dashboard/DashboardEmpty";
 import DashboardError from "@/components/dashboard/DashboardError";
 import DashboardLoading from "@/components/dashboard/DashboardLoading";
+
+import ViewProductModal from "./ViewProductModal";
+import DeleteProductDialog from "./DeleteProductDialog";
 
 import { useFetch } from "@/hooks/swr/useFetch";
 import type { IProduct, IProductResponse } from "@/types";
@@ -49,6 +65,12 @@ export default function ProductsDashboard() {
 
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
+
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const [productToDelete, setProductToDelete] = useState<IProduct | null>(null);
 
   // Debounce search input before requesting the API.
   useEffect(() => {
@@ -129,6 +151,16 @@ export default function ProductsDashboard() {
     setCurrentPage(1);
     setSortBy("createdAt");
     setSortOrder("desc");
+  };
+
+  const handleView = (product: IProduct) => {
+    setSelectedProduct(product);
+    setIsViewModalOpen(true);
+  };
+
+  const handleDelete = (product: IProduct) => {
+    setProductToDelete(product);
+    setIsDeleteDialogOpen(true);
   };
 
   const columns: ColumnDef<typeof features, IProduct>[] = [
@@ -293,6 +325,61 @@ export default function ProductsDashboard() {
         </div>
       ),
     },
+    {
+      id: "actions",
+      header: "Actions",
+
+      cell: ({ row }) => {
+        const product = row.original;
+
+        return (
+          <div className="flex items-center gap-1.5">
+            <DashboardButton
+              variant="outline"
+              className="h-8 w-8 rounded-lg border-blue/30 bg-muted/30 p-0 text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
+              icon={<Eye className="h-4 w-4" />}
+              onClick={() => handleView(product)}
+              ariaLabel="View product details"
+            />
+
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <DashboardButton
+                  variant="outline"
+                  className="h-8 w-8 rounded-lg border-blue/30 bg-muted/30 p-0 text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
+                  icon={<MoreHorizontal className="h-4 w-4" />}
+                  ariaLabel="Product actions"
+                />
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => handleEdit(product)}
+                  >
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    className="cursor-pointer text-red-600 focus:text-red-600"
+                    onClick={() => handleDelete(product)}
+                  >
+                    <Trash className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    },
   ];
 
   const table = useTable({
@@ -352,14 +439,14 @@ export default function ProductsDashboard() {
         </div>
 
         {/* Filters */}
-       
+
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-3 sm:ml-auto sm:justify-end">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium">Filter:</span>
           </div>
-        
+
           {/* Status filter */}
           <div className="flex items-center gap-1.5">
             <label className="text-xs font-medium text-muted-foreground">
@@ -376,7 +463,7 @@ export default function ProductsDashboard() {
               </SelectContent>
             </Select>
           </div>
-        
+
           {/* Stock filter */}
           <div className="flex items-center gap-1.5">
             <label className="text-xs font-medium text-muted-foreground">
@@ -393,7 +480,7 @@ export default function ProductsDashboard() {
               </SelectContent>
             </Select>
           </div>
-        
+
           {/* Sort field */}
           <div className="flex items-center gap-1.5">
             <label className="text-xs font-medium text-muted-foreground">
@@ -412,7 +499,7 @@ export default function ProductsDashboard() {
               </SelectContent>
             </Select>
           </div>
-        
+
           {/* Sort direction */}
           <div className="flex items-center gap-1.5">
             <label className="text-xs font-medium text-muted-foreground">
@@ -428,7 +515,7 @@ export default function ProductsDashboard() {
               </SelectContent>
             </Select>
           </div>
-        
+
           {hasActiveFilters && (
             <DashboardButton
               variant="outline"
@@ -439,7 +526,6 @@ export default function ProductsDashboard() {
             </DashboardButton>
           )}
         </div>
-
       </div>
 
       {/* Products table */}
@@ -540,6 +626,31 @@ export default function ProductsDashboard() {
           </div>
         </div>
       )}
+
+      {/* VIEW PRODUCT */}
+      <ViewProductModal
+        product={selectedProduct}
+        isModalOpen={isViewModalOpen}
+        setIsModalOpen={(open) => {
+          setIsViewModalOpen(open);
+
+          if (!open) {
+            setSelectedProduct(null);
+          }
+        }}
+      />
+
+      {/* DELETE PRODUCT */}
+      <DeleteProductDialog
+        product={productToDelete}
+        open={isDeleteDialogOpen}
+        revalidateKey={`/product?page=${currentPage}&limit=${limit}`}
+        onClose={() => {
+          setIsDeleteDialogOpen(false);
+          setProductToDelete(null);
+          refetch();
+        }}
+      />
     </section>
   );
 }
