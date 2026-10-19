@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Mail,
   MessageSquareQuote,
+  Package,
   Settings,
   ShoppingCart,
   User,
@@ -27,6 +28,7 @@ export const dashboardIcons = {
   testimonials: MessageSquareQuote,
   contacts: Mail,
   ecommerce: ShoppingCart,
+  products: Package,
 } satisfies Record<string, LucideIcon>;
 
 export type DashboardIcon = keyof typeof dashboardIcons;
@@ -111,7 +113,7 @@ export const dashboardNavigation: Record<
         {
           title: "Products",
           href: "/dashboard/ecommerce/products",
-          icon: "documents",
+          icon: "products",
         },
         {
           title: "Orders",
