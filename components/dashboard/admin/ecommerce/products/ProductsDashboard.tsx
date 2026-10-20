@@ -406,7 +406,7 @@ export default function ProductsDashboard() {
                     onClick={() => handleInventoryMovements(product)}
                   >
                     <History className="mr-2 h-4 w-4" />
-                    View Inventory Movements
+                    Inventory History
                   </DropdownMenuItem>
 
                   <DropdownMenuItem
