@@ -16,8 +16,10 @@ import {
   Trash,
   Send,
   EyeOff,
+  History,
 } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { tableFeatures, useTable, type ColumnDef } from "@tanstack/react-table";
@@ -60,6 +62,7 @@ import { Input } from "@/components/ui/input";
 const features = tableFeatures({});
 
 export default function ProductsDashboard() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -178,6 +181,12 @@ export default function ProductsDashboard() {
   const handleProductStatusAction = (product: IProduct) => {
     setProductToChangeStatus(product);
     setIsStatusDialogOpen(true);
+  };
+
+  const handleInventoryMovements = (product: IProduct) => {
+    router.push(
+      `/dashboard/ecommerce/products/${encodeURIComponent(product._id)}/inventory-movements`,
+    );
   };
 
   const handleDelete = (product: IProduct) => {
@@ -390,6 +399,14 @@ export default function ProductsDashboard() {
                       <Send className="mr-2 h-4 w-4" />
                     )}
                     {product.status === "published" ? "Unpublish" : "Publish"}
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => handleInventoryMovements(product)}
+                  >
+                    <History className="mr-2 h-4 w-4" />
+                    View Inventory Movements
                   </DropdownMenuItem>
 
                   <DropdownMenuItem
