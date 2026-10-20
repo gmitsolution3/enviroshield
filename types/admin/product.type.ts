@@ -43,6 +43,12 @@ export interface IProduct {
   updatedAt: string;
 }
 
+/** Shape returned for public products, where private cost data is omitted. */
+export interface IPublishedProduct
+  extends Omit<IProduct, "categoryId" | "costPrice"> {
+  categoryId: Pick<ICategory, "_id" | "name" | "slug">;
+}
+
 export interface IProductResponse {
   success: boolean;
   statusCode: number;
@@ -56,9 +62,15 @@ export interface IProductResponse {
   data: IProduct[];
 }
 
+export interface IPublishedProductResponse
+  extends Omit<IProductResponse, "data"> {
+  data: IPublishedProduct[];
+}
+
 export interface IProductSingleResponse {
   success: boolean;
   statusCode: number;
   message: string;
   data: IProduct;
 }
+
