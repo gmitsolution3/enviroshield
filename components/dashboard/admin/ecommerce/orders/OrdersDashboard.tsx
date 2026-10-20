@@ -7,11 +7,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
+  Filter,
   MoreHorizontal,
   Package,
+  Search,
   Truck,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import DashboardButton from "@/components/dashboard/DashboardButton";
@@ -20,6 +22,7 @@ import DashboardError from "@/components/dashboard/DashboardError";
 import DashboardLoading from "@/components/dashboard/DashboardLoading";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +32,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useFetch } from "@/hooks/swr/useFetch";
 import type { AdminOrder, OrdersResponse } from "@/types";
 import {
@@ -85,15 +95,63 @@ function StatusBadge({
 }
 
 export default function OrdersDashboard() {
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [orderStatus, setOrderStatus] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedOrder, setSelectedOrder] =
     useState<AdminOrder | null>(null);
   const [activeAction, setActiveAction] = useState<
     "details" | "status" | "payment" | "cancel" | null
   >(null);
-  const endpoint = `/order?page=${currentPage}&limit=${PAGE_SIZE}`;
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 350);
+
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  const endpoint = useMemo(() => {
+    const params = new URLSearchParams();
+    params.set("page", String(currentPage));
+    params.set("limit", String(PAGE_SIZE));
+    if (orderStatus) params.set("status", orderStatus);
+    if (paymentStatus) params.set("paymentStatus", paymentStatus);
+    if (debouncedSearch) params.set("search", debouncedSearch);
+    return `/order?${params.toString()}`;
+  }, [currentPage, orderStatus, paymentStatus, debouncedSearch]);
+
   const { data, isLoading, isError, refetch } =
     useFetch<OrdersResponse>(endpoint);
+
+  const hasActiveFilters =
+    search.trim() !== "" || Boolean(orderStatus) || Boolean(paymentStatus);
+  const isSearchPending = search.trim() !== debouncedSearch;
+
+  const handleOrderStatusChange = (value: string | null) => {
+    setOrderStatus(value === "all" || value === null ? "" : value);
+    setCurrentPage(1);
+  };
+
+  const handlePaymentStatusChange = (value: string | null) => {
+    setPaymentStatus(value === "all" || value === null ? "" : value);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setCurrentPage(1);
+  };
+
+  const clearFilters = () => {
+    setSearch("");
+    setDebouncedSearch("");
+    setOrderStatus("");
+    setPaymentStatus("");
+    setCurrentPage(1);
+  };
 
   const closeAction = () => {
     setActiveAction(null);
@@ -139,7 +197,7 @@ export default function OrdersDashboard() {
           <p className="mt-1 text-muted-foreground">
             Review customer orders, payment, and fulfillment status.
           </p>
-          {meta && (
+          {meta && !isSearchPending && (
             <p className="mt-1 text-sm text-muted-foreground">
               Showing {orders.length} of {meta.total} orders
             </p>
@@ -147,10 +205,102 @@ export default function OrdersDashboard() {
         </div>
       </header>
 
-      {orders.length === 0 ? (
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:w-64 sm:shrink-0">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search order number, customer, email, or ID..."
+            value={search}
+            onChange={(event) => handleSearchChange(event.target.value)}
+            className="h-9 rounded-full border-blue/30 bg-muted/30 pl-9 text-xs shadow-sm transition-all duration-200 focus:border-blue/40 focus:ring-2 focus:ring-blue/10"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 sm:ml-auto sm:justify-end">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Filter:</span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <label className="text-xs font-medium text-muted-foreground">
+              Order status
+            </label>
+            <Select
+              value={orderStatus || "all"}
+              onValueChange={handleOrderStatusChange}
+            >
+              <SelectTrigger className="h-9 w-[155px] rounded-full border-blue/30 bg-muted/30 px-3 text-xs font-semibold text-navy">
+                <SelectValue placeholder="All Order Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Order Statuses</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="confirmed">Confirmed</SelectItem>
+                <SelectItem value="processing">Processing</SelectItem>
+                <SelectItem value="shipped">Shipped</SelectItem>
+                <SelectItem value="delivered">Delivered</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <label className="text-xs font-medium text-muted-foreground">
+              Payment
+            </label>
+            <Select
+              value={paymentStatus || "all"}
+              onValueChange={handlePaymentStatusChange}
+            >
+              <SelectTrigger className="h-9 w-[155px] rounded-full border-blue/30 bg-muted/30 px-3 text-xs font-semibold text-navy">
+                <SelectValue placeholder="All Payment Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Payment Statuses</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="failed">Failed</SelectItem>
+                <SelectItem value="refunded">Refunded</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {hasActiveFilters && (
+            <DashboardButton
+              variant="outline"
+              onClick={clearFilters}
+              className="h-9 rounded-full px-4 text-xs"
+            >
+              Clear
+            </DashboardButton>
+          )}
+        </div>
+      </div>
+
+      {isSearchPending ? (
+        <Card
+          className="overflow-hidden border p-0 shadow-sm"
+          aria-label="Loading matching orders"
+          aria-busy="true"
+        >
+          <div className="space-y-4 p-6">
+            {[1, 2, 3, 4].map((row) => (
+              <div
+                key={row}
+                className="h-12 animate-pulse rounded bg-muted"
+              />
+            ))}
+          </div>
+        </Card>
+      ) : orders.length === 0 ? (
         <DashboardEmpty
-          title="No orders found"
-          description="Customer orders will appear here when they are placed."
+          title={hasActiveFilters ? "No matching orders" : "No orders found"}
+          description={
+            hasActiveFilters
+              ? "Try changing your search or filters."
+              : "Customer orders will appear here when they are placed."
+          }
           icon={<Package className="h-6 w-6" />}
         />
       ) : (
