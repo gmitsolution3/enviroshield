@@ -58,7 +58,7 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
             </p>
 
             <p className="mt-2 text-sm text-muted-foreground">
-              User statistics will appear here.
+              No live user metrics are currently available.
             </p>
           </CardContent>
         </Card>
@@ -80,7 +80,7 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
             </p>
 
             <p className="mt-2 text-sm text-muted-foreground">
-              Application statistics will appear here.
+              No application metrics are currently available.
             </p>
           </CardContent>
         </Card>
@@ -102,7 +102,7 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
             </p>
 
             <p className="mt-2 text-sm text-muted-foreground">
-              Report statistics will appear here.
+              No report metrics are currently available.
             </p>
           </CardContent>
         </Card>
@@ -199,7 +199,7 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
             </a>
 
             <a
-              href="/dashboard/applications"
+              href="/dashboard/contacts"
               className="flex items-center justify-between rounded-xl px-3 py-3 transition-colors hover:bg-muted/60"
             >
               <div className="flex items-center gap-3">
@@ -209,11 +209,11 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
 
                 <div>
                   <p className="text-sm font-medium">
-                    Manage applications
+                    Review customer inquiries
                   </p>
 
                   <p className="text-xs text-muted-foreground">
-                    Review submitted applications
+                    View contact submissions
                   </p>
                 </div>
               </div>

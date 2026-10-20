@@ -3,12 +3,19 @@
 import "lenis/dist/lenis.css";
 
 import { ReactLenis } from "lenis/react";
+import { useReducedMotion } from "motion/react";
 
 export default function SmoothScroll({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const prefersReducedMotion = useReducedMotion();
+
+  if (prefersReducedMotion) {
+    return <>{children}</>;
+  }
+
   return (
     <ReactLenis
       root

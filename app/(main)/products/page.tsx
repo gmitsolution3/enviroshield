@@ -18,12 +18,14 @@ import {
 } from "@/components/ui/pagination";
 import { Separator } from "@/components/ui/separator";
 import { getAllCategories, getPublishedProducts } from "@/lib/api/products";
+import { siteUrl } from "@/lib/site-url";
 import { cn } from "@/lib/utils";
 
 export const metadata = {
   title: "Paints, Primers & Finishing Products | Enviroshield",
   description:
     "Explore Enviroshield's range of interior and exterior paints, primers, decorative finishes, surface preparation products, and wallcoverings.",
+  alternates: { canonical: `${siteUrl}/products` },
 };
 
 type SearchParams = Record<string, string | string[] | undefined>;

@@ -31,7 +31,15 @@ function getSafeRedirectUrl(callbackUrl?: string) {
     return "/dashboard";
   }
 
-  return callbackUrl;
+  try {
+    const redirectUrl = new URL(callbackUrl, window.location.origin);
+    if (redirectUrl.origin !== window.location.origin) {
+      return "/dashboard";
+    }
+    return `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`;
+  } catch {
+    return "/dashboard";
+  }
 }
 
 const fieldVariants = {

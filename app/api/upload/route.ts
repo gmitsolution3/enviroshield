@@ -1,7 +1,18 @@
 import cloudinary from "@/lib/cloudinary";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
+  const { getRequestSession } = await import("@/lib/auth-guards");
+  const session = await getRequestSession(req);
+  if (!session) {
+    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  }
+  if ((session.user.role ?? "user") !== "admin") {
+    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  }
+
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File;
@@ -29,7 +40,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(uploadResult);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Upload failed" },
       { status: 500 },

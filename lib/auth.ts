@@ -1,3 +1,5 @@
+import "server-only";
+
 import { sendEmail } from "@/lib/email";
 import { resetPasswordEmail } from "@/lib/emails/reset-password-email";
 import { verificationEmail } from "@/lib/emails/verification-email";

@@ -31,17 +31,6 @@ type UpdateTestimonialModalProps = {
   onClose: () => void;
 };
 
-/**
- * Keep publicId as a string without requiring it to be non-empty.
- * This allows older testimonials to load while ensuring new uploads
- * store their Cloudinary publicId.
- */
-const imageSchema = z.object({
-  url: z.string().optional(),
-  publicId: z.string(),
-  alt: z.string().trim().min(1, "Image alt text is required"),
-});
-
 const formSchema = z.object({
   clientName: z
     .string()
@@ -79,6 +68,21 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function getErrorMessage(error: unknown) {
+  if (isRecord(error)) {
+    const response = isRecord(error.response) ? error.response : null;
+    const data = response && isRecord(response.data) ? response.data : null;
+    for (const candidate of [data?.message, data?.error, error.message]) {
+      if (typeof candidate === "string" && candidate.trim()) return candidate;
+    }
+  }
+  return "Failed to update testimonial.";
+}
 
 const defaultValues: FormValues = {
   clientName: "",
@@ -184,17 +188,8 @@ export default function UpdateTestimonialModal({
 
       onClose();
       reset(defaultValues);
-    } catch (error: any) {
-      console.log(error);
-      const message =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        error?.message ||
-        "Failed to update testimonial.";
-
-      toast.error(message);
-
-      console.error("Failed to update testimonial:", message);
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error));
     }
   };
 

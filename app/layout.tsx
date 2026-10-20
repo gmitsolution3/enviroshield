@@ -53,9 +53,6 @@ export const metadata: Metadata = {
       "Professional waterproofing, waterproofing paint, heatproofing, epoxy and PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy floors, floor hardener, and ETP coating in Bangladesh.",
   },
 
-  other: {
-    "fb:pages": "YOUR_FACEBOOK_PAGE_ID",
-  },
 };
 
 export default function RootLayout({
@@ -64,7 +61,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans", fustat.variable)}>
+    <html lang="en" className={cn("font-sans", geist.variable, fustat.variable)}>
       <body className="min-h-screen antialiased">
         <TooltipProvider>
           <script

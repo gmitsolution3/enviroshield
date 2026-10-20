@@ -1,5 +1,5 @@
 
-import { ICategory } from "./category.type";
+import type { ICategory } from "./category.type";
 
 export interface IProductImage {
   url: string;

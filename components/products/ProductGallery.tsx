@@ -3,16 +3,23 @@
 import { ChevronLeft, ChevronRight, Maximize2, Package, X } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-type Img = { url: string; alt?: string };
+import type { IProductImage } from "@/types/admin/product.type";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-export default function ProductGallery({ images, name }: { images: Img[]; name: string }) {
+export default function ProductGallery({
+  images,
+  name,
+}: {
+  images: Pick<IProductImage, "url" | "alt">[];
+  name: string;
+}) {
   const [active, setActive] = useState(0);
   const [open, setOpen] = useState(false);
   const [zoom, setZoom] = useState<{ x: number; y: number } | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const count = images.length;
   const current = images[active];
@@ -25,11 +32,27 @@ export default function ProductGallery({ images, name }: { images: Img[]; name: 
   // Lightbox: keyboard, scroll lock, focus
   useEffect(() => {
     if (!open) return;
+    const trigger = triggerRef.current;
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
       if (e.key === "ArrowRight") go(1);
       if (e.key === "ArrowLeft") go(-1);
+      if (e.key === "Tab") {
+        const controls = dialogRef.current?.querySelectorAll<HTMLButtonElement>(
+          'button:not([disabled])',
+        );
+        if (!controls?.length) return;
+        const first = controls[0];
+        const last = controls[controls.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
 
     const prevOverflow = document.body.style.overflow;
@@ -40,6 +63,7 @@ export default function ProductGallery({ images, name }: { images: Img[]; name: 
     return () => {
       document.body.style.overflow = prevOverflow;
       document.removeEventListener("keydown", onKey);
+      trigger?.focus();
     };
   }, [open, go]);
 
@@ -97,6 +121,7 @@ export default function ProductGallery({ images, name }: { images: Img[]; name: 
         {/* Main image */}
         <div className="group/gallery relative aspect-[4/4.2] min-w-0 flex-1 min-[701px]:self-start overflow-hidden rounded-[16px] border border-line bg-white">
           <button
+            ref={triggerRef}
             type="button"
             onClick={() => setOpen(true)}
             onMouseMove={(e) => {
@@ -117,7 +142,7 @@ export default function ProductGallery({ images, name }: { images: Img[]; name: 
               fill
               priority
               sizes="(max-width: 900px) 100vw, 45vw"
-              className="animate-in fade-in object-cover duration-500"
+              className="animate-in fade-in object-cover duration-500 motion-reduce:animate-none"
               style={{
                 transformOrigin: zoom ? `${zoom.x}% ${zoom.y}%` : "50% 50%",
                 transform: zoom ? "scale(1.9)" : "scale(1)",
@@ -165,11 +190,14 @@ export default function ProductGallery({ images, name }: { images: Img[]; name: 
       {/* Lightbox */}
       {open && (
         <div
+          ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-label={`${name} image viewer`}
           className="fixed inset-0 z-[100] flex flex-col bg-navy/95"
-          onClick={() => setOpen(false)}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) setOpen(false);
+          }}
         >
           <div className="flex items-center justify-between px-5 py-4 text-white">
             <p className="truncate pr-4 text-[14px] font-bold">{name}</p>

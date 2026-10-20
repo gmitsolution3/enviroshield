@@ -61,9 +61,15 @@ export async function getPublishedProducts({
 
   const result: IPublishedProductResponse = await response.json();
 
-  if (!result.success) {
+  if (
+    !result.success ||
+    !Array.isArray(result.data) ||
+    !result.meta ||
+    !Number.isInteger(result.meta.page) ||
+    !Number.isInteger(result.meta.totalPages)
+  ) {
     throw new Error(
-      result.message || "Failed to fetch published products.",
+      result.message || "The published products response was invalid.",
     );
   }
 
@@ -103,7 +109,13 @@ export async function getPublishedProductBySlug(
     data: IPublishedProduct;
   } = await response.json();
 
-  if (!result.success || !result.data) {
+  if (
+    !result.success ||
+    !result.data ||
+    typeof result.data !== "object" ||
+    typeof result.data._id !== "string" ||
+    typeof result.data.slug !== "string"
+  ) {
     throw new Error(result.message || "Failed to fetch product.");
   }
 
@@ -136,9 +148,15 @@ export async function getCategories({
 
   const result: ICategoryResponse = await response.json();
 
-  if (!result.success) {
+  if (
+    !result.success ||
+    !Array.isArray(result.data) ||
+    !result.meta ||
+    !Number.isInteger(result.meta.page) ||
+    !Number.isInteger(result.meta.totalPages)
+  ) {
     throw new Error(
-      result.message || "Failed to fetch categories.",
+      result.message || "The categories response was invalid.",
     );
   }
 

@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 import { getPublishedBlogs } from "@/lib/api/blogs";
 import { getPublishedProjects } from "@/lib/api/projects";
 import { getPublishedServices } from "@/lib/api/services";
-import { products } from "@/lib/data/content";
+import { getPublishedProducts } from "@/lib/api/products";
 import { siteUrl } from "@/lib/site-url";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -114,13 +114,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     blogRoutes = [];
   }
 
-  const productRoutes: MetadataRoute.Sitemap = products.map(
-    (product) => ({
-      url: `${siteUrl}/products/${product.slug}`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    }),
-  );
+  let productRoutes: MetadataRoute.Sitemap = [];
+
+  try {
+    const firstPage = await getPublishedProducts({ page: 1, limit: 100 });
+    const remainingPages = await Promise.all(
+      Array.from({ length: Math.max(0, firstPage.meta.totalPages - 1) }, (_, index) =>
+        getPublishedProducts({ page: index + 2, limit: firstPage.meta.limit || 100 }),
+      ),
+    );
+
+    productRoutes = [firstPage, ...remainingPages]
+      .flatMap(({ data }) => data)
+      .filter((product) => product.seo?.noIndex !== true)
+      .map((product) => ({
+        url: `${siteUrl}/products/${product.slug}`,
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+      }));
+  } catch {
+    productRoutes = [];
+  }
 
   return [
     ...staticRoutes,

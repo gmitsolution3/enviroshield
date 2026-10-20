@@ -9,12 +9,14 @@ import ProjectsSection from "@/components/home/ProjectsSection/ProjectsSection";
 import ServicesSection from "@/components/home/ServiceSection/ServicesSection";
 import TestimonialSection from "@/components/home/TestimonialSection";
 import WorkProcessSection from "@/components/home/WorkProcessSection";
+import { siteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
   title:
     "Best Waterproofing, Flooring & Protective Coating Solutions In Bangladesh | Enviroshield",
   description:
     "Enviroshield provides waterproofing, waterproofing paint, heatproofing, epoxy and PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy floors, floor hardener, and ETP coating in Bangladesh.",
+  alternates: { canonical: siteUrl },
 };
 
 export default function HomePage() {

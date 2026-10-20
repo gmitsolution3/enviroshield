@@ -87,8 +87,6 @@ export default function BlogDashboard() {
   const blogs = data?.data || [];
   const meta = data?.meta;
 
-  console.log("blogs", blogs);
-
   const handleView = (blog: IBlog) => {
     setSelectedBlog(blog);
     setIsViewModalOpen(true);

@@ -2,15 +2,23 @@ import BlogContent from "@/components/blog/BlogContent";
 import { Button } from "@/components/Button";
 import AddToCart from "@/components/products/AddToCart";
 import Container from "@/components/Container";
+import PageHero from "@/components/PageHero";
 import { ProductCard } from "@/components/ProductCard";
 import ProductGallery from "@/components/products/ProductGallery";
 import { Reveal } from "@/components/Reveal";
+import { SectionHeader } from "@/components/SectionHeader";
 import {
   getPublishedProductBySlug,
   getPublishedProducts,
 } from "@/lib/api/products";
+import { getTrustedTdsUrl } from "@/lib/products/tds";
+import { getProductImageUrl } from "@/lib/products/images";
 import { siteUrl } from "@/lib/site-url";
-import type { IProduct } from "@/types/admin/product.type";
+import { products as staticProducts } from "@/lib/data/content";
+import type {
+  IPublishedProduct,
+  IProductImage,
+} from "@/types/admin/product.type";
 import type { JSONContent } from "@tiptap/react";
 import {
   ArrowLeft,
@@ -22,6 +30,7 @@ import {
   Tag,
 } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -31,12 +40,33 @@ type ProductPageProps = {
   }>;
 };
 
-function getProductDescription(product: IProduct) {
+function getProductDescription(product: IPublishedProduct) {
+  const metaDescription =
+    typeof product.seo?.metaDescription === "string"
+      ? product.seo.metaDescription.trim()
+      : "";
+  const shortDescription =
+    typeof product.shortDescription === "string"
+      ? product.shortDescription.trim()
+      : "";
+
   return (
-    product.seo?.metaDescription?.trim() ||
-    product.shortDescription ||
+    metaDescription ||
+    shortDescription ||
     `Explore ${product.name} from Enviroshield.`
   );
+}
+
+function getMetadataImageUrl(value?: string | null) {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:"
+      ? url.toString()
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 function formatPrice(price: number) {
@@ -68,13 +98,13 @@ function hasRichContent(content: unknown): content is JSONContent {
   );
 }
 
-function getProductImages(product: IProduct) {
+function getProductImages(product: IPublishedProduct) {
   const images = [
     product.primaryImage,
-    ...(product.gallery ?? []),
+    ...(Array.isArray(product.gallery) ? product.gallery : []),
   ].filter(
-    (image): image is NonNullable<IProduct["primaryImage"]> =>
-      Boolean(image?.url),
+    (image): image is IProductImage =>
+      Boolean(image && getProductImageUrl(image.url)),
   );
 
   return images.filter(
@@ -119,24 +149,32 @@ export async function generateMetadata({
     const seo = product.seo;
 
     const title =
-      seo?.metaTitle?.trim() ||
+      (typeof seo?.metaTitle === "string" ? seo.metaTitle.trim() : "") ||
       `${product.name} | Enviroshield`;
 
     const description = getProductDescription(product);
     const canonical = `${siteUrl}/products/${product.slug}`;
 
-    const ogTitle = seo?.ogTitle?.trim() || title;
+    const ogTitle =
+      (typeof seo?.ogTitle === "string" ? seo.ogTitle.trim() : "") || title;
     const ogDescription =
-      seo?.ogDescription?.trim() || description;
+      (typeof seo?.ogDescription === "string" ? seo.ogDescription.trim() : "") || description;
     const ogImage =
-      seo?.ogImage?.trim() || product.primaryImage.url;
+      getMetadataImageUrl(typeof seo?.ogImage === "string" ? seo.ogImage : null) ??
+      getProductImageUrl(product.primaryImage?.url);
+    const imageAlt =
+      typeof product.primaryImage?.alt === "string" && product.primaryImage.alt.trim()
+        ? product.primaryImage.alt.trim()
+        : product.name;
 
     const noIndex = seo?.noIndex === true;
 
     return {
       title,
       description,
-      keywords: seo?.keywords?.filter(Boolean) ?? [],
+      keywords: Array.isArray(seo?.keywords)
+        ? seo.keywords.filter((keyword): keyword is string => typeof keyword === "string" && Boolean(keyword.trim()))
+        : [],
 
       alternates: {
         canonical,
@@ -156,22 +194,30 @@ export async function generateMetadata({
         description: ogDescription,
         type: "website",
         url: canonical,
-        images: [
-          {
-            url: ogImage,
-            alt: product.primaryImage.alt || product.name,
-          },
-        ],
+        images: ogImage
+          ? [{ url: ogImage, alt: imageAlt }]
+          : undefined,
       },
 
       twitter: {
         card: "summary_large_image",
         title: ogTitle,
         description: ogDescription,
-        images: [ogImage],
+        images: ogImage ? [{ url: ogImage, alt: imageAlt }] : undefined,
       },
     };
-  } catch {
+  } catch (error) {
+    if (!(error instanceof Error) || error.message !== "Product not found.") {
+      throw error;
+    }
+    const staticProduct = staticProducts.find((item) => item.slug === slug);
+    if (staticProduct) {
+      return {
+        title: `${staticProduct.name} | Enviroshield`,
+        description: staticProduct.description,
+        alternates: { canonical: `${siteUrl}/products/${staticProduct.slug}` },
+      };
+    }
     return {
       title: "Product not found | Enviroshield",
       description:
@@ -204,12 +250,49 @@ export default async function ProductDetailPage({
 }: ProductPageProps) {
   const { slug } = await params;
 
-  let product: IProduct;
+  let product: IPublishedProduct | null = null;
 
   try {
     product = await getPublishedProductBySlug(slug);
-  } catch {
-    notFound();
+  } catch (error) {
+    if (!(error instanceof Error) || error.message !== "Product not found.") {
+      throw error;
+    }
+  }
+
+  if (!product) {
+    const staticProduct = staticProducts.find((item) => item.slug === slug);
+    if (!staticProduct) notFound();
+
+    return (
+      <>
+        <PageHero
+          eyebrow={staticProduct.category}
+          title={staticProduct.name}
+          text={staticProduct.description}
+          image={staticProduct.image}
+          imageAlt={`${staticProduct.name} - ${staticProduct.category}`}
+        />
+        <section aria-labelledby="legacy-product-details-heading" className="py-[112px] max-[900px]:py-20 max-[600px]:py-16">
+          <Container className="grid grid-cols-2 items-center gap-[70px] max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
+            <Reveal dir="image">
+              <div className="relative h-[530px] overflow-hidden rounded-[18px] max-[600px]:h-[340px]">
+                <Image src={staticProduct.image} alt={`${staticProduct.name} - ${staticProduct.category}`} fill sizes="45vw" className="object-cover" />
+              </div>
+            </Reveal>
+            <Reveal dir="up" delay={0.15}>
+              <div>
+                <SectionHeader eyebrow="PRODUCT DETAILS" title={`About ${staticProduct.name}`} text={staticProduct.description} headingId="legacy-product-details-heading" />
+                <div className="mb-[26px] flex flex-wrap gap-2">
+                  {staticProduct.features.map((feature) => <span key={feature} className="rounded-full border border-line px-3 py-[7px] text-[12px] text-ink">{feature}</span>)}
+                </div>
+                <Button href="/contact">Ask about this product</Button>
+              </div>
+            </Reveal>
+          </Container>
+        </section>
+      </>
+    );
   }
 
   const categoryName =
@@ -220,14 +303,21 @@ export default async function ProductDetailPage({
   const price = formatPrice(product.price);
   const articleUrl = `${siteUrl}/products/${product.slug}`;
 
-  const available = product.stockQuantity > 0;
+  const stockQuantity = Number.isFinite(product.stockQuantity)
+    ? Math.max(0, product.stockQuantity)
+    : 0;
+  const lowStockThreshold = Number.isFinite(product.lowStockThreshold)
+    ? Math.max(0, product.lowStockThreshold)
+    : 0;
+  const available = stockQuantity > 0;
   const stock = getStockStatus(
-    product.stockQuantity,
-    product.lowStockThreshold,
+    stockQuantity,
+    lowStockThreshold,
   );
 
-  const publishedOn = product.publishedAt
-    ? new Date(product.publishedAt).toLocaleDateString("en-GB", {
+  const publishedDate = product.publishedAt ? new Date(product.publishedAt) : null;
+  const publishedOn = publishedDate && !Number.isNaN(publishedDate.getTime())
+    ? publishedDate.toLocaleDateString("en-GB", {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -322,6 +412,7 @@ export default async function ProductDetailPage({
 
   const tdsLinkClass =
     "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-line bg-white px-5 text-[13px] font-bold text-navy transition-colors hover:border-blue hover:text-blue";
+  const tdsUrl = getTrustedTdsUrl(product.tdsUrl);
 
   return (
     <>
@@ -524,15 +615,8 @@ export default async function ProductDetailPage({
                   <div className="mt-6 flex flex-col gap-3">
                     {price ? (
                       <AddToCart
-                        product={{
-                          id: product._id,
-                          slug: product.slug,
-                          sku: product.sku,
-                          name: product.name,
-                          price: product.price,
-                          image: images[0]?.url ?? "",
-                        }}
-                        stock={product.stockQuantity}
+                        product={product}
+                        stock={stockQuantity}
                       />
                     ) : (
                       <Button href="/contact" fullWidth>
@@ -540,16 +624,16 @@ export default async function ProductDetailPage({
                       </Button>
                     )}
 
-                    {product?.tdsUrl && (
+                    {tdsUrl && (
                       <a
-                        href={product.tdsUrl}
-                        download
+                        href={tdsUrl}
                         target="_blank"
                         rel="noopener noreferrer"
+                        aria-label={`Open technical data sheet for ${product.name} in a new tab`}
                         className={tdsLinkClass}
                       >
                         <FileText size={17} aria-hidden="true" />
-                        Download TDS
+                        View TDS
                         <ArrowUpRight size={15} aria-hidden="true" />
                       </a>
                     )}
@@ -660,13 +744,13 @@ export default async function ProductDetailPage({
                     ))}
                   </dl>
 
-                  {product?.tdsUrl && (
+                  {tdsUrl && (
                     <div className="border-t border-line p-4">
                       <a
-                        href={product.tdsUrl}
-                        download
+                        href={tdsUrl}
                         target="_blank"
                         rel="noopener noreferrer"
+                        aria-label={`Open technical data sheet for ${product.name} in a new tab`}
                         className="group flex items-center gap-3 rounded-xl border border-line p-3 transition-colors hover:border-blue"
                       >
                         <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-blue text-white">
@@ -678,7 +762,7 @@ export default async function ProductDetailPage({
                             Technical data sheet
                           </span>
                           <span className="block text-[12px] text-ink/60">
-                            Download TDS
+                            View TDS
                           </span>
                         </span>
 

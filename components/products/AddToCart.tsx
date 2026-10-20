@@ -3,16 +3,13 @@
 import { Check, Minus, Plus, ShoppingCart } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { addToCart } from "@/lib/cart";
+import type { IPublishedProduct } from "@/types/admin/product.type";
 
 type Props = {
-  product: {
-    id: string;
-    slug: string;
-    sku: string;
-    name: string;
-    price: number;
-    image: string;
-  };
+  product: Pick<
+    IPublishedProduct,
+    "_id" | "slug" | "sku" | "name" | "price" | "primaryImage"
+  >;
   /** Units available. 0 disables the button. */
   stock: number;
 };
@@ -33,12 +30,12 @@ export default function AddToCart({ product, stock }: Props) {
     if (outOfStock) return;
     addToCart(
       {
-        productId: product.id,
+        productId: product._id,
         slug: product.slug,
         sku: product.sku,
         name: product.name,
         price: product.price,
-        image: product.image,
+        image: product.primaryImage?.url ?? "",
       },
       qty,
       stock,
