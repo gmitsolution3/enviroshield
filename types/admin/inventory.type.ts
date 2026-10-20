@@ -76,3 +76,30 @@ export interface InventoryMovementsResponse {
     pagination: InventoryPagination;
   };
 }
+
+export interface InventoryAdjustedProduct {
+  _id: string;
+  name: string;
+  slug: string;
+  sku: string;
+  stockQuantity: number;
+  lowStockThreshold: number;
+  status: string;
+}
+
+export type InventoryAdjustmentMovement = Omit<
+  InventoryMovement,
+  "performedBy"
+> & {
+  performedBy: string;
+};
+
+export interface InventoryAdjustmentResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    product: InventoryAdjustedProduct;
+    movement: InventoryAdjustmentMovement;
+  };
+}

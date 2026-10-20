@@ -23,8 +23,12 @@ axiosInstance.interceptors.request.use(async (config) => {
 
 axiosInstance.interceptors.response.use(
   (res) => res,
-  (error) => {
-    return Promise.reject(error.response.data);
+  (error: unknown) => {
+    if (axios.isAxiosError(error)) {
+      return Promise.reject(error.response?.data ?? error);
+    }
+
+    return Promise.reject(error);
   },
 );
 

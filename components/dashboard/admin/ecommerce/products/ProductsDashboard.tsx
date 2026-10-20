@@ -5,34 +5,32 @@ import {
   CheckCircle,
   ChevronLeft,
   ChevronRight,
+  Edit,
   Eye,
+  EyeOff,
   Filter,
+  History,
+  MoreHorizontal,
   Package,
+  PackagePlus,
   Plus,
   Search,
-  XCircle,
-  Edit,
-  MoreHorizontal,
-  Trash,
   Send,
-  EyeOff,
-  History,
+  Trash,
+  XCircle,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { tableFeatures, useTable, type ColumnDef } from "@tanstack/react-table";
+import {
+  tableFeatures,
+  useTable,
+  type ColumnDef,
+} from "@tanstack/react-table";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +40,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import DashboardButton from "@/components/dashboard/DashboardButton";
 import DashboardEmpty from "@/components/dashboard/DashboardEmpty";
@@ -49,15 +54,16 @@ import DashboardError from "@/components/dashboard/DashboardError";
 import DashboardLoading from "@/components/dashboard/DashboardLoading";
 
 import CreateProductModal from "./CreateProductModal";
-import EditProductModal from "./EditProductModal";
-import ViewProductModal from "./ViewProductModal";
 import DeleteProductDialog from "./DeleteProductDialog";
+import EditProductModal from "./EditProductModal";
 import ProductStatusDialog from "./ProductStatusDialog";
+import StockAdjustmentModal from "./StockAdjustmentModal";
+import ViewProductModal from "./ViewProductModal";
 
+import { Input } from "@/components/ui/input";
 import { useFetch } from "@/hooks/swr/useFetch";
 import type { IProduct, IProductResponse } from "@/types";
 import { formatDate } from "@/utils/formatDate";
-import { Input } from "@/components/ui/input";
 
 const features = tableFeatures({});
 
@@ -78,14 +84,19 @@ export default function ProductsDashboard() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
+  const [selectedProduct, setSelectedProduct] =
+    useState<IProduct | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const [productToDelete, setProductToDelete] = useState<IProduct | null>(null);
+  const [productToDelete, setProductToDelete] =
+    useState<IProduct | null>(null);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
-  const [productToChangeStatus, setProductToChangeStatus] = useState<
-    IProduct | null
-  >(null);
+  const [productToChangeStatus, setProductToChangeStatus] =
+    useState<IProduct | null>(null);
+  const [isStockAdjustmentOpen, setIsStockAdjustmentOpen] =
+    useState(false);
+  const [productToAdjust, setProductToAdjust] =
+    useState<IProduct | null>(null);
 
   // Debounce search input before requesting the API.
   useEffect(() => {
@@ -119,7 +130,15 @@ export default function ProductsDashboard() {
     params.set("sortOrder", sortOrder);
 
     return `/product?${params.toString()}`;
-  }, [debouncedSearch, status, inStock, currentPage, limit, sortBy, sortOrder]);
+  }, [
+    debouncedSearch,
+    status,
+    inStock,
+    currentPage,
+    limit,
+    sortBy,
+    sortOrder,
+  ]);
 
   const { data, isLoading, isError, refetch } =
     useFetch<IProductResponse>(endpoint);
@@ -187,6 +206,11 @@ export default function ProductsDashboard() {
     router.push(
       `/dashboard/ecommerce/products/${encodeURIComponent(product._id)}/inventory-movements`,
     );
+  };
+
+  const handleAdjustStock = (product: IProduct) => {
+    setProductToAdjust(product);
+    setIsStockAdjustmentOpen(true);
   };
 
   const handleDelete = (product: IProduct) => {
@@ -280,7 +304,8 @@ export default function ProductsDashboard() {
         const product = row.original;
         const isOutOfStock = product.stockQuantity <= 0;
         const isLowStock =
-          !isOutOfStock && product.stockQuantity <= product.lowStockThreshold;
+          !isOutOfStock &&
+          product.stockQuantity <= product.lowStockThreshold;
 
         return (
           <div className="min-w-[110px] space-y-1">
@@ -398,7 +423,9 @@ export default function ProductsDashboard() {
                     ) : (
                       <Send className="mr-2 h-4 w-4" />
                     )}
-                    {product.status === "published" ? "Unpublish" : "Publish"}
+                    {product.status === "published"
+                      ? "Unpublish"
+                      : "Publish"}
                   </DropdownMenuItem>
 
                   <DropdownMenuItem
@@ -407,6 +434,14 @@ export default function ProductsDashboard() {
                   >
                     <History className="mr-2 h-4 w-4" />
                     Inventory History
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => handleAdjustStock(product)}
+                  >
+                    <PackagePlus className="mr-2 h-4 w-4" />
+                    Adjust Stock
                   </DropdownMenuItem>
 
                   <DropdownMenuItem
@@ -464,13 +499,14 @@ export default function ProductsDashboard() {
           <h1 className="text-3xl font-bold">Product Management</h1>
 
           <p className="mt-1 text-muted-foreground">
-            Manage product information, pricing, stock, and publishing.
+            Manage product information, pricing, stock, and
+            publishing.
           </p>
 
           {meta && (
             <p className="mt-1 text-sm text-muted-foreground">
-              Showing {products.length} products on this page of {meta.total}{" "}
-              total products
+              Showing {products.length} products on this page of{" "}
+              {meta.total} total products
             </p>
           )}
         </div>
@@ -549,11 +585,17 @@ export default function ProductsDashboard() {
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="createdAt">Date created</SelectItem>
-                <SelectItem value="updatedAt">Last updated</SelectItem>
+                <SelectItem value="createdAt">
+                  Date created
+                </SelectItem>
+                <SelectItem value="updatedAt">
+                  Last updated
+                </SelectItem>
                 <SelectItem value="name">Product name</SelectItem>
                 <SelectItem value="price">Price</SelectItem>
-                <SelectItem value="stockQuantity">Stock quantity</SelectItem>
+                <SelectItem value="stockQuantity">
+                  Stock quantity
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -563,7 +605,10 @@ export default function ProductsDashboard() {
             <label className="text-xs font-medium text-muted-foreground">
               Order
             </label>
-            <Select value={sortOrder} onValueChange={handleSortOrderChange}>
+            <Select
+              value={sortOrder}
+              onValueChange={handleSortOrderChange}
+            >
               <SelectTrigger className="h-9 w-[115px] rounded-full border-blue/30 bg-muted/30 px-3 text-xs font-semibold text-navy">
                 <SelectValue placeholder="Order" />
               </SelectTrigger>
@@ -596,7 +641,9 @@ export default function ProductsDashboard() {
               : "Your product catalogue is empty. Add your first product to get started."
           }
           icon={<Package className="h-6 w-6" />}
-          actionLabel={hasActiveFilters ? undefined : "Add Your First Product"}
+          actionLabel={
+            hasActiveFilters ? undefined : "Add Your First Product"
+          }
           onAction={() => setIsCreateModalOpen(true)}
         />
       ) : (
@@ -647,7 +694,10 @@ export default function ProductsDashboard() {
               Rows per page:
             </span>
 
-            <Select value={String(limit)} onValueChange={handleLimitChange}>
+            <Select
+              value={String(limit)}
+              onValueChange={handleLimitChange}
+            >
               <SelectTrigger className="h-8 w-20 rounded-full border-blue/30 bg-muted/30 px-4 text-xs font-semibold text-navy">
                 <SelectValue />
               </SelectTrigger>
@@ -694,7 +744,7 @@ export default function ProductsDashboard() {
         revalidateKey={`/product?page=${currentPage}&limit=${limit}`}
         onSuccess={() => refetch()}
       />
-      
+
       {/* EDIT PRODUCT */}
       <EditProductModal
         product={selectedProduct}
@@ -728,6 +778,17 @@ export default function ProductsDashboard() {
         onClose={() => {
           setIsStatusDialogOpen(false);
           setProductToChangeStatus(null);
+        }}
+      />
+
+      {/* STOCK ADJUSTMENT */}
+      <StockAdjustmentModal
+        product={productToAdjust}
+        open={isStockAdjustmentOpen}
+        revalidateKey={endpoint}
+        onClose={() => {
+          setIsStockAdjustmentOpen(false);
+          setProductToAdjust(null);
         }}
       />
 
