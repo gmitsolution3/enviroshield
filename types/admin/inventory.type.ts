@@ -1,3 +1,5 @@
+import {IProduct} from "@/types";
+
 export interface InventoryStats {
   totalProducts: number;
   lowStockProducts: number;
@@ -56,7 +58,7 @@ export interface InventoryMovementPerformer {
 
 export interface InventoryMovement {
   _id: string;
-  productId: string;
+  productId: IProduct;
   movementType: InventoryMovementType;
   quantity: number;
   previousStock: number;

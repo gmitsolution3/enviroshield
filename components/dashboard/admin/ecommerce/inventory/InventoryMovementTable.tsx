@@ -50,7 +50,9 @@ export default function InventoryMovementTable({
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-bold text-navy">{title}</h2>
-            <p className="mt-1 text-sm text-slate-500">{description}</p>
+            <p className="mt-1 text-sm text-slate-500">
+              {description}
+            </p>
           </div>
           <span className="text-xs font-medium text-slate-400">
             {pagination?.total ?? 0} movements
@@ -87,12 +89,15 @@ export default function InventoryMovementTable({
             No inventory movements
           </p>
           <p className="mt-1 text-sm text-slate-500">
-            Movement history will appear here when stock changes are recorded.
+            Movement history will appear here when stock changes are
+            recorded.
           </p>
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className={`w-full ${showProductId ? "min-w-[1200px]" : "min-w-[1050px]"}`}>
+          <table
+            className={`w-full ${showProductId ? "min-w-[1200px]" : "min-w-[1050px]"}`}
+          >
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/80">
                 <th className="whitespace-nowrap px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
@@ -103,6 +108,9 @@ export default function InventoryMovementTable({
                     Product ID
                   </th>
                 )}
+                <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Product Name
+                </th>
                 <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
                   Movement Type
                 </th>
@@ -138,10 +146,14 @@ export default function InventoryMovementTable({
 
       {movements.length > 0 && (
         <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/60 px-5 py-4 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <span>{(pagination?.total ?? 0).toLocaleString("en-BD")} total movements</span>
+          <span>
+            {(pagination?.total ?? 0).toLocaleString("en-BD")} total
+            movements
+          </span>
           <div className="flex items-center justify-between gap-3 sm:justify-end">
             <span>
-              Page {pagination?.page ?? page} of {Math.max(1, totalPages)}
+              Page {pagination?.page ?? page} of{" "}
+              {Math.max(1, totalPages)}
             </span>
             <div className="flex gap-2">
               <DashboardButton
@@ -187,9 +199,12 @@ function MovementRow({
       </td>
       {showProductId && (
         <td className="px-5 py-4 font-mono text-xs text-slate-600">
-          {movement.productId || "Unavailable"}
+          {movement.productId._id || "Unavailable"}
         </td>
       )}
+      <td className="px-5 py-4 font-mono text-xs text-slate-600">
+        {movement.productId?.name || "Product name unavailable"}
+      </td>
       <td className="px-5 py-4">
         <Badge
           variant="outline"
