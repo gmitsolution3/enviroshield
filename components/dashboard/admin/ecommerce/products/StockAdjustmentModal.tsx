@@ -149,7 +149,7 @@ export default function StockAdjustmentModal({
     setIsSubmitting(true);
 
     try {
-      const response = await axiosInstance.patch<InventoryAdjustmentResponse>(
+      const response = await axiosInstance.post<InventoryAdjustmentResponse>(
         `/inventory/${encodeURIComponent(product._id)}/adjust`,
         {
           movementType,
