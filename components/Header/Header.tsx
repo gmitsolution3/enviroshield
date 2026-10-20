@@ -1,8 +1,10 @@
 "use client";
 
-import { Menu } from "lucide-react";
+import CartDrawer from "@/components/cart/CartDrawer";
+import { useCart } from "@/components/cart/CartProvider";
+import { Menu, ShoppingBag } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { EASE } from "../animations/variants";
 import Container from "../Container";
 import Logo from "../Logo";
@@ -13,8 +15,12 @@ import TopHeaderBar from "./TopHeaderBar";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const cartTriggerRef = useRef<HTMLButtonElement>(null);
   const [scrolled, setScrolled] = useState(false);
   const reduce = useReducedMotion();
+  const { count } = useCart();
+  const closeCart = useCallback(() => setCartOpen(false), []);
 
   const links: { label: string; href: string }[] = [
     { label: "Home", href: "/" },
@@ -96,6 +102,26 @@ export default function Header() {
           <DesktopNavbar links={links} />
 
           <button
+            ref={cartTriggerRef}
+            type="button"
+            onClick={() => setCartOpen(true)}
+            aria-label={`Open cart${count ? `, ${count} ${count === 1 ? "item" : "items"}` : ", empty"}`}
+            aria-haspopup="dialog"
+            aria-expanded={cartOpen}
+            className="relative mr-3 inline-grid size-10 shrink-0 place-items-center rounded-full text-navy transition-colors hover:bg-mist hover:text-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue max-[900px]:mr-3"
+          >
+            <ShoppingBag size={21} aria-hidden="true" />
+            {count > 0 && (
+              <span
+                aria-hidden="true"
+                className="absolute -right-0.5 -top-0.5 grid min-w-[19px] place-items-center rounded-full bg-blue px-1 text-[10px] font-bold leading-[19px] text-white"
+              >
+                {count > 99 ? "99+" : count}
+              </span>
+            )}
+          </button>
+
+          <button
             className="block text-navy min-[901px]:hidden"
             type="button"
             aria-label="Open navigation"
@@ -112,6 +138,11 @@ export default function Header() {
         open={open}
         links={links}
         onClose={() => setOpen(false)}
+      />
+      <CartDrawer
+        open={cartOpen}
+        onClose={closeCart}
+        triggerRef={cartTriggerRef}
       />
     </>
   );

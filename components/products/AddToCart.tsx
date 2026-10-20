@@ -36,6 +36,8 @@ export default function AddToCart({ product, stock }: Props) {
         name: product.name,
         price: product.price,
         image: product.primaryImage?.url ?? "",
+        imageAlt: product.primaryImage?.alt || product.name,
+        stockQuantity: stock,
       },
       qty,
       stock,

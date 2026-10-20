@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FileText, ImageOff } from "lucide-react";
 
 import { Button } from "@/components/Button";
+import AddToCart from "@/components/products/AddToCart";
 import { products as staticProducts } from "@/lib/data/content";
 import { getProductImageUrl } from "@/lib/products/images";
 import { getTrustedTdsUrl } from "@/lib/products/tds";
@@ -107,6 +108,9 @@ export function ProductCard({ product }: { product: ProductCardProduct }) {
           </div>
         )}
 
+        {isPublishedProduct && (
+          <AddToCart product={product} stock={availableQuantity} />
+        )}
         <Button href={detailsHref} variant="outline" fullWidth className="mt-2">View details</Button>
       </div>
     </article>
