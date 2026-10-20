@@ -95,7 +95,8 @@ const formSchema = z.object({
   seo: seoSchema,
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormInputValues = z.input<typeof formSchema>;
+type FormValues = z.output<typeof formSchema>;
 
 type EditProductModalProps = {
   product: IProduct | null;
@@ -265,7 +266,7 @@ export default function EditProductModal({
     watch,
     trigger,
     formState: { errors },
-  } = useForm<FormValues>({
+  } = useForm<FormInputValues, unknown, FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });

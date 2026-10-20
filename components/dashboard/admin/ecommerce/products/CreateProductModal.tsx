@@ -95,7 +95,8 @@ const formSchema = z.object({
   seo: seoSchema,
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormInputValues = z.input<typeof formSchema>;
+type FormValues = z.output<typeof formSchema>;
 
 type CreateProductModalProps = {
   isModalOpen: boolean;
@@ -217,12 +218,12 @@ export default function CreateProductModal({
     watch,
     trigger,
     formState: { errors },
-  } = useForm<FormValues>({
+  } = useForm<FormInputValues, unknown, FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
 
-  const { clearDraft } = usePersistentFormDraft<FormValues>({
+  const { clearDraft } = usePersistentFormDraft<FormInputValues>({
     storageKey: "enviroshield:draft:create-product",
     watch,
     reset,
