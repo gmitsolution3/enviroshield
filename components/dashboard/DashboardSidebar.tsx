@@ -42,6 +42,49 @@ interface DashboardSidebarProps {
   navigation: DashboardNavItem[];
 }
 
+/**
+ * Single source of truth for menu, sub menu and settings items.
+ * Every state (default / hover / active / collapsed) lives here,
+ * so all levels always look and behave the same.
+ * The `!` modifiers make sure the shadcn defaults of
+ * SidebarMenuButton / SidebarMenuSubButton never win.
+ */
+const navItemStyles = (active: boolean) =>
+  cn(
+    // base
+    "relative h-9 gap-2.5 rounded-md px-2.5",
+    "text-[14px] !font-medium !text-ink/80",
+    "transition-colors duration-200",
+
+    // icon colour (sidebar's SubButton forces its own colour on child svgs,
+    // so it has to be set explicitly on the svg, not just inherited)
+    "[&>svg]:!text-ink/80",
+
+    // hover
+    "hover:!bg-blue/10 hover:!text-blue hover:[&>svg]:!text-blue",
+
+    // collapsed (icon) mode
+    "group-data-[collapsible=icon]:justify-center",
+    "group-data-[collapsible=icon]:px-0",
+
+    // active
+    active && [
+      "!bg-blue/10 !text-blue !font-semibold [&>svg]:!text-blue",
+      "hover:!bg-blue/10",
+      "before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5",
+      "before:-translate-y-1/2 before:rounded-full before:bg-blue",
+    ],
+  );
+
+// Icon colour is controlled by navItemStyles via [&>svg] (default / hover / active).
+const navIconStyles = "h-[15px] w-[15px] shrink-0";
+
+const isPathActive = (pathname: string, href?: string) => {
+  if (!href) return false;
+  if (href === "/dashboard") return pathname === "/dashboard";
+  return pathname === href || pathname.startsWith(`${href}/`);
+};
+
 export function DashboardSidebar({
   role,
   user,
@@ -55,11 +98,7 @@ export function DashboardSidebar({
 
   useEffect(() => {
     const activeGroup = navigation.find((item) =>
-      item.children?.some(
-        (child) =>
-          pathname === child.href ||
-          pathname.startsWith(`${child.href}/`),
-      ),
+      item.children?.some((child) => isPathActive(pathname, child.href)),
     );
 
     if (activeGroup) {
@@ -77,18 +116,20 @@ export function DashboardSidebar({
     .slice(0, 2)
     .toUpperCase();
 
+  const settingsActive = pathname.startsWith("/dashboard/settings");
+
   return (
     <Sidebar
       variant="sidebar"
       collapsible="icon"
-      className="group border-r border-line bg-white"
+      className="border-r border-line bg-white"
     >
       {/* Brand */}
       <SidebarHeader className="h-[64px] border-b border-line/80 p-0">
         <Link
           href="/dashboard"
           className="
-            group flex h-full w-full items-center gap-2.5 px-3.5
+            flex h-full w-full items-center gap-2.5 px-3.5
             transition-colors duration-200
             hover:bg-mist/60
             group-data-[collapsible=icon]:justify-center
@@ -131,21 +172,13 @@ export function DashboardSidebar({
             const Icon = dashboardIcons[item.icon];
 
             const hasActiveChild =
-              item.children?.some(
-                (child) =>
-                  pathname === child.href ||
-                  pathname.startsWith(`${child.href}/`),
+              item.children?.some((child) =>
+                isPathActive(pathname, child.href),
               ) ?? false;
 
             const isActive = item.children
               ? hasActiveChild
-              : item.href === "/dashboard"
-                ? pathname === "/dashboard"
-                : Boolean(
-                    item.href &&
-                    (pathname === item.href ||
-                      pathname.startsWith(`${item.href}/`)),
-                  );
+              : isPathActive(pathname, item.href);
 
             const isExpanded =
               expandedItems[item.title] ?? hasActiveChild;
@@ -164,22 +197,9 @@ export function DashboardSidebar({
                           [item.title]: !isExpanded,
                         }))
                       }
-                      className={cn(
-                        "relative h-9 rounded-md px-2.5",
-                        "text-[14px] !font-medium text-ink/80",
-                        "transition-all duration-200",
-                        "hover:bg-blue/[0.10] hover:text-blue",
-                        isActive && "!bg-blue/[0.10]",
-                        isActive && "!text-blue",
-                        isActive && "!font-semibold",
-                        isActive && "hover:bg-blue/[0.09]",
-                        isActive &&
-                          "before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-blue",
-                        "group-data-[collapsible=icon]:justify-center",
-                        "group-data-[collapsible=icon]:px-0",
-                      )}
+                      className={navItemStyles(isActive)}
                     >
-                      <Icon className="h-[15px] w-[15px] shrink-0" />
+                      <Icon className={navIconStyles} />
 
                       <span className="min-w-0 flex-1 truncate text-left group-data-[collapsible=icon]:hidden">
                         {item.title}
@@ -195,48 +215,26 @@ export function DashboardSidebar({
                     </SidebarMenuButton>
 
                     {isExpanded && (
-                      <SidebarMenuSub className="ml-4 mr-0 mt-1 border-l border-line/80 pl-3">
+                      <SidebarMenuSub className="ml-4 mr-0 mt-1 gap-0.5 border-l border-line/80 pl-3">
                         {item.children.map((child) => {
-                          const childIsActive =
-                            pathname === child.href ||
-                            pathname.startsWith(`${child.href}/`);
+                          const childIsActive = isPathActive(
+                            pathname,
+                            child.href,
+                          );
+                          const ChildIcon = child.icon
+                            ? dashboardIcons[child.icon]
+                            : null;
 
                           return (
                             <SidebarMenuSubItem key={child.href}>
                               <SidebarMenuSubButton
                                 render={<Link href={child.href} />}
                                 isActive={childIsActive}
-                                className={cn(
-                                  "relative h-9 rounded-md px-2.5",
-                                  "text-[14px] !font-medium text-ink/80",
-                                  "transition-all duration-200",
-                                  "hover:bg-blue/[0.10] hover:text-blue",
-                                  childIsActive && "!bg-blue/[0.10]",
-                                  childIsActive && "!text-blue",
-                                  childIsActive && "!font-semibold",
-                                  childIsActive &&
-                                    "hover:bg-blue/[0.10]",
-                                  childIsActive &&
-                                    "before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-blue",
-                                  "group-data-[collapsible=icon]:justify-center",
-                                  "group-data-[collapsible=icon]:px-0",
-                                )}
+                                className={navItemStyles(childIsActive)}
                               >
-                                {child.icon &&
-                                  (() => {
-                                    const ChildIcon =
-                                      dashboardIcons[child.icon];
-
-                                    return (
-                                      <ChildIcon
-                                        className={cn(
-                                          "h-[15px] w-[15px] shrink-0 !text-ink/80",
-                                          childIsActive &&
-                                            "!text-blue",
-                                        )}
-                                      />
-                                    );
-                                  })()}
+                                {ChildIcon && (
+                                  <ChildIcon className={navIconStyles} />
+                                )}
 
                                 <span className="truncate">
                                   {child.title}
@@ -250,32 +248,16 @@ export function DashboardSidebar({
                   </>
                 ) : (
                   <SidebarMenuButton
+                    render={<Link href={item.href!} />}
                     isActive={isActive}
                     tooltip={item.title}
-                    className={cn(
-                      "relative h-9 rounded-md px-2.5",
-                      "text-[14px] !font-medium text-ink/80",
-                      "transition-all duration-200",
-                      "hover:bg-blue/[0.10] hover:text-blue",
-                      isActive &&
-                        "bg-blue/[0.10] text-blue font-semibold",
-                      isActive && "hover:bg-blue/[0.10]",
-                      isActive &&
-                        "before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-blue",
-                      "group-data-[collapsible=icon]:justify-center",
-                      "group-data-[collapsible=icon]:px-0",
-                    )}
+                    className={navItemStyles(isActive)}
                   >
-                    <Link
-                      href={item.href!}
-                      className="flex min-w-0 w-full items-center gap-2.5"
-                    >
-                      <Icon className="h-[15px] w-[15px] shrink-0" />
+                    <Icon className={navIconStyles} />
 
-                      <span className="truncate group-data-[collapsible=icon]:hidden">
-                        {item.title}
-                      </span>
-                    </Link>
+                    <span className="truncate group-data-[collapsible=icon]:hidden">
+                      {item.title}
+                    </span>
                   </SidebarMenuButton>
                 )}
               </SidebarMenuItem>
@@ -286,43 +268,22 @@ export function DashboardSidebar({
 
       {/* Bottom utility + account area */}
       <SidebarFooter className="mt-auto border-t border-line/80 p-2.5">
-        <div className="mb-2 space-y-0.5">
-          <Link href="/dashboard/settings">
+        <SidebarMenu className="mb-2 gap-0.5">
+          <SidebarMenuItem>
             <SidebarMenuButton
-              isActive={pathname.startsWith("/dashboard/settings")}
+              render={<Link href="/dashboard/settings" />}
+              isActive={settingsActive}
               tooltip="Settings"
-              className={cn(
-                "relative h-9 rounded-md px-2.5",
-                "text-[14px] !font-medium text-ink/80",
-                "transition-all duration-200",
-                "hover:bg-blue/[0.10] hover:text-blue",
-
-                // Active state
-                pathname.startsWith("/dashboard/settings") &&
-                  "!bg-blue/[0.10]",
-                pathname.startsWith("/dashboard/settings") &&
-                  "!text-blue",
-                pathname.startsWith("/dashboard/settings") &&
-                  "!font-semibold",
-                pathname.startsWith("/dashboard/settings") &&
-                  "hover:bg-blue/[0.09]",
-
-                // Reference-style left active indicator
-                pathname.startsWith("/dashboard/settings") &&
-                  "before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-blue",
-
-                // Collapsed state
-                "group-data-[collapsible=icon]:justify-center",
-                "group-data-[collapsible=icon]:px-0",
-              )}
+              className={navItemStyles(settingsActive)}
             >
-              <Settings className="h-[14px] w-[14px] shrink-0" />
-              <span className="group-data-[collapsible=icon]:hidden">
+              <Settings className={navIconStyles} />
+
+              <span className="truncate group-data-[collapsible=icon]:hidden">
                 Settings
               </span>
             </SidebarMenuButton>
-          </Link>
-        </div>
+          </SidebarMenuItem>
+        </SidebarMenu>
 
         {/* User */}
         <Link
