@@ -54,18 +54,27 @@ type OrderDetailsModalProps = {
 export default function OrderDetailsModal({ order, open, onClose }: OrderDetailsModalProps) {
   return (
     <Dialog open={open && Boolean(order)} onOpenChange={(value) => !value && onClose()}>
-      <DialogContent className="max-h-[92vh] !max-w-4xl overflow-y-auto border-0 bg-[#f8fafc] p-0 shadow-2xl">
+      <DialogContent className="max-h-[92vh] !max-w-6xl overflow-hidden border-0 bg-[#f8fafc] p-0 shadow-2xl">
         {order && (
-          <>
-            <DialogHeader className="bg-navy px-6 py-6 pr-14 text-white sm:px-8">
-              <DialogDescription className="text-white/70">Order placed {formatOrderDate(order.createdAt)}</DialogDescription>
-              <div className="flex flex-wrap items-center gap-3">
-                <DialogTitle className="text-xl font-bold">Order {order.orderNumber}</DialogTitle>
-                <StatusBadge status={order.status} />
-              </div>
+          <div className="flex max-h-[92vh] flex-col overflow-hidden">
+            <DialogHeader className="sr-only">
+              <DialogTitle>Order Details</DialogTitle>
+              <DialogDescription>Complete customer, delivery, item, payment, and order information.</DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-5 p-5 sm:p-8">
+            <section className="relative shrink-0 overflow-hidden bg-navy px-6 py-6 text-white sm:px-8 sm:py-8">
+              <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-blue/20 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-blue/10 blur-3xl" />
+              <div className="relative space-y-2 pr-8">
+                <p className="text-sm text-white/70">Order placed {formatOrderDate(order.createdAt)}</p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h2 className="text-2xl font-bold">Order {order.orderNumber}</h2>
+                  <StatusBadge status={order.status} />
+                </div>
+              </div>
+            </section>
+
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5 sm:p-8">
               <section className="rounded-2xl border bg-white p-5">
                 <h2 className="mb-4 font-semibold text-navy">Customer</h2>
                 <div className="grid gap-4 sm:grid-cols-3">
@@ -135,7 +144,7 @@ export default function OrderDetailsModal({ order, open, onClose }: OrderDetails
                 </section>
               )}
             </div>
-          </>
+          </div>
         )}
       </DialogContent>
     </Dialog>

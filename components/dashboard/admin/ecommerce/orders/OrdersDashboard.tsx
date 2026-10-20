@@ -1,6 +1,16 @@
 "use client";
 
-import { CalendarDays, ChevronLeft, ChevronRight, Eye, MoreHorizontal, Package, Ban, CheckCircle, Truck } from "lucide-react";
+import {
+  Ban,
+  CalendarDays,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  MoreHorizontal,
+  Package,
+  Truck,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -10,12 +20,28 @@ import DashboardError from "@/components/dashboard/DashboardError";
 import DashboardLoading from "@/components/dashboard/DashboardLoading";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useFetch } from "@/hooks/swr/useFetch";
 import type { AdminOrder, OrdersResponse } from "@/types";
+import {
+  CancelOrderModal,
+  MarkPaymentPaidModal,
+  UpdateOrderStatusModal,
+} from "./OrderActionModals";
+import {
+  formatOrderAmount,
+  formatOrderDate,
+  prettyOrderStatus,
+} from "./orderActionUtils";
 import OrderDetailsModal from "./OrderDetailsModal";
-import { CancelOrderModal, MarkPaymentPaidModal, UpdateOrderStatusModal } from "./OrderActionModals";
-import { formatOrderAmount, formatOrderDate, prettyOrderStatus } from "./orderActionUtils";
 
 const PAGE_SIZE = 10;
 
@@ -35,9 +61,24 @@ const paymentStatusClasses: Record<string, string> = {
   refunded: "border-slate-200 bg-slate-100 text-slate-700",
 };
 
-function StatusBadge({ status, classes }: { status: string; classes: Record<string, string> }) {
+function StatusBadge({
+  status,
+  classes,
+}: {
+  status: string;
+  classes: Record<string, string>;
+}) {
   return (
-    <Badge variant="outline" className={classes[status] ?? "capitalize"}>
+    <Badge
+      variant={
+        status === "pending" ||
+        status === "failed" ||
+        status === "cancelled"
+          ? "secondary"
+          : "default"
+      }
+      className={`gap-1 rounded-full px-3 py-1 text-[11px] font-semibold capitalize ${classes[status] ?? ""}`}
+    >
       {prettyOrderStatus(status)}
     </Badge>
   );
@@ -45,23 +86,34 @@ function StatusBadge({ status, classes }: { status: string; classes: Record<stri
 
 export default function OrdersDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
-  const [activeAction, setActiveAction] = useState<"details" | "status" | "payment" | "cancel" | null>(null);
+  const [selectedOrder, setSelectedOrder] =
+    useState<AdminOrder | null>(null);
+  const [activeAction, setActiveAction] = useState<
+    "details" | "status" | "payment" | "cancel" | null
+  >(null);
   const endpoint = `/order?page=${currentPage}&limit=${PAGE_SIZE}`;
-  const { data, isLoading, isError, refetch } = useFetch<OrdersResponse>(
-    endpoint,
-  );
+  const { data, isLoading, isError, refetch } =
+    useFetch<OrdersResponse>(endpoint);
 
   const closeAction = () => {
     setActiveAction(null);
     setSelectedOrder(null);
   };
 
-  const handleActionSuccess = async (updatedOrder: AdminOrder, message: string) => {
+  const handleActionSuccess = async (
+    updatedOrder: AdminOrder,
+    message: string,
+  ) => {
     await refetch(
-      (current) => current
-        ? { ...current, data: current.data.map((item) => item._id === updatedOrder._id ? updatedOrder : item) }
-        : current,
+      (current) =>
+        current
+          ? {
+              ...current,
+              data: current.data.map((item) =>
+                item._id === updatedOrder._id ? updatedOrder : item,
+              ),
+            }
+          : current,
       { revalidate: false },
     );
     setSelectedOrder(updatedOrder);
@@ -72,92 +124,203 @@ export default function OrdersDashboard() {
   };
 
   if (isLoading && !data) return <DashboardLoading />;
-  if (isError && !data) return <DashboardError onRetry={() => void refetch()} />;
+  if (isError && !data)
+    return <DashboardError onRetry={() => void refetch()} />;
 
   const orders = data?.data ?? [];
   const meta = data?.meta;
   const totalPages = meta?.totalPages ?? 1;
 
   return (
-    <section className="container mx-auto space-y-6 px-5 py-8 lg:px-0">
-      <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+    <section className="container mx-auto px-5 py-8 lg:px-0">
+      <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-blue">Ecommerce</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-navy">Orders</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Review customer orders, payment, and fulfillment status.</p>
+          <h1 className="text-3xl font-bold">Order Management</h1>
+          <p className="mt-1 text-muted-foreground">
+            Review customer orders, payment, and fulfillment status.
+          </p>
+          {meta && (
+            <p className="mt-1 text-sm text-muted-foreground">
+              Showing {orders.length} of {meta.total} orders
+            </p>
+          )}
         </div>
-        <p className="text-sm text-muted-foreground">
-          {meta ? `${meta.total.toLocaleString()} orders` : ""}
-        </p>
       </header>
 
-      <Card className="overflow-hidden p-0">
-        {orders.length === 0 ? (
-          <div className="p-4">
-            <DashboardEmpty
-              title="No orders yet"
-              description="Customer orders will appear here when they are placed."
-              icon={<Package className="h-7 w-7 text-muted-foreground" />}
-            />
-          </div>
-        ) : (
+      {orders.length === 0 ? (
+        <DashboardEmpty
+          title="No orders found"
+          description="Customer orders will appear here when they are placed."
+          icon={<Package className="h-6 w-6" />}
+        />
+      ) : (
+        <Card className="overflow-hidden border p-0 shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[980px] text-left text-sm">
-              <thead className="border-b bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
+            <table className="w-full min-w-[980px]">
+              <thead className="border-b bg-muted/50">
                 <tr>
-                  <th className="px-5 py-4 font-semibold">Order</th>
-                  <th className="px-5 py-4 font-semibold">Customer</th>
-                  <th className="px-5 py-4 font-semibold">Items</th>
-                  <th className="px-5 py-4 font-semibold">Date</th>
-                  <th className="px-5 py-4 font-semibold">Amount</th>
-                  <th className="px-5 py-4 font-semibold">Payment</th>
-                  <th className="px-5 py-4 font-semibold">Status</th>
-                  <th className="px-5 py-4 text-right font-semibold">Actions</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-muted-foreground">
+                    Order
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-muted-foreground">
+                    Customer
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-muted-foreground">
+                    Items
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-muted-foreground">
+                    Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-muted-foreground">
+                    Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-muted-foreground">
+                    Payment
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-muted-foreground">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-muted-foreground">
+                    Actions
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody>
                 {orders.map((order) => {
-                  const units = order.items.reduce((sum, item) => sum + item.quantity, 0);
+                  const units = order.items.reduce(
+                    (sum, item) => sum + item.quantity,
+                    0,
+                  );
 
                   return (
-                    <tr key={order._id} className="align-top transition-colors hover:bg-muted/20">
-                      <td className="px-5 py-4">
-                        <p className="font-semibold text-navy">{order.orderNumber}</p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {order.paymentMethod === "cod" ? "Cash on delivery" : prettyOrderStatus(order.paymentMethod)}
+                    <tr
+                      key={order._id}
+                      className="border-b transition-colors last:border-0 hover:bg-muted/30"
+                    >
+                      <td className="px-6 py-4">
+                        <p className="font-medium text-navy">
+                          {order.orderNumber}
+                        </p>
+                        <p className="mt-1 text-[11px] text-slate-400">
+                          {order.paymentMethod === "cod"
+                            ? "Cash on delivery"
+                            : prettyOrderStatus(order.paymentMethod)}
                         </p>
                       </td>
-                      <td className="px-5 py-4">
-                        <p className="font-medium">{order.customer.name}</p>
-                        <p className="mt-1 text-xs text-muted-foreground">{order.customer.phone}</p>
-                        <p className="mt-0.5 text-xs text-muted-foreground">{order.customer.email}</p>
+                      <td className="px-6 py-4">
+                        <p className="font-medium">
+                          {order.customer.name}
+                        </p>
+                        <p className="mt-1 text-[11px] text-slate-400">
+                          {order.customer.phone}
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-slate-400">
+                          {order.customer.email}
+                        </p>
                       </td>
-                      <td className="px-5 py-4">
-                        <p className="font-medium">{order.items.length} {order.items.length === 1 ? "item" : "items"}</p>
-                        <p className="mt-1 text-xs text-muted-foreground">{units} {units === 1 ? "unit" : "units"}</p>
+                      <td className="px-6 py-4">
+                        <p className="font-medium">
+                          {order.items.length}{" "}
+                          {order.items.length === 1
+                            ? "item"
+                            : "items"}
+                        </p>
+                        <p className="mt-1 text-[11px] text-slate-400">
+                          {units} {units === 1 ? "unit" : "units"}
+                        </p>
                       </td>
-                      <td className="px-5 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-2 text-muted-foreground">
-                          <CalendarDays className="h-4 w-4" />{formatOrderDate(order.createdAt)}
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                          <CalendarDays className="h-4 w-4" />
+                          {formatOrderDate(order.createdAt)}
                         </span>
                       </td>
-                      <td className="px-5 py-4 font-semibold whitespace-nowrap">{formatOrderAmount(order.totalAmount, order.currency)}</td>
-                      <td className="px-5 py-4">
-                        <StatusBadge status={order.paymentStatus} classes={paymentStatusClasses} />
+                      <td className="whitespace-nowrap px-6 py-4 font-medium">
+                        {formatOrderAmount(
+                          order.totalAmount,
+                          order.currency,
+                        )}
                       </td>
-                      <td className="px-5 py-4">
-                        <StatusBadge status={order.status} classes={orderStatusClasses} />
+                      <td className="px-6 py-4">
+                        <StatusBadge
+                          status={order.paymentStatus}
+                          classes={paymentStatusClasses}
+                        />
                       </td>
-                      <td className="px-5 py-4 text-right">
+                      <td className="px-6 py-4">
+                        <StatusBadge
+                          status={order.status}
+                          classes={orderStatusClasses}
+                        />
+                      </td>
+                      <td className="px-6 py-4">
                         <DropdownMenu>
-                          <DropdownMenuTrigger className="inline-flex h-9 w-9 items-center justify-center rounded-lg border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" aria-label={`Actions for order ${order.orderNumber}`}>
-                            <MoreHorizontal className="h-4 w-4" />
+                          <DropdownMenuTrigger>
+                            <DashboardButton
+                              variant="outline"
+                              className="h-8 w-8 rounded-lg border-blue/30 bg-muted/30 p-0 text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
+                              icon={
+                                <MoreHorizontal className="h-4 w-4" />
+                              }
+                              ariaLabel={`Actions for order ${order.orderNumber}`}
+                            />
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-52">
-                            <DropdownMenuItem onClick={() => { setSelectedOrder(order); setActiveAction("details"); }}><Eye /> View Details</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => { setSelectedOrder(order); setActiveAction("status"); }}><Truck /> Update Order Status</DropdownMenuItem>
-                            <DropdownMenuItem disabled={order.paymentStatus === "paid"} onClick={() => { setSelectedOrder(order); setActiveAction("payment"); }}><CheckCircle /> Mark Payment as Paid</DropdownMenuItem>
-                            <DropdownMenuItem variant="destructive" disabled={order.status === "cancelled"} onClick={() => { setSelectedOrder(order); setActiveAction("cancel"); }}><Ban /> Cancel Order</DropdownMenuItem>
+                          <DropdownMenuContent
+                            align="end"
+                            className="w-52"
+                          >
+                            <DropdownMenuGroup>
+                              <DropdownMenuLabel>
+                                Actions
+                              </DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() => {
+                                  setSelectedOrder(order);
+                                  setActiveAction("details");
+                                }}
+                              >
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() => {
+                                  setSelectedOrder(order);
+                                  setActiveAction("status");
+                                }}
+                              >
+                                <Truck className="mr-2 h-4 w-4" />
+                                Update Order Status
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="cursor-pointer"
+                                disabled={
+                                  order.paymentStatus === "paid"
+                                }
+                                onClick={() => {
+                                  setSelectedOrder(order);
+                                  setActiveAction("payment");
+                                }}
+                              >
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                Mark Payment as Paid
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="cursor-pointer text-red-600 focus:text-red-600"
+                                disabled={
+                                  order.status === "cancelled"
+                                }
+                                onClick={() => {
+                                  setSelectedOrder(order);
+                                  setActiveAction("cancel");
+                                }}
+                              >
+                                <Ban className="mr-2 h-4 w-4" />
+                                Cancel Order
+                              </DropdownMenuItem>
+                            </DropdownMenuGroup>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </td>
@@ -167,42 +330,79 @@ export default function OrdersDashboard() {
               </tbody>
             </table>
           </div>
-        )}
+        </Card>
+      )}
 
-        {orders.length > 0 && (
-          <div className="flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted-foreground">
-              Page {meta?.page ?? currentPage} of {Math.max(1, totalPages)}
-              {meta ? ` · ${meta.total.toLocaleString()} total orders` : ""}
-            </p>
-            <div className="flex items-center gap-2">
-              <DashboardButton
-                variant="outline"
-                className="h-9 rounded-lg px-3"
-                disabled={currentPage <= 1 || isLoading}
-                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-                ariaLabel="Previous page"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </DashboardButton>
-              <DashboardButton
-                variant="outline"
-                className="h-9 rounded-lg px-3"
-                disabled={currentPage >= totalPages || isLoading}
-                onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-                ariaLabel="Next page"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </DashboardButton>
-            </div>
+      {orders.length > 0 && (
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            Rows per page: {PAGE_SIZE}
+          </p>
+          <div className="flex items-center gap-2 self-end sm:self-auto">
+            <DashboardButton
+              variant="outline"
+              className="h-8 w-8 rounded-full border-blue bg-blue p-0 text-white shadow-[0_3px_10px_rgba(1,110,220,0.18)] transition-[background-color,box-shadow] duration-200 hover:bg-[#005cb9] hover:text-white hover:shadow-[0_4px_12px_rgba(1,110,220,0.24)] disabled:pointer-events-none disabled:opacity-50"
+              disabled={currentPage <= 1 || isLoading}
+              onClick={() =>
+                setCurrentPage((page) => Math.max(1, page - 1))
+              }
+              icon={<ChevronLeft className="h-4 w-4" />}
+              ariaLabel="Previous page"
+            />
+            <span className="text-sm text-muted-foreground">
+              Page {meta?.page ?? currentPage} of{" "}
+              {Math.max(1, totalPages)}
+            </span>
+            <DashboardButton
+              variant="outline"
+              className="h-8 w-8 rounded-full border-blue bg-blue p-0 text-white shadow-[0_3px_10px_rgba(1,110,220,0.18)] transition-[background-color,box-shadow] duration-200 hover:bg-[#005cb9] hover:text-white hover:shadow-[0_4px_12px_rgba(1,110,220,0.24)] disabled:pointer-events-none disabled:opacity-50"
+              disabled={currentPage >= totalPages || isLoading}
+              onClick={() =>
+                setCurrentPage((page) =>
+                  Math.min(totalPages, page + 1),
+                )
+              }
+              icon={<ChevronRight className="h-4 w-4" />}
+              ariaLabel="Next page"
+            />
           </div>
-        )}
-      </Card>
+        </div>
+      )}
 
-      {activeAction === "details" && <OrderDetailsModal order={selectedOrder} open onClose={closeAction} />}
-      {activeAction === "status" && <UpdateOrderStatusModal order={selectedOrder} open revalidateKey={endpoint} onClose={closeAction} onSuccess={handleActionSuccess} />}
-      {activeAction === "payment" && <MarkPaymentPaidModal order={selectedOrder} open revalidateKey={endpoint} onClose={closeAction} onSuccess={handleActionSuccess} />}
-      {activeAction === "cancel" && <CancelOrderModal order={selectedOrder} open revalidateKey={endpoint} onClose={closeAction} onSuccess={handleActionSuccess} />}
+      {activeAction === "details" && (
+        <OrderDetailsModal
+          order={selectedOrder}
+          open
+          onClose={closeAction}
+        />
+      )}
+      {activeAction === "status" && (
+        <UpdateOrderStatusModal
+          order={selectedOrder}
+          open
+          revalidateKey={endpoint}
+          onClose={closeAction}
+          onSuccess={handleActionSuccess}
+        />
+      )}
+      {activeAction === "payment" && (
+        <MarkPaymentPaidModal
+          order={selectedOrder}
+          open
+          revalidateKey={endpoint}
+          onClose={closeAction}
+          onSuccess={handleActionSuccess}
+        />
+      )}
+      {activeAction === "cancel" && (
+        <CancelOrderModal
+          order={selectedOrder}
+          open
+          revalidateKey={endpoint}
+          onClose={closeAction}
+          onSuccess={handleActionSuccess}
+        />
+      )}
     </section>
   );
 }
