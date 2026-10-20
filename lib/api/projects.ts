@@ -1,133 +1,107 @@
+
 import type {
-  IProject,
-  IProjectResponse,
-} from "@/types/admin/project.type";
+  IProduct,
+  IProductResponse,
+  IProductSingleResponse,
+} from "@/types/admin/product.type";
 
 const API_BASE_URL =
   process.env.NODE_ENV === "development"
     ? process.env.NEXT_PUBLIC_DEV_API_BASE_URL
     : process.env.NEXT_PUBLIC_API_BASE_URL;
 
-type GetPublishedProjectsOptions = {
+type GetPublishedProductsOptions = {
   page?: number;
   limit?: number;
+  search?: string;
+  categoryId?: string;
+  minPrice?: number;
+  maxPrice?: number;
 };
 
-export async function getPublishedProjects({
-  page = 1,
-  limit = 10,
-}: GetPublishedProjectsOptions = {}): Promise<IProjectResponse> {
+function getBaseUrl() {
   if (!API_BASE_URL) {
     throw new Error("API base URL is not configured.");
   }
 
-  const baseUrl = API_BASE_URL.replace(/\/$/, "");
+  return API_BASE_URL.replace(/\/+$/, "");
+}
+
+export async function getPublishedProducts({
+  page = 1,
+  limit = 10,
+  search = "",
+  categoryId = "",
+  minPrice,
+  maxPrice,
+}: GetPublishedProductsOptions = {}): Promise<IProductResponse> {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+    search,
+    categoryId,
+    minPrice: minPrice == null ? "" : String(minPrice),
+    maxPrice: maxPrice == null ? "" : String(maxPrice),
+  });
 
   const response = await fetch(
-    `${baseUrl}/project/published?page=${page}&limit=${limit}`,
+    `${getBaseUrl()}/product/published?${params.toString()}`,
     {
       next: {
         revalidate: 60,
-        tags: ["published-projects"],
+        tags: ["published-products"],
       },
     },
   );
 
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch published projects: ${response.status} ${response.statusText}`,
+      `Failed to fetch published products: ${response.status} ${response.statusText}`,
     );
   }
 
-  const result: IProjectResponse = await response.json();
+  const result: IProductResponse = await response.json();
 
   if (!result.success) {
     throw new Error(
-      result.message || "Failed to fetch published projects.",
+      result.message || "Failed to fetch published products.",
     );
   }
 
   return result;
 }
 
-export async function getFeaturedProjects(): Promise<IProject[]> {
-  if (!API_BASE_URL) {
-    throw new Error("API base URL is not configured.");
-  }
-
-  const baseUrl = API_BASE_URL.replace(/\/$/, "");
-
-  const response = await fetch(`${baseUrl}/project/featured`, {
-    next: {
-      revalidate: 60,
-      tags: ["featured-projects"],
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch featured projects: ${response.status} ${response.statusText}`,
-    );
-  }
-
-  const result: {
-    success: boolean;
-    statusCode: number;
-    message: string;
-    data: IProject[];
-  } = await response.json();
-
-  if (!result.success) {
-    throw new Error(
-      result.message || "Failed to fetch featured projects.",
-    );
-  }
-
-  return result.data ?? [];
-}
-
-export async function getPublishedProjectBySlug(
+export async function getPublishedProductBySlug(
   slug: string,
-): Promise<IProject> {
-  if (!API_BASE_URL) {
-    throw new Error("API base URL is not configured.");
-  }
-
-  const baseUrl = API_BASE_URL.replace(/\/$/, "");
-
+): Promise<IProduct> {
   const response = await fetch(
-    `${baseUrl}/project/slug/${encodeURIComponent(slug)}`,
+    `${getBaseUrl()}/product/slug/${encodeURIComponent(slug)}`,
     {
       next: {
         revalidate: 60,
         tags: [
-          "published-projects",
-          `published-project-${slug}`,
+          "published-products",
+          `published-product-${slug}`,
         ],
       },
     },
   );
 
   if (response.status === 404) {
-    throw new Error("Project not found.");
+    throw new Error("Product not found.");
   }
 
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch project: ${response.status} ${response.statusText}`,
+      `Failed to fetch product: ${response.status} ${response.statusText}`,
     );
   }
 
-  const result: {
-    success: boolean;
-    statusCode: number;
-    message: string;
-    data: IProject;
-  } = await response.json();
+  const result: IProductSingleResponse = await response.json();
 
   if (!result.success || !result.data) {
     throw new Error(
-      result.message || "Failed to fetch project.",
+      result.message || "Failed to fetch product.",
     );
   }
 
