@@ -6,3 +6,4 @@ export * from "./admin/blog.type";
 export * from "./admin/contact.type";
 export * from "./admin/category.type";
 export * from "./admin/product.type";
+export * from "./admin/inventory.type";

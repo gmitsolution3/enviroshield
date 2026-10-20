@@ -116,14 +116,14 @@ export const dashboardNavigation: Record<
           icon: "products",
         },
         {
-          title: "Orders",
-          href: "/dashboard/ecommerce/orders",
-          icon: "documents",
-        },
-        {
           title: "Inventory",
           href: "/dashboard/ecommerce/inventory",
           icon: "analytics",
+        },
+        {
+          title: "Orders",
+          href: "/dashboard/ecommerce/orders",
+          icon: "documents",
         },
       ],
     },
