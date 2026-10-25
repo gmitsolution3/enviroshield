@@ -45,6 +45,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
+  /* ------------------------------------------------------------------------ */
+  /* SERVICES                                                                 */
+  /* ------------------------------------------------------------------------ */
+
   let serviceRoutes: MetadataRoute.Sitemap = [];
 
   try {
@@ -67,6 +71,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch {
     serviceRoutes = [];
   }
+
+  /* ------------------------------------------------------------------------ */
+  /* PROJECTS                                                                 */
+  /* ------------------------------------------------------------------------ */
 
   let projectRoutes: MetadataRoute.Sitemap = [];
 
@@ -91,6 +99,54 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     projectRoutes = [];
   }
 
+  /* ------------------------------------------------------------------------ */
+  /* PRODUCTS                                                                 */
+  /* ------------------------------------------------------------------------ */
+
+  let productRoutes: MetadataRoute.Sitemap = [];
+
+  try {
+    const firstPage = await getPublishedProducts({
+      page: 1,
+      limit: 100,
+    });
+
+    const remainingPages = await Promise.all(
+      Array.from(
+        {
+          length: Math.max(
+            0,
+            firstPage.meta.totalPages - 1,
+          ),
+        },
+        (_, index) =>
+          getPublishedProducts({
+            page: index + 2,
+            limit: firstPage.meta.limit || 100,
+          }),
+      ),
+    );
+
+    productRoutes = [firstPage, ...remainingPages]
+      .flatMap(({ data }) => data)
+      .filter(
+        (product) =>
+          product.status === "published" &&
+          product.seo?.noIndex !== true,
+      )
+      .map((product) => ({
+        url: `${siteUrl}/products/${product.slug}`,
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+      }));
+  } catch {
+    productRoutes = [];
+  }
+
+  /* ------------------------------------------------------------------------ */
+  /* BLOG                                                                     */
+  /* ------------------------------------------------------------------------ */
+
   let blogRoutes: MetadataRoute.Sitemap = [];
 
   try {
@@ -114,27 +170,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     blogRoutes = [];
   }
 
-  let productRoutes: MetadataRoute.Sitemap = [];
-
-  try {
-    const firstPage = await getPublishedProducts({ page: 1, limit: 100 });
-    const remainingPages = await Promise.all(
-      Array.from({ length: Math.max(0, firstPage.meta.totalPages - 1) }, (_, index) =>
-        getPublishedProducts({ page: index + 2, limit: firstPage.meta.limit || 100 }),
-      ),
-    );
-
-    productRoutes = [firstPage, ...remainingPages]
-      .flatMap(({ data }) => data)
-      .filter((product) => product.seo?.noIndex !== true)
-      .map((product) => ({
-        url: `${siteUrl}/products/${product.slug}`,
-        changeFrequency: "monthly" as const,
-        priority: 0.7,
-      }));
-  } catch {
-    productRoutes = [];
-  }
+  /* ------------------------------------------------------------------------ */
+  /* FINAL SITEMAP                                                            */
+  /* ------------------------------------------------------------------------ */
 
   return [
     ...staticRoutes,

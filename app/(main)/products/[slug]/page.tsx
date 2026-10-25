@@ -143,56 +143,39 @@ export async function generateMetadata({
 
   try {
     const product = await getPublishedProductBySlug(slug);
+
     const seo = product.seo;
 
     const title =
-      (typeof seo?.metaTitle === "string"
-        ? seo.metaTitle.trim()
-        : "") || `${product.name} | Enviroshield`;
+      seo?.metaTitle?.trim() || `${product.name} | Enviroshield`;
 
     const description = getProductDescription(product);
+
     const canonical = `${siteUrl}/products/${product.slug}`;
 
-    const ogTitle =
-      (typeof seo?.ogTitle === "string" ? seo.ogTitle.trim() : "") ||
-      title;
-    const ogDescription =
-      (typeof seo?.ogDescription === "string"
-        ? seo.ogDescription.trim()
-        : "") || description;
-    const ogImage =
-      getMetadataImageUrl(
-        typeof seo?.ogImage === "string" ? seo.ogImage : null,
-      ) ?? getProductImageUrl(product.primaryImage?.url);
-    const imageAlt =
-      typeof product.primaryImage?.alt === "string" &&
-      product.primaryImage.alt.trim()
-        ? product.primaryImage.alt.trim()
-        : product.name;
+    const keywords = seo?.keywords?.filter(Boolean) ?? [];
 
-    const noIndex = seo?.noIndex === true;
+    const ogTitle = seo?.ogTitle?.trim() || title;
+
+    const ogDescription = seo?.ogDescription?.trim() || description;
+
+    const ogImage = seo?.ogImage?.trim() || product.primaryImage?.url;
+
+    const imageAlt =
+      product.primaryImage?.alt?.trim() || product.name;
 
     return {
       title,
       description,
-      keywords: Array.isArray(seo?.keywords)
-        ? seo.keywords.filter(
-            (keyword): keyword is string =>
-              typeof keyword === "string" && Boolean(keyword.trim()),
-          )
-        : [],
+      keywords,
 
       alternates: {
         canonical,
       },
 
       robots: {
-        index: !noIndex,
-        follow: !noIndex,
-        googleBot: {
-          index: !noIndex,
-          follow: !noIndex,
-        },
+        index: seo?.noIndex !== true,
+        follow: seo?.noIndex !== true,
       },
 
       openGraph: {
@@ -200,18 +183,19 @@ export async function generateMetadata({
         description: ogDescription,
         type: "website",
         url: canonical,
-        images: ogImage
-          ? [{ url: ogImage, alt: imageAlt }]
-          : undefined,
+        images: [
+          {
+            url: ogImage,
+            alt: imageAlt,
+          },
+        ],
       },
 
       twitter: {
         card: "summary_large_image",
         title: ogTitle,
         description: ogDescription,
-        images: ogImage
-          ? [{ url: ogImage, alt: imageAlt }]
-          : undefined,
+        images: [ogImage],
       },
     };
   } catch (error) {
@@ -221,25 +205,34 @@ export async function generateMetadata({
     ) {
       throw error;
     }
+
     const staticProduct = staticProducts.find(
       (item) => item.slug === slug,
     );
+
     if (staticProduct) {
       return {
         title: `${staticProduct.name} | Enviroshield`,
         description: staticProduct.description,
+
         alternates: {
           canonical: `${siteUrl}/products/${staticProduct.slug}`,
         },
       };
     }
+
     return {
       title: "Product not found | Enviroshield",
       description:
         "The requested Enviroshield product could not be found.",
+
       robots: {
         index: false,
         follow: false,
+        googleBot: {
+          index: false,
+          follow: false,
+        },
       },
     };
   }
@@ -396,11 +389,18 @@ export default async function ProductDetailPage({
     "@context": "https://schema.org",
     "@type": "Product",
     "@id": `${articleUrl}#product`,
+
     name: product.name,
     description,
-    sku: product.sku,
     url: articleUrl,
-    image: images.map((image) => image.url),
+
+    ...(product.sku?.trim() ? { sku: product.sku.trim() } : {}),
+
+    ...(images.length > 0
+      ? {
+          image: images.map((image) => image.url),
+        }
+      : {}),
 
     category: categoryName,
 
@@ -416,11 +416,14 @@ export default async function ProductDetailPage({
             url: articleUrl,
             price: product.price,
             priceCurrency: "BDT",
+
             availability: available
               ? "https://schema.org/InStock"
               : "https://schema.org/OutOfStock",
+
             seller: {
               "@type": "Organization",
+              "@id": `${siteUrl}/#organization`,
               name: "Enviroshield",
               url: siteUrl,
             },
@@ -429,9 +432,36 @@ export default async function ProductDetailPage({
       : {}),
   };
 
+  const webPageJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${articleUrl}#webpage`,
+
+    url: articleUrl,
+    name: product.seo?.metaTitle?.trim() || product.name,
+    description,
+
+    isPartOf: {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      url: siteUrl,
+      name: "Enviroshield",
+    },
+
+    about: {
+      "@id": `${articleUrl}#product`,
+    },
+
+    breadcrumb: {
+      "@id": `${articleUrl}#breadcrumb`,
+    },
+  };
+
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
+    "@id": `${articleUrl}#breadcrumb`,
+
     itemListElement: [
       {
         "@type": "ListItem",
@@ -464,6 +494,16 @@ export default async function ProductDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(productJsonLd).replace(
+            /</g,
+            "\\u003c",
+          ),
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(webPageJsonLd).replace(
             /</g,
             "\\u003c",
           ),

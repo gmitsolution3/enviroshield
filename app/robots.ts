@@ -16,6 +16,7 @@ export default function robots(): MetadataRoute.Robots {
         "/verify-email",
       ],
     },
+
     sitemap: `${siteUrl}/sitemap.xml`,
     host: siteUrl,
   };
