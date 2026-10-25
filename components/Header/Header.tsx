@@ -181,11 +181,13 @@ export default function Header() {
         </Container>
       </motion.header>
 
-      <MobileMenu
-        open={open}
-        links={links}
-        onClose={() => setOpen(false)}
-      />
+  
+<MobileMenu
+  open={open}
+  links={links}
+  onClose={() => setOpen(false)}
+  onCartClick={() => setCartOpen(true)}
+/>
 
       <CartDrawer
         open={cartOpen}
