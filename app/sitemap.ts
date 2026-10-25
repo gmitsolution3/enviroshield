@@ -6,6 +6,46 @@ import { getPublishedServices } from "@/lib/api/services";
 import { getPublishedProducts } from "@/lib/api/products";
 import { siteUrl } from "@/lib/site-url";
 
+type PaginatedResult<T> = {
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  data: T[];
+};
+
+/**
+ * Fetch every page of a paginated API response.
+ */
+async function fetchAllPages<T>(
+  fetchPage: (
+    page: number,
+    limit: number,
+  ) => Promise<PaginatedResult<T>>,
+  pageSize = 100,
+): Promise<T[]> {
+  const firstPage = await fetchPage(1, pageSize);
+
+  const totalPages = Math.max(1, firstPage.meta.totalPages || 1);
+  const limit = firstPage.meta.limit || pageSize;
+
+  if (totalPages === 1) {
+    return firstPage.data;
+  }
+
+  const remainingPages = await Promise.all(
+    Array.from({ length: totalPages - 1 }, (_, index) =>
+      fetchPage(index + 2, limit),
+    ),
+  );
+
+  return [firstPage, ...remainingPages].flatMap(
+    (result) => result.data,
+  );
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -52,12 +92,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let serviceRoutes: MetadataRoute.Sitemap = [];
 
   try {
-    const result = await getPublishedServices({
-      page: 1,
-      limit: 100,
-    });
+    const services = await fetchAllPages((page, limit) =>
+      getPublishedServices({ page, limit }),
+    );
 
-    serviceRoutes = result.data
+    serviceRoutes = services
       .filter(
         (service) =>
           service.status === "published" &&
@@ -68,8 +107,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "monthly" as const,
         priority: 0.8,
       }));
-  } catch {
-    serviceRoutes = [];
+  } catch (error) {
+    console.error("Failed to generate service sitemap routes:", error);
   }
 
   /* ------------------------------------------------------------------------ */
@@ -79,12 +118,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let projectRoutes: MetadataRoute.Sitemap = [];
 
   try {
-    const result = await getPublishedProjects({
-      page: 1,
-      limit: 100,
-    });
+    const projects = await fetchAllPages((page, limit) =>
+      getPublishedProjects({ page, limit }),
+    );
 
-    projectRoutes = result.data
+    projectRoutes = projects
       .filter(
         (project) =>
           project.status === "published" &&
@@ -95,8 +133,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "monthly" as const,
         priority: 0.8,
       }));
-  } catch {
-    projectRoutes = [];
+  } catch (error) {
+    console.error("Failed to generate project sitemap routes:", error);
   }
 
   /* ------------------------------------------------------------------------ */
@@ -139,8 +177,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "monthly" as const,
         priority: 0.7,
       }));
-  } catch {
-    productRoutes = [];
+  } catch (error) {
+    console.error("Failed to generate product sitemap routes:", error);
   }
 
   /* ------------------------------------------------------------------------ */
@@ -150,12 +188,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let blogRoutes: MetadataRoute.Sitemap = [];
 
   try {
-    const result = await getPublishedBlogs({
-      page: 1,
-      limit: 100,
-    });
+    const blogs = await fetchAllPages((page, limit) =>
+      getPublishedBlogs({ page, limit }),
+    );
 
-    blogRoutes = result.data
+    blogRoutes = blogs
       .filter(
         (post) =>
           post.status === "published" &&
@@ -166,8 +203,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "monthly" as const,
         priority: 0.7,
       }));
-  } catch {
-    blogRoutes = [];
+  } catch (error) {
+    console.error("Failed to generate blog sitemap routes:", error);
   }
 
   /* ------------------------------------------------------------------------ */
