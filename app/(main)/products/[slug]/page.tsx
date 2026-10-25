@@ -1,17 +1,14 @@
 import BlogContent from "@/components/blog/BlogContent";
 import { Button } from "@/components/Button";
 import Container from "@/components/Container";
-import PageHero from "@/components/PageHero";
 import { ProductCard } from "@/components/ProductCard";
 import AddToCart from "@/components/products/AddToCart";
 import ProductGallery from "@/components/products/ProductGallery";
 import { Reveal } from "@/components/Reveal";
-import { SectionHeader } from "@/components/SectionHeader";
 import {
   getPublishedProductBySlug,
   getPublishedProducts,
 } from "@/lib/api/products";
-import { products as staticProducts } from "@/lib/data/content";
 import { getProductImageUrl } from "@/lib/products/images";
 import { getTrustedTdsUrl } from "@/lib/products/tds";
 import { siteUrl } from "@/lib/site-url";
@@ -30,7 +27,6 @@ import {
   Tag,
 } from "lucide-react";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -45,6 +41,7 @@ function getProductDescription(product: IPublishedProduct) {
     typeof product.seo?.metaDescription === "string"
       ? product.seo.metaDescription.trim()
       : "";
+
   const shortDescription =
     typeof product.shortDescription === "string"
       ? product.shortDescription.trim()
@@ -55,18 +52,6 @@ function getProductDescription(product: IPublishedProduct) {
     shortDescription ||
     `Explore ${product.name} from Enviroshield.`
   );
-}
-
-function getMetadataImageUrl(value?: string | null) {
-  if (!value) return null;
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" || url.protocol === "http:"
-      ? url.toString()
-      : null;
-  } catch {
-    return null;
-  }
 }
 
 function formatPrice(price: number) {
@@ -206,21 +191,6 @@ export async function generateMetadata({
       throw error;
     }
 
-    const staticProduct = staticProducts.find(
-      (item) => item.slug === slug,
-    );
-
-    if (staticProduct) {
-      return {
-        title: `${staticProduct.name} | Enviroshield`,
-        description: staticProduct.description,
-
-        alternates: {
-          canonical: `${siteUrl}/products/${staticProduct.slug}`,
-        },
-      };
-    }
-
     return {
       title: "Product not found | Enviroshield",
       description:
@@ -271,64 +241,10 @@ export default async function ProductDetailPage({
     }
   }
 
+  // Only published API products can render.
+  // A missing product must return a real 404.
   if (!product) {
-    const staticProduct = staticProducts.find(
-      (item) => item.slug === slug,
-    );
-    if (!staticProduct) notFound();
-
-    return (
-      <>
-        <PageHero
-          eyebrow={staticProduct.category}
-          title={staticProduct.name}
-          text={staticProduct.description}
-          image={staticProduct.image}
-          imageAlt={`${staticProduct.name} - ${staticProduct.category}`}
-        />
-        <section
-          aria-labelledby="legacy-product-details-heading"
-          className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
-        >
-          <Container className="grid grid-cols-2 items-center gap-[70px] max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
-            <Reveal dir="image">
-              <div className="relative h-[530px] overflow-hidden rounded-[18px] max-[600px]:h-[340px]">
-                <Image
-                  src={staticProduct.image}
-                  alt={`${staticProduct.name} - ${staticProduct.category}`}
-                  fill
-                  sizes="45vw"
-                  className="object-cover"
-                />
-              </div>
-            </Reveal>
-            <Reveal dir="up" delay={0.15}>
-              <div>
-                <SectionHeader
-                  eyebrow="PRODUCT DETAILS"
-                  title={`About ${staticProduct.name}`}
-                  text={staticProduct.description}
-                  headingId="legacy-product-details-heading"
-                />
-                <div className="mb-[26px] flex flex-wrap gap-2">
-                  {staticProduct.features.map((feature) => (
-                    <span
-                      key={feature}
-                      className="rounded-full border border-line px-3 py-[7px] text-[12px] text-ink"
-                    >
-                      {feature}
-                    </span>
-                  ))}
-                </div>
-                <Button href="/contact">
-                  Ask about this product
-                </Button>
-              </div>
-            </Reveal>
-          </Container>
-        </section>
-      </>
-    );
+    notFound();
   }
 
   const categoryName = product.categoryId?.name || "Product";
@@ -341,15 +257,24 @@ export default async function ProductDetailPage({
   const stockQuantity = Number.isFinite(product.stockQuantity)
     ? Math.max(0, product.stockQuantity)
     : 0;
-  const lowStockThreshold = Number.isFinite(product.lowStockThreshold)
+
+  const lowStockThreshold = Number.isFinite(
+    product.lowStockThreshold,
+  )
     ? Math.max(0, product.lowStockThreshold)
     : 0;
+
   const available = stockQuantity > 0;
-  const stock = getStockStatus(stockQuantity, lowStockThreshold);
+
+  const stock = getStockStatus(
+    stockQuantity,
+    lowStockThreshold,
+  );
 
   const publishedDate = product.publishedAt
     ? new Date(product.publishedAt)
     : null;
+
   const publishedOn =
     publishedDate && !Number.isNaN(publishedDate.getTime())
       ? publishedDate.toLocaleDateString("en-GB", {
@@ -359,7 +284,7 @@ export default async function ProductDetailPage({
         })
       : null;
 
-  // Related products from the same category
+  // Related products from the same category.
   let related: Awaited<
     ReturnType<typeof getPublishedProducts>
   >["data"] = [];
@@ -394,7 +319,9 @@ export default async function ProductDetailPage({
     description,
     url: articleUrl,
 
-    ...(product.sku?.trim() ? { sku: product.sku.trim() } : {}),
+    ...(product.sku?.trim()
+      ? { sku: product.sku.trim() }
+      : {}),
 
     ...(images.length > 0
       ? {
@@ -486,6 +413,7 @@ export default async function ProductDetailPage({
 
   const tdsLinkClass =
     "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-line bg-white px-5 text-[13px] font-bold text-navy transition-colors hover:border-blue hover:text-blue";
+
   const tdsUrl = getTrustedTdsUrl(product.tdsUrl);
 
   return (
@@ -545,7 +473,9 @@ export default async function ProductDetailPage({
                         Home
                       </Link>
                     </li>
+
                     <li aria-hidden="true">/</li>
+
                     <li>
                       <Link
                         href="/products"
@@ -554,7 +484,9 @@ export default async function ProductDetailPage({
                         Products
                       </Link>
                     </li>
+
                     <li aria-hidden="true">/</li>
+
                     <li
                       className="max-w-[220px] truncate font-semibold text-navy"
                       aria-current="page"
@@ -611,14 +543,18 @@ export default async function ProductDetailPage({
             {/* Images */}
 
             <Reveal dir="image">
-              <ProductGallery images={images} name={product.name} />
+              <ProductGallery
+                images={images}
+                name={product.name}
+              />
             </Reveal>
 
             {/* Product information */}
 
             <Reveal dir="up" delay={0.12}>
               <div className="overflow-hidden rounded-[20px] border border-line bg-white shadow-[0_10px_40px_rgba(0,51,78,0.07)] min-[901px]:sticky min-[901px]:top-28">
-                {/* price header */}
+                {/* Price header */}
+
                 <div className="border-b border-line p-7 max-[600px]:p-5">
                   <p className="text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
                     Product information
@@ -757,6 +693,7 @@ export default async function ProductDetailPage({
           <div className="mx-auto max-w-[1120px]">
             <div className="grid grid-cols-[minmax(0,1fr)_340px] items-start gap-16 max-[1000px]:grid-cols-1 max-[1000px]:gap-10">
               {/* Story */}
+
               <Reveal dir="up">
                 <div className="min-w-0">
                   <p className="mb-4 flex items-center gap-3 text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
@@ -793,7 +730,8 @@ export default async function ProductDetailPage({
                 </div>
               </Reveal>
 
-              {/* Spec sheet */}
+              {/* Specification sheet */}
+
               <Reveal dir="up" delay={0.1}>
                 <aside
                   aria-label="Product specifications"
@@ -807,7 +745,10 @@ export default async function ProductDetailPage({
 
                   <dl className="divide-y divide-line px-6">
                     {[
-                      { label: "Category", value: categoryName },
+                      {
+                        label: "Category",
+                        value: categoryName,
+                      },
                       {
                         label: "SKU",
                         value: product.sku || "Not specified",
@@ -830,7 +771,12 @@ export default async function ProductDetailPage({
                           : "Out of stock",
                       },
                       ...(publishedOn
-                        ? [{ label: "Listed", value: publishedOn }]
+                        ? [
+                            {
+                              label: "Listed",
+                              value: publishedOn,
+                            },
+                          ]
                         : []),
                     ].map((row) => (
                       <div
@@ -840,6 +786,7 @@ export default async function ProductDetailPage({
                         <dt className="text-[13px] text-ink/60">
                           {row.label}
                         </dt>
+
                         <dd className="break-words text-right text-[14px] font-bold text-navy">
                           {row.value}
                         </dd>
@@ -864,6 +811,7 @@ export default async function ProductDetailPage({
                           <span className="block text-[14px] font-bold text-navy">
                             Technical data sheet
                           </span>
+
                           <span className="block text-[12px] text-ink/60">
                             View TDS
                           </span>
@@ -928,7 +876,10 @@ export default async function ProductDetailPage({
 
               <div className="grid grid-cols-3 gap-6 max-[1000px]:grid-cols-2 max-[600px]:grid-cols-1">
                 {related.map((item) => (
-                  <ProductCard key={item._id} product={item} />
+                  <ProductCard
+                    key={item._id}
+                    product={item}
+                  />
                 ))}
               </div>
             </div>
