@@ -99,12 +99,14 @@ export default function Header() {
       // Do not animate toward a hidden cart icon on mobile.
       if (!targetRect.width || !targetRect.height) return;
 
+      const scrollY = window.scrollY;
+
       setCartFlight({
         id: Date.now(),
         startX: detail.sourceRect.left + detail.sourceRect.width / 2,
         startY: detail.sourceRect.top + detail.sourceRect.height / 2,
         endX: targetRect.left + targetRect.width / 2,
-        endY: targetRect.top + targetRect.height / 2,
+        endY: targetRect.top + scrollY + targetRect.height / 2,
         quantity: detail.quantity,
       });
     };
@@ -208,7 +210,7 @@ export default function Header() {
             opacity: [0, 1, 1, 0],
           }}
           transition={{
-            duration: 3.6,
+            duration: 1.6,
             ease: [0.22, 1, 0.36, 1],
             times: [0, 0.16, 0.76, 1],
           }}

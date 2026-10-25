@@ -2,6 +2,7 @@
 
 import { addToCart } from "@/lib/cart";
 import type { IPublishedProduct } from "@/types/admin/product.type";
+import { useLenis } from "lenis/react";
 import { Check, Minus, Plus, ShoppingCart } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -30,26 +31,11 @@ export default function AddToCart({ product, stock }: Props) {
 
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
+  const lenis = useLenis();
 
   useEffect(() => {
     return () => {
       if (timer.current) clearTimeout(timer.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleScrollToTop = () => {
-      window.scrollTo({
-        top: 0,
-        left: 0,
-        behavior: "smooth",
-      });
-    };
-
-    window.addEventListener("scroll-to-top", handleScrollToTop);
-
-    return () => {
-      window.removeEventListener("scroll-to-top", handleScrollToTop);
     };
   }, []);
 
@@ -76,7 +62,18 @@ export default function AddToCart({ product, stock }: Props) {
       stock,
     );
 
-    window.dispatchEvent(new CustomEvent("scroll-to-top"));
+    if (lenis) {
+      lenis.scrollTo(0, {
+        duration: 1.2,
+        force: true,
+      });
+    } else {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      });
+    }
 
     const rect = addButtonRef.current?.getBoundingClientRect();
 

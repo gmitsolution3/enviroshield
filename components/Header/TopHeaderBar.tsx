@@ -118,7 +118,10 @@ export default function TopHeaderBar({
                     />
                   }
                 >
-                  <Avatar size="sm" className="border border-[#e9eef1]">
+                  <Avatar
+                    size="sm"
+                    className="border border-[#e9eef1]"
+                  >
                     <AvatarImage
                       src={user.image || undefined}
                       alt={user.name || "Your profile"}
