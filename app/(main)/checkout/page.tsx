@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+
 import CheckoutForm from "@/components/cart/CheckoutForm";
+import { requireAuth } from "@/lib/auth-guards";
 
 export const metadata: Metadata = {
   title: "Checkout | Enviroshield",
@@ -7,6 +9,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function CheckoutPage() {
+export default async function CheckoutPage() {
+  await requireAuth("/checkout");
+
   return <CheckoutForm />;
 }

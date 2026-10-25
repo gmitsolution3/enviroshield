@@ -17,11 +17,23 @@ export async function getRequestSession(request: Request) {
   return auth.api.getSession({ headers: request.headers });
 }
 
-export async function requireAuth() {
+export async function requireAuth(returnTo?: string) {
   const session = await getCurrentSession();
 
   if (!session) {
-    redirect("/login");
+    const params = new URLSearchParams({
+      notice: "login-required",
+    });
+
+    if (
+      returnTo &&
+      returnTo.startsWith("/") &&
+      !returnTo.startsWith("//")
+    ) {
+      params.set("callbackUrl", returnTo);
+    }
+
+    redirect(`/login?${params.toString()}`);
   }
 
   return session;
@@ -33,7 +45,7 @@ export async function requireRole(role: AppRole) {
   const userRole = session.user.role ?? "user";
 
   if (userRole !== role) {
-    redirect("/dashboard");
+    redirect("/dashboard?notice=access-denied");
   }
 
   return session;

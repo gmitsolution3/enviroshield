@@ -1,9 +1,10 @@
-import ClientIsland from "@/components/client-island";
+import GlobalToastListener from "@/components/GlobalToastListener";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { siteUrl } from "@/lib/site-url";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Fustat, Geist } from "next/font/google";
+import { Suspense } from "react";
 import { Toaster } from "sonner";
 
 import "./globals.css";
@@ -52,7 +53,6 @@ export const metadata: Metadata = {
     description:
       "Professional waterproofing, waterproofing paint, heatproofing, epoxy and PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy floors, floor hardener, and ETP coating in Bangladesh.",
   },
-
 };
 
 export default function RootLayout({
@@ -61,7 +61,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable, fustat.variable)}>
+    <html
+      lang="en"
+      className={cn("font-sans", geist.variable, fustat.variable)}
+    >
       <body className="min-h-screen antialiased">
         <TooltipProvider>
           <script
@@ -94,8 +97,27 @@ export default function RootLayout({
             }}
           />
           {children}
-          <Toaster />
-          <ClientIsland />
+
+          <Toaster
+            position="top-right"
+            richColors
+            closeButton
+            duration={4500}
+            visibleToasts={4}
+            toastOptions={{
+              classNames: {
+                toast:
+                  "rounded-2xl border shadow-xl backdrop-blur-md !px-5 !py-4",
+                title: "!font-semibold !text-sm",
+                description: "!text-sm !opacity-90",
+                closeButton: "!rounded-full",
+              },
+            }}
+          />
+
+          <Suspense fallback={null}>
+            <GlobalToastListener />
+          </Suspense>
         </TooltipProvider>
       </body>
     </html>
