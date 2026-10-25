@@ -1,9 +1,9 @@
 import BlogContent from "@/components/blog/BlogContent";
 import { Button } from "@/components/Button";
-import AddToCart from "@/components/products/AddToCart";
 import Container from "@/components/Container";
 import PageHero from "@/components/PageHero";
 import { ProductCard } from "@/components/ProductCard";
+import AddToCart from "@/components/products/AddToCart";
 import ProductGallery from "@/components/products/ProductGallery";
 import { Reveal } from "@/components/Reveal";
 import { SectionHeader } from "@/components/SectionHeader";
@@ -11,13 +11,13 @@ import {
   getPublishedProductBySlug,
   getPublishedProducts,
 } from "@/lib/api/products";
-import { getTrustedTdsUrl } from "@/lib/products/tds";
-import { getProductImageUrl } from "@/lib/products/images";
-import { siteUrl } from "@/lib/site-url";
 import { products as staticProducts } from "@/lib/data/content";
+import { getProductImageUrl } from "@/lib/products/images";
+import { getTrustedTdsUrl } from "@/lib/products/tds";
+import { siteUrl } from "@/lib/site-url";
 import type {
-  IPublishedProduct,
   IProductImage,
+  IPublishedProduct,
 } from "@/types/admin/product.type";
 import type { JSONContent } from "@tiptap/react";
 import {
@@ -102,16 +102,13 @@ function getProductImages(product: IPublishedProduct) {
   const images = [
     product.primaryImage,
     ...(Array.isArray(product.gallery) ? product.gallery : []),
-  ].filter(
-    (image): image is IProductImage =>
-      Boolean(image && getProductImageUrl(image.url)),
+  ].filter((image): image is IProductImage =>
+    Boolean(image && getProductImageUrl(image.url)),
   );
 
   return images.filter(
     (image, index, allImages) =>
-      allImages.findIndex(
-        (item) => item.url === image.url,
-      ) === index,
+      allImages.findIndex((item) => item.url === image.url) === index,
   );
 }
 
@@ -149,21 +146,27 @@ export async function generateMetadata({
     const seo = product.seo;
 
     const title =
-      (typeof seo?.metaTitle === "string" ? seo.metaTitle.trim() : "") ||
-      `${product.name} | Enviroshield`;
+      (typeof seo?.metaTitle === "string"
+        ? seo.metaTitle.trim()
+        : "") || `${product.name} | Enviroshield`;
 
     const description = getProductDescription(product);
     const canonical = `${siteUrl}/products/${product.slug}`;
 
     const ogTitle =
-      (typeof seo?.ogTitle === "string" ? seo.ogTitle.trim() : "") || title;
+      (typeof seo?.ogTitle === "string" ? seo.ogTitle.trim() : "") ||
+      title;
     const ogDescription =
-      (typeof seo?.ogDescription === "string" ? seo.ogDescription.trim() : "") || description;
+      (typeof seo?.ogDescription === "string"
+        ? seo.ogDescription.trim()
+        : "") || description;
     const ogImage =
-      getMetadataImageUrl(typeof seo?.ogImage === "string" ? seo.ogImage : null) ??
-      getProductImageUrl(product.primaryImage?.url);
+      getMetadataImageUrl(
+        typeof seo?.ogImage === "string" ? seo.ogImage : null,
+      ) ?? getProductImageUrl(product.primaryImage?.url);
     const imageAlt =
-      typeof product.primaryImage?.alt === "string" && product.primaryImage.alt.trim()
+      typeof product.primaryImage?.alt === "string" &&
+      product.primaryImage.alt.trim()
         ? product.primaryImage.alt.trim()
         : product.name;
 
@@ -173,7 +176,10 @@ export async function generateMetadata({
       title,
       description,
       keywords: Array.isArray(seo?.keywords)
-        ? seo.keywords.filter((keyword): keyword is string => typeof keyword === "string" && Boolean(keyword.trim()))
+        ? seo.keywords.filter(
+            (keyword): keyword is string =>
+              typeof keyword === "string" && Boolean(keyword.trim()),
+          )
         : [],
 
       alternates: {
@@ -203,19 +209,28 @@ export async function generateMetadata({
         card: "summary_large_image",
         title: ogTitle,
         description: ogDescription,
-        images: ogImage ? [{ url: ogImage, alt: imageAlt }] : undefined,
+        images: ogImage
+          ? [{ url: ogImage, alt: imageAlt }]
+          : undefined,
       },
     };
   } catch (error) {
-    if (!(error instanceof Error) || error.message !== "Product not found.") {
+    if (
+      !(error instanceof Error) ||
+      error.message !== "Product not found."
+    ) {
       throw error;
     }
-    const staticProduct = staticProducts.find((item) => item.slug === slug);
+    const staticProduct = staticProducts.find(
+      (item) => item.slug === slug,
+    );
     if (staticProduct) {
       return {
         title: `${staticProduct.name} | Enviroshield`,
         description: staticProduct.description,
-        alternates: { canonical: `${siteUrl}/products/${staticProduct.slug}` },
+        alternates: {
+          canonical: `${siteUrl}/products/${staticProduct.slug}`,
+        },
       };
     }
     return {
@@ -255,13 +270,18 @@ export default async function ProductDetailPage({
   try {
     product = await getPublishedProductBySlug(slug);
   } catch (error) {
-    if (!(error instanceof Error) || error.message !== "Product not found.") {
+    if (
+      !(error instanceof Error) ||
+      error.message !== "Product not found."
+    ) {
       throw error;
     }
   }
 
   if (!product) {
-    const staticProduct = staticProducts.find((item) => item.slug === slug);
+    const staticProduct = staticProducts.find(
+      (item) => item.slug === slug,
+    );
     if (!staticProduct) notFound();
 
     return (
@@ -273,20 +293,43 @@ export default async function ProductDetailPage({
           image={staticProduct.image}
           imageAlt={`${staticProduct.name} - ${staticProduct.category}`}
         />
-        <section aria-labelledby="legacy-product-details-heading" className="py-[112px] max-[900px]:py-20 max-[600px]:py-16">
+        <section
+          aria-labelledby="legacy-product-details-heading"
+          className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
+        >
           <Container className="grid grid-cols-2 items-center gap-[70px] max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
             <Reveal dir="image">
               <div className="relative h-[530px] overflow-hidden rounded-[18px] max-[600px]:h-[340px]">
-                <Image src={staticProduct.image} alt={`${staticProduct.name} - ${staticProduct.category}`} fill sizes="45vw" className="object-cover" />
+                <Image
+                  src={staticProduct.image}
+                  alt={`${staticProduct.name} - ${staticProduct.category}`}
+                  fill
+                  sizes="45vw"
+                  className="object-cover"
+                />
               </div>
             </Reveal>
             <Reveal dir="up" delay={0.15}>
               <div>
-                <SectionHeader eyebrow="PRODUCT DETAILS" title={`About ${staticProduct.name}`} text={staticProduct.description} headingId="legacy-product-details-heading" />
+                <SectionHeader
+                  eyebrow="PRODUCT DETAILS"
+                  title={`About ${staticProduct.name}`}
+                  text={staticProduct.description}
+                  headingId="legacy-product-details-heading"
+                />
                 <div className="mb-[26px] flex flex-wrap gap-2">
-                  {staticProduct.features.map((feature) => <span key={feature} className="rounded-full border border-line px-3 py-[7px] text-[12px] text-ink">{feature}</span>)}
+                  {staticProduct.features.map((feature) => (
+                    <span
+                      key={feature}
+                      className="rounded-full border border-line px-3 py-[7px] text-[12px] text-ink"
+                    >
+                      {feature}
+                    </span>
+                  ))}
                 </div>
-                <Button href="/contact">Ask about this product</Button>
+                <Button href="/contact">
+                  Ask about this product
+                </Button>
               </div>
             </Reveal>
           </Container>
@@ -295,8 +338,7 @@ export default async function ProductDetailPage({
     );
   }
 
-  const categoryName =
-    product.categoryId?.name || "Product";
+  const categoryName = product.categoryId?.name || "Product";
 
   const images = getProductImages(product);
   const description = getProductDescription(product);
@@ -310,22 +352,24 @@ export default async function ProductDetailPage({
     ? Math.max(0, product.lowStockThreshold)
     : 0;
   const available = stockQuantity > 0;
-  const stock = getStockStatus(
-    stockQuantity,
-    lowStockThreshold,
-  );
+  const stock = getStockStatus(stockQuantity, lowStockThreshold);
 
-  const publishedDate = product.publishedAt ? new Date(product.publishedAt) : null;
-  const publishedOn = publishedDate && !Number.isNaN(publishedDate.getTime())
-    ? publishedDate.toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })
+  const publishedDate = product.publishedAt
+    ? new Date(product.publishedAt)
     : null;
+  const publishedOn =
+    publishedDate && !Number.isNaN(publishedDate.getTime())
+      ? publishedDate.toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        })
+      : null;
 
   // Related products from the same category
-  let related: Awaited<ReturnType<typeof getPublishedProducts>>["data"] = [];
+  let related: Awaited<
+    ReturnType<typeof getPublishedProducts>
+  >["data"] = [];
 
   try {
     const categoryId =
@@ -451,7 +495,10 @@ export default async function ProductDetailPage({
                   All products
                 </Link>
 
-                <nav aria-label="Breadcrumb" className="text-[13px] text-ink/60">
+                <nav
+                  aria-label="Breadcrumb"
+                  className="text-[13px] text-ink/60"
+                >
                   <ol className="flex flex-wrap items-center gap-2">
                     <li>
                       <Link href="/" className="hover:text-blue">
@@ -460,12 +507,18 @@ export default async function ProductDetailPage({
                     </li>
                     <li aria-hidden="true">/</li>
                     <li>
-                      <Link href="/products" className="hover:text-blue">
+                      <Link
+                        href="/products"
+                        className="hover:text-blue"
+                      >
                         Products
                       </Link>
                     </li>
                     <li aria-hidden="true">/</li>
-                    <li className="max-w-[220px] truncate font-semibold text-navy" aria-current="page">
+                    <li
+                      className="max-w-[220px] truncate font-semibold text-navy"
+                      aria-current="page"
+                    >
                       {product.name}
                     </li>
                   </ol>
@@ -486,7 +539,9 @@ export default async function ProductDetailPage({
                 <span
                   className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-bold ${stock.pill}`}
                 >
-                  <span className={`size-2 rounded-full ${stock.dot}`} />
+                  <span
+                    className={`size-2 rounded-full ${stock.dot}`}
+                  />
                   {available ? "In stock" : "Out of stock"}
                 </span>
               </div>
@@ -550,7 +605,9 @@ export default async function ProductDetailPage({
                   <span
                     className={`mt-5 inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] font-bold ${stock.pill}`}
                   >
-                    <span className={`size-2 rounded-full ${stock.dot}`} />
+                    <span
+                      className={`size-2 rounded-full ${stock.dot}`}
+                    />
                     {stock.label}
                   </span>
                 </div>
@@ -685,9 +742,7 @@ export default async function ProductDetailPage({
 
                   <div className="mt-10 max-w-[720px] border-t border-line pt-10">
                     {hasRichContent(product.description) ? (
-                      <BlogContent
-                        content={product.description}
-                      />
+                      <BlogContent content={product.description} />
                     ) : (
                       <p className="text-[16px] leading-[1.85] text-ink">
                         {product.shortDescription ||
@@ -713,7 +768,10 @@ export default async function ProductDetailPage({
                   <dl className="divide-y divide-line px-6">
                     {[
                       { label: "Category", value: categoryName },
-                      { label: "SKU", value: product.sku || "Not specified" },
+                      {
+                        label: "SKU",
+                        value: product.sku || "Not specified",
+                      },
                       {
                         label: "Pack weight",
                         value:
@@ -721,10 +779,15 @@ export default async function ProductDetailPage({
                             ? `${product.weight} kg`
                             : "Not specified",
                       },
-                      { label: "Price", value: price || "Contact for pricing" },
+                      {
+                        label: "Price",
+                        value: price || "Contact for pricing",
+                      },
                       {
                         label: "Availability",
-                        value: available ? "In stock" : "Out of stock",
+                        value: available
+                          ? "In stock"
+                          : "Out of stock",
                       },
                       ...(publishedOn
                         ? [{ label: "Listed", value: publishedOn }]
@@ -781,7 +844,6 @@ export default async function ProductDetailPage({
         </Container>
       </section>
 
-      
       {/* RELATED PRODUCTS */}
 
       {related.length > 0 && (
