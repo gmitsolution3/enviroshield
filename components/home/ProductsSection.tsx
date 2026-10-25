@@ -5,9 +5,10 @@ import { ProductCard } from "../ProductCard";
 import { Reveal } from "../Reveal";
 import { SectionHeader } from "../SectionHeader";
 import { getPublishedProducts } from "@/lib/api/products";
+import { IPublishedProduct } from "@/types";
 
 export default async function ProductsSection() {
-  let products = [];
+  let products: IPublishedProduct[] = [];
 
   try {
     const result = await getPublishedProducts({
@@ -41,7 +42,7 @@ export default async function ProductsSection() {
         </div>
 
         {products.length > 0 ? (
-          <StaggerContainer className="mt-12 grid grid-cols-3 gap-[25px] max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
+          <StaggerContainer className="mt-12 grid grid-cols-4 gap-[25px] max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
             {products.map((product) => (
               <StaggerItem
                 key={product._id}
