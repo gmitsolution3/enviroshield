@@ -31,11 +31,9 @@ export async function generateMetadata({
 
     const seo = service.seo;
 
-    const title =
-      seo?.metaTitle?.trim() || `${service.name} | Enviroshield`;
+    const title = seo?.metaTitle?.trim() || `${service.name} | Enviroshield`;
 
-    const description =
-      seo?.metaDescription?.trim() || service.description;
+    const description = seo?.metaDescription?.trim() || service.description;
 
     const keywords = seo?.keywords?.filter(Boolean) ?? [];
 
@@ -59,6 +57,10 @@ export async function generateMetadata({
       robots: {
         index: seo?.noIndex !== true,
         follow: seo?.noIndex !== true,
+        googleBot: {
+          index: seo?.noIndex !== true,
+          follow: seo?.noIndex !== true,
+        },
       },
 
       openGraph: {
@@ -84,8 +86,7 @@ export async function generateMetadata({
   } catch {
     return {
       title: "Service not found | Enviroshield",
-      description:
-        "The requested Enviroshield service could not be found.",
+      description: "The requested Enviroshield service could not be found.",
       robots: {
         index: false,
         follow: false,
@@ -259,9 +260,7 @@ export default async function ServiceDetailPage({
       />
 
       <PageHero
-        eyebrow={
-          service.isFeatured ? "FEATURED SERVICE" : "OUR SERVICES"
-        }
+        eyebrow={service.isFeatured ? "FEATURED SERVICE" : "OUR SERVICES"}
         title={service.name}
         text={service.description}
         image={service.primaryImage.url}
@@ -271,17 +270,11 @@ export default async function ServiceDetailPage({
       {/* BREADCRUMB                                                         */}
       {/* ------------------------------------------------------------------ */}
 
-      <nav
-        aria-label="Breadcrumb"
-        className="border-b border-line bg-white"
-      >
+      <nav aria-label="Breadcrumb" className="border-b border-line bg-white">
         <Container>
           <ol className="flex flex-wrap items-center gap-1.5 py-4 text-[13px] text-ink">
             <li>
-              <Link
-                href="/"
-                className="transition-colors hover:text-blue"
-              >
+              <Link href="/" className="transition-colors hover:text-blue">
                 Home
               </Link>
             </li>
@@ -303,10 +296,7 @@ export default async function ServiceDetailPage({
               aria-hidden="true"
               className="text-ink/40"
             />
-            <li
-              aria-current="page"
-              className="font-semibold text-navy"
-            >
+            <li aria-current="page" className="font-semibold text-navy">
               {service.name}
             </li>
           </ol>
@@ -346,10 +336,7 @@ export default async function ServiceDetailPage({
             <div>
               <SectionHeader
                 eyebrow="OVERVIEW"
-                title={
-                  service.detailHeading?.trim() ||
-                  `About ${service.name}`
-                }
+                title={service.detailHeading?.trim() || `About ${service.name}`}
                 text={service.description}
                 headingId="service-overview-heading"
               />
@@ -410,14 +397,9 @@ export default async function ServiceDetailPage({
                 className="border-l border-white/20 px-8 py-14 first:border-l-0 max-[900px]:border-b max-[900px]:[&:nth-child(odd)]:border-l-0 max-[600px]:border-l-0 max-[600px]:px-0 max-[600px]:py-8"
               >
                 <div className="mb-2 text-[clamp(42px,4.6vw,64px)] font-extrabold leading-none tracking-[-0.05em]">
-                  <AnimatedCounter
-                    value={stat.value}
-                    suffix={stat.suffix}
-                  />
+                  <AnimatedCounter value={stat.value} suffix={stat.suffix} />
                 </div>
-                <p className="text-[14px] text-white/80">
-                  {stat.label}
-                </p>
+                <p className="text-[14px] text-white/80">{stat.label}</p>
               </div>
             ))}
           </div>

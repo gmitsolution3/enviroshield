@@ -131,8 +131,7 @@ export async function generateMetadata({
 
     const seo = product.seo;
 
-    const title =
-      seo?.metaTitle?.trim() || `${product.name} | Enviroshield`;
+    const title = seo?.metaTitle?.trim() || `${product.name} | Enviroshield`;
 
     const description = getProductDescription(product);
 
@@ -146,8 +145,7 @@ export async function generateMetadata({
 
     const ogImage = seo?.ogImage?.trim() || product.primaryImage?.url;
 
-    const imageAlt =
-      product.primaryImage?.alt?.trim() || product.name;
+    const imageAlt = product.primaryImage?.alt?.trim() || product.name;
 
     return {
       title,
@@ -161,6 +159,10 @@ export async function generateMetadata({
       robots: {
         index: seo?.noIndex !== true,
         follow: seo?.noIndex !== true,
+        googleBot: {
+          index: seo?.noIndex !== true,
+          follow: seo?.noIndex !== true,
+        },
       },
 
       openGraph: {
@@ -184,17 +186,13 @@ export async function generateMetadata({
       },
     };
   } catch (error) {
-    if (
-      !(error instanceof Error) ||
-      error.message !== "Product not found."
-    ) {
+    if (!(error instanceof Error) || error.message !== "Product not found.") {
       throw error;
     }
 
     return {
       title: "Product not found | Enviroshield",
-      description:
-        "The requested Enviroshield product could not be found.",
+      description: "The requested Enviroshield product could not be found.",
 
       robots: {
         index: false,
@@ -223,9 +221,7 @@ export async function generateStaticParams() {
   }
 }
 
-export default async function ProductDetailPage({
-  params,
-}: ProductPageProps) {
+export default async function ProductDetailPage({ params }: ProductPageProps) {
   const { slug } = await params;
 
   let product: IPublishedProduct | null = null;
@@ -233,10 +229,7 @@ export default async function ProductDetailPage({
   try {
     product = await getPublishedProductBySlug(slug);
   } catch (error) {
-    if (
-      !(error instanceof Error) ||
-      error.message !== "Product not found."
-    ) {
+    if (!(error instanceof Error) || error.message !== "Product not found.") {
       throw error;
     }
   }
@@ -258,18 +251,13 @@ export default async function ProductDetailPage({
     ? Math.max(0, product.stockQuantity)
     : 0;
 
-  const lowStockThreshold = Number.isFinite(
-    product.lowStockThreshold,
-  )
+  const lowStockThreshold = Number.isFinite(product.lowStockThreshold)
     ? Math.max(0, product.lowStockThreshold)
     : 0;
 
   const available = stockQuantity > 0;
 
-  const stock = getStockStatus(
-    stockQuantity,
-    lowStockThreshold,
-  );
+  const stock = getStockStatus(stockQuantity, lowStockThreshold);
 
   const publishedDate = product.publishedAt
     ? new Date(product.publishedAt)
@@ -285,15 +273,11 @@ export default async function ProductDetailPage({
       : null;
 
   // Related products from the same category.
-  let related: Awaited<
-    ReturnType<typeof getPublishedProducts>
-  >["data"] = [];
+  let related: Awaited<ReturnType<typeof getPublishedProducts>>["data"] = [];
 
   try {
     const categoryId =
-      typeof product.categoryId === "object"
-        ? product.categoryId._id
-        : "";
+      typeof product.categoryId === "object" ? product.categoryId._id : "";
 
     if (categoryId) {
       const result = await getPublishedProducts({
@@ -319,9 +303,7 @@ export default async function ProductDetailPage({
     description,
     url: articleUrl,
 
-    ...(product.sku?.trim()
-      ? { sku: product.sku.trim() }
-      : {}),
+    ...(product.sku?.trim() ? { sku: product.sku.trim() } : {}),
 
     ...(images.length > 0
       ? {
@@ -421,30 +403,21 @@ export default async function ProductDetailPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(productJsonLd).replace(
-            /</g,
-            "\\u003c",
-          ),
+          __html: JSON.stringify(productJsonLd).replace(/</g, "\\u003c"),
         }}
       />
 
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(webPageJsonLd).replace(
-            /</g,
-            "\\u003c",
-          ),
+          __html: JSON.stringify(webPageJsonLd).replace(/</g, "\\u003c"),
         }}
       />
 
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbJsonLd).replace(
-            /</g,
-            "\\u003c",
-          ),
+          __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c"),
         }}
       />
 
@@ -477,10 +450,7 @@ export default async function ProductDetailPage({
                     <li aria-hidden="true">/</li>
 
                     <li>
-                      <Link
-                        href="/products"
-                        className="hover:text-blue"
-                      >
+                      <Link href="/products" className="hover:text-blue">
                         Products
                       </Link>
                     </li>
@@ -511,9 +481,7 @@ export default async function ProductDetailPage({
                 <span
                   className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-bold ${stock.pill}`}
                 >
-                  <span
-                    className={`size-2 rounded-full ${stock.dot}`}
-                  />
+                  <span className={`size-2 rounded-full ${stock.dot}`} />
                   {available ? "In stock" : "Out of stock"}
                 </span>
               </div>
@@ -543,10 +511,7 @@ export default async function ProductDetailPage({
             {/* Images */}
 
             <Reveal dir="image">
-              <ProductGallery
-                images={images}
-                name={product.name}
-              />
+              <ProductGallery images={images} name={product.name} />
             </Reveal>
 
             {/* Product information */}
@@ -581,9 +546,7 @@ export default async function ProductDetailPage({
                   <span
                     className={`mt-5 inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] font-bold ${stock.pill}`}
                   >
-                    <span
-                      className={`size-2 rounded-full ${stock.dot}`}
-                    />
+                    <span className={`size-2 rounded-full ${stock.dot}`} />
                     {stock.label}
                   </span>
                 </div>
@@ -647,10 +610,7 @@ export default async function ProductDetailPage({
 
                   <div className="mt-6 flex flex-col gap-3">
                     {price ? (
-                      <AddToCart
-                        product={product}
-                        stock={stockQuantity}
-                      />
+                      <AddToCart product={product} stock={stockQuantity} />
                     ) : (
                       <Button href="/contact" fullWidth>
                         Ask about this product
@@ -673,8 +633,8 @@ export default async function ProductDetailPage({
                   </div>
 
                   <p className="mt-5 text-center text-[12px] leading-6 text-ink/60">
-                    Questions about specifications, bulk orders or
-                    suitability? Our team is happy to help.
+                    Questions about specifications, bulk orders or suitability?
+                    Our team is happy to help.
                   </p>
                 </div>
               </div>
@@ -697,10 +657,7 @@ export default async function ProductDetailPage({
               <Reveal dir="up">
                 <div className="min-w-0">
                   <p className="mb-4 flex items-center gap-3 text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
-                    <span
-                      aria-hidden="true"
-                      className="h-[2px] w-7 bg-blue"
-                    />
+                    <span aria-hidden="true" className="h-[2px] w-7 bg-blue" />
                     Product details
                   </p>
 
@@ -766,9 +723,7 @@ export default async function ProductDetailPage({
                       },
                       {
                         label: "Availability",
-                        value: available
-                          ? "In stock"
-                          : "Out of stock",
+                        value: available ? "In stock" : "Out of stock",
                       },
                       ...(publishedOn
                         ? [
@@ -783,9 +738,7 @@ export default async function ProductDetailPage({
                         key={row.label}
                         className="flex items-baseline justify-between gap-6 py-3.5"
                       >
-                        <dt className="text-[13px] text-ink/60">
-                          {row.label}
-                        </dt>
+                        <dt className="text-[13px] text-ink/60">{row.label}</dt>
 
                         <dd className="break-words text-right text-[14px] font-bold text-navy">
                           {row.value}
@@ -876,10 +829,7 @@ export default async function ProductDetailPage({
 
               <div className="grid grid-cols-3 gap-6 max-[1000px]:grid-cols-2 max-[600px]:grid-cols-1">
                 {related.map((item) => (
-                  <ProductCard
-                    key={item._id}
-                    product={item}
-                  />
+                  <ProductCard key={item._id} product={item} />
                 ))}
               </div>
             </div>
@@ -905,9 +855,8 @@ export default async function ProductDetailPage({
               </h2>
 
               <p className="mt-4 text-[15px] leading-[1.8] text-white/75">
-                Talk to our team about this product, its
-                specifications, pricing, and suitability for your
-                project.
+                Talk to our team about this product, its specifications,
+                pricing, and suitability for your project.
               </p>
             </div>
 

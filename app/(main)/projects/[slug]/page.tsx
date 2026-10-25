@@ -44,11 +44,9 @@ export async function generateMetadata({
 
     const seo = project.seo;
 
-    const title =
-      seo?.metaTitle?.trim() || `${project.title} | Enviroshield`;
+    const title = seo?.metaTitle?.trim() || `${project.title} | Enviroshield`;
 
-    const description =
-      seo?.metaDescription?.trim() || project.description;
+    const description = seo?.metaDescription?.trim() || project.description;
 
     const keywords = seo?.keywords?.filter(Boolean) ?? [];
 
@@ -72,6 +70,10 @@ export async function generateMetadata({
       robots: {
         index: seo?.noIndex !== true,
         follow: seo?.noIndex !== true,
+        googleBot: {
+          index: seo?.noIndex !== true,
+          follow: seo?.noIndex !== true,
+        },
       },
 
       openGraph: {
@@ -97,8 +99,7 @@ export async function generateMetadata({
   } catch {
     return {
       title: "Project not found | Enviroshield",
-      description:
-        "The requested Enviroshield project could not be found.",
+      description: "The requested Enviroshield project could not be found.",
       robots: {
         index: false,
         follow: false,
@@ -174,8 +175,7 @@ export default async function ProjectDetailPage({
     .filter(Boolean)
     .join(", ");
 
-  const serviceName =
-    project.serviceId?.name || "Enviroshield Solution";
+  const serviceName = project.serviceId?.name || "Enviroshield Solution";
 
   const completionDate = project.completionDate
     ? new Date(project.completionDate).toLocaleDateString("en-US", {
@@ -301,9 +301,7 @@ export default async function ProjectDetailPage({
       />
 
       <PageHero
-        eyebrow={
-          project.isFeatured ? "FEATURED PROJECT" : "OUR PROJECTS"
-        }
+        eyebrow={project.isFeatured ? "FEATURED PROJECT" : "OUR PROJECTS"}
         title={project.title}
         text={project.description}
         image={project.primaryImage.url}
@@ -314,17 +312,11 @@ export default async function ProjectDetailPage({
       {/* BREADCRUMB                                                         */}
       {/* ------------------------------------------------------------------ */}
 
-      <nav
-        aria-label="Breadcrumb"
-        className="border-b border-line bg-white"
-      >
+      <nav aria-label="Breadcrumb" className="border-b border-line bg-white">
         <Container>
           <ol className="flex flex-wrap items-center gap-1.5 py-4 text-[13px] text-ink">
             <li>
-              <Link
-                href="/"
-                className="transition-colors hover:text-blue"
-              >
+              <Link href="/" className="transition-colors hover:text-blue">
                 Home
               </Link>
             </li>
@@ -346,10 +338,7 @@ export default async function ProjectDetailPage({
               aria-hidden="true"
               className="text-ink/40"
             />
-            <li
-              aria-current="page"
-              className="font-semibold text-navy"
-            >
+            <li aria-current="page" className="font-semibold text-navy">
               {project.title}
             </li>
           </ol>
@@ -459,10 +448,7 @@ export default async function ProjectDetailPage({
                     <div className="relative h-[120px] w-full max-w-[240px]">
                       <Image
                         src={project.client.logo.url}
-                        alt={
-                          project.client.logo.alt ||
-                          project.client.name
-                        }
+                        alt={project.client.logo.alt || project.client.name}
                         fill
                         sizes="240px"
                         className="object-contain"
@@ -531,9 +517,7 @@ export default async function ProjectDetailPage({
             eyebrow="PROJECT DETAILS"
             title="The work behind the result."
             text={`A closer look at the ${serviceName.toLowerCase()} solution delivered${
-              project.client?.name
-                ? ` for ${project.client.name}`
-                : ""
+              project.client?.name ? ` for ${project.client.name}` : ""
             }.`}
             light
             headingId="project-details-heading"
