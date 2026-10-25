@@ -36,12 +36,12 @@ export async function generateMetadata({
   const isFirstPage = page === 1;
 
   const title = isFirstPage
-    ? "Waterproofing & Flooring Projects in Bangladesh | Enviro Shield"
-    : `Waterproofing & Flooring Projects — Page ${page} | Enviro Shield`;
+    ? "Waterproofing & Flooring Projects in Bangladesh | Enviroshield"
+    : `Waterproofing & Flooring Projects — Page ${page} | Enviroshield`;
 
   const description = isFirstPage
-    ? "Explore Enviro Shield projects featuring waterproofing, waterproofing paint, heatproofing, epoxy and PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy flooring, floor hardener, and ETP coating across Bangladesh."
-    : `Explore more Enviro Shield projects involving waterproofing, flooring, heatproofing, injection grouting, and protective coatings in Bangladesh. Browse project examples on page ${page}.`;
+    ? "Explore Enviroshield projects featuring waterproofing, waterproofing paint, heatproofing, epoxy and PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy flooring, floor hardener, and ETP coating across Bangladesh."
+    : `Explore more Enviroshield projects involving waterproofing, flooring, heatproofing, injection grouting, and protective coatings in Bangladesh. Browse project examples on page ${page}.`;
 
   const canonical = isFirstPage
     ? "/projects"
@@ -52,7 +52,7 @@ export async function generateMetadata({
     description,
 
     keywords: [
-      "Enviro Shield projects",
+      "Enviroshield projects",
       "waterproofing projects Bangladesh",
       "waterproofing paint projects",
       "heatproofing projects",
@@ -163,9 +163,9 @@ export default async function ProjectsPage({
       <PageHero
         eyebrow="OUR PROJECTS"
         title="Projects built to perform."
-        text="Discover how Enviro Shield applies specialized waterproofing, flooring, insulation, grouting, and protective coating systems to residential, commercial, and industrial projects."
+        text="Discover how Enviroshield applies specialized waterproofing, flooring, insulation, grouting, and protective coating systems to residential, commercial, and industrial projects."
         image="/images/service-hero.jpg"
-        imageAlt="Enviro Shield completed project"
+        imageAlt="Enviroshield completed project"
       />
 
       {/* STATS */}
