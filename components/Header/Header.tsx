@@ -12,11 +12,36 @@ import DesktopNavbar from "./DesktopNavbar";
 import MobileMenu from "./MobileMenu";
 import TopHeaderBar from "./TopHeaderBar";
 
+type CartAddAnimationDetail = {
+  sourceRect: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  };
+  quantity: number;
+};
+
+type CartFlight = {
+  id: number;
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+  quantity: number;
+};
+
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+
   const cartTriggerRef = useRef<HTMLButtonElement>(null);
+
   const [scrolled, setScrolled] = useState(false);
+  const [cartFlight, setCartFlight] = useState<CartFlight | null>(
+    null,
+  );
+
   const reduce = useReducedMotion();
 
   const closeCart = useCallback(() => setCartOpen(false), []);
@@ -59,6 +84,43 @@ export default function Header() {
 
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
+
+  useEffect(() => {
+    const handleCartAddAnimation = (event: Event) => {
+      const detail = (event as CustomEvent<CartAddAnimationDetail>)
+        .detail;
+
+      const target = cartTriggerRef.current;
+
+      if (!detail || !target || reduce) return;
+
+      const targetRect = target.getBoundingClientRect();
+
+      // Do not animate toward a hidden cart icon on mobile.
+      if (!targetRect.width || !targetRect.height) return;
+
+      setCartFlight({
+        id: Date.now(),
+        startX: detail.sourceRect.left + detail.sourceRect.width / 2,
+        startY: detail.sourceRect.top + detail.sourceRect.height / 2,
+        endX: targetRect.left + targetRect.width / 2,
+        endY: targetRect.top + targetRect.height / 2,
+        quantity: detail.quantity,
+      });
+    };
+
+    window.addEventListener(
+      "cart:add-animation",
+      handleCartAddAnimation,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "cart:add-animation",
+        handleCartAddAnimation,
+      );
+    };
+  }, [reduce]);
 
   return (
     <>
@@ -128,6 +190,38 @@ export default function Header() {
         onClose={closeCart}
         triggerRef={cartTriggerRef}
       />
+
+      {cartFlight && (
+        <motion.div
+          key={cartFlight.id}
+          aria-hidden="true"
+          initial={{
+            x: 0,
+            y: 0,
+            scale: 0.45,
+            opacity: 0,
+          }}
+          animate={{
+            x: cartFlight.endX - cartFlight.startX,
+            y: cartFlight.endY - cartFlight.startY,
+            scale: [0.45, 1.1, 0.72, 0.55],
+            opacity: [0, 1, 1, 0],
+          }}
+          transition={{
+            duration: 3.6,
+            ease: [0.22, 1, 0.36, 1],
+            times: [0, 0.16, 0.76, 1],
+          }}
+          onAnimationComplete={() => setCartFlight(null)}
+          style={{
+            left: cartFlight.startX - 18,
+            top: cartFlight.startY - 18,
+          }}
+          className="pointer-events-none fixed z-[100] grid size-9 place-items-center rounded-full border-2 border-white bg-blue text-xs font-extrabold text-white shadow-[0_6px_22px_rgba(1,110,220,0.4)]"
+        >
+          +{cartFlight.quantity}
+        </motion.div>
+      )}
     </>
   );
 }

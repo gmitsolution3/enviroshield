@@ -9,6 +9,7 @@ import {
   ShoppingBag,
   UserRound,
 } from "lucide-react";
+import { motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -105,7 +106,6 @@ export default function TopHeaderBar({
             aria-hidden="true"
           />
 
-          {/* Account */}
           {!isPending &&
             (user ? (
               <DropdownMenu>
@@ -184,7 +184,6 @@ export default function TopHeaderBar({
               </Link>
             ))}
 
-          {/* Cart */}
           <button
             ref={cartTriggerRef}
             type="button"
@@ -197,12 +196,16 @@ export default function TopHeaderBar({
             <ShoppingBag size={17} aria-hidden="true" />
 
             {count > 0 && (
-              <span
+              <motion.span
+                key={count}
                 aria-hidden="true"
+                initial={{ scale: 0.5 }}
+                animate={{ scale: [0.5, 1.3, 1] }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 className="absolute -right-1 -top-1 grid min-w-[16px] place-items-center rounded-full bg-blue px-1 text-[9px] font-bold leading-4 text-white"
               >
                 {count > 99 ? "99+" : count}
-              </span>
+              </motion.span>
             )}
           </button>
         </div>

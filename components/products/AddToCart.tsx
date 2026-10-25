@@ -1,9 +1,9 @@
 "use client";
 
-import { Check, Minus, Plus, ShoppingCart } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { addToCart } from "@/lib/cart";
 import type { IPublishedProduct } from "@/types/admin/product.type";
+import { Check, Minus, Plus, ShoppingCart } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   product: Pick<
@@ -14,20 +14,53 @@ type Props = {
   stock: number;
 };
 
+type CartAddAnimationDetail = {
+  sourceRect: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  };
+  quantity: number;
+};
+
 export default function AddToCart({ product, stock }: Props) {
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => () => {
-    if (timer.current) clearTimeout(timer.current);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleScrollToTop = () => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      });
+    };
+
+    window.addEventListener("scroll-to-top", handleScrollToTop);
+
+    return () => {
+      window.removeEventListener("scroll-to-top", handleScrollToTop);
+    };
   }, []);
 
   const outOfStock = stock <= 0;
-  const clamp = (n: number) => Math.min(Math.max(1, n), Math.max(1, stock));
+
+  const clamp = (n: number) =>
+    Math.min(Math.max(1, n), Math.max(1, stock));
 
   const handleAdd = () => {
     if (outOfStock) return;
+
     addToCart(
       {
         productId: product._id,
@@ -42,9 +75,37 @@ export default function AddToCart({ product, stock }: Props) {
       qty,
       stock,
     );
+
+    window.dispatchEvent(new CustomEvent("scroll-to-top"));
+
+    const rect = addButtonRef.current?.getBoundingClientRect();
+
+    if (rect) {
+      const detail: CartAddAnimationDetail = {
+        sourceRect: {
+          left: rect.left,
+          top: rect.top,
+          width: rect.width,
+          height: rect.height,
+        },
+        quantity: qty,
+      };
+
+      window.dispatchEvent(
+        new CustomEvent<CartAddAnimationDetail>(
+          "cart:add-animation",
+          { detail },
+        ),
+      );
+    }
+
     setAdded(true);
+
     if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => setAdded(false), 2200);
+
+    timer.current = setTimeout(() => {
+      setAdded(false);
+    }, 2200);
   };
 
   const stepBtn =
@@ -53,7 +114,6 @@ export default function AddToCart({ product, stock }: Props) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-stretch gap-3">
-        {/* quantity */}
         <div
           role="group"
           aria-label="Quantity"
@@ -76,7 +136,9 @@ export default function AddToCart({ product, stock }: Props) {
             max={Math.max(1, stock)}
             value={qty}
             disabled={outOfStock}
-            onChange={(e) => setQty(clamp(Number(e.target.value) || 1))}
+            onChange={(e) =>
+              setQty(clamp(Number(e.target.value) || 1))
+            }
             aria-label="Quantity"
             className="h-12 w-12 border-0 bg-transparent text-center text-[14px] font-bold tabular-nums text-navy outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           />
@@ -92,13 +154,15 @@ export default function AddToCart({ product, stock }: Props) {
           </button>
         </div>
 
-        {/* add to cart */}
         <button
+          ref={addButtonRef}
           type="button"
           onClick={handleAdd}
           disabled={outOfStock}
           className={`inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full px-5 text-[13px] font-bold tracking-[0.01em] text-white shadow-[0_4px_14px_rgba(1,110,220,0.22)] transition-all duration-300 active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-ink/30 disabled:shadow-none ${
-            added ? "bg-deep" : "bg-blue hover:bg-deep hover:shadow-[0_8px_22px_rgba(1,110,220,0.32)]"
+            added
+              ? "bg-deep"
+              : "bg-blue hover:bg-deep hover:shadow-[0_8px_22px_rgba(1,110,220,0.32)]"
           }`}
         >
           {outOfStock ? (
@@ -117,7 +181,11 @@ export default function AddToCart({ product, stock }: Props) {
         </button>
       </div>
 
-      <p role="status" aria-live="polite" className="min-h-[18px] text-[12px] text-ink/60">
+      <p
+        role="status"
+        aria-live="polite"
+        className="min-h-[18px] text-[12px] text-ink/60"
+      >
         {added ? `${qty} × ${product.name} added to your cart.` : ""}
       </p>
     </div>
