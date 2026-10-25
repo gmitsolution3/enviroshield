@@ -36,7 +36,10 @@ type TopHeaderBarProps = {
   cartTriggerRef: React.RefObject<HTMLButtonElement | null>;
 };
 
-function getInitials(name?: string | null, email?: string | null) {
+function getInitials(
+  name?: string | null,
+  email?: string | null,
+) {
   const trimmedName = name?.trim();
 
   if (trimmedName) {
@@ -76,6 +79,7 @@ export default function TopHeaderBar({
   return (
     <div className="hidden h-[38px] border-b border-[#e9eef1] bg-white text-[13px] text-ink min-[901px]:block">
       <Container className="flex h-full items-center justify-between">
+        {/* Contact Information */}
         <span className="flex items-center gap-[7px] font-normal">
           <MapPin size={14} aria-hidden="true" />
           House No: 22/13-15, Block-B, Bauniabad R/A, Mirpur 11,
@@ -106,8 +110,24 @@ export default function TopHeaderBar({
             aria-hidden="true"
           />
 
-          {!isPending &&
-            (user ? (
+          {/* Account: Skeleton, Avatar, or Login */}
+          <div
+            className="inline-flex h-7 min-w-7 shrink-0 items-center justify-center"
+            aria-live="polite"
+          >
+            {isPending ? (
+              /* Avatar Skeleton */
+              <div
+                role="status"
+                aria-label="Loading account"
+                className="size-7 animate-pulse rounded-full border border-[#e9eef1] bg-gradient-to-br from-[#e9eef1] via-[#f5f7f8] to-[#e9eef1]"
+              >
+                <span className="sr-only">
+                  Loading account...
+                </span>
+              </div>
+            ) : user ? (
+              /* Authenticated User */
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={
@@ -160,7 +180,9 @@ export default function TopHeaderBar({
                   </DropdownMenuItem>
 
                   <DropdownMenuItem
-                    render={<Link href="/dashboard/profile" />}
+                    render={
+                      <Link href="/dashboard/profile" />
+                    }
                     className="cursor-pointer rounded-lg"
                   >
                     <UserRound className="size-4" />
@@ -179,14 +201,17 @@ export default function TopHeaderBar({
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
+              /* Unauthenticated User */
               <Link
                 href="/login"
                 className="inline-flex h-7 items-center justify-center rounded-full px-2 text-[12px] font-semibold text-navy transition-colors hover:bg-mist hover:text-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue"
               >
                 Login
               </Link>
-            ))}
+            )}
+          </div>
 
+          {/* Shopping Cart */}
           <button
             ref={cartTriggerRef}
             type="button"
@@ -196,7 +221,10 @@ export default function TopHeaderBar({
             aria-expanded={cartOpen}
             className="relative inline-grid size-7 shrink-0 place-items-center rounded-full text-navy transition-colors hover:bg-mist hover:text-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue"
           >
-            <ShoppingBag size={17} aria-hidden="true" />
+            <ShoppingBag
+              size={17}
+              aria-hidden="true"
+            />
 
             {count > 0 && (
               <motion.span
@@ -204,7 +232,10 @@ export default function TopHeaderBar({
                 aria-hidden="true"
                 initial={{ scale: 0.5 }}
                 animate={{ scale: [0.5, 1.3, 1] }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
+                transition={{
+                  duration: 0.3,
+                  ease: "easeOut",
+                }}
                 className="absolute -right-1 -top-1 grid min-w-[16px] place-items-center rounded-full bg-blue px-1 text-[9px] font-bold leading-4 text-white"
               >
                 {count > 99 ? "99+" : count}

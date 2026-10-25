@@ -1,9 +1,11 @@
 "use client";
 
 import CartDrawer from "@/components/cart/CartDrawer";
+import { useLenis } from "lenis/react";
 import { Menu } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import { EASE } from "../animations/variants";
 import Container from "../Container";
 import Logo from "../Logo";
@@ -38,11 +40,15 @@ export default function Header() {
   const cartTriggerRef = useRef<HTMLButtonElement>(null);
 
   const [scrolled, setScrolled] = useState(false);
+
   const [cartFlight, setCartFlight] = useState<CartFlight | null>(
     null,
   );
 
   const reduce = useReducedMotion();
+
+  // Access the existing Lenis smooth-scroll instance.
+  const lenis = useLenis();
 
   const closeCart = useCallback(() => setCartOpen(false), []);
 
@@ -56,35 +62,67 @@ export default function Header() {
     { label: "Contact Us", href: "/contact" },
   ];
 
+  // Track page scrolling for the sticky header.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
 
     window.addEventListener("scroll", onScroll, { passive: true });
+
     onScroll();
 
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
+  // Lock background scrolling while the mobile menu is open.
+  // Stop Lenis as well so smooth scrolling cannot move the page.
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
+    const body = document.body;
+    const html = document.documentElement;
+
+    const previousBodyOverflow = body.style.overflow;
+    const previousHtmlOverflow = html.style.overflow;
+
+    if (open) {
+      lenis?.stop();
+
+      body.style.overflow = "hidden";
+      html.style.overflow = "hidden";
+    } else {
+      lenis?.start();
+    }
 
     return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
+      body.style.overflow = previousBodyOverflow;
+      html.style.overflow = previousHtmlOverflow;
 
+      // Ensure smooth scrolling resumes when the menu closes
+      // or the Header component unmounts.
+      lenis?.start();
+    };
+  }, [open, lenis]);
+
+  // Close the mobile menu with the Escape key.
   useEffect(() => {
     if (!open) return;
 
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
     };
 
     window.addEventListener("keydown", onKey);
 
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open]);
 
+  // Animate an item toward the cart icon when added to the cart.
   useEffect(() => {
     const handleCartAddAnimation = (event: Event) => {
       const detail = (event as CustomEvent<CartAddAnimationDetail>)
@@ -103,10 +141,15 @@ export default function Header() {
 
       setCartFlight({
         id: Date.now(),
+
         startX: detail.sourceRect.left + detail.sourceRect.width / 2,
+
         startY: detail.sourceRect.top + detail.sourceRect.height / 2,
+
         endX: targetRect.left + targetRect.width / 2,
+
         endY: targetRect.top + scrollY + targetRect.height / 2,
+
         quantity: detail.quantity,
       });
     };
@@ -134,18 +177,22 @@ export default function Header() {
         cartTriggerRef={cartTriggerRef}
       />
 
+      {/* Main Header */}
       <motion.header
         className="sticky top-0 z-20 h-[82px] border-b"
         animate={{
           backgroundColor: scrolled
             ? "rgba(255, 255, 255, 0.55)"
             : "rgba(255, 255, 255, 1)",
+
           backdropFilter: scrolled
             ? "blur(16px) saturate(180%)"
             : "blur(0px) saturate(100%)",
+
           boxShadow: scrolled
             ? "0px 10px 30px -5px rgba(0, 51, 78, 0.08), inset 0px 1px 0px 0px rgba(255, 255, 255, 0.8)"
             : "0px 0px 0px rgba(0, 51, 78, 0), inset 0px 0px 0px 0px rgba(255, 255, 255, 0)",
+
           borderColor: scrolled
             ? "rgba(255, 255, 255, 0.4)"
             : "rgba(223, 229, 233, 0)",
@@ -158,16 +205,32 @@ export default function Header() {
         transition={{ duration: 0.3 }}
       >
         <Container className="flex h-full items-center justify-between">
+          {/* Logo */}
           <motion.div
-            initial={reduce ? false : { opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: EASE }}
+            initial={
+              reduce
+                ? false
+                : {
+                    opacity: 0,
+                    y: -8,
+                  }
+            }
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              duration: 0.5,
+              ease: EASE,
+            }}
           >
             <Logo />
           </motion.div>
 
+          {/* Desktop Navigation */}
           <DesktopNavbar links={links} />
 
+          {/* Mobile Menu Toggle */}
           <button
             className="block text-navy min-[901px]:hidden"
             type="button"
@@ -181,20 +244,22 @@ export default function Header() {
         </Container>
       </motion.header>
 
-  
-<MobileMenu
-  open={open}
-  links={links}
-  onClose={() => setOpen(false)}
-  onCartClick={() => setCartOpen(true)}
-/>
+      {/* Mobile Navigation Drawer */}
+      <MobileMenu
+        open={open}
+        links={links}
+        onClose={() => setOpen(false)}
+        onCartClick={() => setCartOpen(true)}
+      />
 
+      {/* Shopping Cart Drawer */}
       <CartDrawer
         open={cartOpen}
         onClose={closeCart}
         triggerRef={cartTriggerRef}
       />
 
+      {/* Add-to-Cart Animation */}
       {cartFlight && (
         <motion.div
           key={cartFlight.id}
@@ -207,8 +272,11 @@ export default function Header() {
           }}
           animate={{
             x: cartFlight.endX - cartFlight.startX,
+
             y: cartFlight.endY - cartFlight.startY,
+
             scale: [0.45, 1.1, 0.72, 0.55],
+
             opacity: [0, 1, 1, 0],
           }}
           transition={{
@@ -216,7 +284,9 @@ export default function Header() {
             ease: [0.22, 1, 0.36, 1],
             times: [0, 0.16, 0.76, 1],
           }}
-          onAnimationComplete={() => setCartFlight(null)}
+          onAnimationComplete={() => {
+            setCartFlight(null);
+          }}
           style={{
             left: cartFlight.startX - 18,
             top: cartFlight.startY - 18,
