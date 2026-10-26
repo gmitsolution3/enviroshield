@@ -8,7 +8,11 @@ import { z } from "zod";
 
 import { authClient } from "@/lib/auth-client";
 
-import { Button } from "@/components/ui/button";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 import {
   Card,
   CardContent,
@@ -17,6 +21,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import DashboardButton from "@/components/dashboard/DashboardButton";
+import { ProfileImageDialog } from "./ProfileImageDialog";
 
 import type { Session } from "@/lib/auth-client";
 
@@ -43,6 +49,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const [successMessage, setSuccessMessage] = useState<string | null>(
     null,
   );
+  const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(user.image ?? null);
 
   const {
     register,
@@ -99,21 +107,32 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
         <CardContent className="px-6 py-7 sm:px-7">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full border border-border/70 bg-muted">
-              <Camera className="h-7 w-7 text-muted-foreground" />
-            </div>
+            <Avatar className="h-20 w-20 shrink-0 border border-border/70">
+              <AvatarImage src={profileImage ?? undefined} alt={`${user.name} profile photo`} />
+              <AvatarFallback className="bg-indigo/[0.08] text-lg font-semibold text-indigo">
+                {user.name.trim().split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
 
             <div className="max-w-md">
               <p className="text-sm font-medium">Profile photo</p>
 
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                Profile image uploads will be connected once the
-                Enviroshield image-upload infrastructure is added.
+                Choose a photo to personalize your Enviroshield account.
               </p>
 
               <p className="mt-3 text-xs text-muted-foreground/70">
                 JPG, PNG, WebP · Maximum 5 MB
               </p>
+              <div className="mt-4">
+                <DashboardButton
+                  type="button"
+                  onClick={() => setIsPhotoDialogOpen(true)}
+                  icon={<Camera className="h-4 w-4" />}
+                >
+                  Change photo
+                </DashboardButton>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -297,17 +316,23 @@ export function ProfileForm({ user }: ProfileFormProps) {
             )}
 
             <div className="flex justify-end border-t border-border/60 pt-6">
-              <Button
+              <DashboardButton
                 type="submit"
                 disabled={isSubmitting}
-                className="h-10 rounded-full px-6"
               >
                 {isSubmitting ? "Saving..." : "Save changes"}
-              </Button>
+              </DashboardButton>
             </div>
           </CardContent>
         </form>
       </Card>
+
+      <ProfileImageDialog
+        open={isPhotoDialogOpen}
+        onOpenChange={setIsPhotoDialogOpen}
+        currentImage={profileImage}
+        onSaved={(image) => setProfileImage(image)}
+      />
     </div>
   );
 }

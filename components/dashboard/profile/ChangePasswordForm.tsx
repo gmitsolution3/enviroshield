@@ -1,14 +1,14 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LockKeyhole } from "lucide-react";
+import { Eye, EyeOff, LockKeyhole } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { authClient } from "@/lib/auth-client";
 
-import { Button } from "@/components/ui/button";
+import DashboardButton from "@/components/dashboard/DashboardButton";
 import {
   Card,
   CardContent,
@@ -43,6 +43,9 @@ export function ChangePasswordForm() {
   const [successMessage, setSuccessMessage] = useState<string | null>(
     null,
   );
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -110,14 +113,26 @@ export function ChangePasswordForm() {
               Current password
             </Label>
 
-            <Input
-              id="currentPassword"
-              type="password"
-              autoComplete="current-password"
-              placeholder="Enter your current password"
-              className="h-11 rounded-xl"
-              {...register("currentPassword")}
-            />
+            <div className="relative">
+              <Input
+                id="currentPassword"
+                type={showCurrentPassword ? "text" : "password"}
+                autoComplete="current-password"
+                placeholder="Enter your current password"
+                className="h-11 rounded-xl pr-11"
+                {...register("currentPassword")}
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword((visible) => !visible)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label={showCurrentPassword ? "Hide current password" : "Show current password"}
+                aria-pressed={showCurrentPassword}
+                aria-controls="currentPassword"
+              >
+                {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
 
             {errors.currentPassword && (
               <p className="text-sm text-destructive">
@@ -134,14 +149,26 @@ export function ChangePasswordForm() {
               New password
             </Label>
 
-            <Input
-              id="newPassword"
-              type="password"
-              autoComplete="new-password"
-              placeholder="At least 8 characters"
-              className="h-11 rounded-xl"
-              {...register("newPassword")}
-            />
+            <div className="relative">
+              <Input
+                id="newPassword"
+                type={showNewPassword ? "text" : "password"}
+                autoComplete="new-password"
+                placeholder="At least 8 characters"
+                className="h-11 rounded-xl pr-11"
+                {...register("newPassword")}
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword((visible) => !visible)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label={showNewPassword ? "Hide new password" : "Show new password"}
+                aria-pressed={showNewPassword}
+                aria-controls="newPassword"
+              >
+                {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
 
             {errors.newPassword && (
               <p className="text-sm text-destructive">
@@ -158,14 +185,26 @@ export function ChangePasswordForm() {
               Confirm new password
             </Label>
 
-            <Input
-              id="confirmPassword"
-              type="password"
-              autoComplete="new-password"
-              placeholder="Enter your new password again"
-              className="h-11 rounded-xl"
-              {...register("confirmPassword")}
-            />
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                autoComplete="new-password"
+                placeholder="Enter your new password again"
+                className="h-11 rounded-xl pr-11"
+                {...register("confirmPassword")}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((visible) => !visible)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                aria-pressed={showConfirmPassword}
+                aria-controls="confirmPassword"
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
 
             {errors.confirmPassword && (
               <p className="text-sm text-destructive">
@@ -205,13 +244,12 @@ export function ChangePasswordForm() {
           )}
 
           <div className="flex justify-end border-t border-border/60 pt-6">
-            <Button
+            <DashboardButton
               type="submit"
               disabled={isSubmitting}
-              className="h-10 rounded-full px-6"
             >
               {isSubmitting ? "Updating..." : "Update password"}
-            </Button>
+            </DashboardButton>
           </div>
         </form>
       </CardContent>
