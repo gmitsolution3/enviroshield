@@ -54,6 +54,19 @@ type DashboardUser = Session["user"] & {
   banned?: boolean;
 };
 
+type UserSearchResult = Pick<
+  Session["user"],
+  "id" | "name" | "email" | "image" | "role"
+> & {
+  createdAt: string;
+  banned: boolean;
+};
+
+type UserSearchResponse = {
+  users: UserSearchResult[];
+  total: number;
+};
+
 export default function UsersDashboard() {
   const { data: session } = authClient.useSession();
 
@@ -78,37 +91,46 @@ export default function UsersDashboard() {
 
     const offset = pagination.pageIndex * pagination.pageSize;
 
-    const { data, error } = await authClient.admin.listUsers({
-      query: {
-        limit: pagination.pageSize,
-        offset,
+    try {
+      const params = new URLSearchParams({
+        limit: String(pagination.pageSize),
+        offset: String(offset),
+      });
+      if (searchValue) params.set("search", searchValue);
 
-        searchValue: searchValue || undefined,
+      const response = await fetch(`/api/admin/users?${params.toString()}`, {
+        cache: "no-store",
+      });
+      if (!response.ok) {
+        throw new Error("Unable to load users.");
+      }
 
-        searchField: "name",
-        searchOperator: "contains",
+      const data = (await response.json()) as UserSearchResponse;
+      if (!Array.isArray(data.users) || !Number.isInteger(data.total)) {
+        throw new Error("The user search response was invalid.");
+      }
 
-        sortBy: "createdAt",
-        sortDirection: "desc",
-      },
-    });
-
-    if (error || !data) {
+      setUsers(
+        data.users.map((user) => ({
+          ...user,
+          createdAt: new Date(user.createdAt),
+        })) as DashboardUser[],
+      );
+      setTotal(data.total);
+    } catch {
       setUsers([]);
       setTotal(0);
       setIsError(true);
+    } finally {
       setIsLoading(false);
-
-      return;
     }
-
-    setUsers(data.users as DashboardUser[]);
-    setTotal(data.total);
-    setIsLoading(false);
   }, [pagination.pageIndex, pagination.pageSize, searchValue]);
 
   useEffect(() => {
-    void fetchUsers();
+    const timeout = window.setTimeout(() => {
+      void fetchUsers();
+    }, 0);
+    return () => window.clearTimeout(timeout);
   }, [fetchUsers]);
 
   const columns = useMemo<
@@ -226,7 +248,7 @@ export default function UsersDashboard() {
         ),
       },
     ],
-    [session?.user.id, fetchUsers],
+    [session?.user, fetchUsers],
   );
 
   const table = useTable({

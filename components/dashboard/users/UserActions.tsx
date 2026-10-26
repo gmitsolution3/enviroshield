@@ -215,7 +215,7 @@ export default function UserActions({
 
         <DropdownMenuItem
           disabled={isLoading || isCurrentUser}
-          onSelect={(event) => {
+          onClick={(event) => {
             event.preventDefault();
             setIsDeleteOpen(true);
           }}
