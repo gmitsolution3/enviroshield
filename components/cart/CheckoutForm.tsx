@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShieldCheck, ShoppingBag } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -32,6 +33,7 @@ import type {
 } from "@/lib/api/orders";
 import { authClient } from "@/lib/auth-client";
 import { clearCart } from "@/lib/cart";
+import { getProductImageUrl } from "@/lib/products/images";
 
 const checkoutSchema = z.object({
   name: z
@@ -276,7 +278,7 @@ export default function CheckoutForm() {
           ) : items.length === 0 ? (
             <EmptyCart />
           ) : (
-            <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+            <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
               <form
                 onSubmit={handleSubmit(onSubmit)}
                 noValidate
@@ -698,64 +700,107 @@ export default function CheckoutForm() {
                 </p>
               </form>
 
-              <aside className="rounded-2xl border border-line bg-white p-6 shadow-[0_10px_30px_rgba(0,51,78,0.06)] lg:sticky lg:top-28">
-                <h2 className="text-lg font-extrabold text-navy">
-                  Order summary
-                </h2>
+              <aside className="rounded-3xl border border-line bg-white p-5 shadow-[0_8px_28px_rgba(0,51,78,0.06)] sm:p-7 lg:sticky lg:top-28">
+                <div className="flex items-center justify-between gap-3 border-b border-line pb-4">
+                  <div className="flex items-center gap-3">
+                    <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-blue/10 text-blue">
+                      <ShoppingBag size={21} aria-hidden="true" />
+                    </span>
 
-                <ul className="mt-4 divide-y divide-line">
-                  {items.map((item) => (
-                    <li
-                      key={item.productId}
-                      className="flex justify-between gap-4 py-3 text-sm"
-                    >
-                      <span className="min-w-0 text-ink/75">
-                        {item.name}{" "}
-                        <span className="whitespace-nowrap text-ink/50">
-                          × {item.quantity}
+                    <div>
+                      <h2 className="text-lg font-extrabold text-navy">
+                        Order summary
+                      </h2>
+                      <p className="mt-0.5 text-xs text-ink/55">
+                        A quick look at your purchase
+                      </p>
+                    </div>
+                  </div>
+
+                  <span className="shrink-0 rounded-full bg-mist px-3 py-1.5 text-xs font-bold text-navy">
+                    {items.length} {items.length === 1 ? "item" : "items"}
+                  </span>
+                </div>
+
+                <ul className="divide-y divide-line">
+                  {items.map((item) => {
+                    const image = getProductImageUrl(item.image);
+
+                    return (
+                      <li
+                        key={item.productId}
+                        className="flex items-center gap-3 py-4 sm:gap-4"
+                      >
+                        <div className="relative size-[68px] shrink-0 overflow-hidden rounded-2xl border border-line bg-mist/60">
+                          {image ? (
+                            <Image
+                              src={image}
+                              alt={item.name}
+                              fill
+                              sizes="68px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <span className="grid h-full place-items-center text-[10px] text-ink/50">
+                              No image
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold leading-5 text-navy">
+                            {item.name}
+                          </p>
+
+                          <p className="mt-1 text-xs text-ink/55">
+                            {money(item.price)} × {item.quantity}
+                          </p>
+                        </div>
+
+                        <span className="shrink-0 text-sm font-extrabold tabular-nums text-navy">
+                          {money(item.price * item.quantity)}
                         </span>
-                      </span>
-
-                      <span className="shrink-0 font-semibold tabular-nums text-navy">
-                        {money(item.price * item.quantity)}
-                      </span>
-                    </li>
-                  ))}
+                      </li>
+                    );
+                  })}
                 </ul>
 
-                <div className="mt-2 flex justify-between border-t border-line pt-4 text-sm">
-                  <span className="text-ink/65">
-                    Estimated subtotal
-                  </span>
+                <div className="space-y-3 border-t border-line pt-5 text-sm">
+                  <div className="flex justify-between gap-4">
+                    <span className="text-ink/65">Estimated subtotal</span>
+                    <span className="font-semibold tabular-nums text-navy">
+                      {money(subtotal)}
+                    </span>
+                  </div>
 
-                  <span className="font-bold tabular-nums text-navy">
-                    {money(subtotal)}
-                  </span>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-ink/65">Delivery</span>
+                    <span className="text-right text-xs leading-5 text-ink/60">
+                      Confirmed after order placement
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4 rounded-2xl bg-blue/5 px-4 py-4">
+                    <span className="font-extrabold text-navy">
+                      Final total
+                    </span>
+                    <span className="max-w-[170px] text-right text-xs leading-5 text-ink/60">
+                      Confirmed with server-verified prices and delivery
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-2 pt-1 text-xs leading-5 text-ink/55">
+                    <ShieldCheck
+                      size={15}
+                      className="mt-0.5 shrink-0 text-blue"
+                      aria-hidden="true"
+                    />
+                    <p>
+                      Cart prices are estimates. Stock, item prices, and delivery
+                      charges are verified when you place your order.
+                    </p>
+                  </div>
                 </div>
-
-                <div className="mt-3 flex justify-between text-sm">
-                  <span className="text-ink/65">Delivery</span>
-
-                  <span className="text-right text-xs leading-5 text-ink/60">
-                    Confirmed after order placement
-                  </span>
-                </div>
-
-                <div className="mt-3 flex justify-between border-t border-line pt-4">
-                  <span className="text-sm font-bold text-navy">
-                    Final total
-                  </span>
-
-                  <span className="max-w-[170px] text-right text-xs leading-5 text-ink/60">
-                    Shown using server-confirmed prices and delivery
-                  </span>
-                </div>
-
-                <p className="mt-4 rounded-xl bg-mist p-3 text-xs leading-5 text-ink/65">
-                  Displayed prices are estimates from the cart. The
-                  backend verifies current stock and prices before
-                  accepting your order.
-                </p>
               </aside>
             </div>
           )}
