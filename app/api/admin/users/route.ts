@@ -111,9 +111,14 @@ export async function GET(request: Request) {
             email: 1,
             emailVerified: 1,
             image: 1,
+            imagePublicId: 1,
+            phone: 1,
             createdAt: 1,
+            updatedAt: 1,
             role: 1,
             banned: 1,
+            banReason: 1,
+            banExpires: 1,
           },
         })
         .sort({ createdAt: -1 })
@@ -123,30 +128,25 @@ export async function GET(request: Request) {
       usersCollection.countDocuments(filter),
     ]);
 
-    const results = documents.flatMap((document) => {
-      const createdAt = serializeDate(document.createdAt);
-      if (!createdAt) return [];
-      return [
-        {
-          id: String(document._id),
-          name:
-            typeof document.name === "string" ? document.name : "",
-          email:
-            typeof document.email === "string" ? document.email : "",
-          emailVerified: document.emailVerified === true,
-          image:
-            typeof document.image === "string"
-              ? document.image
-              : null,
-          createdAt,
-          role:
-            typeof document.role === "string"
-              ? document.role
-              : "user",
-          banned: Boolean(document.banned),
-        },
-      ];
-    });
+    const results = documents.map((document) => ({
+      id: String(document._id),
+      name: typeof document.name === "string" ? document.name : "",
+      email: typeof document.email === "string" ? document.email : "",
+      emailVerified: document.emailVerified === true,
+      image: typeof document.image === "string" ? document.image : null,
+      imagePublicId:
+        typeof document.imagePublicId === "string"
+          ? document.imagePublicId
+          : null,
+      phone: typeof document.phone === "string" ? document.phone : null,
+      createdAt: serializeDate(document.createdAt),
+      updatedAt: serializeDate(document.updatedAt),
+      role: typeof document.role === "string" ? document.role : "user",
+      banned: document.banned === true,
+      banReason:
+        typeof document.banReason === "string" ? document.banReason : null,
+      banExpires: serializeDate(document.banExpires),
+    }));
 
     return NextResponse.json(
       { users: results, total },

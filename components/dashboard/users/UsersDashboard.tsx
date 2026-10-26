@@ -42,7 +42,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import type { Session } from "@/lib/auth-client";
+import type {
+  AdminDashboardUser,
+  AdminUsersResponse,
+} from "@/types/admin/user.type";
 import DashboardButton from "../DashboardButton";
 
 import EmptyUsers from "./EmptyUsers";
@@ -58,22 +61,57 @@ const features = tableFeatures({
   rowPaginationFeature,
 });
 
-type DashboardUser = Session["user"] & {
-  banned?: boolean;
-};
+type DashboardUser = AdminDashboardUser;
 
-type UserSearchResult = Pick<
-  Session["user"],
-  "id" | "name" | "email" | "emailVerified" | "image" | "role"
-> & {
-  createdAt: string;
-  banned: boolean;
-};
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
 
-type UserSearchResponse = {
-  users: UserSearchResult[];
-  total: number;
-};
+function isNullableString(value: unknown) {
+  return value === null || typeof value === "string";
+}
+
+function isAdminDashboardUser(value: unknown): value is AdminDashboardUser {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.id === "string" &&
+    typeof value.name === "string" &&
+    typeof value.email === "string" &&
+    typeof value.emailVerified === "boolean" &&
+    isNullableString(value.image) &&
+    (value.imagePublicId === undefined || isNullableString(value.imagePublicId)) &&
+    (value.phone === undefined || isNullableString(value.phone)) &&
+    isNullableString(value.createdAt) &&
+    isNullableString(value.updatedAt) &&
+    typeof value.role === "string" &&
+    typeof value.banned === "boolean" &&
+    isNullableString(value.banReason) &&
+    isNullableString(value.banExpires)
+  );
+}
+
+function isAdminUsersResponse(value: unknown): value is AdminUsersResponse {
+  return (
+    isRecord(value) &&
+    Array.isArray(value.users) &&
+    value.users.every(isAdminDashboardUser) &&
+    typeof value.total === "number" &&
+    Number.isInteger(value.total) &&
+    value.total >= 0
+  );
+}
+
+function formatUserDate(value: string | null) {
+  if (!value) return "Not available";
+  const date = new Date(value);
+  return Number.isFinite(date.getTime())
+    ? date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "Not available";
+}
 
 export default function UsersDashboard() {
   const { data: session } = authClient.useSession();
@@ -93,8 +131,8 @@ export default function UsersDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
-  const fetchUsers = useCallback(async () => {
-    setIsLoading(true);
+  const fetchUsers = useCallback(async (showLoader = true) => {
+    if (showLoader) setIsLoading(true);
     setIsError(false);
 
     const offset = pagination.pageIndex * pagination.pageSize;
@@ -120,21 +158,12 @@ export default function UsersDashboard() {
         throw new Error("Unable to load users.");
       }
 
-      const data = (await response.json()) as UserSearchResponse;
-
-      if (
-        !Array.isArray(data.users) ||
-        !Number.isInteger(data.total)
-      ) {
+      const data: unknown = await response.json();
+      if (!isAdminUsersResponse(data)) {
         throw new Error("The user search response was invalid.");
       }
 
-      setUsers(
-        data.users.map((user) => ({
-          ...user,
-          createdAt: new Date(user.createdAt),
-        })) as DashboardUser[],
-      );
+      setUsers(data.users);
 
       setTotal(data.total);
 
@@ -155,7 +184,7 @@ export default function UsersDashboard() {
       setTotal(0);
       setIsError(true);
     } finally {
-      setIsLoading(false);
+      if (showLoader) setIsLoading(false);
     }
   }, [pagination.pageIndex, pagination.pageSize, searchValue]);
 
@@ -205,14 +234,7 @@ export default function UsersDashboard() {
 
                 <p className="mt-0.5 truncate text-xs text-muted-foreground">
                   Joined{" "}
-                  {new Date(user.createdAt).toLocaleDateString(
-                    "en-US",
-                    {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    },
-                  )}
+                  {formatUserDate(user.createdAt)}
                 </p>
               </div>
             </div>
@@ -240,7 +262,7 @@ export default function UsersDashboard() {
         header: "Role",
 
         cell: ({ row }) => (
-          <RoleBadge role={row.original.role as string} />
+          <RoleBadge role={row.original.role} />
         ),
       },
 
@@ -307,12 +329,12 @@ export default function UsersDashboard() {
           <UserActions
             user={row.original}
             currentUserId={session?.user.id}
-            onSuccess={fetchUsers}
+            onSuccess={() => fetchUsers(false)}
           />
         ),
       },
     ],
-    [session?.user.id, fetchUsers],
+    [session?.user, fetchUsers],
   );
 
   const table = useTable({
@@ -500,7 +522,7 @@ export default function UsersDashboard() {
                     key={user.id}
                     user={user}
                     currentUserId={session?.user.id}
-                    onSuccess={fetchUsers}
+                    onSuccess={() => fetchUsers(false)}
                   />
                 ))}
               </div>

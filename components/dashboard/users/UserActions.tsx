@@ -8,6 +8,7 @@ import {
   Trash2,
   UserRound,
   Eye,
+  Clock3,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -25,6 +26,14 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import {
   DropdownMenu,
@@ -38,16 +47,14 @@ import UserDetailsDialog from "./UserDetailsDialog";
 
 import { toast } from "sonner";
 
-import type { Session } from "@/lib/auth-client";
+import type { AdminDashboardUser } from "@/types/admin/user.type";
 
-type DashboardUser = Session["user"] & {
-  banned?: boolean;
-};
+type BanDuration = "permanent" | "one-day" | "seven-days" | "thirty-days";
 
 interface UserActionsProps {
-  user: DashboardUser;
+  user: AdminDashboardUser;
   currentUserId?: string;
-  onSuccess: () => void;
+  onSuccess: () => void | Promise<void>;
 }
 
 export default function UserActions({
@@ -58,6 +65,10 @@ export default function UserActions({
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isBanOpen, setIsBanOpen] = useState(false);
+  const [banReason, setBanReason] = useState("");
+  const [banReasonError, setBanReasonError] = useState("");
+  const [banDuration, setBanDuration] = useState<BanDuration>("permanent");
 
   const isAdmin = user.role === "admin";
   const isBanned = Boolean(user.banned);
@@ -94,50 +105,85 @@ export default function UserActions({
   }
 
   async function handleBanToggle() {
-    setIsLoading(true);
+    if (!isBanned) {
+      setBanReason("");
+      setBanReasonError("");
+      setBanDuration("permanent");
+      setIsBanOpen(true);
+      return;
+    }
 
-    if (isBanned) {
+    setIsLoading(true);
+    try {
       const { error } = await authClient.admin.unbanUser({
         userId: user.id,
       });
-
-      setIsLoading(false);
-
       if (error) {
         toast.error("Failed to unban user", {
-          description:
-            error.message || "The user could not be unbanned.",
+          description: error.message || "The user could not be unbanned.",
         });
-
         return;
       }
 
       toast.success("User unbanned", {
         description: `${user.name || user.email} can access the account again.`,
       });
-    } else {
+      await onSuccess();
+    } catch {
+      toast.error("Failed to unban user", {
+        description: "The user could not be unbanned. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleBan() {
+    const reason = banReason.trim();
+    if (!reason) {
+      setBanReasonError("Enter a reason before confirming this ban.");
+      return;
+    }
+    if (reason.length > 500) {
+      setBanReasonError("The reason must be 500 characters or fewer.");
+      return;
+    }
+
+    setIsLoading(true);
+    setBanReasonError("");
+    const expirationSeconds: Record<Exclude<BanDuration, "permanent">, number> = {
+      "one-day": 60 * 60 * 24,
+      "seven-days": 60 * 60 * 24 * 7,
+      "thirty-days": 60 * 60 * 24 * 30,
+    };
+
+    try {
       const { error } = await authClient.admin.banUser({
         userId: user.id,
-        banReason: "Banned by administrator",
+        banReason: reason,
+        ...(banDuration === "permanent"
+          ? {}
+          : { banExpiresIn: expirationSeconds[banDuration] }),
       });
-
-      setIsLoading(false);
-
       if (error) {
         toast.error("Failed to ban user", {
-          description:
-            error.message || "The user could not be banned.",
+          description: error.message || "The user could not be banned.",
         });
-
         return;
       }
 
+      setIsBanOpen(false);
       toast.success("User banned", {
         description: `${user.name || user.email} has been banned.`,
       });
+      await onSuccess();
+    } catch {
+      toast.error("Failed to ban user", {
+        description: "The user could not be banned. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
     }
-
-    onSuccess();
   }
 
   async function handleDelete() {
@@ -182,11 +228,11 @@ export default function UserActions({
 
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuItem
-  onClick={() => setIsDetailsOpen(true)}
->
-  <Eye className="mr-2 h-4 w-4" />
-  View details
-</DropdownMenuItem>
+          onClick={() => setIsDetailsOpen(true)}
+        >
+          <Eye className="mr-2 h-4 w-4" />
+          View details
+        </DropdownMenuItem>
 
         <DropdownMenuItem
           disabled={isLoading || isCurrentUser}
@@ -238,16 +284,110 @@ export default function UserActions({
 
         {isCurrentUser && (
           <p className="px-2 py-1.5 text-xs text-muted-foreground">
-            You can't manage your own account
+            You can&apos;t manage your own account
           </p>
         )}
       </DropdownMenuContent>
 
       <UserDetailsDialog
-  user={user}
-  open={isDetailsOpen}
-  onOpenChange={setIsDetailsOpen}
-/>
+        user={user}
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+      />
+
+      <AlertDialog
+        open={isBanOpen}
+        onOpenChange={(open) => {
+          if (isLoading) return;
+          setIsBanOpen(open);
+          if (!open) setBanReasonError("");
+        }}
+      >
+        <AlertDialogContent className="sm:max-w-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ban this user?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will prevent {user.name || user.email} from signing in and
+              revoke their active sessions. Provide a reason for the account
+              record.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor={`ban-reason-${user.id}`} className="text-sm font-medium">
+                Ban reason
+              </label>
+              <Textarea
+                id={`ban-reason-${user.id}`}
+                value={banReason}
+                onChange={(event) => {
+                  setBanReason(event.target.value);
+                  if (event.target.value.trim()) setBanReasonError("");
+                }}
+                placeholder="Describe why this account is being banned"
+                maxLength={500}
+                aria-invalid={Boolean(banReasonError)}
+                aria-describedby={banReasonError ? `ban-reason-error-${user.id}` : undefined}
+                disabled={isLoading}
+              />
+              {banReasonError && (
+                <p
+                  id={`ban-reason-error-${user.id}`}
+                  className="text-sm text-destructive"
+                  role="alert"
+                >
+                  {banReasonError}
+                </p>
+              )}
+              <p className="text-right text-xs text-muted-foreground">
+                {banReason.length}/500
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor={`ban-duration-${user.id}`} className="flex items-center gap-2 text-sm font-medium">
+                <Clock3 className="h-4 w-4" aria-hidden="true" />
+                Ban duration
+              </label>
+              <Select
+                value={banDuration}
+                onValueChange={(value) => {
+                  if (
+                    value === "permanent" ||
+                    value === "one-day" ||
+                    value === "seven-days" ||
+                    value === "thirty-days"
+                  ) setBanDuration(value);
+                }}
+                disabled={isLoading}
+              >
+                <SelectTrigger id={`ban-duration-${user.id}`} className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="permanent">Permanent</SelectItem>
+                  <SelectItem value="one-day">1 day</SelectItem>
+                  <SelectItem value="seven-days">7 days</SelectItem>
+                  <SelectItem value="thirty-days">30 days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={isLoading}
+              onClick={handleBan}
+            >
+              {isLoading ? "Banning..." : "Confirm ban"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>

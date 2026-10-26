@@ -8,19 +8,15 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 
-import type { Session } from "@/lib/auth-client";
+import type { AdminDashboardUser } from "@/types/admin/user.type";
 
 import RoleBadge from "./RoleBadge";
 import UserActions from "./UserActions";
 
-type DashboardUser = Session["user"] & {
-  banned?: boolean;
-};
-
 interface MobileUserCardProps {
-  user: DashboardUser;
+  user: AdminDashboardUser;
   currentUserId?: string;
-  onSuccess: () => void;
+  onSuccess: () => void | Promise<void>;
 }
 
 export default function MobileUserCard({
@@ -71,7 +67,7 @@ export default function MobileUserCard({
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <RoleBadge role={user.role as string} />
+        <RoleBadge role={user.role} />
 
         {isBanned ? (
           <Badge
