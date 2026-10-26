@@ -30,6 +30,8 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { clearCart } from "@/lib/cart";
 import { saveOrderConfirmation } from "@/lib/order-confirmation";
+
+import EmptyCart from "@/components/cart/EmptyCart";
 import CheckoutLoader from "./CheckoutLoader";
 
 const checkoutSchema = z.object({
@@ -254,21 +256,7 @@ export default function CheckoutForm() {
           {!hydrated ? (
             <CheckoutLoader />
           ) : items.length === 0 ? (
-            <div className="mt-8 rounded-2xl border border-line bg-white p-7">
-              <h2 className="font-bold text-navy">
-                Your cart is empty
-              </h2>
-              <p className="mt-2 text-sm text-ink/65">
-                Add products before starting checkout.
-              </p>
-              <Link
-                href="/products"
-                className="mt-4 inline-flex font-bold text-blue transition-colors hover:text-deep"
-              >
-                Browse products{" "}
-                <ArrowRight size={16} className="ml-2" />
-              </Link>
-            </div>
+            <EmptyCart />
           ) : (
             <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
               <form
