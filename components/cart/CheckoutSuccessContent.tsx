@@ -33,6 +33,9 @@ export default function CheckoutSuccessContent({ orderId }: { orderId: string })
 
   useEffect(() => {
     let active = true;
+    setOrder(null);
+    setChecked(false);
+    setLoadError("");
 
     if (!orderId.trim()) {
       setLoadError("The order ID is missing from this confirmation link.");
