@@ -244,12 +244,13 @@ export function RegisterForm() {
                 </p>
               </div>
 
-              <div className="mt-12 hidden max-[900px]:block">
+              <div className="mt-12">
                 <Link
                   href="/"
-                  className="text-[13px] font-bold text-paste transition-colors hover:text-white"
+                  className="inline-flex items-center gap-2 text-[13px] font-bold text-paste transition-colors duration-200 hover:text-white"
                 >
-                  ← Back to Enviroshield
+                  <span aria-hidden="true">←</span>
+                  Back to Enviroshield
                 </Link>
               </div>
             </div>
@@ -271,10 +272,7 @@ export function RegisterForm() {
             }}
           >
             {/* Header */}
-            <motion.header
-              className="mb-8"
-              variants={fieldVariants}
-            >
+            <motion.header className="mb-8" variants={fieldVariants}>
               <div className="mb-3 text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
                 CREATE ACCOUNT
               </div>
@@ -693,28 +691,6 @@ export function RegisterForm() {
                 </Link>
               </motion.p>
             </form>
-
-            {/* Mobile footer */}
-            <motion.div
-              className="mt-8 border-t border-line pt-6 text-center min-[901px]:hidden"
-              initial={{
-                opacity: 0,
-              }}
-              animate={{
-                opacity: 1,
-              }}
-              transition={{
-                duration: 0.5,
-                delay: 0.8,
-              }}
-            >
-              <Link
-                href="/"
-                className="text-[12px] font-bold text-ink transition-colors hover:text-blue"
-              >
-                Back to Enviroshield
-              </Link>
-            </motion.div>
           </motion.div>
         </div>
       </section>
