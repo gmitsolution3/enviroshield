@@ -32,7 +32,13 @@ export const auth = betterAuth({
     },
   },
 
-  plugins: [admin(), bearer()],
+  plugins: [
+    admin({
+      bannedUserMessage:
+        "Your account has been banned. Please contact Enviroshield support if you believe this is a mistake.",
+    }),
+    bearer(),
+  ],
 
   session: {
     expiresIn: 60 * 60 * 24,

@@ -77,25 +77,35 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
   async function onSubmit(values: LoginFormValues) {
     setServerError(null);
 
-    const { error } = await authClient.signIn.email({
-      email: values.email,
-      password: values.password,
-    });
+    try {
+      const { error } = await authClient.signIn.email({
+        email: values.email,
+        password: values.password,
+      });
 
-    if (error) {
-      const message =
-        error.status === 403
-          ? "Please verify your email address before logging in."
-          : error.message || "Invalid email or password.";
+      if (error) {
+        const message =
+          error.code === "BANNED_USER"
+            ? "Your account has been banned. Please contact Enviroshield support if you believe this is a mistake."
+            : error.code === "EMAIL_NOT_VERIFIED"
+              ? "Please verify your email address before logging in."
+              : error.code === "INVALID_EMAIL_OR_PASSWORD"
+                ? "Invalid email or password."
+                : "Unable to sign in. Please try again.";
 
+        setServerError(message);
+        toast.error(message);
+        return;
+      }
+
+      toast.success("Logged in successfully.");
+      router.push(getSafeRedirectUrl(callbackUrl));
+      router.refresh();
+    } catch {
+      const message = "Unable to sign in. Please try again.";
       setServerError(message);
       toast.error(message);
-      return;
     }
-
-    toast.success("Logged in successfully.");
-    router.push(getSafeRedirectUrl(callbackUrl));
-    router.refresh();
   }
 
   return (
