@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   Trash2,
   UserRound,
+  Eye,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -33,6 +34,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import UserDetailsDialog from "./UserDetailsDialog";
+
 import { toast } from "sonner";
 
 import type { Session } from "@/lib/auth-client";
@@ -54,6 +57,7 @@ export default function UserActions({
 }: UserActionsProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const isAdmin = user.role === "admin";
   const isBanned = Boolean(user.banned);
@@ -178,6 +182,13 @@ export default function UserActions({
 
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuItem
+  onClick={() => setIsDetailsOpen(true)}
+>
+  <Eye className="mr-2 h-4 w-4" />
+  View details
+</DropdownMenuItem>
+
+        <DropdownMenuItem
           disabled={isLoading || isCurrentUser}
           onClick={handleRoleChange}
         >
@@ -231,6 +242,12 @@ export default function UserActions({
           </p>
         )}
       </DropdownMenuContent>
+
+      <UserDetailsDialog
+  user={user}
+  open={isDetailsOpen}
+  onOpenChange={setIsDetailsOpen}
+/>
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>

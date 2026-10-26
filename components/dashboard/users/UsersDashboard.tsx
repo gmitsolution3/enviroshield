@@ -3,6 +3,7 @@
 import {
   Ban,
   CheckCircle2,
+  CircleAlert,
   ChevronLeft,
   ChevronRight,
   Mail,
@@ -63,7 +64,7 @@ type DashboardUser = Session["user"] & {
 
 type UserSearchResult = Pick<
   Session["user"],
-  "id" | "name" | "email" | "image" | "role"
+  "id" | "name" | "email" | "emailVerified" | "image" | "role"
 > & {
   createdAt: string;
   banned: boolean;
@@ -265,6 +266,33 @@ export default function UsersDashboard() {
             >
               <CheckCircle2 className="mr-1.5 h-3 w-3" />
               Active
+            </Badge>
+          );
+        },
+      },
+
+      {
+        id: "emailVerification",
+        header: "Email Verification",
+
+        cell: ({ row }) => {
+          const isVerified = row.original.emailVerified === true;
+
+          return isVerified ? (
+            <Badge
+              variant="outline"
+              className="border-emerald-200 bg-emerald-50 text-emerald-700"
+            >
+              <CheckCircle2 className="mr-1.5 h-3 w-3" />
+              Verified
+            </Badge>
+          ) : (
+            <Badge
+              variant="outline"
+              className="border-amber-200 bg-amber-50 text-amber-700"
+            >
+              <CircleAlert className="mr-1.5 h-3 w-3" />
+              Not verified
             </Badge>
           );
         },

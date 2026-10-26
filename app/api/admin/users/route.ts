@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
 import { auth } from "@/lib/auth";
+import clientPromise from "@/lib/mongodb";
+import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
@@ -18,7 +18,11 @@ function parseIntegerParameter(
   if (value === null) return fallback;
   if (!/^\d+$/.test(value)) return null;
   const parsed = Number(value);
-  if (!Number.isSafeInteger(parsed) || parsed < minimum || parsed > maximum) {
+  if (
+    !Number.isSafeInteger(parsed) ||
+    parsed < minimum ||
+    parsed > maximum
+  ) {
     return null;
   }
   return parsed;
@@ -35,12 +39,16 @@ function serializeDate(value: unknown): string | null {
       : typeof value === "string"
         ? new Date(value)
         : null;
-  return date && Number.isFinite(date.getTime()) ? date.toISOString() : null;
+  return date && Number.isFinite(date.getTime())
+    ? date.toISOString()
+    : null;
 }
 
 export async function GET(request: Request) {
   try {
-    const session = await auth.api.getSession({ headers: request.headers });
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
     if (!session) {
       return NextResponse.json(
         { message: "Authentication is required." },
@@ -75,7 +83,11 @@ export async function GET(request: Request) {
       MAX_OFFSET,
     );
     const search = (params.get("search") ?? "").trim();
-    if (limit === null || offset === null || search.length > MAX_SEARCH_LENGTH) {
+    if (
+      limit === null ||
+      offset === null ||
+      search.length > MAX_SEARCH_LENGTH
+    ) {
       return NextResponse.json(
         { message: "Invalid search or pagination parameters." },
         { status: 400, headers: { "Cache-Control": "no-store" } },
@@ -97,6 +109,7 @@ export async function GET(request: Request) {
           projection: {
             name: 1,
             email: 1,
+            emailVerified: 1,
             image: 1,
             createdAt: 1,
             role: 1,
@@ -113,15 +126,26 @@ export async function GET(request: Request) {
     const results = documents.flatMap((document) => {
       const createdAt = serializeDate(document.createdAt);
       if (!createdAt) return [];
-      return [{
-        id: String(document._id),
-        name: typeof document.name === "string" ? document.name : "",
-        email: typeof document.email === "string" ? document.email : "",
-        image: typeof document.image === "string" ? document.image : null,
-        createdAt,
-        role: typeof document.role === "string" ? document.role : "user",
-        banned: Boolean(document.banned),
-      }];
+      return [
+        {
+          id: String(document._id),
+          name:
+            typeof document.name === "string" ? document.name : "",
+          email:
+            typeof document.email === "string" ? document.email : "",
+          emailVerified: document.emailVerified === true,
+          image:
+            typeof document.image === "string"
+              ? document.image
+              : null,
+          createdAt,
+          role:
+            typeof document.role === "string"
+              ? document.role
+              : "user",
+          banned: Boolean(document.banned),
+        },
+      ];
     });
 
     return NextResponse.json(
