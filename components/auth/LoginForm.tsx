@@ -165,7 +165,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
               </motion.div>
 
               <motion.div
-                className="mt-12 hidden max-[900px]:block"
+                className="mt-12"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
@@ -383,7 +383,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
             </form>
 
             <motion.div
-              className="mt-8 border-t border-line pt-6 text-center min-[901px]:hidden"
+              className="hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{
