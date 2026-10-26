@@ -24,7 +24,7 @@ export interface CreatedOrderConfirmation {
     name: string;
     slug: string;
     sku?: string;
-    primaryImage?: { url?: string; alt?: string };
+    primaryImage?: { url?: string; alt?: string; publicId?: string };
     unitPrice: number;
     quantity: number;
     lineTotal: number;
@@ -38,6 +38,13 @@ export interface CreatedOrderConfirmation {
   paymentStatus: string;
   status: string;
   createdAt?: string;
+  updatedAt?: string;
+  userId?: string;
+  customer?: {
+    name: string;
+    phone: string;
+    email?: string;
+  };
   deliveryAddress?: {
     addressLine: string;
     area: string;
