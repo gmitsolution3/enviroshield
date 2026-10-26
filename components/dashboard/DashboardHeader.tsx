@@ -125,7 +125,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
         </Button>
 
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger>
             <Button
               type="button"
               variant="ghost"
