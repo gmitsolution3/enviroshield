@@ -1,5 +1,7 @@
-import CheckoutSuccessContent from "@/components/cart/CheckoutSuccessContent";
 import type { Metadata } from "next";
+
+import CheckoutSuccessContent from "@/components/cart/CheckoutSuccessContent";
+import { requireAuth } from "@/lib/auth-guards";
 
 export const metadata: Metadata = {
   title: "Order Confirmation | Enviroshield",
@@ -19,6 +21,10 @@ export default async function CheckoutSuccessPage({
   const orderId = Array.isArray(params.orderId)
     ? (params.orderId[0] ?? "")
     : (params.orderId ?? "");
+
+  await requireAuth(
+    `/checkout/success?orderId=${encodeURIComponent(orderId)}`,
+  );
 
   return <CheckoutSuccessContent orderId={orderId} />;
 }

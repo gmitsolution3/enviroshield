@@ -17,6 +17,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
+import CheckoutSuccessLoading from "@/components/cart/CheckoutSuccessLoading";
 import Container from "@/components/Container";
 import {
   getMyOrderById,
@@ -41,8 +42,9 @@ export default function CheckoutSuccessContent({
 }: {
   orderId: string;
 }) {
-  const [order, setOrder] =
-    useState<CreatedOrderConfirmation | null>(null);
+  const [order, setOrder] = useState<CreatedOrderConfirmation | null>(
+    null,
+  );
 
   const [checked, setChecked] = useState(false);
   const [loadError, setLoadError] = useState("");
@@ -108,35 +110,7 @@ export default function CheckoutSuccessContent({
   }, [order?.orderNumber]);
 
   if (!checked) {
-    return (
-      <section className="bg-mist/45 py-20">
-        <Container>
-          <div
-            role="status"
-            className="mx-auto max-w-2xl rounded-3xl border border-line bg-white p-8 text-center shadow-sm"
-          >
-            <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-blue/10 text-blue">
-              <PackageCheck size={28} aria-hidden="true" />
-            </span>
-
-            <h1 className="mt-5 text-xl font-extrabold text-navy">
-              Retrieving your order
-            </h1>
-
-            <p className="mt-2 text-sm text-ink/60">
-              Please wait while we load your order confirmation.
-            </p>
-
-            <div
-              aria-hidden="true"
-              className="mx-auto mt-5 h-1.5 w-40 overflow-hidden rounded-full bg-mist"
-            >
-              <div className="h-full w-1/2 animate-pulse rounded-full bg-blue" />
-            </div>
-          </div>
-        </Container>
-      </section>
-    );
+    return <CheckoutSuccessLoading />;
   }
 
   if (!order) {
@@ -484,9 +458,7 @@ export default function CheckoutSuccessContent({
                         {image ? (
                           <Image
                             src={image}
-                            alt={
-                              item.primaryImage?.alt || item.name
-                            }
+                            alt={item.primaryImage?.alt || item.name}
                             fill
                             sizes="68px"
                             className="object-cover"
