@@ -11,6 +11,8 @@ import { z } from "zod";
 
 import Container from "@/components/Container";
 import { useCart } from "@/components/cart/CartProvider";
+import CheckoutLoader from "@/components/cart/CheckoutLoader";
+import EmptyCart from "@/components/cart/EmptyCart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,16 +24,14 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import {
-  createOrder,
-  type CreateOrderRequest,
-  type DeliveryZone,
+import { usePost } from "@/hooks/swr/usePost";
+import type {
+  CreateOrderRequest,
+  CreatedOrderConfirmation,
+  DeliveryZone,
 } from "@/lib/api/orders";
 import { authClient } from "@/lib/auth-client";
 import { clearCart } from "@/lib/cart";
-
-import EmptyCart from "@/components/cart/EmptyCart";
-import CheckoutLoader from "./CheckoutLoader";
 
 const checkoutSchema = z.object({
   name: z
@@ -80,6 +80,13 @@ const checkoutSchema = z.object({
 
 type CheckoutValues = z.infer<typeof checkoutSchema>;
 
+type CreateOrderApiResponse = {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: CreatedOrderConfirmation | null;
+};
+
 const initialValues: CheckoutValues = {
   name: "",
   phone: "",
@@ -126,9 +133,12 @@ export default function CheckoutForm() {
 
   const { data: session, isPending: sessionPending } =
     authClient.useSession();
+
   const { items, subtotal, hydrated } = useCart();
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { mutate: postOrder, isLoading: isSubmitting } =
+    usePost("/order");
+
   const [requestError, setRequestError] = useState("");
   const submissionLock = useRef(false);
 
@@ -183,7 +193,6 @@ export default function CheckoutForm() {
     }
 
     submissionLock.current = true;
-    setIsSubmitting(true);
     setRequestError("");
 
     const phone = values.phone.trim().replace(/[\s()-]/g, "");
@@ -213,20 +222,26 @@ export default function CheckoutForm() {
     };
 
     try {
-      const order = await createOrder(payload);
+      const order = await postOrder(payload);
+
+      if (!order?.data?._id || !order?.data?.orderNumber) {
+        throw new Error("The order response was incomplete.");
+      }
 
       clearCart();
+
       toast.success("Your order has been placed.");
 
       router.push(
-        `/checkout/success?orderId=${encodeURIComponent(order._id)}`,
+        `/checkout/success?orderId=${encodeURIComponent(order?.data?._id)}`,
       );
     } catch (error: unknown) {
       const message = messageFromError(error);
+
       setRequestError(message);
       toast.error(message);
+
       submissionLock.current = false;
-      setIsSubmitting(false);
     }
   };
 
@@ -246,9 +261,11 @@ export default function CheckoutForm() {
             <p className="mb-3 text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
               Secure checkout
             </p>
+
             <h1 className="text-[clamp(32px,4vw,48px)] font-extrabold leading-tight tracking-[-0.04em] text-navy">
               Delivery details
             </h1>
+
             <p className="mt-2 text-sm leading-6 text-ink/65">
               Your order will be paid by cash on delivery.
             </p>
@@ -272,6 +289,7 @@ export default function CheckoutForm() {
                   <legend className="text-lg font-extrabold text-navy">
                     Customer and delivery
                   </legend>
+
                   <p className="mt-1 text-sm text-ink/60">
                     Fields marked with{" "}
                     <span aria-hidden="true">*</span> are required.
@@ -300,6 +318,7 @@ export default function CheckoutForm() {
                         Customer name{" "}
                         <span className="text-red-600">*</span>
                       </label>
+
                       <Input
                         id="name"
                         autoComplete="name"
@@ -313,6 +332,7 @@ export default function CheckoutForm() {
                         {...form.register("name")}
                         className={`${fieldClassName} mt-2`}
                       />
+
                       {formState.errors.name && (
                         <p
                           id="name-error"
@@ -331,6 +351,7 @@ export default function CheckoutForm() {
                         Phone number{" "}
                         <span className="text-red-600">*</span>
                       </label>
+
                       <Input
                         id="phone"
                         type="tel"
@@ -346,6 +367,7 @@ export default function CheckoutForm() {
                         {...form.register("phone")}
                         className={`${fieldClassName} mt-2`}
                       />
+
                       {formState.errors.phone && (
                         <p
                           id="phone-error"
@@ -364,6 +386,7 @@ export default function CheckoutForm() {
                         Delivery address{" "}
                         <span className="text-red-600">*</span>
                       </label>
+
                       <Input
                         id="addressLine"
                         autoComplete="street-address"
@@ -379,6 +402,7 @@ export default function CheckoutForm() {
                         {...form.register("addressLine")}
                         className={`${fieldClassName} mt-2`}
                       />
+
                       {formState.errors.addressLine && (
                         <p
                           id="addressLine-error"
@@ -396,6 +420,7 @@ export default function CheckoutForm() {
                       >
                         Area <span className="text-red-600">*</span>
                       </label>
+
                       <Input
                         id="area"
                         autoComplete="address-level3"
@@ -409,6 +434,7 @@ export default function CheckoutForm() {
                         {...form.register("area")}
                         className={`${fieldClassName} mt-2`}
                       />
+
                       {formState.errors.area && (
                         <p
                           id="area-error"
@@ -426,6 +452,7 @@ export default function CheckoutForm() {
                       >
                         City <span className="text-red-600">*</span>
                       </label>
+
                       <Input
                         id="city"
                         autoComplete="address-level2"
@@ -439,6 +466,7 @@ export default function CheckoutForm() {
                         {...form.register("city")}
                         className={`${fieldClassName} mt-2`}
                       />
+
                       {formState.errors.city && (
                         <p
                           id="city-error"
@@ -457,6 +485,7 @@ export default function CheckoutForm() {
                         District{" "}
                         <span className="text-red-600">*</span>
                       </label>
+
                       <Input
                         id="district"
                         autoComplete="address-level1"
@@ -472,6 +501,7 @@ export default function CheckoutForm() {
                         {...form.register("district")}
                         className={`${fieldClassName} mt-2`}
                       />
+
                       {formState.errors.district && (
                         <p
                           id="district-error"
@@ -492,6 +522,7 @@ export default function CheckoutForm() {
                           (optional)
                         </span>
                       </label>
+
                       <Input
                         id="postalCode"
                         autoComplete="postal-code"
@@ -507,6 +538,7 @@ export default function CheckoutForm() {
                         {...form.register("postalCode")}
                         className={`${fieldClassName} mt-2`}
                       />
+
                       {formState.errors.postalCode && (
                         <p
                           id="postalCode-error"
@@ -525,6 +557,7 @@ export default function CheckoutForm() {
                         Delivery zone{" "}
                         <span className="text-red-600">*</span>
                       </label>
+
                       <Controller
                         control={control}
                         name="deliveryZone"
@@ -554,10 +587,12 @@ export default function CheckoutForm() {
                                     : "Select delivery zone"}
                               </SelectValue>
                             </SelectTrigger>
+
                             <SelectContent>
                               <SelectItem value="dhaka">
                                 Inside Dhaka
                               </SelectItem>
+
                               <SelectItem value="outside_dhaka">
                                 Outside Dhaka
                               </SelectItem>
@@ -565,10 +600,12 @@ export default function CheckoutForm() {
                           </Select>
                         )}
                       />
+
                       <p className="mt-1.5 text-xs leading-5 text-ink/55">
                         The delivery fee and final total are confirmed
                         by the server when the order is placed.
                       </p>
+
                       {formState.errors.deliveryZone && (
                         <p
                           id="deliveryZone-error"
@@ -589,6 +626,7 @@ export default function CheckoutForm() {
                           (optional)
                         </span>
                       </label>
+
                       <Textarea
                         id="customerNote"
                         rows={3}
@@ -605,6 +643,7 @@ export default function CheckoutForm() {
                         {...form.register("customerNote")}
                         className="mt-2 min-h-24 resize-y rounded-xl border-line bg-white text-sm text-navy shadow-none placeholder:text-ink/40 focus-visible:border-blue focus-visible:ring-2 focus-visible:ring-blue/15"
                       />
+
                       {formState.errors.customerNote && (
                         <p
                           id="customerNote-error"
@@ -676,6 +715,7 @@ export default function CheckoutForm() {
                           × {item.quantity}
                         </span>
                       </span>
+
                       <span className="shrink-0 font-semibold tabular-nums text-navy">
                         {money(item.price * item.quantity)}
                       </span>
@@ -687,6 +727,7 @@ export default function CheckoutForm() {
                   <span className="text-ink/65">
                     Estimated subtotal
                   </span>
+
                   <span className="font-bold tabular-nums text-navy">
                     {money(subtotal)}
                   </span>
@@ -694,6 +735,7 @@ export default function CheckoutForm() {
 
                 <div className="mt-3 flex justify-between text-sm">
                   <span className="text-ink/65">Delivery</span>
+
                   <span className="text-right text-xs leading-5 text-ink/60">
                     Confirmed after order placement
                   </span>
@@ -703,6 +745,7 @@ export default function CheckoutForm() {
                   <span className="text-sm font-bold text-navy">
                     Final total
                   </span>
+
                   <span className="max-w-[170px] text-right text-xs leading-5 text-ink/60">
                     Shown using server-confirmed prices and delivery
                   </span>
