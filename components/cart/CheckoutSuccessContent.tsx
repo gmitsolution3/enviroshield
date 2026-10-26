@@ -17,9 +17,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Container from "@/components/Container";
-import { authClient } from "@/lib/auth-client";
 import { getMyOrderById, type CreatedOrderConfirmation } from "@/lib/api/orders";
-import { readOrderConfirmation } from "@/lib/order-confirmation";
 import { getProductImageUrl } from "@/lib/products/images";
 
 const money = (amount: number, currency: string) =>
@@ -27,40 +25,39 @@ const money = (amount: number, currency: string) =>
 const pretty = (value: string) =>
   value.charAt(0).toUpperCase() + value.slice(1).replaceAll("_", " ");
 
-export default function CheckoutSuccessContent() {
-  const { data: session, isPending } = authClient.useSession();
+export default function CheckoutSuccessContent({ orderId }: { orderId: string }) {
   const [order, setOrder] = useState<CreatedOrderConfirmation | null>(null);
   const [checked, setChecked] = useState(false);
+  const [loadError, setLoadError] = useState("");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (isPending) return;
     let active = true;
-    Promise.resolve().then(async () => {
-      const savedOrder = readOrderConfirmation();
-      if (!savedOrder) {
+
+    if (!orderId.trim()) {
+      setLoadError("The order ID is missing from this confirmation link.");
+      setChecked(true);
+      return () => { active = false; };
+    }
+
+    getMyOrderById(orderId)
+      .then((retrievedOrder) => {
+        if (active) setOrder(retrievedOrder);
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        setLoadError(
+          error instanceof Error
+            ? error.message
+            : "We could not retrieve this order. Please try again.",
+        );
+      })
+      .finally(() => {
         if (active) setChecked(true);
-        return;
-      }
-      if (!session?.user) {
-        if (active) {
-          setOrder(savedOrder);
-          setChecked(true);
-        }
-        return;
-      }
-      try {
-        const verifiedOrder = await getMyOrderById(savedOrder._id);
-        if (active) setOrder(verifiedOrder);
-      } catch {
-        // Keep the successful create response available if refresh lookup fails.
-        if (active) setOrder(savedOrder);
-      } finally {
-        if (active) setChecked(true);
-      }
-    });
+      });
+
     return () => { active = false; };
-  }, [isPending, session?.user]);
+  }, [orderId]);
 
   async function copyOrderNumber() {
     if (!order?.orderNumber || !navigator.clipboard) return;
@@ -91,8 +88,10 @@ export default function CheckoutSuccessContent() {
         <Container>
           <div className="mx-auto max-w-2xl rounded-3xl border border-line bg-white px-7 py-12 text-center shadow-[0_18px_55px_rgba(0,51,78,0.07)]">
             <span className="mx-auto grid size-16 place-items-center rounded-2xl bg-blue/10 text-blue"><PackageCheck size={30} aria-hidden="true" /></span>
-            <h1 className="mt-5 text-2xl font-extrabold text-navy">No order confirmation found</h1>
-            <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-ink/65">This page only displays an order after the order service confirms it. If you just placed an order, check your account orders or contact our team.</p>
+            <h1 className="mt-5 text-2xl font-extrabold text-navy">Order details unavailable</h1>
+            <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-ink/65">
+              {loadError || "We could not retrieve this order."} If you just placed an order, verify the confirmation link or check your account orders.
+            </p>
             <div className="mt-7 flex flex-wrap justify-center gap-3">
               <Link href="/cart" className="inline-flex min-h-12 items-center justify-center rounded-full border border-line px-5 text-sm font-bold text-navy transition hover:border-blue hover:text-blue">View cart</Link>
               <Link href="/products" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-blue px-5 text-sm font-bold text-white transition hover:bg-deep">Browse products <ArrowRight size={16} /></Link>
@@ -183,8 +182,15 @@ export default function CheckoutSuccessContent() {
                   <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-blue/10 text-blue"><MapPin size={21} aria-hidden="true" /></span>
                   <div><h2 className="text-lg font-extrabold text-navy">Delivery information</h2><p className="mt-0.5 text-xs text-ink/55">Where your order is headed</p></div>
                 </div>
+                {order.customer && (
+                  <div className="mt-4 rounded-2xl bg-[#fbfcfe] p-4 text-sm leading-6 text-ink/75">
+                    <p className="font-bold text-navy">{order.customer.name}</p>
+                    <p>{order.customer.phone}</p>
+                    {order.customer.email && <p className="break-all">{order.customer.email}</p>}
+                  </div>
+                )}
                 {address ? (
-                  <address className="mt-4 not-italic text-sm leading-6 text-ink/75">
+                  <address className="mt-3 not-italic text-sm leading-6 text-ink/75">
                     <span className="font-bold text-navy">{address.addressLine}</span><br />
                     {address.area}, {address.city}<br />
                     {address.district}{address.postalCode ? ` ${address.postalCode}` : ""}
