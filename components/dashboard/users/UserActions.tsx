@@ -10,7 +10,7 @@ import {
   Eye,
   Clock3,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 
@@ -49,7 +49,12 @@ import { toast } from "sonner";
 
 import type { AdminDashboardUser } from "@/types/admin/user.type";
 
-type BanDuration = "permanent" | "one-day" | "seven-days" | "thirty-days";
+type BanDuration =
+  | "one-day"
+  | "three-days"
+  | "seven-days"
+  | "fifteen-days"
+  | "one-month";
 
 interface UserActionsProps {
   user: AdminDashboardUser;
@@ -66,9 +71,11 @@ export default function UserActions({
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isBanOpen, setIsBanOpen] = useState(false);
+  const [isUnbanOpen, setIsUnbanOpen] = useState(false);
   const [banReason, setBanReason] = useState("");
   const [banReasonError, setBanReasonError] = useState("");
-  const [banDuration, setBanDuration] = useState<BanDuration>("permanent");
+  const [banDuration, setBanDuration] = useState<BanDuration>("seven-days");
+  const submissionInProgress = useRef(false);
 
   const isAdmin = user.role === "admin";
   const isBanned = Boolean(user.banned);
@@ -108,11 +115,16 @@ export default function UserActions({
     if (!isBanned) {
       setBanReason("");
       setBanReasonError("");
-      setBanDuration("permanent");
+      setBanDuration("seven-days");
       setIsBanOpen(true);
       return;
     }
+    setIsUnbanOpen(true);
+  }
 
+  async function handleUnban() {
+    if (submissionInProgress.current) return;
+    submissionInProgress.current = true;
     setIsLoading(true);
     try {
       const { error } = await authClient.admin.unbanUser({
@@ -128,17 +140,20 @@ export default function UserActions({
       toast.success("User unbanned", {
         description: `${user.name || user.email} can access the account again.`,
       });
+      setIsUnbanOpen(false);
       await onSuccess();
     } catch {
       toast.error("Failed to unban user", {
         description: "The user could not be unbanned. Please try again.",
       });
     } finally {
+      submissionInProgress.current = false;
       setIsLoading(false);
     }
   }
 
   async function handleBan() {
+    if (submissionInProgress.current) return;
     const reason = banReason.trim();
     if (!reason) {
       setBanReasonError("Enter a reason before confirming this ban.");
@@ -150,20 +165,21 @@ export default function UserActions({
     }
 
     setIsLoading(true);
+    submissionInProgress.current = true;
     setBanReasonError("");
-    const expirationSeconds: Record<Exclude<BanDuration, "permanent">, number> = {
+    const expirationSeconds: Record<BanDuration, number> = {
       "one-day": 60 * 60 * 24,
+      "three-days": 60 * 60 * 24 * 3,
       "seven-days": 60 * 60 * 24 * 7,
-      "thirty-days": 60 * 60 * 24 * 30,
+      "fifteen-days": 60 * 60 * 24 * 15,
+      "one-month": 60 * 60 * 24 * 30,
     };
 
     try {
       const { error } = await authClient.admin.banUser({
         userId: user.id,
         banReason: reason,
-        ...(banDuration === "permanent"
-          ? {}
-          : { banExpiresIn: expirationSeconds[banDuration] }),
+        banExpiresIn: expirationSeconds[banDuration],
       });
       if (error) {
         toast.error("Failed to ban user", {
@@ -182,6 +198,7 @@ export default function UserActions({
         description: "The user could not be banned. Please try again.",
       });
     } finally {
+      submissionInProgress.current = false;
       setIsLoading(false);
     }
   }
@@ -325,7 +342,7 @@ export default function UserActions({
                   setBanReason(event.target.value);
                   if (event.target.value.trim()) setBanReasonError("");
                 }}
-                placeholder="Describe why this account is being banned"
+                placeholder="Enter the reason for banning this user..."
                 maxLength={500}
                 aria-invalid={Boolean(banReasonError)}
                 aria-describedby={banReasonError ? `ban-reason-error-${user.id}` : undefined}
@@ -354,10 +371,11 @@ export default function UserActions({
                 value={banDuration}
                 onValueChange={(value) => {
                   if (
-                    value === "permanent" ||
                     value === "one-day" ||
+                    value === "three-days" ||
                     value === "seven-days" ||
-                    value === "thirty-days"
+                    value === "fifteen-days" ||
+                    value === "one-month"
                   ) setBanDuration(value);
                 }}
                 disabled={isLoading}
@@ -366,10 +384,11 @@ export default function UserActions({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="permanent">Permanent</SelectItem>
                   <SelectItem value="one-day">1 day</SelectItem>
+                  <SelectItem value="three-days">3 days</SelectItem>
                   <SelectItem value="seven-days">7 days</SelectItem>
-                  <SelectItem value="thirty-days">30 days</SelectItem>
+                  <SelectItem value="fifteen-days">15 days</SelectItem>
+                  <SelectItem value="one-month">1 month (30 days)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -384,6 +403,30 @@ export default function UserActions({
               onClick={handleBan}
             >
               {isLoading ? "Banning..." : "Confirm ban"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={isUnbanOpen}
+        onOpenChange={(open) => {
+          if (!isLoading) setIsUnbanOpen(open);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unban this user?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Unbanning {user.name || user.email} will restore the account&apos;s
+              ability to use the application, subject to other access
+              restrictions.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <Button type="button" disabled={isLoading} onClick={handleUnban}>
+              {isLoading ? "Unbanning..." : "Confirm unban"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

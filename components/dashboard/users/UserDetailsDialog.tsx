@@ -68,6 +68,27 @@ function formatDate(value: string | null, includeTime = false) {
   }).format(date);
 }
 
+function formatBanExpiry(value: string | null) {
+  if (!value) return "No expiration date recorded";
+  const expiry = new Date(value);
+  if (!Number.isFinite(expiry.getTime())) return "Not available";
+
+  const formattedDate = formatDate(value, true);
+  const remainingMs = expiry.getTime() - Date.now();
+  if (remainingMs <= 0) return `${formattedDate} (expired)`;
+
+  const totalMinutes = Math.ceil(remainingMs / (60 * 1000));
+  const totalHours = Math.ceil(totalMinutes / 60);
+  const totalDays = Math.ceil(totalHours / 24);
+  const remaining = totalDays >= 1
+    ? `${totalDays} ${totalDays === 1 ? "day" : "days"}`
+    : totalHours >= 1
+      ? `${totalHours} ${totalHours === 1 ? "hour" : "hours"}`
+      : `${totalMinutes} ${totalMinutes === 1 ? "minute" : "minutes"}`;
+
+  return `${formattedDate} (in ${remaining})`;
+}
+
 export default function UserDetailsDialog({
   user,
   open,
@@ -188,9 +209,7 @@ export default function UserDetailsDialog({
               <div>
                 <dt className="text-xs font-medium text-red-900/70">Expires</dt>
                 <dd className="mt-1 font-semibold">
-                  {user.banExpires === null
-                    ? "Permanent ban"
-                    : formatDate(user.banExpires, true)}
+                  {formatBanExpiry(user.banExpires)}
                 </dd>
               </div>
               <div className="sm:col-span-2">
