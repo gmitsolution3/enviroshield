@@ -4,7 +4,10 @@ export type DeliveryZone = "dhaka" | "outside_dhaka";
 
 export interface CreateOrderRequest {
   items: { productId: string; quantity: number }[];
-  customer: { name: string; phone: string };
+  customer: {
+    name: string;
+    phone: string;
+  };
   deliveryAddress: {
     addressLine: string;
     area: string;
@@ -24,7 +27,11 @@ export interface CreatedOrderConfirmation {
     name: string;
     slug: string;
     sku?: string;
-    primaryImage?: { url?: string; alt?: string };
+    primaryImage?: {
+      url?: string;
+      alt?: string;
+      publicId?: string;
+    };
     unitPrice: number;
     quantity: number;
     lineTotal: number;
@@ -38,6 +45,13 @@ export interface CreatedOrderConfirmation {
   paymentStatus: string;
   status: string;
   createdAt?: string;
+  updatedAt?: string;
+  userId?: string;
+  customer?: {
+    name: string;
+    phone: string;
+    email?: string;
+  };
   deliveryAddress?: {
     addressLine: string;
     area: string;
@@ -47,7 +61,7 @@ export interface CreatedOrderConfirmation {
   };
 }
 
-type CreateOrderResponse = {
+type OrderApiResponse = {
   success: boolean;
   statusCode: number;
   message: string;
@@ -55,24 +69,42 @@ type CreateOrderResponse = {
 };
 
 export async function createOrder(payload: CreateOrderRequest) {
-  const response = await axiosInstance.post<CreateOrderResponse>("/order", payload);
+  const response = await axiosInstance.post<OrderApiResponse>(
+    "/order",
+    payload,
+  );
+
   const result = response.data;
-  if (!result.success || !result.data?._id || !result.data.orderNumber) {
-    throw new Error(result.message || "The order response was incomplete.");
+
+  if (
+    !result.success ||
+    !result.data?._id ||
+    !result.data.orderNumber
+  ) {
+    throw new Error(
+      result.message || "The order response was incomplete.",
+    );
   }
+
   return result.data;
 }
 
 export async function getMyOrderById(orderId: string) {
-  const response = await axiosInstance.get<{
-    success: boolean;
-    statusCode: number;
-    message: string;
-    data: CreatedOrderConfirmation | null;
-  }>(`/order/mine/${encodeURIComponent(orderId)}`);
+  const response = await axiosInstance.get<OrderApiResponse>(
+    `/order/mine/${encodeURIComponent(orderId)}`,
+  );
+
   const result = response.data;
-  if (!result.success || !result.data?._id || !result.data.orderNumber) {
-    throw new Error(result.message || "The order could not be retrieved.");
+
+  if (
+    !result.success ||
+    !result.data?._id ||
+    !result.data.orderNumber
+  ) {
+    throw new Error(
+      result.message || "The order could not be retrieved.",
+    );
   }
+
   return result.data;
 }

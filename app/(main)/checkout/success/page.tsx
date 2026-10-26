@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import CheckoutSuccessContent from "@/components/cart/CheckoutSuccessContent";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Order Confirmation | Enviroshield",
@@ -7,6 +7,18 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function CheckoutSuccessPage() {
-  return <CheckoutSuccessContent />;
+type CheckoutSuccessPageProps = {
+  searchParams: Promise<{ orderId?: string | string[] }>;
+};
+
+export default async function CheckoutSuccessPage({
+  searchParams,
+}: CheckoutSuccessPageProps) {
+  const params = await searchParams;
+
+  const orderId = Array.isArray(params.orderId)
+    ? (params.orderId[0] ?? "")
+    : (params.orderId ?? "");
+
+  return <CheckoutSuccessContent orderId={orderId} />;
 }
