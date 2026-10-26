@@ -952,7 +952,7 @@ export default function EditProductModal({
                         htmlFor="product-stock"
                         className="font-semibold text-navy"
                       >
-                        Stock Quantity *
+                        Stock Quantity <span className="!text-yellow-700 !text-[12px]">NB: (Update from adjust stock)</span>
                       </Label>
                       <Input
                         id="product-stock"
@@ -960,6 +960,7 @@ export default function EditProductModal({
                         min="0"
                         step="1"
                         {...register("stockQuantity")}
+                        disabled
                       />
                       {errors.stockQuantity && (
                         <p className="text-sm text-destructive">

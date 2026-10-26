@@ -262,7 +262,7 @@ export default function StockAdjustmentModal({
               >
                 <SelectTrigger
                   id="stock-adjustment-type"
-                  className="h-10 rounded-xl border-slate-200"
+                  className="h-10 rounded-xl border-slate-200 w-full"
                   aria-invalid={Boolean(errors.movementType)}
                 >
                   <SelectValue />
