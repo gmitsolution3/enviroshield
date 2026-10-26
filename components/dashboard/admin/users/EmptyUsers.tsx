@@ -7,9 +7,7 @@ export default function EmptyUsers() {
         <UserRound className="h-6 w-6 text-muted-foreground" />
       </div>
 
-      <h3 className="mt-4 font-semibold">
-        No users found
-      </h3>
+      <h3 className="mt-4 font-semibold">No users found</h3>
 
       <p className="mt-1 text-sm text-muted-foreground">
         Try changing your search.

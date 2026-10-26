@@ -1,18 +1,6 @@
 "use client";
 
 import {
-  Ban,
-  CalendarDays,
-  CheckCircle2,
-  CircleAlert,
-  Fingerprint,
-  Mail,
-  Phone,
-  ShieldCheck,
-  UserRound,
-} from "lucide-react";
-import type { ReactNode } from "react";
-import {
   Avatar,
   AvatarFallback,
   AvatarImage,
@@ -26,6 +14,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { AdminDashboardUser } from "@/types/admin/user.type";
+import {
+  Ban,
+  CalendarDays,
+  CheckCircle2,
+  CircleAlert,
+  Fingerprint,
+  Mail,
+  Phone,
+  ShieldCheck,
+  UserRound,
+} from "lucide-react";
+import type { ReactNode } from "react";
 import RoleBadge from "./RoleBadge";
 
 interface UserDetailsDialogProps {
@@ -49,8 +49,12 @@ function DetailRow({
         {icon}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium text-muted-foreground">{label}</p>
-        <div className="mt-1 break-words text-sm font-medium">{children}</div>
+        <p className="text-xs font-medium text-muted-foreground">
+          {label}
+        </p>
+        <div className="mt-1 break-words text-sm font-medium">
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -80,11 +84,12 @@ function formatBanExpiry(value: string | null) {
   const totalMinutes = Math.ceil(remainingMs / (60 * 1000));
   const totalHours = Math.ceil(totalMinutes / 60);
   const totalDays = Math.ceil(totalHours / 24);
-  const remaining = totalDays >= 1
-    ? `${totalDays} ${totalDays === 1 ? "day" : "days"}`
-    : totalHours >= 1
-      ? `${totalHours} ${totalHours === 1 ? "hour" : "hours"}`
-      : `${totalMinutes} ${totalMinutes === 1 ? "minute" : "minutes"}`;
+  const remaining =
+    totalDays >= 1
+      ? `${totalDays} ${totalDays === 1 ? "day" : "days"}`
+      : totalHours >= 1
+        ? `${totalHours} ${totalHours === 1 ? "hour" : "hours"}`
+        : `${totalMinutes} ${totalMinutes === 1 ? "minute" : "minutes"}`;
 
   return `${formattedDate} (in ${remaining})`;
 }
@@ -95,20 +100,23 @@ export default function UserDetailsDialog({
   onOpenChange,
 }: UserDetailsDialogProps) {
   const name = user.name.trim() || "Unnamed user";
-  const initials = user.name
-    .trim()
-    .split(/\s+/)
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase() || "U";
+  const initials =
+    user.name
+      .trim()
+      .split(/\s+/)
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "U";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85dvh] overflow-y-auto rounded-2xl p-0 sm:max-w-2xl">
         <div className="border-b bg-muted/30 px-5 py-6 sm:px-7">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold">User details</DialogTitle>
+            <DialogTitle className="text-xl font-bold">
+              User details
+            </DialogTitle>
             <DialogDescription>
               Profile and account information for this user.
             </DialogDescription>
@@ -122,8 +130,12 @@ export default function UserDetailsDialog({
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
-              <h3 className="truncate text-lg font-bold text-foreground">{name}</h3>
-              <p className="mt-1 break-all text-sm text-muted-foreground">{user.email}</p>
+              <h3 className="truncate text-lg font-bold text-foreground">
+                {name}
+              </h3>
+              <p className="mt-1 break-all text-sm text-muted-foreground">
+                {user.email}
+              </p>
               <p className="mt-1 break-all font-mono text-xs text-muted-foreground">
                 ID: {user.id}
               </p>
@@ -131,62 +143,110 @@ export default function UserDetailsDialog({
                 <RoleBadge role={user.role} />
                 <Badge
                   variant="outline"
-                  className={user.banned
-                    ? "border-red-200 bg-red-50 text-red-700"
-                    : "border-emerald-200 bg-emerald-50 text-emerald-700"}
+                  className={
+                    user.banned
+                      ? "border-red-200 bg-red-50 text-red-700"
+                      : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  }
                 >
                   {user.banned ? "Banned" : "Active"}
                 </Badge>
                 <Badge
                   variant="outline"
-                  className={user.emailVerified
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                    : "border-amber-200 bg-amber-50 text-amber-700"}
+                  className={
+                    user.emailVerified
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                      : "border-amber-200 bg-amber-50 text-amber-700"
+                  }
                 >
-                  {user.emailVerified ? "Email verified" : "Email not verified"}
+                  {user.emailVerified
+                    ? "Email verified"
+                    : "Email not verified"}
                 </Badge>
               </div>
             </div>
           </div>
         </div>
 
-        <section className="px-5 py-5 sm:px-7" aria-labelledby="user-account-heading">
-          <h4 id="user-account-heading" className="text-sm font-semibold text-foreground">
+        <section
+          className="px-5 py-5 sm:px-7"
+          aria-labelledby="user-account-heading"
+        >
+          <h4
+            id="user-account-heading"
+            className="text-sm font-semibold text-foreground"
+          >
             Account information
           </h4>
           <div className="mt-2 grid divide-y sm:grid-cols-2 sm:gap-x-6">
-            <DetailRow icon={<UserRound className="h-4 w-4" />} label="Name">
+            <DetailRow
+              icon={<UserRound className="h-4 w-4" />}
+              label="Name"
+            >
               {user.name || "Not provided"}
             </DetailRow>
-            <DetailRow icon={<Mail className="h-4 w-4" />} label="Email address">
+            <DetailRow
+              icon={<Mail className="h-4 w-4" />}
+              label="Email address"
+            >
               {user.email || "Not available"}
             </DetailRow>
             <DetailRow
-              icon={user.emailVerified
-                ? <CheckCircle2 className="h-4 w-4" />
-                : <CircleAlert className="h-4 w-4" />}
+              icon={
+                user.emailVerified ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  <CircleAlert className="h-4 w-4" />
+                )
+              }
               label="Email verification"
             >
               {user.emailVerified ? "Verified" : "Not verified"}
             </DetailRow>
-            <DetailRow icon={<Phone className="h-4 w-4" />} label="Phone number">
+            <DetailRow
+              icon={<Phone className="h-4 w-4" />}
+              label="Phone number"
+            >
               {user.phone?.trim() || "Not provided"}
             </DetailRow>
-            <DetailRow icon={<ShieldCheck className="h-4 w-4" />} label="Role">
-              <span className="capitalize">{user.role || "Not available"}</span>
+            <DetailRow
+              icon={<ShieldCheck className="h-4 w-4" />}
+              label="Role"
+            >
+              <span className="capitalize">
+                {user.role || "Not available"}
+              </span>
             </DetailRow>
-            <DetailRow icon={<Ban className="h-4 w-4" />} label="Account status">
-              <span className={user.banned ? "text-red-700" : "text-emerald-700"}>
+            <DetailRow
+              icon={<Ban className="h-4 w-4" />}
+              label="Account status"
+            >
+              <span
+                className={
+                  user.banned ? "text-red-700" : "text-emerald-700"
+                }
+              >
                 {user.banned ? "Banned" : "Active"}
               </span>
             </DetailRow>
-            <DetailRow icon={<Fingerprint className="h-4 w-4" />} label="User ID">
-              <span className="select-all font-mono text-xs">{user.id}</span>
+            <DetailRow
+              icon={<Fingerprint className="h-4 w-4" />}
+              label="User ID"
+            >
+              <span className="select-all font-mono text-xs">
+                {user.id}
+              </span>
             </DetailRow>
-            <DetailRow icon={<CalendarDays className="h-4 w-4" />} label="Registration date">
+            <DetailRow
+              icon={<CalendarDays className="h-4 w-4" />}
+              label="Registration date"
+            >
               {formatDate(user.createdAt)}
             </DetailRow>
-            <DetailRow icon={<CalendarDays className="h-4 w-4" />} label="Last updated">
+            <DetailRow
+              icon={<CalendarDays className="h-4 w-4" />}
+              label="Last updated"
+            >
               {formatDate(user.updatedAt)}
             </DetailRow>
           </div>
@@ -197,23 +257,32 @@ export default function UserDetailsDialog({
             aria-labelledby="user-ban-heading"
             className="mx-5 mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-950 sm:mx-7 sm:p-5"
           >
-            <h4 id="user-ban-heading" className="flex items-center gap-2 font-semibold">
+            <h4
+              id="user-ban-heading"
+              className="flex items-center gap-2 font-semibold"
+            >
               <Ban className="h-4 w-4 shrink-0" aria-hidden="true" />
               Ban information
             </h4>
             <dl className="mt-3 grid gap-x-5 gap-y-3 text-sm sm:grid-cols-2">
               <div>
-                <dt className="text-xs font-medium text-red-900/70">Status</dt>
+                <dt className="text-xs font-medium text-red-900/70">
+                  Status
+                </dt>
                 <dd className="mt-1 font-semibold">Banned</dd>
               </div>
               <div>
-                <dt className="text-xs font-medium text-red-900/70">Expires</dt>
+                <dt className="text-xs font-medium text-red-900/70">
+                  Expires
+                </dt>
                 <dd className="mt-1 font-semibold">
                   {formatBanExpiry(user.banExpires)}
                 </dd>
               </div>
               <div className="sm:col-span-2">
-                <dt className="text-xs font-medium text-red-900/70">Reason</dt>
+                <dt className="text-xs font-medium text-red-900/70">
+                  Reason
+                </dt>
                 <dd className="mt-1 whitespace-pre-wrap font-medium">
                   {user.banReason?.trim() || "No reason provided"}
                 </dd>

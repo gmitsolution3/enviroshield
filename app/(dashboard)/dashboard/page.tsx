@@ -1,9 +1,11 @@
-import { AdminDashboard } from "@/components/dashboard/admin/AdminDashboard";
-import UserDashboardHome from "@/components/dashboard/users/UserDashboardHome";
+import AdminDashboard from "@/components/dashboard/admin/AdminDashboard";
+import UserDashboard from "@/components/dashboard/user/UserDashboard";
 import { requireAuth } from "@/lib/auth-guards";
 
 export default async function DashboardPage() {
   const session = await requireAuth();
+
+  console.log(session)
 
   const role = session.user.role ?? "user";
 
@@ -11,5 +13,5 @@ export default async function DashboardPage() {
     return <AdminDashboard user={session.user} />;
   }
 
-  return <UserDashboardHome name={session.user.name} />;
+  return <UserDashboard name={session.user.name} />;
 }

@@ -20,7 +20,7 @@ interface AdminDashboardProps {
   };
 }
 
-export function AdminDashboard({ user }: AdminDashboardProps) {
+export default function AdminDashboard({ user }: AdminDashboardProps) {
   return (
     <div className="mx-auto w-full max-w-[1440px] space-y-10 p-6 sm:p-8 lg:p-10">
       {/* Introduction */}

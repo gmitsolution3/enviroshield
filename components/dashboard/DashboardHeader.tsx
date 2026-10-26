@@ -1,6 +1,12 @@
 "use client";
 
-import { Bell, LogOut, Settings, User } from "lucide-react";
+import {
+  ArrowUpRight,
+  Bell,
+  LogOut,
+  Settings,
+  User,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -53,8 +59,8 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-line/80 bg-white/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-white/80 sm:px-6">
-      {/* Left */}
-      <div className="flex h-full items-center gap-3">
+      {/* Left: Dashboard identity and public-site navigation */}
+      <div className="flex h-full min-w-0 items-center gap-3">
         <SidebarTrigger
           className={cn(
             "h-9 w-9 rounded-lg",
@@ -66,7 +72,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
 
         <Separator orientation="vertical" className="h-5 bg-line" />
 
-        <div className="flex flex-col justify-center">
+        <div className="flex shrink-0 flex-col justify-center">
           <p className="text-sm font-semibold tracking-tight text-navy">
             Dashboard
           </p>
@@ -75,14 +81,39 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
             Enviroshield workspace
           </p>
         </div>
+
+        <Separator
+          orientation="vertical"
+          className="mx-0.5 hidden h-5 bg-line sm:block"
+        />
       </div>
 
-      {/* Right */}
-      <div className="flex items-center gap-1.5">
+      {/* Right: Notifications and user menu */}
+      <div className="flex shrink-0 items-center gap-1.5">
+        <Link
+          href="/"
+          aria-label="Visit the Enviroshield public website"
+          className={cn(
+            "group inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-2",
+            "text-xs font-medium text-ink/55 sm:text-sm",
+            "transition-colors duration-200",
+            "hover:bg-blue/[0.06] hover:text-blue",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue/40",
+          )}
+        >
+          <span>Visit website</span>
+
+          <ArrowUpRight
+            aria-hidden="true"
+            className="h-3.5 w-3.5 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+          />
+        </Link>
+        
         <Button
           type="button"
           variant="ghost"
           size="icon"
+          aria-label="Notifications"
           className={cn(
             "h-9 w-9 rounded-lg",
             "text-ink/55",
@@ -91,18 +122,17 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
           )}
         >
           <Bell className="h-[16px] w-[16px]" />
-
-          <span className="sr-only">Notifications</span>
         </Button>
 
         <DropdownMenu>
-          <DropdownMenuTrigger>
+          <DropdownMenuTrigger asChild>
             <Button
               type="button"
               variant="ghost"
-              className="ml-1 h-9 rounded-full p-0 hover:bg-transparent"
+              aria-label="Open user menu"
+              className="ml-1 h-10 w-10 rounded-full p-0 hover:bg-blue/[0.06]"
             >
-              <Avatar className="h-10 w-10 border border-line">
+              <Avatar className="h-9 w-9 border border-line">
                 <AvatarImage
                   src={user.image ?? undefined}
                   alt={user.name}
@@ -135,7 +165,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
             <DropdownMenuItem className="rounded-lg text-ink/90 focus:bg-blue/[0.10] focus:text-blue hover:bg-blue/[0.10]">
               <Link
                 href="/dashboard/profile"
-                className="flex w-full items-center gap-2 h-7"
+                className="flex h-7 w-full items-center gap-2"
               >
                 <User className="h-4 w-4" />
                 Profile
@@ -145,7 +175,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
             <DropdownMenuItem className="rounded-lg text-ink/70 focus:bg-blue/[0.08] focus:text-blue">
               <Link
                 href="/dashboard/settings"
-                className="flex w-full items-center gap-2 h-7"
+                className="flex h-7 w-full items-center gap-2"
               >
                 <Settings className="h-4 w-4" />
                 Settings
@@ -156,7 +186,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
 
             <DropdownMenuItem
               onClick={handleLogout}
-              className="rounded-lg text-destructive focus:text-destructive h-8"
+              className="h-8 rounded-lg text-destructive focus:text-destructive"
             >
               <LogOut className="h-4 w-4" />
               Logout

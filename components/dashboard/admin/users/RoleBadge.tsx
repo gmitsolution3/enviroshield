@@ -2,11 +2,7 @@ import { ShieldCheck, UserRound } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 
-export default function RoleBadge({
-  role,
-}: {
-  role?: string;
-}) {
+export default function RoleBadge({ role }: { role?: string }) {
   const isAdmin = role === "admin";
 
   return (
