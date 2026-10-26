@@ -1,13 +1,18 @@
 "use client";
 
-import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, ArrowRight, ShieldCheck } from "lucide-react";
-import { useEffect, useRef, useState, type FormEvent } from "react";
-import { toast } from "sonner";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 import Container from "@/components/Container";
 import { useCart } from "@/components/cart/CartProvider";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -15,30 +20,64 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
-import { authClient } from "@/lib/auth-client";
 import {
   createOrder,
   type CreateOrderRequest,
   type DeliveryZone,
 } from "@/lib/api/orders";
+import { authClient } from "@/lib/auth-client";
 import { clearCart } from "@/lib/cart";
 import { saveOrderConfirmation } from "@/lib/order-confirmation";
 import CheckoutLoader from "./CheckoutLoader";
 
-type CheckoutValues = {
-  name: string;
-  phone: string;
-  addressLine: string;
-  area: string;
-  city: string;
-  district: string;
-  postalCode: string;
-  deliveryZone: DeliveryZone;
-  customerNote: string;
-};
+const checkoutSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Enter a name between 2 and 100 characters.")
+    .max(100, "Enter a name between 2 and 100 characters."),
+  phone: z
+    .string()
+    .trim()
+    .refine(
+      (value) =>
+        /^\+?[0-9]{7,15}$/.test(value.replace(/[\s()-]/g, "")),
+      "Enter a valid phone number, including +880 if needed.",
+    ),
+  addressLine: z
+    .string()
+    .trim()
+    .min(5, "Enter an address between 5 and 200 characters.")
+    .max(200, "Enter an address between 5 and 200 characters."),
+  area: z
+    .string()
+    .trim()
+    .min(2, "Enter an area between 2 and 100 characters.")
+    .max(100, "Enter an area between 2 and 100 characters."),
+  city: z
+    .string()
+    .trim()
+    .min(2, "Enter a city between 2 and 100 characters.")
+    .max(100, "Enter a city between 2 and 100 characters."),
+  district: z
+    .string()
+    .trim()
+    .min(2, "Enter a district between 2 and 100 characters.")
+    .max(100, "Enter a district between 2 and 100 characters."),
+  postalCode: z
+    .string()
+    .trim()
+    .max(20, "Postal code cannot exceed 20 characters."),
+  deliveryZone: z.enum(["dhaka", "outside_dhaka"]),
+  customerNote: z
+    .string()
+    .trim()
+    .max(1000, "Note cannot exceed 1000 characters."),
+});
 
-type FieldErrors = Partial<Record<keyof CheckoutValues, string>>;
+type CheckoutValues = z.infer<typeof checkoutSchema>;
 
 const initialValues: CheckoutValues = {
   name: "",
@@ -55,67 +94,6 @@ const initialValues: CheckoutValues = {
 const money = (amount: number) =>
   `৳${amount.toLocaleString("en-BD")}`;
 
-const inputClass =
-  "mt-2 min-h-12 w-full rounded-xl border border-line bg-white px-4 text-sm text-navy outline-none transition-colors placeholder:text-ink/40 focus:border-blue focus:ring-2 focus:ring-blue/15";
-
-function validate(values: CheckoutValues): FieldErrors {
-  const errors: FieldErrors = {};
-
-  if (
-    values.name.trim().length < 2 ||
-    values.name.trim().length > 100
-  ) {
-    errors.name = "Enter a name between 2 and 100 characters.";
-  }
-
-  const phone = values.phone.trim().replace(/[\s()-]/g, "");
-
-  if (!/^\+?[0-9]{7,15}$/.test(phone)) {
-    errors.phone =
-      "Enter a valid phone number, including +880 if needed.";
-  }
-
-  if (
-    values.addressLine.trim().length < 5 ||
-    values.addressLine.trim().length > 200
-  ) {
-    errors.addressLine =
-      "Enter an address between 5 and 200 characters.";
-  }
-
-  if (
-    values.area.trim().length < 2 ||
-    values.area.trim().length > 100
-  ) {
-    errors.area = "Enter an area between 2 and 100 characters.";
-  }
-
-  if (
-    values.city.trim().length < 2 ||
-    values.city.trim().length > 100
-  ) {
-    errors.city = "Enter a city between 2 and 100 characters.";
-  }
-
-  if (
-    values.district.trim().length < 2 ||
-    values.district.trim().length > 100
-  ) {
-    errors.district =
-      "Enter a district between 2 and 100 characters.";
-  }
-
-  if (values.postalCode.trim().length > 20) {
-    errors.postalCode = "Postal code cannot exceed 20 characters.";
-  }
-
-  if (values.customerNote.trim().length > 1000) {
-    errors.customerNote = "Note cannot exceed 1000 characters.";
-  }
-
-  return errors;
-}
-
 function messageFromError(error: unknown): string {
   if (error instanceof Error) return error.message;
 
@@ -125,161 +103,81 @@ function messageFromError(error: unknown): string {
       errorMessages?: unknown;
     };
 
-    if (typeof data.message === "string") {
-      return data.message;
-    }
+    if (typeof data.message === "string") return data.message;
 
     if (Array.isArray(data.errorMessages)) {
       const firstMessage = data.errorMessages.find(
         (item) => typeof item?.message === "string",
       )?.message;
 
-      if (typeof firstMessage === "string") {
-        return firstMessage;
-      }
+      if (typeof firstMessage === "string") return firstMessage;
     }
   }
 
   return "We couldn't place your order. Please check your details and try again.";
 }
 
-function Field({
-  label,
-  name,
-  value,
-  onChange,
-  error,
-  type = "text",
-  autoComplete,
-  required,
-}: {
-  label: string;
-  name: keyof CheckoutValues;
-  value: string;
-  onChange: (name: keyof CheckoutValues, value: string) => void;
-  error?: string;
-  type?: string;
-  autoComplete?: string;
-  required?: boolean;
-}) {
-  const errorId = `${name}-error`;
-
-  return (
-    <div>
-      <label
-        htmlFor={name}
-        className="text-sm font-bold text-navy"
-      >
-        {label}
-        {required && (
-          <span aria-hidden="true" className="text-red-600">
-            {" "}*
-          </span>
-        )}
-      </label>
-
-      <input
-        id={name}
-        name={name}
-        type={type}
-        autoComplete={autoComplete}
-        required={required}
-        value={value}
-        onChange={(event) => onChange(name, event.target.value)}
-        aria-invalid={Boolean(error)}
-        aria-describedby={error ? errorId : undefined}
-        className={`${inputClass} ${
-          error
-            ? "border-red-500 focus:border-red-500 focus:ring-red-500/15"
-            : ""
-        }`}
-      />
-
-      {error && (
-        <p id={errorId} className="mt-1.5 text-xs text-red-700">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
+const fieldClassName =
+  "min-h-12 rounded-xl border-line bg-white text-sm text-navy shadow-none placeholder:text-ink/40 focus-visible:border-blue focus-visible:ring-2 focus-visible:ring-blue/15";
 
 export default function CheckoutForm() {
   const router = useRouter();
 
-  const {
-    data: session,
-    isPending: sessionPending,
-  } = authClient.useSession();
-
+  const { data: session, isPending: sessionPending } =
+    authClient.useSession();
   const { items, subtotal, hydrated } = useCart();
 
-  const [values, setValues] = useState<CheckoutValues>(initialValues);
-  const [errors, setErrors] = useState<FieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [requestError, setRequestError] = useState("");
-
   const submissionLock = useRef(false);
 
-  // Prefill customer details from the authenticated user's profile.
-  // Preserve any values the customer has already entered.
+  const form = useForm<CheckoutValues>({
+    resolver: zodResolver(checkoutSchema),
+    defaultValues: initialValues,
+    mode: "onTouched",
+  });
+
+  const { control, handleSubmit, setValue, formState } = form;
+
+  // Prefill profile data without overwriting anything the customer has entered.
   useEffect(() => {
     if (!session?.user) return;
 
-    setValues((current) => ({
-      ...current,
-      name: current.name || session.user.name || "",
-      phone: current.phone || session.user.phone || "",
-    }));
-  }, [session?.user]);
+    if (!form.getValues("name") && session.user.name) {
+      setValue("name", session.user.name, {
+        shouldDirty: false,
+        shouldValidate: formState.touchedFields.name,
+      });
+    }
 
-  const change = (
-    name: keyof CheckoutValues,
-    value: string,
-  ) => {
-    setValues((current) => ({
-      ...current,
-      [name]: value,
-    }));
+    if (!form.getValues("phone") && session.user.phone) {
+      setValue("phone", session.user.phone, {
+        shouldDirty: false,
+        shouldValidate: formState.touchedFields.phone,
+      });
+    }
+  }, [
+    session?.user,
+    form,
+    setValue,
+    formState.touchedFields.name,
+    formState.touchedFields.phone,
+  ]);
 
-    setErrors((current) => ({
-      ...current,
-      [name]: undefined,
-    }));
-
-    setRequestError("");
-  };
-
-  const onSubmit = async (
-    event: FormEvent<HTMLFormElement>,
-  ) => {
-    event.preventDefault();
-
+  const onSubmit = async (values: CheckoutValues) => {
     if (submissionLock.current) return;
 
     if (!items.length) {
-      setRequestError(
-        "Your cart is empty. Add a product before checkout.",
-      );
-      return;
-    }
-
-    const nextErrors = validate(values);
-
-    setErrors(nextErrors);
-
-    if (Object.keys(nextErrors).length > 0) {
-      document.getElementById(
-        Object.keys(nextErrors)[0],
-      )?.focus();
-
+      const message =
+        "Your cart is empty. Add a product before checkout.";
+      setRequestError(message);
       return;
     }
 
     if (!session?.user) {
-      setRequestError(
-        "Please sign in to place an order. Your account email is used for order updates.",
-      );
+      const message =
+        "Please sign in to place an order. Your account email is used for order updates.";
+      setRequestError(message);
       return;
     }
 
@@ -294,12 +192,10 @@ export default function CheckoutForm() {
         productId: item.productId,
         quantity: item.quantity,
       })),
-
       customer: {
         name: values.name.trim(),
         phone,
       },
-
       deliveryAddress: {
         addressLine: values.addressLine.trim(),
         area: values.area.trim(),
@@ -309,9 +205,7 @@ export default function CheckoutForm() {
           ? { postalCode: values.postalCode.trim() }
           : {}),
       },
-
-      deliveryZone: values.deliveryZone,
-
+      deliveryZone: values.deliveryZone as DeliveryZone,
       ...(values.customerNote.trim()
         ? { customerNote: values.customerNote.trim() }
         : {}),
@@ -322,16 +216,12 @@ export default function CheckoutForm() {
 
       saveOrderConfirmation(order);
       clearCart();
-
       toast.success("Your order has been placed.");
-
       router.push("/checkout/success");
     } catch (error: unknown) {
       const message = messageFromError(error);
-
       setRequestError(message);
       toast.error(message);
-
       submissionLock.current = false;
       setIsSubmitting(false);
     }
@@ -343,7 +233,7 @@ export default function CheckoutForm() {
         <div className="mx-auto max-w-[1180px]">
           <Link
             href="/cart"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-blue hover:text-deep"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-blue transition-colors hover:text-deep"
           >
             <ArrowLeft size={16} aria-hidden="true" />
             Back to cart
@@ -353,11 +243,9 @@ export default function CheckoutForm() {
             <p className="mb-3 text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
               Secure checkout
             </p>
-
             <h1 className="text-[clamp(32px,4vw,48px)] font-extrabold leading-tight tracking-[-0.04em] text-navy">
               Delivery details
             </h1>
-
             <p className="mt-2 text-sm leading-6 text-ink/65">
               Your order will be paid by cash on delivery.
             </p>
@@ -370,14 +258,12 @@ export default function CheckoutForm() {
               <h2 className="font-bold text-navy">
                 Your cart is empty
               </h2>
-
               <p className="mt-2 text-sm text-ink/65">
                 Add products before starting checkout.
               </p>
-
               <Link
                 href="/products"
-                className="mt-4 inline-flex font-bold text-blue hover:text-deep"
+                className="mt-4 inline-flex font-bold text-blue transition-colors hover:text-deep"
               >
                 Browse products{" "}
                 <ArrowRight size={16} className="ml-2" />
@@ -386,9 +272,9 @@ export default function CheckoutForm() {
           ) : (
             <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
               <form
-                onSubmit={onSubmit}
+                onSubmit={handleSubmit(onSubmit)}
                 noValidate
-                className="rounded-2xl border border-line bg-white p-7 shadow-[0_10px_30px_rgba(0,51,78,0.04)] max-[600px]:p-5"
+                className="min-w-0 rounded-2xl border border-line bg-white p-7 shadow-[0_10px_30px_rgba(0,51,78,0.04)] max-[600px]:p-5"
               >
                 <fieldset
                   disabled={isSubmitting || sessionPending}
@@ -397,9 +283,9 @@ export default function CheckoutForm() {
                   <legend className="text-lg font-extrabold text-navy">
                     Customer and delivery
                   </legend>
-
                   <p className="mt-1 text-sm text-ink/60">
-                    Fields marked with * are required.
+                    Fields marked with{" "}
+                    <span aria-hidden="true">*</span> are required.
                   </p>
 
                   {!sessionPending && !session?.user && (
@@ -417,129 +303,291 @@ export default function CheckoutForm() {
                   )}
 
                   <div className="mt-6 grid gap-5 sm:grid-cols-2">
-                    <Field
-                      label="Customer name"
-                      name="name"
-                      value={values.name}
-                      onChange={change}
-                      error={errors.name}
-                      autoComplete="name"
-                      required
-                    />
-
-                    <Field
-                      label="Phone number"
-                      name="phone"
-                      type="tel"
-                      value={values.phone}
-                      onChange={change}
-                      error={errors.phone}
-                      autoComplete="tel"
-                      required
-                    />
-
-                    <div className="sm:col-span-2">
-                      <Field
-                        label="Delivery address"
-                        name="addressLine"
-                        value={values.addressLine}
-                        onChange={change}
-                        error={errors.addressLine}
-                        autoComplete="street-address"
-                        required
+                    <div>
+                      <label
+                        htmlFor="name"
+                        className="text-sm font-bold text-navy"
+                      >
+                        Customer name{" "}
+                        <span className="text-red-600">*</span>
+                      </label>
+                      <Input
+                        id="name"
+                        autoComplete="name"
+                        placeholder="Your full name"
+                        aria-invalid={Boolean(formState.errors.name)}
+                        aria-describedby={
+                          formState.errors.name
+                            ? "name-error"
+                            : undefined
+                        }
+                        {...form.register("name")}
+                        className={`${fieldClassName} mt-2`}
                       />
+                      {formState.errors.name && (
+                        <p
+                          id="name-error"
+                          className="mt-1.5 text-xs text-red-700"
+                        >
+                          {formState.errors.name.message}
+                        </p>
+                      )}
                     </div>
 
-                    <Field
-                      label="Area"
-                      name="area"
-                      value={values.area}
-                      onChange={change}
-                      error={errors.area}
-                      autoComplete="address-level3"
-                      required
-                    />
+                    <div>
+                      <label
+                        htmlFor="phone"
+                        className="text-sm font-bold text-navy"
+                      >
+                        Phone number{" "}
+                        <span className="text-red-600">*</span>
+                      </label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        placeholder="+880 1XXXXXXXXX"
+                        aria-invalid={Boolean(formState.errors.phone)}
+                        aria-describedby={
+                          formState.errors.phone
+                            ? "phone-error"
+                            : undefined
+                        }
+                        {...form.register("phone")}
+                        className={`${fieldClassName} mt-2`}
+                      />
+                      {formState.errors.phone && (
+                        <p
+                          id="phone-error"
+                          className="mt-1.5 text-xs text-red-700"
+                        >
+                          {formState.errors.phone.message}
+                        </p>
+                      )}
+                    </div>
 
-                    <Field
-                      label="City"
-                      name="city"
-                      value={values.city}
-                      onChange={change}
-                      error={errors.city}
-                      autoComplete="address-level2"
-                      required
-                    />
+                    <div className="sm:col-span-2">
+                      <label
+                        htmlFor="addressLine"
+                        className="text-sm font-bold text-navy"
+                      >
+                        Delivery address{" "}
+                        <span className="text-red-600">*</span>
+                      </label>
+                      <Input
+                        id="addressLine"
+                        autoComplete="street-address"
+                        placeholder="House, road, building, or street"
+                        aria-invalid={Boolean(
+                          formState.errors.addressLine,
+                        )}
+                        aria-describedby={
+                          formState.errors.addressLine
+                            ? "addressLine-error"
+                            : undefined
+                        }
+                        {...form.register("addressLine")}
+                        className={`${fieldClassName} mt-2`}
+                      />
+                      {formState.errors.addressLine && (
+                        <p
+                          id="addressLine-error"
+                          className="mt-1.5 text-xs text-red-700"
+                        >
+                          {formState.errors.addressLine.message}
+                        </p>
+                      )}
+                    </div>
 
-                    <Field
-                      label="District"
-                      name="district"
-                      value={values.district}
-                      onChange={change}
-                      error={errors.district}
-                      autoComplete="address-level1"
-                      required
-                    />
+                    <div>
+                      <label
+                        htmlFor="area"
+                        className="text-sm font-bold text-navy"
+                      >
+                        Area <span className="text-red-600">*</span>
+                      </label>
+                      <Input
+                        id="area"
+                        autoComplete="address-level3"
+                        placeholder="Your area"
+                        aria-invalid={Boolean(formState.errors.area)}
+                        aria-describedby={
+                          formState.errors.area
+                            ? "area-error"
+                            : undefined
+                        }
+                        {...form.register("area")}
+                        className={`${fieldClassName} mt-2`}
+                      />
+                      {formState.errors.area && (
+                        <p
+                          id="area-error"
+                          className="mt-1.5 text-xs text-red-700"
+                        >
+                          {formState.errors.area.message}
+                        </p>
+                      )}
+                    </div>
 
-                    <Field
-                      label="Postal code"
-                      name="postalCode"
-                      value={values.postalCode}
-                      onChange={change}
-                      error={errors.postalCode}
-                      autoComplete="postal-code"
-                    />
+                    <div>
+                      <label
+                        htmlFor="city"
+                        className="text-sm font-bold text-navy"
+                      >
+                        City <span className="text-red-600">*</span>
+                      </label>
+                      <Input
+                        id="city"
+                        autoComplete="address-level2"
+                        placeholder="Your city"
+                        aria-invalid={Boolean(formState.errors.city)}
+                        aria-describedby={
+                          formState.errors.city
+                            ? "city-error"
+                            : undefined
+                        }
+                        {...form.register("city")}
+                        className={`${fieldClassName} mt-2`}
+                      />
+                      {formState.errors.city && (
+                        <p
+                          id="city-error"
+                          className="mt-1.5 text-xs text-red-700"
+                        >
+                          {formState.errors.city.message}
+                        </p>
+                      )}
+                    </div>
 
-                    {/* Shadcn UI delivery zone select */}
+                    <div>
+                      <label
+                        htmlFor="district"
+                        className="text-sm font-bold text-navy"
+                      >
+                        District{" "}
+                        <span className="text-red-600">*</span>
+                      </label>
+                      <Input
+                        id="district"
+                        autoComplete="address-level1"
+                        placeholder="Your district"
+                        aria-invalid={Boolean(
+                          formState.errors.district,
+                        )}
+                        aria-describedby={
+                          formState.errors.district
+                            ? "district-error"
+                            : undefined
+                        }
+                        {...form.register("district")}
+                        className={`${fieldClassName} mt-2`}
+                      />
+                      {formState.errors.district && (
+                        <p
+                          id="district-error"
+                          className="mt-1.5 text-xs text-red-700"
+                        >
+                          {formState.errors.district.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="postalCode"
+                        className="text-sm font-bold text-navy"
+                      >
+                        Postal code{" "}
+                        <span className="font-normal text-ink/55">
+                          (optional)
+                        </span>
+                      </label>
+                      <Input
+                        id="postalCode"
+                        autoComplete="postal-code"
+                        placeholder="Postal code"
+                        aria-invalid={Boolean(
+                          formState.errors.postalCode,
+                        )}
+                        aria-describedby={
+                          formState.errors.postalCode
+                            ? "postalCode-error"
+                            : undefined
+                        }
+                        {...form.register("postalCode")}
+                        className={`${fieldClassName} mt-2`}
+                      />
+                      {formState.errors.postalCode && (
+                        <p
+                          id="postalCode-error"
+                          className="mt-1.5 text-xs text-red-700"
+                        >
+                          {formState.errors.postalCode.message}
+                        </p>
+                      )}
+                    </div>
+
                     <div className="sm:col-span-2">
                       <label
                         htmlFor="deliveryZone"
                         className="text-sm font-bold text-navy"
                       >
                         Delivery zone{" "}
-                        <span
-                          aria-hidden="true"
-                          className="text-red-600"
-                        >
-                          *
-                        </span>
+                        <span className="text-red-600">*</span>
                       </label>
-
-                      <Select
-                        value={values.deliveryZone}
-                        onValueChange={(value) =>
-                          change(
-                            "deliveryZone",
-                            value as DeliveryZone,
-                          )
-                        }
-                        disabled={
-                          isSubmitting || sessionPending
-                        }
-                      >
-                        <SelectTrigger
-                          id="deliveryZone"
-                          className="mt-2 min-h-12 w-full rounded-xl border-line bg-white text-sm text-navy focus:ring-blue/15"
-                          aria-label="Delivery zone"
-                        >
-                          <SelectValue placeholder="Select delivery zone" />
-                        </SelectTrigger>
-
-                        <SelectContent>
-                          <SelectItem value="dhaka">
-                            Inside Dhaka
-                          </SelectItem>
-
-                          <SelectItem value="outside_dhaka">
-                            Outside Dhaka
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-
+                      <Controller
+                        control={control}
+                        name="deliveryZone"
+                        render={({ field }) => (
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={isSubmitting || sessionPending}
+                          >
+                            <SelectTrigger
+                              id="deliveryZone"
+                              aria-invalid={Boolean(
+                                formState.errors.deliveryZone,
+                              )}
+                              aria-describedby={
+                                formState.errors.deliveryZone
+                                  ? "deliveryZone-error"
+                                  : undefined
+                              }
+                              className={`${fieldClassName} mt-2 w-full`}
+                            >
+                              <SelectValue placeholder="Select delivery zone">
+                                {field.value === "dhaka"
+                                  ? "Inside Dhaka"
+                                  : field.value === "outside_dhaka"
+                                    ? "Outside Dhaka"
+                                    : "Select delivery zone"}
+                              </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="dhaka">
+                                Inside Dhaka
+                              </SelectItem>
+                              <SelectItem value="outside_dhaka">
+                                Outside Dhaka
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
                       <p className="mt-1.5 text-xs leading-5 text-ink/55">
-                        The delivery fee and final total are
-                        confirmed by the server when the order is
-                        placed.
+                        The delivery fee and final total are confirmed
+                        by the server when the order is placed.
                       </p>
+                      {formState.errors.deliveryZone && (
+                        <p
+                          id="deliveryZone-error"
+                          className="mt-1.5 text-xs text-red-700"
+                        >
+                          {formState.errors.deliveryZone.message}
+                        </p>
+                      )}
                     </div>
 
                     <div className="sm:col-span-2">
@@ -552,34 +600,28 @@ export default function CheckoutForm() {
                           (optional)
                         </span>
                       </label>
-
-                      <textarea
+                      <Textarea
                         id="customerNote"
-                        name="customerNote"
                         rows={3}
                         maxLength={1000}
-                        value={values.customerNote}
-                        onChange={(event) =>
-                          change(
-                            "customerNote",
-                            event.target.value,
-                          )
-                        }
-                        aria-invalid={Boolean(errors.customerNote)}
+                        placeholder="Any directions that will help us deliver your order"
+                        aria-invalid={Boolean(
+                          formState.errors.customerNote,
+                        )}
                         aria-describedby={
-                          errors.customerNote
+                          formState.errors.customerNote
                             ? "customerNote-error"
                             : undefined
                         }
-                        className={`${inputClass} resize-y py-3`}
+                        {...form.register("customerNote")}
+                        className="mt-2 min-h-24 resize-y rounded-xl border-line bg-white text-sm text-navy shadow-none placeholder:text-ink/40 focus-visible:border-blue focus-visible:ring-2 focus-visible:ring-blue/15"
                       />
-
-                      {errors.customerNote && (
+                      {formState.errors.customerNote && (
                         <p
                           id="customerNote-error"
                           className="mt-1.5 text-xs text-red-700"
                         >
-                          {errors.customerNote}
+                          {formState.errors.customerNote.message}
                         </p>
                       )}
                     </div>
@@ -595,7 +637,7 @@ export default function CheckoutForm() {
                   </p>
                 )}
 
-                <button
+                <Button
                   type="submit"
                   disabled={
                     isSubmitting ||
@@ -603,7 +645,7 @@ export default function CheckoutForm() {
                     !session?.user ||
                     items.length === 0
                   }
-                  className="mt-7 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-blue px-5 text-sm font-bold text-white transition-colors hover:bg-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue disabled:cursor-not-allowed disabled:bg-ink/35"
+                  className="mt-7 min-h-12 w-full rounded-full bg-blue px-5 text-sm font-bold text-white transition-colors hover:bg-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue disabled:cursor-not-allowed disabled:bg-ink/35"
                 >
                   {isSubmitting ? (
                     <>
@@ -615,14 +657,11 @@ export default function CheckoutForm() {
                     </>
                   ) : (
                     <>
-                      Place order{" "}
-                      <ArrowRight
-                        size={16}
-                        aria-hidden="true"
-                      />
+                      Place order
+                      <ArrowRight size={16} aria-hidden="true" />
                     </>
                   )}
-                </button>
+                </Button>
 
                 <p className="mt-3 flex items-center justify-center gap-2 text-xs text-ink/55">
                   <ShieldCheck size={15} aria-hidden="true" />
@@ -648,7 +687,6 @@ export default function CheckoutForm() {
                           × {item.quantity}
                         </span>
                       </span>
-
                       <span className="shrink-0 font-semibold tabular-nums text-navy">
                         {money(item.price * item.quantity)}
                       </span>
@@ -660,7 +698,6 @@ export default function CheckoutForm() {
                   <span className="text-ink/65">
                     Estimated subtotal
                   </span>
-
                   <span className="font-bold tabular-nums text-navy">
                     {money(subtotal)}
                   </span>
@@ -668,7 +705,6 @@ export default function CheckoutForm() {
 
                 <div className="mt-3 flex justify-between text-sm">
                   <span className="text-ink/65">Delivery</span>
-
                   <span className="text-right text-xs leading-5 text-ink/60">
                     Confirmed after order placement
                   </span>
@@ -678,7 +714,6 @@ export default function CheckoutForm() {
                   <span className="text-sm font-bold text-navy">
                     Final total
                   </span>
-
                   <span className="max-w-[170px] text-right text-xs leading-5 text-ink/60">
                     Shown using server-confirmed prices and delivery
                   </span>
