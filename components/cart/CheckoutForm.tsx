@@ -29,7 +29,6 @@ import {
 } from "@/lib/api/orders";
 import { authClient } from "@/lib/auth-client";
 import { clearCart } from "@/lib/cart";
-import { saveOrderConfirmation } from "@/lib/order-confirmation";
 
 import EmptyCart from "@/components/cart/EmptyCart";
 import CheckoutLoader from "./CheckoutLoader";
@@ -216,10 +215,9 @@ export default function CheckoutForm() {
     try {
       const order = await createOrder(payload);
 
-      saveOrderConfirmation(order);
       clearCart();
       toast.success("Your order has been placed.");
-      router.push("/checkout/success");
+      router.push(`/checkout/success?orderId=${encodeURIComponent(order._id)}`);
     } catch (error: unknown) {
       const message = messageFromError(error);
       setRequestError(message);
