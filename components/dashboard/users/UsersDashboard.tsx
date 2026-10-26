@@ -26,7 +26,6 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -34,8 +33,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import type { Session } from "@/lib/auth-client";
+import DashboardButton from "../DashboardButton";
 
 import EmptyUsers from "./EmptyUsers";
 import MobileUserCard from "./MobileUserCard";
@@ -96,17 +103,28 @@ export default function UsersDashboard() {
         limit: String(pagination.pageSize),
         offset: String(offset),
       });
-      if (searchValue) params.set("search", searchValue);
 
-      const response = await fetch(`/api/admin/users?${params.toString()}`, {
-        cache: "no-store",
-      });
+      if (searchValue) {
+        params.set("search", searchValue);
+      }
+
+      const response = await fetch(
+        `/api/admin/users?${params.toString()}`,
+        {
+          cache: "no-store",
+        },
+      );
+
       if (!response.ok) {
         throw new Error("Unable to load users.");
       }
 
       const data = (await response.json()) as UserSearchResponse;
-      if (!Array.isArray(data.users) || !Number.isInteger(data.total)) {
+
+      if (
+        !Array.isArray(data.users) ||
+        !Number.isInteger(data.total)
+      ) {
         throw new Error("The user search response was invalid.");
       }
 
@@ -116,7 +134,21 @@ export default function UsersDashboard() {
           createdAt: new Date(user.createdAt),
         })) as DashboardUser[],
       );
+
       setTotal(data.total);
+
+      // If the current page is no longer valid, return to page one.
+      const totalPages = Math.max(
+        1,
+        Math.ceil(data.total / pagination.pageSize),
+      );
+
+      if (pagination.pageIndex >= totalPages) {
+        setPagination((current) => ({
+          ...current,
+          pageIndex: Math.max(0, totalPages - 1),
+        }));
+      }
     } catch {
       setUsers([]);
       setTotal(0);
@@ -130,6 +162,7 @@ export default function UsersDashboard() {
     const timeout = window.setTimeout(() => {
       void fetchUsers();
     }, 0);
+
     return () => window.clearTimeout(timeout);
   }, [fetchUsers]);
 
@@ -171,11 +204,14 @@ export default function UsersDashboard() {
 
                 <p className="mt-0.5 truncate text-xs text-muted-foreground">
                   Joined{" "}
-                  {user.createdAt.toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
+                  {new Date(user.createdAt).toLocaleDateString(
+                    "en-US",
+                    {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    },
+                  )}
                 </p>
               </div>
             </div>
@@ -248,25 +284,19 @@ export default function UsersDashboard() {
         ),
       },
     ],
-    [session?.user, fetchUsers],
+    [session?.user.id, fetchUsers],
   );
 
   const table = useTable({
     key: "users-dashboard",
-
     features,
-
     columns,
     data: users,
-
     manualPagination: true,
-
     rowCount: total,
-
     state: {
       pagination,
     },
-
     onPaginationChange: setPagination,
   });
 
@@ -289,6 +319,15 @@ export default function UsersDashboard() {
     }));
   }
 
+  function handlePageSizeChange(value: string | null) {
+    if (!value) return;
+
+    setPagination({
+      pageIndex: 0,
+      pageSize: Number(value),
+    });
+  }
+
   if (isLoading) {
     return <UsersDashboardLoader />;
   }
@@ -304,29 +343,38 @@ export default function UsersDashboard() {
     Math.ceil(total / pagination.pageSize),
   );
 
+  const firstUser =
+    total === 0 ? 0 : pagination.pageIndex * pagination.pageSize + 1;
+
+  const lastUser = Math.min(
+    (pagination.pageIndex + 1) * pagination.pageSize,
+    total,
+  );
+
   return (
-    <div className="space-y-8 p-6 lg:p-8">
+    <section className="container mx-auto px-5 py-8 lg:px-0">
       {/* Header */}
-      <div>
-        <p className="text-sm font-medium text-muted-foreground">
-          Administration
-        </p>
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">User Management</h1>
 
-        <h1 className="mt-1 font-display text-3xl font-bold tracking-tight">
-          Users
-        </h1>
+          <p className="mt-1 text-muted-foreground">
+            Manage users, roles, and account access across
+            Enviroshield.
+          </p>
 
-        <p className="mt-2 text-muted-foreground">
-          Manage users, roles, and account access.
-        </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Showing {users.length} of {total} users
+          </p>
+        </div>
       </div>
 
       {/* User list */}
-      <Card>
-        <CardHeader className="gap-5">
+      <Card className="overflow-hidden border p-0 shadow-sm">
+        <CardHeader className="p-5 sm:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <CardTitle>User list</CardTitle>
+              <CardTitle>User List</CardTitle>
 
               <p className="mt-1 text-sm text-muted-foreground">
                 {total} {total === 1 ? "user" : "users"} registered
@@ -334,7 +382,7 @@ export default function UsersDashboard() {
             </div>
 
             {/* Search */}
-            <div className="flex w-full gap-2 lg:max-w-md">
+            <div className="flex items-center w-full flex-col gap-2 sm:flex-row lg:max-w-lg">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
@@ -346,71 +394,78 @@ export default function UsersDashboard() {
                       handleSearch();
                     }
                   }}
-                  placeholder="Search by name..."
-                  className="pl-9"
+                  placeholder="Search users by name..."
+                  className="pl-10 py-5"
                 />
               </div>
 
-              <Button type="button" onClick={handleSearch}>
+              <DashboardButton
+                type="button"
+                onClick={handleSearch}
+                icon={<Search className="h-4 w-4" />}
+              >
                 Search
-              </Button>
+              </DashboardButton>
 
               {searchValue && (
-                <Button
+                <DashboardButton
                   type="button"
                   variant="outline"
                   onClick={handleClearSearch}
+                  className="h-9 rounded-full border-blue/60 bg-muted/30 px-4 text-xs font-semibold text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
                 >
                   Clear
-                </Button>
+                </DashboardButton>
               )}
             </div>
           </div>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6">
           {users.length === 0 ? (
             <EmptyUsers />
           ) : (
             <>
               {/* Desktop table */}
-              <div className="hidden overflow-hidden rounded-2xl border md:block">
-                <table className="w-full">
-                  <thead className="bg-muted/40">
-                    {table.getHeaderGroups().map((headerGroup) => (
-                      <tr key={headerGroup.id}>
-                        {headerGroup.headers.map((header) => (
-                          <th
-                            key={header.id}
-                            className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground"
-                          >
-                            {header.isPlaceholder ? null : (
-                              <table.FlexRender header={header} />
-                            )}
-                          </th>
-                        ))}
-                      </tr>
-                    ))}
-                  </thead>
+              <div className="overflow-hidden rounded-xl border">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="border-b bg-muted/50">
+                      {table.getHeaderGroups().map((headerGroup) => (
+                        <tr key={headerGroup.id}>
+                          {headerGroup.headers.map((header) => (
+                            <th
+                              key={header.id}
+                              className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground"
+                            >
+                              {header.isPlaceholder ? null : (
+                                <table.FlexRender header={header} />
+                              )}
+                            </th>
+                          ))}
+                        </tr>
+                      ))}
+                    </thead>
 
-                  <tbody className="divide-y">
-                    {table.getRowModel().rows.map((row) => (
-                      <tr
-                        key={row.id}
-                        className="transition-colors hover:bg-muted/20"
-                      >
-                        {row.getAllCells().map((cell) => (
-                          <td key={cell.id} className="px-4 py-4">
-                            <table.FlexRender cell={cell} />
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    <tbody className="divide-y">
+                      {table.getRowModel().rows.map((row) => (
+                        <tr
+                          key={row.id}
+                          className="transition-colors hover:bg-muted/20"
+                        >
+                          {row.getAllCells().map((cell) => (
+                            <td key={cell.id} className="px-4 py-4">
+                              <table.FlexRender cell={cell} />
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
-              {/* Mobile list */}
+              {/* Mobile user cards */}
               <div className="space-y-3 md:hidden">
                 {users.map((user) => (
                   <MobileUserCard
@@ -423,39 +478,65 @@ export default function UsersDashboard() {
               </div>
 
               {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="mt-5 flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">
+              <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                {/* Rows per page */}
+                <div className="flex items-center gap-2">
+                  <span className="whitespace-nowrap text-sm text-muted-foreground">
+                    Rows per page:
+                  </span>
+
+                  <Select
+                    value={String(pagination.pageSize)}
+                    onValueChange={handlePageSizeChange}
+                  >
+                    <SelectTrigger className="h-8 w-20 rounded-full border-blue/30 bg-muted/30 px-4 text-xs font-semibold text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/5 focus:border-blue/40 focus:ring-2 focus:ring-blue/10">
+                      <SelectValue />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      <SelectItem value="5">5</SelectItem>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="20">20</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Page information and navigation */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4">
+                  <span className="whitespace-nowrap text-sm text-muted-foreground">
+                    Showing {firstUser}–{lastUser} of {total}
+                  </span>
+
+                  <span className="whitespace-nowrap text-sm text-muted-foreground">
                     Page {currentPage} of {totalPages}
-                  </p>
+                  </span>
 
                   <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
+                    <DashboardButton
                       variant="outline"
-                      size="icon"
                       disabled={!table.getCanPreviousPage()}
                       onClick={() => table.previousPage()}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
+                      icon={<ChevronLeft className="h-4 w-4" />}
+                      className="h-8 w-8 rounded-full border-blue bg-blue p-0 text-white shadow-[0_3px_10px_rgba(1,110,220,0.18)] transition-[background-color,box-shadow] duration-200 hover:bg-[#005cb9] hover:text-white hover:shadow-[0_4px_12px_rgba(1,110,220,0.24)] disabled:pointer-events-none disabled:opacity-50"
+                      ariaLabel="Previous page"
+                    />
 
-                    <Button
-                      type="button"
+                    <DashboardButton
                       variant="outline"
-                      size="icon"
                       disabled={!table.getCanNextPage()}
                       onClick={() => table.nextPage()}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
+                      icon={<ChevronRight className="h-4 w-4" />}
+                      className="h-8 w-8 rounded-full border-blue bg-blue p-0 text-white shadow-[0_3px_10px_rgba(1,110,220,0.18)] transition-[background-color,box-shadow] duration-200 hover:bg-[#005cb9] hover:text-white hover:shadow-[0_4px_12px_rgba(1,110,220,0.24)] disabled:pointer-events-none disabled:opacity-50"
+                      ariaLabel="Next page"
+                    />
                   </div>
                 </div>
-              )}
+              </div>
             </>
           )}
         </CardContent>
       </Card>
-    </div>
+    </section>
   );
 }
