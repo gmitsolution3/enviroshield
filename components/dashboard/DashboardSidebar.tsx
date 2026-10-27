@@ -98,7 +98,9 @@ export function DashboardSidebar({
 
   useEffect(() => {
     const activeGroup = navigation.find((item) =>
-      item.children?.some((child) => isPathActive(pathname, child.href)),
+      item.children?.some((child) =>
+        isPathActive(pathname, child.href),
+      ),
     );
 
     if (activeGroup) {
@@ -127,7 +129,7 @@ export function DashboardSidebar({
       {/* Brand */}
       <SidebarHeader className="h-[64px] border-b border-line/80 p-0">
         <Link
-          href="/dashboard"
+          href="/"
           className="
             flex h-full w-full items-center gap-2.5 px-3.5
             transition-colors duration-200
@@ -230,10 +232,14 @@ export function DashboardSidebar({
                               <SidebarMenuSubButton
                                 render={<Link href={child.href} />}
                                 isActive={childIsActive}
-                                className={navItemStyles(childIsActive)}
+                                className={navItemStyles(
+                                  childIsActive,
+                                )}
                               >
                                 {ChildIcon && (
-                                  <ChildIcon className={navIconStyles} />
+                                  <ChildIcon
+                                    className={navIconStyles}
+                                  />
                                 )}
 
                                 <span className="truncate">
