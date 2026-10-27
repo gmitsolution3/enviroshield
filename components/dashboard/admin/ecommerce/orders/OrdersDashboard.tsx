@@ -94,6 +94,9 @@ function StatusBadge({
   );
 }
 
+const getDisplayedPaymentStatus = (order: AdminOrder) =>
+  order.status === "cancelled" ? "cancelled" : order.paymentStatus;
+
 export default function OrdersDashboard() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -524,6 +527,12 @@ export default function OrdersDashboard() {
           order={selectedOrder}
           open
           onClose={closeAction}
+          showTrackingTimeline
+          displayPaymentStatus={
+          selectedOrder
+            ? getDisplayedPaymentStatus(selectedOrder)
+            : undefined
+        }
         />
       )}
       {activeAction === "status" && (
