@@ -592,6 +592,7 @@ export default function MyOrdersDashboard({
         order={selectedOrder}
         open={Boolean(selectedOrder)}
         onClose={() => setSelectedOrder(null)}
+        showTrackingTimeline
         displayPaymentStatus={
           selectedOrder
             ? getDisplayedPaymentStatus(selectedOrder)

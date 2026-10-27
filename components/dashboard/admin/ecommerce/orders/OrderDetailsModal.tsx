@@ -1,5 +1,16 @@
 "use client";
 
+import {
+  BadgeCheck,
+  Check,
+  Package,
+  PackageCheck,
+  ShoppingBag,
+  Truck,
+  XCircle,
+  type LucideIcon,
+} from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -45,11 +56,184 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+const fulfillmentStages: {
+  status: AdminOrder["status"];
+  label: string;
+  Icon: LucideIcon;
+}[] = [
+  { status: "pending", label: "Order Placed", Icon: ShoppingBag },
+  { status: "confirmed", label: "Confirmed", Icon: BadgeCheck },
+  { status: "processing", label: "Processing", Icon: Package },
+  { status: "shipped", label: "Shipped", Icon: Truck },
+  { status: "delivered", label: "Delivered", Icon: PackageCheck },
+];
+
+function OrderTrackingTimeline({ order }: { order: AdminOrder }) {
+  const prefersReducedMotion = useReducedMotion();
+
+  if (order.status === "cancelled") {
+    return (
+      <section
+        aria-label="Order cancellation status"
+        className="rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/30 sm:p-5"
+      >
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">
+            <XCircle className="size-5" aria-hidden="true" />
+          </span>
+          <div className="min-w-0">
+            <h3 className="font-semibold text-red-900 dark:text-red-200">
+              Order Cancelled
+            </h3>
+            <p className="mt-1 text-sm leading-5 text-red-800/80 dark:text-red-200/80">
+              This order is no longer progressing through fulfilment.
+            </p>
+            {order.cancellationReason && (
+              <p className="mt-3 text-sm text-red-900 dark:text-red-200">
+                <span className="font-semibold">Reason:</span>{" "}
+                {order.cancellationReason}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const currentIndex = fulfillmentStages.findIndex(
+    (stage) => stage.status === order.status,
+  );
+  const progressPercent =
+    currentIndex > 0
+      ? (currentIndex / (fulfillmentStages.length - 1)) * 100
+      : 0;
+  const stepTransition = prefersReducedMotion
+    ? ""
+    : "transition-all duration-500";
+  const labelTransition = prefersReducedMotion
+    ? ""
+    : "transition-colors duration-500";
+
+  return (
+    <section
+      aria-label="Order fulfilment progress"
+      className="rounded-2xl border bg-card p-4 text-card-foreground motion-safe:animate-in motion-safe:fade-in-0 sm:p-5"
+    >
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
+        <h3 className="font-semibold text-navy dark:text-foreground">
+          Order tracking
+        </h3>
+        <p className="text-xs text-muted-foreground">
+          {prettyOrderStatus(order.status)}
+        </p>
+      </div>
+
+      <ol className="relative grid grid-cols-5 gap-1">
+        {fulfillmentStages.map(({ status, label, Icon }, index) => {
+          const isCurrent = index === currentIndex;
+          const isComplete = index < currentIndex || order.status === "delivered";
+
+          return (
+            <li
+              key={status}
+              className="relative flex min-w-0 flex-col items-center text-center"
+              aria-current={isCurrent ? "step" : undefined}
+            >
+              {index === 0 && (
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-1/2 top-4 z-0 h-0.5 w-[calc(400%+1rem)] rounded-full bg-border sm:top-5"
+                >
+                  {progressPercent > 0 && (
+                    <motion.span
+                      key={progressPercent}
+                      initial={prefersReducedMotion ? false : { width: "0%" }}
+                      animate={{ width: `${progressPercent}%` }}
+                      transition={
+                        prefersReducedMotion
+                          ? { duration: 0 }
+                          : { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
+                      }
+                      className="absolute inset-y-0 left-0 overflow-hidden rounded-full bg-blue shadow-[0_0_7px_rgba(1,110,220,0.38)] dark:shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                    >
+                      {!prefersReducedMotion && (
+                        <motion.span
+                          initial={{ x: "-120%" }}
+                          animate={{ x: "600%" }}
+                          transition={{
+                            duration: 1.15,
+                            delay: 0.2,
+                            ease: "easeInOut",
+                          }}
+                          className="absolute inset-y-0 left-0 w-1/5 bg-gradient-to-r from-transparent via-white/75 to-transparent blur-[1px]"
+                        />
+                      )}
+                    </motion.span>
+                  )}
+                </span>
+              )}
+              {isCurrent && !prefersReducedMotion && (
+                <motion.span
+                  aria-hidden="true"
+                  initial={{ opacity: 0.2, scale: 0.9 }}
+                  animate={{
+                    opacity: [0.24, 0.44, 0.24],
+                    scale: [1, 1.28, 1],
+                  }}
+                  transition={{
+                    duration: 2.4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  className="absolute left-1/2 top-0 z-0 size-8 -translate-x-1/2 rounded-full bg-blue/30 blur-md sm:size-10"
+                />
+              )}
+              <span
+                className={`relative z-10 grid size-8 place-items-center rounded-full border sm:size-10 ${stepTransition} ${
+                  isCurrent
+                    ? "border-blue bg-blue text-white shadow-[0_0_12px_rgba(1,110,220,0.32)] ring-4 ring-blue/15 dark:ring-blue/25 dark:shadow-[0_0_14px_rgba(59,130,246,0.4)]"
+                    : isComplete
+                      ? "border-blue bg-blue text-white shadow-[0_0_6px_rgba(1,110,220,0.2)] dark:shadow-[0_0_7px_rgba(59,130,246,0.3)]"
+                      : "border-border bg-muted text-muted-foreground"
+                }`}
+              >
+                <Icon className="size-4 sm:size-[18px]" aria-hidden="true" />
+                {isComplete && (
+                  <span className="absolute -right-1 -bottom-1 grid size-4 place-items-center rounded-full border border-card bg-card text-blue">
+                    <Check className="size-3" aria-hidden="true" />
+                  </span>
+                )}
+              </span>
+              <span
+                className={`mt-2 max-w-full text-[9px] leading-tight sm:text-xs ${labelTransition} ${
+                  isCurrent
+                    ? "font-semibold text-blue dark:text-blue"
+                    : isComplete
+                      ? "font-medium text-foreground"
+                      : "text-muted-foreground"
+                }`}
+              >
+                {label}
+              </span>
+              {isCurrent && (
+                <span className="mt-1 text-[8px] font-semibold uppercase tracking-wide text-blue dark:text-blue sm:text-[9px]">
+                  Current Status
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+}
+
 type OrderDetailsModalProps = {
   order: AdminOrder | null;
   open: boolean;
   onClose: () => void;
   displayPaymentStatus?: string;
+  showTrackingTimeline?: boolean;
 };
 
 export default function OrderDetailsModal({
@@ -57,6 +241,7 @@ export default function OrderDetailsModal({
   open,
   onClose,
   displayPaymentStatus,
+  showTrackingTimeline = false,
 }: OrderDetailsModalProps) {
   return (
     <Dialog open={open && Boolean(order)} onOpenChange={(value) => !value && onClose()}>
@@ -81,6 +266,10 @@ export default function OrderDetailsModal({
             </section>
 
             <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5 sm:p-8">
+              {showTrackingTimeline && (
+                <OrderTrackingTimeline order={order} />
+              )}
+
               <section className="rounded-2xl border bg-white p-5">
                 <h2 className="mb-4 font-semibold text-navy">Customer</h2>
                 <div className="grid gap-4 sm:grid-cols-3">
