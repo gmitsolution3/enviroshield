@@ -3,14 +3,25 @@
 import {
   CalendarDays,
   CreditCard,
+  Hash,
   MapPin,
+  Package,
   PackageCheck,
   Search,
   ShoppingBag,
   Truck,
+  X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import DashboardError from "@/components/dashboard/DashboardError";
+import DashboardLoading from "@/components/dashboard/DashboardLoading";
+import OrderDetailsModal from "@/components/dashboard/admin/ecommerce/orders/OrderDetailsModal";
+import {
+  formatOrderAmount,
+  formatOrderDate,
+  prettyOrderStatus,
+} from "@/components/dashboard/admin/ecommerce/orders/orderActionUtils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,182 +38,216 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useFetch } from "@/hooks/swr/useFetch";
+import type { AdminOrder, OrdersResponse } from "@/types";
 import {
   UserDashboardMetric,
   UserListPagination,
   UserStatusBadge,
 } from "./UserDashboardUI";
 
-type OrderStatus = "Processing" | "Shipped" | "Delivered" | "Cancelled";
-type PaymentStatus = "Paid" | "Pending" | "Refunded";
-type OrderStatusFilter = "all" | OrderStatus;
+type OrderStatusFilter = "all" | AdminOrder["status"];
+type PaymentStatusFilter = "all" | AdminOrder["paymentStatus"];
+const PAGE_SIZE = 10;
 
-interface UserOrder {
-  orderNumber: string;
-  date: string;
-  products: string[];
-  itemCount: number;
-  total: number;
-  status: OrderStatus;
-  paymentStatus: PaymentStatus;
-  deliveryLocation: string;
-}
-
-const ORDERS: UserOrder[] = [
-  {
-    orderNumber: "ES-2026-1048",
-    date: "2026-10-18",
-    products: ["Heat Reflective Roof Coating", "Roof Primer"],
-    itemCount: 3,
-    total: 18450,
-    status: "Processing",
-    paymentStatus: "Paid",
-    deliveryLocation: "Dhanmondi, Dhaka",
-  },
-  {
-    orderNumber: "ES-2026-1019",
-    date: "2026-10-07",
-    products: ["AquaSeal Waterproof Membrane"],
-    itemCount: 2,
-    total: 12700,
-    status: "Shipped",
-    paymentStatus: "Paid",
-    deliveryLocation: "Uttara, Dhaka",
-  },
-  {
-    orderNumber: "ES-2026-0962",
-    date: "2026-09-21",
-    products: ["Concrete Crack Repair Kit", "Bonding Primer"],
-    itemCount: 2,
-    total: 8650,
-    status: "Delivered",
-    paymentStatus: "Paid",
-    deliveryLocation: "Chattogram Sadar, Chattogram",
-  },
-  {
-    orderNumber: "ES-2026-0914",
-    date: "2026-09-12",
-    products: ["Protective Floor Coating"],
-    itemCount: 1,
-    total: 7250,
-    status: "Delivered",
-    paymentStatus: "Paid",
-    deliveryLocation: "Sylhet Sadar, Sylhet",
-  },
-  {
-    orderNumber: "ES-2026-0851",
-    date: "2026-08-29",
-    products: ["Basement Waterproofing Compound", "Application Brush Set"],
-    itemCount: 4,
-    total: 11900,
-    status: "Cancelled",
-    paymentStatus: "Refunded",
-    deliveryLocation: "Khulna Sadar, Khulna",
-  },
-  {
-    orderNumber: "ES-2026-0784",
-    date: "2026-08-14",
-    products: ["Exterior Wall Shield"],
-    itemCount: 2,
-    total: 9600,
-    status: "Delivered",
-    paymentStatus: "Pending",
-    deliveryLocation: "Rajshahi Sadar, Rajshahi",
-  },
-];
-
-const PAGE_SIZE = 4;
-const currencyFormatter = new Intl.NumberFormat("en-BD", { maximumFractionDigits: 0 });
-const dateFormatter = new Intl.DateTimeFormat("en-BD", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-
-function formatCurrency(amount: number) {
-  return `৳${currencyFormatter.format(amount)}`;
-}
-
-function formatOrderDate(value: string) {
-  return dateFormatter.format(new Date(`${value}T00:00:00`));
-}
-
-export default function MyOrdersDashboard() {
+export default function MyOrdersDashboard({
+  userId,
+}: {
+  userId: string;
+}) {
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [status, setStatus] = useState<OrderStatusFilter>("all");
+  const [paymentStatus, setPaymentStatus] =
+    useState<PaymentStatusFilter>("all");
+  const [orderNumber, setOrderNumber] = useState("");
   const [page, setPage] = useState(1);
+  const [selectedOrder, setSelectedOrder] =
+    useState<AdminOrder | null>(null);
 
-  const filteredOrders = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
-    return ORDERS.filter((order) => {
-      const matchesSearch =
-        !normalizedSearch ||
-        order.orderNumber.toLowerCase().includes(normalizedSearch) ||
-        order.products.some((product) => product.toLowerCase().includes(normalizedSearch));
-      const matchesStatus = status === "all" || order.status === status;
-      return matchesSearch && matchesStatus;
-    });
-  }, [search, status]);
+  useEffect(() => {
+    const timeout = setTimeout(
+      () => setDebouncedSearch(search.trim()),
+      350,
+    );
+    return () => clearTimeout(timeout);
+  }, [search]);
 
-  const totalSpent = ORDERS
-    .filter((order) => order.status !== "Cancelled")
-    .reduce((sum, order) => sum + order.total, 0);
-  const activeOrders = ORDERS.filter((order) =>
-    order.status === "Processing" || order.status === "Shipped",
-  ).length;
-  const completedOrders = ORDERS.filter((order) => order.status === "Delivered").length;
+  const endpoint = useMemo(() => {
+    if (!userId) return null;
 
-  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));
-  const visibleOrders = filteredOrders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const start = filteredOrders.length ? (page - 1) * PAGE_SIZE + 1 : 0;
-  const end = Math.min(page * PAGE_SIZE, filteredOrders.length);
+    const params = new URLSearchParams();
+    params.set("page", String(page));
+    params.set("limit", String(PAGE_SIZE));
+    if (status !== "all") params.set("status", status);
+    if (paymentStatus !== "all") {
+      params.set("paymentStatus", paymentStatus);
+    }
+    if (orderNumber.trim())
+      params.set("orderNumber", orderNumber.trim());
+    if (debouncedSearch) params.set("search", debouncedSearch);
+    return `/order/mine?${params.toString()}`;
+  }, [
+    debouncedSearch,
+    orderNumber,
+    page,
+    paymentStatus,
+    status,
+    userId,
+  ]);
+
+  const { data, isLoading, isError, refetch } =
+    useFetch<OrdersResponse>(endpoint);
+  const orders = data?.data ?? [];
+  const meta = data?.meta;
+  const hasActiveFilters =
+    Boolean(search.trim()) ||
+    status !== "all" ||
+    paymentStatus !== "all" ||
+    Boolean(orderNumber.trim());
+  const isSearchPending = search.trim() !== debouncedSearch;
+  const hasCompleteUnfilteredHistory =
+    !hasActiveFilters &&
+    meta !== undefined &&
+    meta.total === orders.length;
+  const totalSpent = hasCompleteUnfilteredHistory
+    ? orders
+        .filter((order) => order.status !== "cancelled")
+        .reduce((total, order) => total + order.totalAmount, 0)
+    : null;
+  const summaryCurrency = orders[0]?.currency ?? "BDT";
+  const activeOrders = hasCompleteUnfilteredHistory
+    ? orders.filter(
+        (order) =>
+          order.status === "processing" || order.status === "shipped",
+      ).length
+    : null;
+  const completedOrders = hasCompleteUnfilteredHistory
+    ? orders.filter((order) => order.status === "delivered").length
+    : null;
+  const totalPages = Math.max(1, meta?.totalPages ?? 1);
+  const start =
+    orders.length && meta ? (meta.page - 1) * meta.limit + 1 : 0;
+  const end =
+    orders.length && meta
+      ? Math.min(start + orders.length - 1, meta.total)
+      : 0;
 
   function updateSearch(value: string) {
     setSearch(value);
     setPage(1);
   }
 
+  function updateOrderNumber(value: string) {
+    setOrderNumber(value);
+    setPage(1);
+  }
+
   function updateStatus(value: string | null) {
-    if (value === "all" || value === "Processing" || value === "Shipped" || value === "Delivered" || value === "Cancelled") {
+    if (
+      value === "all" ||
+      value === "pending" ||
+      value === "confirmed" ||
+      value === "processing" ||
+      value === "shipped" ||
+      value === "delivered" ||
+      value === "cancelled"
+    ) {
       setStatus(value);
       setPage(1);
     }
   }
 
+  function updatePaymentStatus(value: string | null) {
+    if (
+      value === "all" ||
+      value === "pending" ||
+      value === "paid" ||
+      value === "failed" ||
+      value === "refunded"
+    ) {
+      setPaymentStatus(value);
+      setPage(1);
+    }
+  }
+
+  function clearFilters() {
+    setSearch("");
+    setDebouncedSearch("");
+    setStatus("all");
+    setPaymentStatus("all");
+    setOrderNumber("");
+    setPage(1);
+  }
+
+  if (isLoading && !data) return <DashboardLoading />;
+  if (isError && !data)
+    return <DashboardError onRetry={() => void refetch()} />;
+
   return (
     <div className="mx-auto w-full max-w-[1440px] space-y-8 p-6 sm:p-8 lg:p-10">
       <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo">Your account</p>
-          <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">My Orders</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo">
+            Your account
+          </p>
+          <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            My Orders
+          </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Keep track of your purchases, check delivery progress, and review your order history.
+            Keep track of your purchases, check delivery progress, and
+            review your order history.
           </p>
         </div>
-        <Badge variant="outline" className="w-fit rounded-full border-blue/20 bg-blue/5 px-3 py-1.5 text-sm font-semibold text-blue">
-          {ORDERS.length} orders total
+        <Badge
+          variant="outline"
+          className="w-fit rounded-full border-blue/20 bg-blue/5 px-3 py-1.5 text-sm font-semibold text-blue"
+        >
+          {meta?.total ?? 0}{" "}
+          {hasActiveFilters ? "matching orders" : "orders total"}
         </Badge>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-label="Order summaries">
+      <section
+        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
+        aria-label="Order summaries"
+      >
         <UserDashboardMetric
           title="Total Spent"
-          value={formatCurrency(totalSpent)}
-          description="Across non-cancelled orders"
+          value={
+            totalSpent === null
+              ? "—"
+              : formatOrderAmount(totalSpent, summaryCurrency)
+          }
+          description={
+            totalSpent === null
+              ? "Unavailable for filtered or paginated history"
+              : "Across non-cancelled orders"
+          }
           icon={CreditCard}
           tone="blue"
         />
         <UserDashboardMetric
           title="Active Orders"
-          value={String(activeOrders)}
-          description="Processing or on the way"
+          value={activeOrders === null ? "—" : String(activeOrders)}
+          description={
+            activeOrders === null
+              ? "Unavailable for filtered or paginated history"
+              : "Processing or on the way"
+          }
           icon={Truck}
           tone="amber"
         />
         <UserDashboardMetric
           title="Completed Orders"
-          value={String(completedOrders)}
-          description="Successfully delivered"
+          value={
+            completedOrders === null ? "—" : String(completedOrders)
+          }
+          description={
+            completedOrders === null
+              ? "Unavailable for filtered or paginated history"
+              : "Successfully delivered"
+          }
           icon={PackageCheck}
           tone="teal"
         />
@@ -215,85 +260,231 @@ export default function MyOrdersDashboard() {
               <ShoppingBag className="h-5 w-5" aria-hidden="true" />
             </div>
             <div>
-              <CardTitle className="font-display text-base font-bold tracking-tight">Order history</CardTitle>
-              <p className="mt-1 text-sm text-muted-foreground">Browse and filter your recent purchases.</p>
+              <CardTitle className="font-display text-base font-bold tracking-tight">
+                Order history
+              </CardTitle>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Browse and filter your recent purchases.
+              </p>
             </div>
           </div>
         </CardHeader>
 
         <CardContent className="space-y-5 p-5 sm:p-6">
-          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_190px]">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="space-y-1.5">
+              <label
+                htmlFor="orders-search"
+                className="flex items-center gap-2 text-xs font-medium text-muted-foreground"
+              >
+                <Search className="h-4 w-4" aria-hidden="true" />
+                Search Orders
+              </label>
+              <div className="relative">
+                <Search
+                  className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <Input
+                  id="orders-search"
+                  value={search}
+                  onChange={(event) =>
+                    updateSearch(event.target.value)
+                  }
+                  placeholder="Search order number, customer, email, or order ID..."
+                  className="h-9 rounded-full border-blue/30 bg-muted/30 pl-9 text-xs shadow-sm transition-all duration-200 focus:border-blue/40 focus:ring-2 focus:ring-blue/10"
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <label
+                htmlFor="order-number-filter"
+                className="flex items-center gap-2 text-xs font-medium text-muted-foreground"
+              >
+                <Hash className="h-4 w-4" aria-hidden="true" />
+                Order Number
+              </label>
               <Input
-                value={search}
-                onChange={(event) => updateSearch(event.target.value)}
-                placeholder="Search order number or product..."
-                aria-label="Search orders by order number or product"
-                className="h-11 rounded-xl pl-9"
+                id="order-number-filter"
+                value={orderNumber}
+                onChange={(event) =>
+                  updateOrderNumber(event.target.value)
+                }
+                placeholder="Filter by order number..."
+                className="h-9 rounded-full border-blue/30 bg-muted/30 px-4 text-xs shadow-sm transition-all duration-200 focus:border-blue/40 focus:ring-2 focus:ring-blue/10"
               />
             </div>
             <div className="space-y-1.5">
-              <label htmlFor="order-status-filter" className="sr-only">Filter orders by status</label>
+              <label
+                htmlFor="order-status-filter"
+                className="flex items-center gap-2 text-xs font-medium text-muted-foreground"
+              >
+                <Package className="h-4 w-4" aria-hidden="true" />
+                Order Status
+              </label>
               <Select value={status} onValueChange={updateStatus}>
-                <SelectTrigger id="order-status-filter" className="h-11 w-full rounded-xl">
-                  <SelectValue placeholder="All orders" />
+                <SelectTrigger
+                  id="order-status-filter"
+                  className="h-9 w-full rounded-full border-blue/30 bg-muted/30 px-3 text-xs font-semibold text-navy"
+                >
+                  <SelectValue placeholder="All Statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All orders</SelectItem>
-                  <SelectItem value="Processing">Processing</SelectItem>
-                  <SelectItem value="Shipped">Shipped</SelectItem>
-                  <SelectItem value="Delivered">Delivered</SelectItem>
-                  <SelectItem value="Cancelled">Cancelled</SelectItem>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="processing">
+                    Processing
+                  </SelectItem>
+                  <SelectItem value="shipped">Shipped</SelectItem>
+                  <SelectItem value="delivered">Delivered</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label
+                htmlFor="payment-status-filter"
+                className="flex items-center gap-2 text-xs font-medium text-muted-foreground"
+              >
+                <CreditCard className="h-4 w-4" aria-hidden="true" />
+                Payment Status
+              </label>
+              <Select
+                value={paymentStatus}
+                onValueChange={updatePaymentStatus}
+              >
+                <SelectTrigger
+                  id="payment-status-filter"
+                  className="h-9 w-full rounded-full border-blue/30 bg-muted/30 px-3 text-xs font-semibold text-navy"
+                >
+                  <SelectValue placeholder="All Payment Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    All Payment Statuses
+                  </SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="failed">Failed</SelectItem>
+                  <SelectItem value="refunded">Refunded</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
+          {hasActiveFilters && (
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-9 rounded-full px-4 text-xs"
+                onClick={clearFilters}
+              >
+                <X className="mr-2 h-4 w-4" aria-hidden="true" />
+                Clear Filters
+              </Button>
+            </div>
+          )}
 
-          {filteredOrders.length === 0 ? (
+          {isSearchPending ? (
+            <div
+              className="space-y-4 rounded-2xl border border-border/70 p-5"
+              aria-label="Loading matching orders"
+              aria-busy="true"
+            >
+              {[1, 2, 3].map((row) => (
+                <div
+                  key={row}
+                  className="h-16 animate-pulse rounded-xl bg-muted"
+                />
+              ))}
+            </div>
+          ) : orders.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border px-5 py-14 text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted text-muted-foreground">
                 <ShoppingBag className="h-6 w-6" aria-hidden="true" />
               </div>
-              <h2 className="mt-4 font-display text-lg font-bold text-navy">No orders found</h2>
+              <h2 className="mt-4 font-display text-lg font-bold text-navy">
+                {hasActiveFilters
+                  ? "No matching orders"
+                  : "No orders found"}
+              </h2>
               <p className="mt-1 max-w-sm text-sm leading-relaxed text-muted-foreground">
-                Try another order number, product name, or status filter.
+                Try another order number, customer, or status filter.
               </p>
             </div>
           ) : (
             <div className="overflow-hidden rounded-2xl border border-border/70">
-              {visibleOrders.map((order, index) => (
+              {orders.map((order, index) => (
                 <article
-                  key={order.orderNumber}
+                  key={order._id}
                   className={`p-5 transition-colors hover:bg-muted/20 sm:p-6 ${index > 0 ? "border-t border-border/60" : ""}`}
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="min-w-0 flex-1 space-y-4">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="font-display text-base font-bold tracking-tight text-navy">{order.orderNumber}</h2>
-                        <UserStatusBadge status={order.status} />
+                        <h2 className="font-display text-base font-bold tracking-tight text-navy">
+                          {order.orderNumber}
+                        </h2>
+                        <UserStatusBadge
+                          status={prettyOrderStatus(order.status)}
+                        />
                       </div>
 
                       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                         <div className="flex min-w-0 items-start gap-2.5">
-                          <ShoppingBag className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                          <ShoppingBag
+                            className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+                            aria-hidden="true"
+                          />
                           <div className="min-w-0">
-                            <p className="text-xs font-medium text-muted-foreground">Items · {order.itemCount}</p>
-                            <p className="mt-1 text-sm font-medium leading-relaxed text-foreground">{order.products.join(", ")}</p>
+                            <p className="text-xs font-medium text-muted-foreground">
+                              Items ·{" "}
+                              {order.items.reduce(
+                                (sum, item) => sum + item.quantity,
+                                0,
+                              )}
+                            </p>
+                            <p className="mt-1 text-sm font-medium leading-relaxed text-foreground">
+                              {order.items
+                                .map((item) => item.name)
+                                .join(", ")}
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-start gap-2.5">
-                          <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                          <CalendarDays
+                            className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+                            aria-hidden="true"
+                          />
                           <div>
-                            <p className="text-xs font-medium text-muted-foreground">Order date</p>
-                            <p className="mt-1 text-sm font-medium text-foreground">{formatOrderDate(order.date)}</p>
+                            <p className="text-xs font-medium text-muted-foreground">
+                              Order date
+                            </p>
+                            <p className="mt-1 text-sm font-medium text-foreground">
+                              {formatOrderDate(order.createdAt)}
+                            </p>
                           </div>
                         </div>
                         <div className="flex min-w-0 items-start gap-2.5 sm:col-span-2 xl:col-span-1">
-                          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                          <MapPin
+                            className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+                            aria-hidden="true"
+                          />
                           <div className="min-w-0">
-                            <p className="text-xs font-medium text-muted-foreground">Delivery location</p>
-                            <p className="mt-1 truncate text-sm font-medium text-foreground">{order.deliveryLocation}</p>
+                            <p className="text-xs font-medium text-muted-foreground">
+                              Delivery location
+                            </p>
+                            <p className="mt-1 truncate text-sm font-medium text-foreground">
+                              {[
+                                order.deliveryAddress.area,
+                                order.deliveryAddress.city,
+                                order.deliveryAddress.district,
+                              ]
+                                .filter(Boolean)
+                                .join(", ") ||
+                                order.deliveryAddress.addressLine}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -301,11 +492,28 @@ export default function MyOrdersDashboard() {
 
                     <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border/60 pt-4 lg:min-w-[200px] lg:flex-col lg:items-end lg:border-0 lg:pt-0">
                       <div className="space-y-1 lg:text-right">
-                        <p className="text-xs font-medium text-muted-foreground">Order total</p>
-                        <p className="font-display text-xl font-bold text-navy">{formatCurrency(order.total)}</p>
-                        <UserStatusBadge status={order.paymentStatus} />
+                        <p className="text-xs font-medium text-muted-foreground">
+                          Order total
+                        </p>
+                        <p className="font-display text-xl font-bold text-navy">
+                          {formatOrderAmount(
+                            order.totalAmount,
+                            order.currency,
+                          )}
+                        </p>
+                        <UserStatusBadge
+                          status={prettyOrderStatus(
+                            order.paymentStatus,
+                          )}
+                        />
                       </div>
-                      <Button type="button" variant="outline" size="sm" className="rounded-full" disabled title="Order details are not available yet">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full"
+                        onClick={() => setSelectedOrder(order)}
+                      >
                         View details
                       </Button>
                     </div>
@@ -316,17 +524,23 @@ export default function MyOrdersDashboard() {
           )}
         </CardContent>
 
-        {filteredOrders.length > 0 && (
+        {orders.length > 0 && meta && (
           <UserListPagination
-            page={page}
+            page={meta.page}
             totalPages={totalPages}
             start={start}
             end={end}
-            total={filteredOrders.length}
+            total={meta.total}
             onPageChange={setPage}
           />
         )}
       </Card>
+
+      <OrderDetailsModal
+        order={selectedOrder}
+        open={Boolean(selectedOrder)}
+        onClose={() => setSelectedOrder(null)}
+      />
     </div>
   );
 }
