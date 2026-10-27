@@ -201,10 +201,23 @@ export default function Footer() {
       </Container>
 
       {/* Bottom */}
-      <Container className="flex flex-col justify-between gap-2 border-t border-[#214a5d] py-5 text-[11px] text-[#7797a5] min-[601px]:flex-row">
+      <Container className="flex flex-col justify-between gap-3 border-t border-[#214a5d] py-5 text-[11px] text-[#7797a5] min-[601px]:flex-row min-[601px]:items-center">
         <span>© 2026 Enviro Shield. All rights reserved.</span>
+
         <span>
           Protecting what matters. Building with confidence.
+        </span>
+
+        <span>
+          Developed by{" "}
+          <a
+            href="https://www.gmitsolution.net"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-[#a9c1ce] transition-colors duration-200 hover:text-white"
+          >
+            GM IT Solution
+          </a>
         </span>
       </Container>
     </footer>
