@@ -1,6 +1,7 @@
 import {
   BarChart3,
   CirclePile,
+  ClipboardList,
   FileText,
   FolderKanban,
   LayoutDashboard,
@@ -8,6 +9,7 @@ import {
   MessageSquareQuote,
   Package,
   Settings,
+  ShoppingBag,
   ShoppingCart,
   User,
   Users,
@@ -29,6 +31,8 @@ export const dashboardIcons = {
   contacts: Mail,
   ecommerce: ShoppingCart,
   products: Package,
+  myOrders: ShoppingBag,
+  myServices: ClipboardList,
 } satisfies Record<string, LucideIcon>;
 
 export type DashboardIcon = keyof typeof dashboardIcons;
@@ -59,19 +63,14 @@ export const dashboardNavigation: Record<
       icon: "dashboard",
     },
     {
-      title: "Applications",
-      href: "/dashboard/applications",
-      icon: "documents",
+      title: "My Orders",
+      href: "/dashboard/my-orders",
+      icon: "myOrders",
     },
     {
-      title: "Profile",
-      href: "/dashboard/profile",
-      icon: "user",
-    },
-    {
-      title: "Settings",
-      href: "/dashboard/settings",
-      icon: "settings",
+      title: "My Services",
+      href: "/dashboard/my-services",
+      icon: "myServices",
     },
   ],
 

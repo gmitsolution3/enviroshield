@@ -274,22 +274,24 @@ export function DashboardSidebar({
 
       {/* Bottom utility + account area */}
       <SidebarFooter className="mt-auto border-t border-line/80 p-2.5">
-        <SidebarMenu className="mb-2 gap-0.5">
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              render={<Link href="/dashboard/settings" />}
-              isActive={settingsActive}
-              tooltip="Settings"
-              className={navItemStyles(settingsActive)}
-            >
-              <Settings className={navIconStyles} />
+        {role === "admin" && (
+          <SidebarMenu className="mb-2 gap-0.5">
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                render={<Link href="/dashboard/settings" />}
+                isActive={settingsActive}
+                tooltip="Settings"
+                className={navItemStyles(settingsActive)}
+              >
+                <Settings className={navIconStyles} />
 
-              <span className="truncate group-data-[collapsible=icon]:hidden">
-                Settings
-              </span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+                <span className="truncate group-data-[collapsible=icon]:hidden">
+                  Settings
+                </span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        )}
 
         {/* User */}
         <Link
