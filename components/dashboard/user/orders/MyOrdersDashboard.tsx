@@ -3,29 +3,31 @@
 import {
   CalendarDays,
   CreditCard,
+  Eye,
   Hash,
   MapPin,
   Package,
   PackageCheck,
+  Receipt,
   Search,
   ShoppingBag,
   Truck,
   X,
   XCircle,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import DashboardError from "@/components/dashboard/DashboardError";
 import DashboardLoading from "@/components/dashboard/DashboardLoading";
 import OrderDetailsModal from "@/components/dashboard/admin/ecommerce/orders/OrderDetailsModal";
-import CancelMyOrderModal from "./CancelMyOrderModal";
 import {
   formatOrderAmount,
   formatOrderDate,
   prettyOrderStatus,
 } from "@/components/dashboard/admin/ecommerce/orders/orderActionUtils";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -42,11 +44,13 @@ import {
 } from "@/components/ui/select";
 import { useFetch } from "@/hooks/swr/useFetch";
 import type { AdminOrder, OrdersResponse } from "@/types";
+import CancelMyOrderModal from "./CancelMyOrderModal";
 import {
   UserDashboardMetric,
   UserListPagination,
   UserStatusBadge,
 } from "./UserDashboardUI";
+import { cn } from '@/lib/utils';
 
 type OrderStatusFilter = "all" | AdminOrder["status"];
 type PaymentStatusFilter = "all" | AdminOrder["paymentStatus"];
@@ -518,9 +522,32 @@ export default function MyOrdersDashboard({
                           size="sm"
                           className="rounded-full"
                           onClick={() => setSelectedOrder(order)}
+                          aria-label={`View details for order ${order.orderNumber}`}
                         >
+                          <Eye
+                            className="h-4 w-4"
+                            aria-hidden="true"
+                          />
                           View details
                         </Button>
+                        <Link
+                          href={`/checkout/success?orderId=${encodeURIComponent(order._id)}`}
+                          className={cn(
+                            buttonVariants({
+                              variant: "outline",
+                              size: "sm",
+                            }),
+                            "rounded-full border-input",
+                          )}
+                          aria-label={`View order confirmation for ${order.orderNumber}`}
+                        >
+                          <Receipt
+                            className="h-4 w-4"
+                            aria-hidden="true"
+                          />
+                          View Order Confirmation
+                        </Link>
+
                         {order.status === "pending" && (
                           <Button
                             type="button"
@@ -528,8 +555,12 @@ export default function MyOrdersDashboard({
                             size="sm"
                             className="rounded-full"
                             onClick={() => setOrderToCancel(order)}
+                            aria-label={`Cancel order ${order.orderNumber}`}
                           >
-                            <XCircle className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                            <XCircle
+                              className="mr-1.5 h-4 w-4"
+                              aria-hidden="true"
+                            />
                             Cancel Order
                           </Button>
                         )}
