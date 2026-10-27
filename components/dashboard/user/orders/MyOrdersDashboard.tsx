@@ -2,6 +2,8 @@
 
 import {
   CalendarDays,
+  ChevronLeft,
+  ChevronRight,
   CreditCard,
   Eye,
   Hash,
@@ -20,6 +22,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import DashboardError from "@/components/dashboard/DashboardError";
 import DashboardLoading from "@/components/dashboard/DashboardLoading";
+import DashboardButton from "@/components/dashboard/DashboardButton";
 import OrderDetailsModal from "@/components/dashboard/admin/ecommerce/orders/OrderDetailsModal";
 import {
   formatOrderAmount,
@@ -47,7 +50,6 @@ import type { AdminOrder, OrdersResponse } from "@/types";
 import CancelMyOrderModal from "./CancelMyOrderModal";
 import {
   UserDashboardMetric,
-  UserListPagination,
   UserStatusBadge,
 } from "./UserDashboardUI";
 import { cn } from '@/lib/utils';
@@ -137,12 +139,6 @@ export default function MyOrdersDashboard({
     ? orders.filter((order) => order.status === "delivered").length
     : null;
   const totalPages = Math.max(1, meta?.totalPages ?? 1);
-  const start =
-    orders.length && meta ? (meta.page - 1) * meta.limit + 1 : 0;
-  const end =
-    orders.length && meta
-      ? Math.min(start + orders.length - 1, meta.total)
-      : 0;
 
   function updateSearch(value: string) {
     setSearch(value);
@@ -574,18 +570,44 @@ export default function MyOrdersDashboard({
               ))}
             </div>
           )}
-        </CardContent>
 
-        {orders.length > 0 && meta && (
-          <UserListPagination
-            page={meta.page}
-            totalPages={totalPages}
-            start={start}
-            end={end}
-            total={meta.total}
-            onPageChange={setPage}
-          />
+          {orders.length > 0 && meta && (
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                Rows per page:
+              </span>
+              <span className="text-sm font-medium text-foreground">
+                {meta.limit}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 self-end sm:self-auto">
+              <DashboardButton
+                variant="outline"
+                disabled={meta.page <= 1 || isLoading}
+                onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
+                icon={<ChevronLeft className="h-4 w-4" />}
+                className="h-8 w-8 rounded-full border-blue bg-blue p-0 text-white shadow-[0_3px_10px_rgba(1,110,220,0.18)] transition-[background-color,box-shadow] duration-200 hover:bg-[#005cb9] hover:text-white hover:shadow-[0_4px_12px_rgba(1,110,220,0.24)] disabled:pointer-events-none disabled:opacity-50"
+                ariaLabel="Previous page"
+              />
+              <span className="text-sm text-muted-foreground" aria-live="polite">
+                Page {meta.page} of {totalPages}
+              </span>
+              <DashboardButton
+                variant="outline"
+                disabled={meta.page >= totalPages || isLoading}
+                onClick={() =>
+                  setPage((currentPage) => Math.min(totalPages, currentPage + 1))
+                }
+                icon={<ChevronRight className="h-4 w-4" />}
+                className="h-8 w-8 rounded-full border-blue bg-blue p-0 text-white shadow-[0_3px_10px_rgba(1,110,220,0.18)] transition-[background-color,box-shadow] duration-200 hover:bg-[#005cb9] hover:text-white hover:shadow-[0_4px_12px_rgba(1,110,220,0.24)] disabled:pointer-events-none disabled:opacity-50"
+                ariaLabel="Next page"
+              />
+            </div>
+          </div>
         )}
+        </CardContent>
       </Card>
 
       <OrderDetailsModal
