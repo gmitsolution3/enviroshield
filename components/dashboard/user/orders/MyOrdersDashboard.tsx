@@ -56,6 +56,9 @@ type OrderStatusFilter = "all" | AdminOrder["status"];
 type PaymentStatusFilter = "all" | AdminOrder["paymentStatus"];
 const PAGE_SIZE = 10;
 
+const getDisplayedPaymentStatus = (order: AdminOrder) =>
+  order.status === "cancelled" ? "cancelled" : order.paymentStatus;
+
 export default function MyOrdersDashboard({
   userId,
 }: {
@@ -511,7 +514,7 @@ export default function MyOrdersDashboard({
                         </p>
                         <UserStatusBadge
                           status={prettyOrderStatus(
-                            order.paymentStatus,
+                            getDisplayedPaymentStatus(order),
                           )}
                         />
                       </div>
@@ -589,6 +592,11 @@ export default function MyOrdersDashboard({
         order={selectedOrder}
         open={Boolean(selectedOrder)}
         onClose={() => setSelectedOrder(null)}
+        displayPaymentStatus={
+          selectedOrder
+            ? getDisplayedPaymentStatus(selectedOrder)
+            : undefined
+        }
       />
       <CancelMyOrderModal
         key={orderToCancel?._id ?? "closed"}

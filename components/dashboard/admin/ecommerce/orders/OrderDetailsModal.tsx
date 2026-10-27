@@ -49,9 +49,15 @@ type OrderDetailsModalProps = {
   order: AdminOrder | null;
   open: boolean;
   onClose: () => void;
+  displayPaymentStatus?: string;
 };
 
-export default function OrderDetailsModal({ order, open, onClose }: OrderDetailsModalProps) {
+export default function OrderDetailsModal({
+  order,
+  open,
+  onClose,
+  displayPaymentStatus,
+}: OrderDetailsModalProps) {
   return (
     <Dialog open={open && Boolean(order)} onOpenChange={(value) => !value && onClose()}>
       <DialogContent className="max-h-[92vh] !max-w-6xl overflow-hidden border-0 bg-[#f8fafc] p-0 shadow-2xl">
@@ -126,7 +132,7 @@ export default function OrderDetailsModal({ order, open, onClose }: OrderDetails
                 <div className="space-y-3">
                   <h2 className="font-semibold text-navy">Payment</h2>
                   <Detail label="Method" value={order.paymentMethod === "cod" ? "Cash on delivery" : prettyOrderStatus(order.paymentMethod)} />
-                  <div className="space-y-1"><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Payment status</p><StatusBadge status={order.paymentStatus} /></div>
+                  <div className="space-y-1"><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Payment status</p><StatusBadge status={displayPaymentStatus ?? order.paymentStatus} /></div>
                   <div className="space-y-1"><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Order status</p><StatusBadge status={order.status} /></div>
                 </div>
                 <div className="space-y-3">
