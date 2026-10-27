@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Check,
   CheckCircle2,
+  Clock3,
   Copy,
   CreditCard,
   FileText,
@@ -12,10 +13,12 @@ import {
   ShieldCheck,
   ShoppingBag,
   Truck,
+  XCircle,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import CheckoutSuccessLoading from "@/components/cart/CheckoutSuccessLoading";
 import Container from "@/components/Container";
@@ -37,32 +40,133 @@ const pretty = (value: string) =>
       value.slice(1).replaceAll("_", " ")
     : "Not available";
 
+type OrderStatusPresentation = {
+  label: string;
+  heading: string;
+  highlight: string;
+  message: string;
+  cardTitle: string;
+  cardMessage: string;
+  Icon: LucideIcon;
+  badgeClass: string;
+  iconFrameClass: string;
+  iconClass: string;
+  textClass: string;
+};
+
+const orderStatusPresentations: Record<string, OrderStatusPresentation> = {
+  pending: {
+    label: "Order pending",
+    heading: "Order received",
+    highlight: "awaiting confirmation",
+    message:
+      "We have received your order. It is pending confirmation, and we will share an update when its status changes.",
+    cardTitle: "Awaiting confirmation",
+    cardMessage: "We will update you when your order is confirmed.",
+    Icon: Clock3,
+    badgeClass: "border-amber-200 bg-amber-50 text-amber-800",
+    iconFrameClass: "border-amber-200 bg-amber-50",
+    iconClass: "bg-amber-100 text-amber-700",
+    textClass: "text-amber-900",
+  },
+  confirmed: {
+    label: "Order confirmed",
+    heading: "Your order is",
+    highlight: "confirmed",
+    message:
+      "Your order has been confirmed by Enviroshield. We will share updates as it moves toward delivery.",
+    cardTitle: "Order confirmed",
+    cardMessage: "Your order is moving to preparation.",
+    Icon: CheckCircle2,
+    badgeClass: "border-blue/20 bg-blue/5 text-blue",
+    iconFrameClass: "border-blue/20 bg-blue/5",
+    iconClass: "bg-blue/10 text-blue",
+    textClass: "text-blue",
+  },
+  processing: {
+    label: "Order processing",
+    heading: "We are preparing",
+    highlight: "your order",
+    message:
+      "Your order is being prepared. We will share another update when it is on the way.",
+    cardTitle: "Being prepared",
+    cardMessage: "Your order is being prepared for delivery.",
+    Icon: PackageCheck,
+    badgeClass: "border-blue/20 bg-blue/5 text-blue",
+    iconFrameClass: "border-blue/20 bg-blue/5",
+    iconClass: "bg-blue/10 text-blue",
+    textClass: "text-blue",
+  },
+  shipped: {
+    label: "Order shipped",
+    heading: "Your order is",
+    highlight: "on the way",
+    message:
+      "Your order has been shipped. Our team will keep you updated about delivery.",
+    cardTitle: "On the way",
+    cardMessage: "Your order has been shipped for delivery.",
+    Icon: Truck,
+    badgeClass: "border-blue/20 bg-blue/5 text-blue",
+    iconFrameClass: "border-blue/20 bg-blue/5",
+    iconClass: "bg-blue/10 text-blue",
+    textClass: "text-blue",
+  },
+  delivered: {
+    label: "Order delivered",
+    heading: "Your order has been",
+    highlight: "delivered",
+    message:
+      "This order is marked as delivered. You can review its items and payment details below.",
+    cardTitle: "Delivered",
+    cardMessage: "This order is marked as delivered.",
+    Icon: CheckCircle2,
+    badgeClass: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    iconFrameClass: "border-emerald-200 bg-emerald-50",
+    iconClass: "bg-emerald-100 text-emerald-700",
+    textClass: "text-emerald-900",
+  },
+  cancelled: {
+    label: "Order cancelled",
+    heading: "Order Cancelled",
+    highlight: "",
+    message:
+      "This order has been cancelled. Its payment status below reflects the current payment record.",
+    cardTitle: "Order cancelled",
+    cardMessage: "This order is cancelled. See the current payment status below.",
+    Icon: XCircle,
+    badgeClass: "border-red-200 bg-red-50 text-red-800",
+    iconFrameClass: "border-red-200 bg-red-50",
+    iconClass: "bg-red-100 text-red-700",
+    textClass: "text-red-900",
+  },
+};
+
 export default function CheckoutSuccessContent({
   orderId,
 }: {
   orderId: string;
 }) {
-  const [order, setOrder] = useState<CreatedOrderConfirmation | null>(
-    null,
-  );
-
-  const [checked, setChecked] = useState(false);
-  const [loadError, setLoadError] = useState("");
+  const [orderLookup, setOrderLookup] = useState<{
+    orderId: string;
+    order?: CreatedOrderConfirmation;
+    error?: string;
+  } | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const checked = !orderId.trim() || orderLookup?.orderId === orderId;
+  const order = orderLookup?.orderId === orderId
+    ? orderLookup.order ?? null
+    : null;
+  const loadError = !orderId.trim()
+    ? "The order ID is missing from this confirmation link."
+    : orderLookup?.orderId === orderId
+      ? orderLookup.error ?? ""
+      : "";
 
   useEffect(() => {
     let active = true;
 
-    setOrder(null);
-    setChecked(false);
-    setLoadError("");
-
     if (!orderId.trim()) {
-      setLoadError(
-        "The order ID is missing from this confirmation link.",
-      );
-      setChecked(true);
-
       return () => {
         active = false;
       };
@@ -71,22 +175,19 @@ export default function CheckoutSuccessContent({
     getMyOrderById(orderId)
       .then((retrievedOrder) => {
         if (active) {
-          setOrder(retrievedOrder);
+          setOrderLookup({ orderId, order: retrievedOrder });
         }
       })
       .catch((error: unknown) => {
         if (!active) return;
 
-        setLoadError(
-          error instanceof Error
-            ? error.message
-            : "We could not retrieve this order. Please try again.",
-        );
-      })
-      .finally(() => {
-        if (active) {
-          setChecked(true);
-        }
+        setOrderLookup({
+          orderId,
+          error:
+            error instanceof Error
+              ? error.message
+              : "We could not retrieve this order. Please try again.",
+        });
       });
 
     return () => {
@@ -94,7 +195,7 @@ export default function CheckoutSuccessContent({
     };
   }, [orderId]);
 
-  const copyOrderNumber = useCallback(async () => {
+  const copyOrderNumber = async () => {
     if (!order?.orderNumber || !navigator.clipboard) return;
 
     try {
@@ -107,7 +208,7 @@ export default function CheckoutSuccessContent({
     } catch {
       setCopied(false);
     }
-  }, [order?.orderNumber]);
+  };
 
   if (!checked) {
     return <CheckoutSuccessLoading />;
@@ -171,52 +272,80 @@ export default function CheckoutSuccessContent({
         }).format(placedDate)
       : null;
 
+  const statusPresentation =
+    orderStatusPresentations[order.status] ?? {
+      label: `Order ${pretty(order.status)}`,
+      heading: "Order status",
+      highlight: pretty(order.status),
+      message: `The current status of this order is ${pretty(order.status)}.`,
+      cardTitle: pretty(order.status),
+      cardMessage: `The current order status is ${pretty(order.status)}.`,
+      Icon: PackageCheck,
+      badgeClass: "border-blue/20 bg-blue/5 text-blue",
+      iconFrameClass: "border-blue/20 bg-blue/5",
+      iconClass: "bg-blue/10 text-blue",
+      textClass: "text-blue",
+    } satisfies OrderStatusPresentation;
+  const isCancelled = order.status === "cancelled";
+  const StatusIcon = statusPresentation.Icon;
+
   return (
     <section className="overflow-hidden bg-[#f7f9fc] py-10 sm:py-14">
       <Container>
         <div className="mx-auto max-w-[1120px]">
-          {/* Success hero */}
-          <div className="relative isolate overflow-hidden rounded-[28px] border border-line bg-white shadow-[0_18px_60px_rgba(0,51,78,0.08)]">
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-r from-blue/5 via-mist to-blue/10"
-            />
-
+          {/* Order status hero */}
+          <div className={`relative isolate overflow-hidden rounded-[28px] border bg-white shadow-[0_18px_60px_rgba(0,51,78,0.08)] ${isCancelled ? "border-red-200" : "border-line"}`}>
+            {!isCancelled && (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-r from-blue/5 via-mist to-blue/10"
+              />
+            )}
             <div className="grid items-center gap-8 px-6 py-9 sm:px-10 sm:py-12 lg:grid-cols-[1.12fr_0.88fr] lg:gap-12 lg:px-12">
               <div className="text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-emerald-800">
-                  <CheckCircle2 size={14} aria-hidden="true" />
-                  Order placed successfully
+                <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] ${statusPresentation.badgeClass}`}>
+                  <StatusIcon size={14} aria-hidden="true" />
+                  {statusPresentation.label}
                 </div>
 
                 <h1 className="mt-5 text-[clamp(34px,5vw,54px)] font-extrabold leading-[1.04] tracking-[-0.045em] text-navy">
-                  Thank you
-                  <span className="block text-blue">
-                    for your order!
-                  </span>
+                  {statusPresentation.heading}
+                  {statusPresentation.highlight && (
+                    <span className={`block ${isCancelled ? "text-red-700" : "text-blue"}`}>
+                      {statusPresentation.highlight}
+                    </span>
+                  )}
                 </h1>
 
                 <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-ink/70 sm:text-base lg:mx-0">
-                  Your order has been received by Enviroshield.
-                  We&apos;re getting everything ready and will use
-                  your account information to share updates.
+                  {statusPresentation.message}
                 </p>
 
                 <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
-                  <button
-                    type="button"
-                    onClick={copyOrderNumber}
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-blue px-6 text-sm font-bold text-white shadow-[0_8px_18px_rgba(1,110,220,0.2)] transition hover:-translate-y-0.5 hover:bg-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue"
-                  >
-                    {copied ? (
-                      <Check size={17} aria-hidden="true" />
-                    ) : (
-                      <Copy size={16} aria-hidden="true" />
-                    )}
-                    {copied
-                      ? "Order number copied"
-                      : "Copy order number"}
-                  </button>
+                  {isCancelled ? (
+                    <Link
+                      href="/dashboard/my-orders"
+                      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-blue px-6 text-sm font-bold text-white shadow-[0_8px_18px_rgba(1,110,220,0.2)] transition hover:-translate-y-0.5 hover:bg-deep"
+                    >
+                      View My Orders
+                      <ArrowRight size={16} aria-hidden="true" />
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={copyOrderNumber}
+                      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-blue px-6 text-sm font-bold text-white shadow-[0_8px_18px_rgba(1,110,220,0.2)] transition hover:-translate-y-0.5 hover:bg-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue"
+                    >
+                      {copied ? (
+                        <Check size={17} aria-hidden="true" />
+                      ) : (
+                        <Copy size={16} aria-hidden="true" />
+                      )}
+                      {copied
+                        ? "Order number copied"
+                        : "Copy order number"}
+                    </button>
+                  )}
 
                   <Link
                     href="/products"
@@ -229,29 +358,30 @@ export default function CheckoutSuccessContent({
               </div>
 
               <div className="relative mx-auto flex w-full max-w-[360px] flex-col items-center py-2">
-                <div
-                  aria-hidden="true"
-                  className="absolute left-1/2 top-1/2 size-52 -translate-x-1/2 -translate-y-[62%] rounded-full bg-blue/[0.04] sm:size-64"
-                />
+                {!isCancelled && (
+                  <div
+                    aria-hidden="true"
+                    className="absolute left-1/2 top-1/2 size-52 -translate-x-1/2 -translate-y-[62%] rounded-full bg-blue/[0.04] sm:size-64"
+                  />
+                )}
 
-                <div className="relative grid size-36 place-items-center rounded-full border border-emerald-200 bg-emerald-50 shadow-[0_0_0_12px_rgba(16,185,129,0.05)] sm:size-40">
-                  <div className="grid size-24 place-items-center rounded-full bg-emerald-100 text-emerald-700 sm:size-28">
-                    <Check
+                <div className={`relative grid size-36 place-items-center rounded-full border sm:size-40 ${statusPresentation.iconFrameClass} ${isCancelled ? "" : "shadow-[0_0_0_12px_rgba(16,185,129,0.05)]"}`}>
+                  <div className={`grid size-24 place-items-center rounded-full sm:size-28 ${statusPresentation.iconClass}`}>
+                    <StatusIcon
                       size={58}
-                      strokeWidth={2.8}
+                      strokeWidth={isCancelled ? 2 : 2.8}
                       aria-hidden="true"
                     />
                   </div>
                 </div>
 
                 <div className="relative mt-5 w-full rounded-2xl border border-line bg-white px-5 py-5 text-center shadow-[0_12px_32px_rgba(0,51,78,0.08)]">
-                  <p className="text-lg font-extrabold text-navy">
-                    Order received
+                  <p className={`text-lg font-extrabold ${statusPresentation.textClass}`}>
+                    {statusPresentation.cardTitle}
                   </p>
 
                   <p className="mt-1.5 text-sm leading-6 text-ink/65">
-                    Thank you for choosing Enviroshield. We appreciate
-                    your trust in us.
+                    {statusPresentation.cardMessage}
                   </p>
                 </div>
               </div>
@@ -305,16 +435,16 @@ export default function CheckoutSuccessContent({
                   </div>
 
                   <div className="grid gap-3">
-                    <div className="flex items-center gap-3 rounded-2xl bg-emerald-50 p-3.5">
-                      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-emerald-100 text-emerald-700">
-                        <CheckCircle2 size={19} aria-hidden="true" />
+                    <div className={`flex items-center gap-3 rounded-2xl p-3.5 ${statusPresentation.iconFrameClass}`}>
+                      <span className={`grid size-9 shrink-0 place-items-center rounded-xl ${statusPresentation.iconClass}`}>
+                        <StatusIcon size={19} aria-hidden="true" />
                       </span>
 
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-emerald-900">
+                        <p className={`text-sm font-bold ${statusPresentation.textClass}`}>
                           {pretty(order.status)}
                         </p>
-                        <p className="mt-0.5 text-xs text-emerald-800/70">
+                        <p className="mt-0.5 text-xs text-ink/60">
                           Order status
                         </p>
                       </div>
@@ -330,7 +460,10 @@ export default function CheckoutSuccessContent({
                           {pretty(order.paymentMethod)}
                         </p>
                         <p className="mt-0.5 text-xs text-ink/60">
-                          Payment · {pretty(order.paymentStatus)}
+                          Payment method
+                        </p>
+                        <p className="mt-1 text-xs font-semibold text-ink/70">
+                          Payment status: {pretty(order.paymentStatus)}
                         </p>
                       </div>
                     </div>
@@ -362,7 +495,9 @@ export default function CheckoutSuccessContent({
                       Delivery information
                     </h2>
                     <p className="mt-0.5 text-xs text-ink/55">
-                      Where your order is headed
+                      {isCancelled
+                        ? "Customer and delivery details for this order"
+                        : "Where your order is headed"}
                     </p>
                   </div>
                 </div>
@@ -401,18 +536,23 @@ export default function CheckoutSuccessContent({
                   </p>
                 )}
 
-                <div className="mt-5 flex items-start gap-3 rounded-2xl bg-mist/70 p-4">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-blue shadow-sm">
-                    <Truck size={21} aria-hidden="true" />
+                <div className={`mt-5 flex items-start gap-3 rounded-2xl p-4 ${isCancelled ? "bg-red-50" : "bg-mist/70"}`}>
+                  <span className={`grid size-10 shrink-0 place-items-center rounded-xl bg-white shadow-sm ${isCancelled ? "text-red-700" : "text-blue"}`}>
+                    {isCancelled ? (
+                      <XCircle size={21} aria-hidden="true" />
+                    ) : (
+                      <Truck size={21} aria-hidden="true" />
+                    )}
                   </span>
 
                   <div>
                     <p className="text-sm font-bold text-navy">
-                      Delivery updates
+                      {isCancelled ? "Cancellation information" : "Delivery updates"}
                     </p>
                     <p className="mt-1 text-xs leading-5 text-ink/65">
-                      Our team will follow up with you to coordinate
-                      your delivery schedule.
+                      {isCancelled
+                        ? "This order has been cancelled. The payment status above shows its current state."
+                        : "Our team will follow up with you to coordinate your delivery schedule."}
                     </p>
                   </div>
                 </div>
@@ -432,7 +572,7 @@ export default function CheckoutSuccessContent({
                       Order summary
                     </h2>
                     <p className="mt-0.5 text-xs text-ink/55">
-                      A quick look at your purchase
+                      A quick look at this order
                     </p>
                   </div>
                 </div>
@@ -532,6 +672,7 @@ export default function CheckoutSuccessContent({
           </div>
 
           {/* Reassurance cards */}
+          {!isCancelled && (
           <div className="mt-6 grid gap-3 rounded-3xl border border-blue/10 bg-gradient-to-r from-blue/[0.07] via-white to-mist/80 p-5 sm:grid-cols-3 sm:p-6">
             <div className="flex items-center gap-3">
               <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-blue shadow-sm">
@@ -578,6 +719,7 @@ export default function CheckoutSuccessContent({
               </div>
             </div>
           </div>
+          )}
         </div>
       </Container>
     </section>
