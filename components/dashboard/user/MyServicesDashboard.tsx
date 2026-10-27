@@ -28,7 +28,7 @@ import {
   UserDashboardMetric,
   UserListPagination,
   UserStatusBadge,
-} from "./UserDashboardUI";
+} from "./orders/UserDashboardUI";
 
 type RequestStatus = "Submitted" | "Under Review" | "In Progress" | "Completed" | "Rejected";
 type StatusFilter = "all" | RequestStatus;

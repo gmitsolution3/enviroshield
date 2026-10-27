@@ -11,12 +11,14 @@ import {
   ShoppingBag,
   Truck,
   X,
+  XCircle,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import DashboardError from "@/components/dashboard/DashboardError";
 import DashboardLoading from "@/components/dashboard/DashboardLoading";
 import OrderDetailsModal from "@/components/dashboard/admin/ecommerce/orders/OrderDetailsModal";
+import CancelMyOrderModal from "./CancelMyOrderModal";
 import {
   formatOrderAmount,
   formatOrderDate,
@@ -64,11 +66,13 @@ export default function MyOrdersDashboard({
   const [page, setPage] = useState(1);
   const [selectedOrder, setSelectedOrder] =
     useState<AdminOrder | null>(null);
+  const [orderToCancel, setOrderToCancel] =
+    useState<AdminOrder | null>(null);
 
   useEffect(() => {
     const timeout = setTimeout(
       () => setDebouncedSearch(search.trim()),
-      350,
+      2000,
     );
     return () => clearTimeout(timeout);
   }, [search]);
@@ -507,15 +511,29 @@ export default function MyOrdersDashboard({
                           )}
                         />
                       </div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full"
-                        onClick={() => setSelectedOrder(order)}
-                      >
-                        View details
-                      </Button>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="rounded-full"
+                          onClick={() => setSelectedOrder(order)}
+                        >
+                          View details
+                        </Button>
+                        {order.status === "pending" && (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="rounded-full"
+                            onClick={() => setOrderToCancel(order)}
+                          >
+                            <XCircle className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                            Cancel Order
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </article>
@@ -540,6 +558,14 @@ export default function MyOrdersDashboard({
         order={selectedOrder}
         open={Boolean(selectedOrder)}
         onClose={() => setSelectedOrder(null)}
+      />
+      <CancelMyOrderModal
+        key={orderToCancel?._id ?? "closed"}
+        order={orderToCancel}
+        open={Boolean(orderToCancel)}
+        revalidateKey={endpoint ?? "/order/mine?page=1&limit=10"}
+        onClose={() => setOrderToCancel(null)}
+        onSuccess={() => setOrderToCancel(null)}
       />
     </div>
   );
