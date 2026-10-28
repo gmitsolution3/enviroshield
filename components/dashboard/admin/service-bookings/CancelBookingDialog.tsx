@@ -1,7 +1,6 @@
 "use client";
 
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -14,8 +13,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { cancelBooking, getBookingApiError } from "@/lib/api/bookings";
-import type { Booking } from "@/types/admin/booking.type";
+import { usePatch } from "@/hooks/swr/usePatch";
+import { getBookingApiError } from "@/lib/api/bookings";
+import type {
+  Booking,
+  BookingResponse,
+} from "@/types/admin/booking.type";
 
 type CancelBookingDialogProps = {
   booking: Booking;
@@ -37,17 +40,30 @@ export default function CancelBookingDialog({
   onSuccess,
   onConflict,
 }: CancelBookingDialogProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const { mutate: patchCancelBooking, isLoading } =
+    usePatch("/booking");
   const eligible = canCancelBooking(booking);
 
   async function submit() {
     if (isLoading || !eligible) return;
-    setIsLoading(true);
     try {
-      const response = await cancelBooking(booking._id);
-      onSuccess(response.data, response.message || "Booking cancelled successfully.");
+      const response: BookingResponse = await patchCancelBooking({
+        id: `${encodeURIComponent(booking._id)}/cancel`,
+        data: undefined,
+      });
+      if (!response.success || !response.data?._id) {
+        throw new Error(
+          response.message || "Failed to cancel this booking.",
+        );
+      }
+      onSuccess(
+        response.data,
+        response.message || "Booking cancelled successfully.",
+      );
     } catch (error: unknown) {
-      toast.error(getBookingApiError(error, "Failed to cancel this booking."));
+      toast.error(
+        getBookingApiError(error, "Failed to cancel this booking."),
+      );
       if (
         typeof error === "object" &&
         error !== null &&
@@ -56,8 +72,6 @@ export default function CancelBookingDialog({
       ) {
         onConflict();
       }
-    } finally {
-      setIsLoading(false);
     }
   }
 
@@ -81,7 +95,8 @@ export default function CancelBookingDialog({
                 <span className="font-semibold text-foreground">
                   {booking.bookingNumber}
                 </span>{" "}
-                will change to Cancelled. The booking record will remain in the system.
+                will change to Cancelled. The booking record will
+                remain in the system.
               </AlertDialogDescription>
             </div>
           </AlertDialogHeader>

@@ -70,7 +70,7 @@ export const dashboardNavigation: Record<
       icon: "myOrders",
     },
     {
-      title: "My Services",
+      title: "My Service Bookings",
       href: "/dashboard/my-services",
       icon: "myServices",
     },

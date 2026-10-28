@@ -1,8 +1,11 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import DashboardButton from "@/components/dashboard/DashboardButton";
 import {
@@ -14,8 +17,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getBookingApiError, updateBookingPrice } from "@/lib/api/bookings";
-import type { Booking } from "@/types/admin/booking.type";
+import { usePatch } from "@/hooks/swr/usePatch";
+import { getBookingApiError } from "@/lib/api/bookings";
+import type { Booking, BookingResponse } from "@/types/admin/booking.type";
 import { formatBookingAmount } from "./bookingUtils";
 
 type UpdateBookingPriceModalProps = {
@@ -25,44 +29,75 @@ type UpdateBookingPriceModalProps = {
   onSuccess: (booking: Booking, message: string) => void;
 };
 
+const formSchema = z.object({
+  price: z
+    .string()
+    .trim()
+    .min(1, "Enter a price.")
+    .refine(
+      (value) => Number.isFinite(Number(value)) && Number(value) >= 0,
+      "Enter a valid, non-negative price.",
+    ),
+});
+type FormValues = z.infer<typeof formSchema>;
+
 export default function UpdateBookingPriceModal({
   booking,
   open,
   onClose,
   onSuccess,
 }: UpdateBookingPriceModalProps) {
-  const [price, setPrice] = useState(String(booking.finalPrice));
-  const [validationError, setValidationError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const { mutate: patchBookingPrice, isLoading } = usePatch("/booking");
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    clearErrors,
+    setError,
+    formState: { errors },
+  } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { price: String(booking.finalPrice) },
+  });
+  const price = useWatch({ control, name: "price" });
   const parsedPrice = Number(price);
-  const isValidPrice =
-    price.trim() !== "" && Number.isFinite(parsedPrice) && parsedPrice >= 0;
 
-  async function submit() {
+  useEffect(() => {
+    if (open) reset({ price: String(booking.finalPrice) });
+  }, [booking._id, booking.finalPrice, open, reset]);
+
+  async function onSubmit(values: FormValues) {
     if (isLoading) return;
-    if (!isValidPrice) {
-      setValidationError("Enter a valid, non-negative price.");
-      return;
-    }
-
-    setValidationError("");
-    setIsLoading(true);
     try {
-      const response = await updateBookingPrice(booking._id, parsedPrice);
-      onSuccess(response.data, response.message || "Booking price updated successfully.");
+      const response: BookingResponse = await patchBookingPrice({
+        id: `${encodeURIComponent(booking._id)}/price`,
+        data: { finalPrice: Number(values.price) },
+      });
+      if (!response.success || !response.data?._id) {
+        throw new Error(response.message || "Failed to update the booking price.");
+      }
+      onSuccess(
+        response.data,
+        response.message || "Booking price updated successfully.",
+      );
     } catch (error: unknown) {
       const message = getBookingApiError(error, "Failed to update the booking price.");
-      setValidationError(message);
+      setError("root.serverError", { message });
       toast.error(message);
-    } finally {
-      setIsLoading(false);
     }
+  }
+
+  function handleClose() {
+    if (isLoading) return;
+    onClose();
+    reset({ price: String(booking.finalPrice) });
   }
 
   return (
     <Dialog
       open={open}
-      onOpenChange={(value) => !value && !isLoading && onClose()}
+      onOpenChange={(value) => !value && !isLoading && handleClose()}
     >
       <DialogContent className="max-h-[92vh] overflow-hidden rounded-2xl border-0 p-0 shadow-2xl sm:max-w-xl">
         <div className="flex max-h-[92vh] flex-col">
@@ -72,59 +107,59 @@ export default function UpdateBookingPriceModal({
             </DialogTitle>
             <DialogDescription className="text-sm leading-6">
               Set the final price for booking{" "}
-              <span className="font-semibold text-foreground">{booking.bookingNumber}</span>.
-              This does not change the service&apos;s catalogue price.
+              <span className="font-semibold text-foreground">
+                {booking.bookingNumber}
+              </span>
+              . This does not change the service&apos;s catalogue price.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6 sm:px-8">
-            <div className="rounded-xl border bg-muted/20 p-4 text-sm">
-              <span className="text-muted-foreground">Current final price: </span>
-              <span className="font-semibold">{formatBookingAmount(booking.finalPrice)}</span>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6 sm:px-8">
+              <div className="rounded-xl border bg-muted/20 p-4 text-sm">
+                <span className="text-muted-foreground">Current final price: </span>
+                <span className="font-semibold">{formatBookingAmount(booking.finalPrice)}</span>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-booking-price" className="font-semibold text-navy">
+                  New final price
+                </Label>
+                <Input
+                  id="new-booking-price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  {...register("price", {
+                    onChange: () => clearErrors("root.serverError"),
+                  })}
+                  disabled={isLoading}
+                  aria-invalid={Boolean(errors.price)}
+                  className="h-11 rounded-xl"
+                />
+                {errors.price && <p className="text-sm text-destructive" role="alert">{errors.price.message}</p>}
+              </div>
+              {errors.root?.serverError && <p className="text-sm text-destructive" role="alert">{errors.root.serverError.message}</p>}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="new-booking-price" className="font-semibold text-navy">
-                New final price
-              </Label>
-              <Input
-                id="new-booking-price"
-                type="number"
-                min="0"
-                step="0.01"
-                inputMode="decimal"
-                value={price}
-                onChange={(event) => {
-                  setPrice(event.target.value);
-                  setValidationError("");
-                }}
-                disabled={isLoading}
-                aria-invalid={Boolean(validationError)}
-              />
-              {validationError && (
-                <p className="text-sm text-destructive" role="alert">
-                  {validationError}
-                </p>
-              )}
-            </div>
-          </div>
 
-          <div className="flex flex-col-reverse gap-3 border-t bg-muted/20 px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
-            <DashboardButton
-              variant="outline"
-              className="min-h-10 rounded-xl px-5"
-              disabled={isLoading}
-              onClick={onClose}
-            >
-              Cancel
-            </DashboardButton>
-            <DashboardButton
-              disabled={isLoading || (isValidPrice && parsedPrice === booking.finalPrice)}
-              onClick={() => void submit()}
-              icon={isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : undefined}
-            >
-              {isLoading ? "Updating..." : "Update Price"}
-            </DashboardButton>
-          </div>
+            <div className="flex flex-col-reverse gap-3 border-t bg-muted/20 px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
+              <DashboardButton
+                variant="outline"
+                className="min-h-10 rounded-xl px-5"
+                disabled={isLoading}
+                onClick={handleClose}
+              >
+                Cancel
+              </DashboardButton>
+              <DashboardButton
+                type="submit"
+                disabled={isLoading || (Number.isFinite(parsedPrice) && parsedPrice === booking.finalPrice)}
+                icon={isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : undefined}
+              >
+                {isLoading ? "Updating..." : "Update Price"}
+              </DashboardButton>
+            </div>
+          </form>
         </div>
       </DialogContent>
     </Dialog>

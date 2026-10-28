@@ -63,6 +63,7 @@ import {
 } from "@/lib/api/bookings";
 import type { Booking, BookingListQuery, BookingStatus } from "@/types/admin/booking.type";
 import {
+  formatBookingAmount,
   formatBookingDate,
   formatBookingStatus,
   getBookingStatusClass,
@@ -152,6 +153,65 @@ function serviceName(booking: Booking) {
   return typeof booking.serviceId === "object" && booking.serviceId
     ? booking.serviceId.name
     : "Service unavailable";
+}
+
+type BookingAction = "details" | "price" | "status" | "management" | "cancel";
+
+function BookingActions({
+  booking,
+  onAction,
+}: {
+  booking: Booking;
+  onAction: (booking: Booking, action: BookingAction) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="h-8 rounded-full border-blue/30 bg-muted/30 px-3 text-navy shadow-sm hover:bg-blue/10 hover:text-blue"
+        onClick={() => onAction(booking, "details")}
+        aria-label={`View details for booking ${booking.bookingNumber}`}
+      >
+        <Eye className="mr-1.5 h-4 w-4" aria-hidden="true" />
+        View Details
+      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger>
+          <DashboardButton
+            variant="outline"
+            className="h-8 w-8 rounded-lg border-blue/30 bg-muted/30 p-0 text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
+            icon={<MoreHorizontal className="h-4 w-4" />}
+            ariaLabel={`Actions for booking ${booking.bookingNumber}`}
+          />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Booking actions</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="cursor-pointer" onClick={() => onAction(booking, "price")}>
+              <DollarSign className="mr-2 h-4 w-4" />Update Price
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" onClick={() => onAction(booking, "status")}>
+              <BadgeCheck className="mr-2 h-4 w-4" />Update Status
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" onClick={() => onAction(booking, "management")}>
+              <Settings2 className="mr-2 h-4 w-4" />Manage Site Visit / Notes
+            </DropdownMenuItem>
+            {(booking.status === "pending" || booking.status === "confirmed" || booking.status === "in-progress") && (
+              <DropdownMenuItem
+                className="cursor-pointer text-red-600 focus:text-red-600"
+                onClick={() => onAction(booking, "cancel")}
+              >
+                <Ban className="mr-2 h-4 w-4" />Cancel Booking
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
 }
 
 export default function ServiceBookingsDashboard() {
@@ -275,7 +335,7 @@ export default function ServiceBookingsDashboard() {
 
   function openAction(
     booking: Booking,
-    action: "details" | "price" | "status" | "management" | "cancel",
+    action: BookingAction,
   ) {
     setSelectedBooking(booking);
     setActiveAction(action);
@@ -502,12 +562,13 @@ export default function ServiceBookingsDashboard() {
             icon={<CalendarDays className="h-6 w-6 text-muted-foreground" />}
           />
         ) : (
-          <Card className="overflow-hidden rounded-2xl border-border/70 p-0 shadow-sm">
+          <>
+          <Card className="hidden overflow-hidden rounded-2xl border-border/70 p-0 shadow-sm md:block">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1040px]">
+              <table className="w-full min-w-[1320px]">
                 <thead className="border-b bg-muted/50">
                   <tr>
-                    {["Booking ID", "Customer", "Contact Information", "Service", "Booking Status", "Date Submitted", "Actions"].map((heading) => (
+                    {["Booking ID", "Customer", "Contact Information", "Service", "Project Location", "Site Visit", "Final Price", "Booking Status", "Date Submitted", "Actions"].map((heading) => (
                       <th key={heading} scope="col" className="px-5 py-3 text-left text-sm font-medium text-muted-foreground">
                         {heading}
                       </th>
@@ -540,68 +601,18 @@ export default function ServiceBookingsDashboard() {
                         )}
                       </td>
                       <td className="px-5 py-4 text-sm font-medium text-foreground">{serviceName(booking)}</td>
+                      <td className="max-w-[180px] px-5 py-4 text-sm text-muted-foreground">
+                        <span className="block truncate">{booking.project?.location || "Location unavailable"}</span>
+                        {booking.project?.areaSize != null && <span className="mt-1 block text-xs">{booking.project.areaSize}{booking.project.areaUnit ? ` ${booking.project.areaUnit}` : ""}</span>}
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-4 text-sm text-muted-foreground">
+                        {booking.isSiteVisit ? (booking.siteVisitDate ? formatBookingDate(booking.siteVisitDate) : "Requested") : "Not requested"}
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-4 text-sm font-medium text-foreground">{formatBookingAmount(booking.finalPrice)}</td>
                       <td className="px-5 py-4"><BookingStatusBadge status={booking.status} /></td>
                       <td className="whitespace-nowrap px-5 py-4 text-sm text-muted-foreground">{formatBookingDate(booking.createdAt)}</td>
                       <td className="px-5 py-4">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-8 rounded-full border-blue/30 bg-muted/30 px-3 text-navy shadow-sm hover:bg-blue/10 hover:text-blue"
-                          onClick={() => openAction(booking, "details")}
-                          aria-label={`View details for booking ${booking.bookingNumber}`}
-                        >
-                          <Eye className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                          View Details
-                        </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger>
-                            <DashboardButton
-                              variant="outline"
-                              className="ml-2 h-8 w-8 rounded-lg border-blue/30 bg-muted/30 p-0 text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
-                              icon={<MoreHorizontal className="h-4 w-4" />}
-                              ariaLabel={`Actions for booking ${booking.bookingNumber}`}
-                            />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56">
-                            <DropdownMenuGroup>
-                              <DropdownMenuLabel>Booking actions</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                className="cursor-pointer"
-                                onClick={() => openAction(booking, "price")}
-                              >
-                                <DollarSign className="mr-2 h-4 w-4" />
-                                Update Price
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="cursor-pointer"
-                                onClick={() => openAction(booking, "status")}
-                              >
-                                <BadgeCheck className="mr-2 h-4 w-4" />
-                                Update Status
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="cursor-pointer"
-                                onClick={() => openAction(booking, "management")}
-                              >
-                                <Settings2 className="mr-2 h-4 w-4" />
-                                Manage Site Visit / Notes
-                              </DropdownMenuItem>
-                              {(booking.status === "pending" ||
-                                booking.status === "confirmed" ||
-                                booking.status === "in-progress") && (
-                                <DropdownMenuItem
-                                  className="cursor-pointer text-red-600 focus:text-red-600"
-                                  onClick={() => openAction(booking, "cancel")}
-                                >
-                                  <Ban className="mr-2 h-4 w-4" />
-                                  Cancel Booking
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuGroup>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <BookingActions booking={booking} onAction={openAction} />
                       </td>
                     </tr>
                   ))}
@@ -609,6 +620,32 @@ export default function ServiceBookingsDashboard() {
               </table>
             </div>
           </Card>
+          <div className="space-y-3 md:hidden">
+            {bookings.map((booking) => (
+              <article key={booking._id} className="rounded-2xl border border-border/70 bg-background p-4 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-mono text-xs font-semibold tracking-wide text-muted-foreground">{booking.bookingNumber}</p>
+                    <h2 className="mt-1 truncate font-semibold text-navy dark:text-foreground">{customerName(booking)}</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">{serviceName(booking)}</p>
+                  </div>
+                  <BookingStatusBadge status={booking.status} />
+                </div>
+                <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-border/60 pt-4 text-sm">
+                  <div className="min-w-0"><dt className="text-xs text-muted-foreground">Location</dt><dd className="mt-1 truncate font-medium text-foreground">{booking.project?.location || "Unavailable"}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Area</dt><dd className="mt-1 font-medium text-foreground">{booking.project?.areaSize != null ? `${booking.project.areaSize}${booking.project.areaUnit ? ` ${booking.project.areaUnit}` : ""}` : "Not provided"}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Site visit</dt><dd className="mt-1 font-medium text-foreground">{booking.isSiteVisit ? (booking.siteVisitDate ? formatBookingDate(booking.siteVisitDate) : "Requested") : "Not requested"}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Final price</dt><dd className="mt-1 font-medium text-foreground">{formatBookingAmount(booking.finalPrice)}</dd></div>
+                  <div className="col-span-2 min-w-0"><dt className="text-xs text-muted-foreground">Contact</dt><dd className="mt-1 truncate text-foreground">{customerEmail(booking)}{customerPhone(booking) !== "Phone unavailable" ? ` · ${customerPhone(booking)}` : ""}</dd></div>
+                  <div className="col-span-2"><dt className="text-xs text-muted-foreground">Submitted</dt><dd className="mt-1 font-medium text-foreground">{formatBookingDate(booking.createdAt)}</dd></div>
+                </dl>
+                <div className="mt-4 flex justify-end border-t border-border/60 pt-3">
+                  <BookingActions booking={booking} onAction={openAction} />
+                </div>
+              </article>
+            ))}
+          </div>
+          </>
         )}
 
         {meta && meta.total > 0 && (
