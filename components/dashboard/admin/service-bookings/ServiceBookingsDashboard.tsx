@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import useSWR, { useSWRConfig } from "swr";
 
 import BookingDetailsDialog from "@/components/dashboard/admin/service-bookings/BookingDetailsDialog";
 import CancelBookingDialog from "@/components/dashboard/admin/service-bookings/CancelBookingDialog";
@@ -30,6 +29,7 @@ import DashboardButton from "@/components/dashboard/DashboardButton";
 import DashboardEmpty from "@/components/dashboard/DashboardEmpty";
 import DashboardError from "@/components/dashboard/DashboardError";
 import DashboardLoading from "@/components/dashboard/DashboardLoading";
+import { useFetch } from "@/hooks/swr/useFetch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,13 +55,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  buildBookingListUrl,
-  getBooking,
-  getBookingApiError,
-  listBookings,
-} from "@/lib/api/bookings";
-import type { Booking, BookingListQuery, BookingStatus } from "@/types/admin/booking.type";
+import type { Booking, BookingListResponse, BookingStatus } from "@/types/admin/booking.type";
 import {
   formatBookingAmount,
   formatBookingDate,
@@ -224,8 +218,6 @@ export default function ServiceBookingsDashboard() {
   const [activeAction, setActiveAction] = useState<
     "details" | "price" | "status" | "management" | "cancel" | null
   >(null);
-  const { mutate: mutateCache } = useSWRConfig();
-
   useEffect(() => {
     const timeout = setTimeout(
       () => setDebouncedBookingNumber(bookingNumber.trim()),
@@ -234,70 +226,61 @@ export default function ServiceBookingsDashboard() {
     return () => clearTimeout(timeout);
   }, [bookingNumber]);
 
-  const listQuery = useMemo<BookingListQuery>(
-    () => ({
-      page,
-      limit: Math.min(100, Math.max(1, pageSize)),
-      ...(status === "all" ? {} : { status }),
-      ...(debouncedBookingNumber
-        ? { bookingNumber: debouncedBookingNumber }
-        : {}),
-    }),
-    [debouncedBookingNumber, page, pageSize, status],
-  );
-  const listKey = useMemo(() => buildBookingListUrl(listQuery), [listQuery]);
+  const endpoint = useMemo(() => {
+    const params = new URLSearchParams();
+    if (status !== "all") params.set("status", status);
+    if (debouncedBookingNumber) {
+      params.set("bookingNumber", debouncedBookingNumber);
+    }
+    params.set("page", String(page));
+    params.set("limit", String(Math.min(100, Math.max(1, pageSize))));
+    return `/booking?${params.toString()}`;
+  }, [debouncedBookingNumber, page, pageSize, status]);
+  const summaryEndpoints = useMemo(() => {
+    const totalParams = new URLSearchParams({ page: "1", limit: "1" });
+    const pendingParams = new URLSearchParams({ page: "1", limit: "1", status: "pending" });
+    const confirmedParams = new URLSearchParams({ page: "1", limit: "1", status: "confirmed" });
+    const completedParams = new URLSearchParams({ page: "1", limit: "1", status: "completed" });
+    return {
+      total: `/booking?${totalParams.toString()}`,
+      pending: `/booking?${pendingParams.toString()}`,
+      confirmed: `/booking?${confirmedParams.toString()}`,
+      completed: `/booking?${completedParams.toString()}`,
+    };
+  }, []);
   const {
     data: bookingList,
-    error: listError,
     isLoading: listLoading,
-    mutate: revalidateList,
-  } = useSWR(listKey, () => listBookings(listQuery), {
-    keepPreviousData: true,
-    revalidateOnFocus: false,
-    shouldRetryOnError: false,
-    onSuccess: (result) => {
-      if (page > Math.max(1, result.meta.totalPages)) {
-        setPage(Math.max(1, result.meta.totalPages));
-      }
-    },
-  });
-
-  const unfilteredSummaryQuery = useMemo<BookingListQuery>(
-    () => ({ page: 1, limit: 1 }),
-    [],
-  );
-  const { data: totalSummary, error: totalSummaryError } = useSWR(
-    buildBookingListUrl(unfilteredSummaryQuery),
-    () => listBookings(unfilteredSummaryQuery),
-    { revalidateOnFocus: false, shouldRetryOnError: false },
-  );
-  const pendingQuery = useMemo<BookingListQuery>(
-    () => ({ page: 1, limit: 1, status: "pending" }),
-    [],
-  );
-  const confirmedQuery = useMemo<BookingListQuery>(
-    () => ({ page: 1, limit: 1, status: "confirmed" }),
-    [],
-  );
-  const completedQuery = useMemo<BookingListQuery>(
-    () => ({ page: 1, limit: 1, status: "completed" }),
-    [],
-  );
-  const { data: pendingSummary, error: pendingSummaryError } = useSWR(
-    buildBookingListUrl(pendingQuery),
-    () => listBookings(pendingQuery),
-    { revalidateOnFocus: false, shouldRetryOnError: false },
-  );
-  const { data: confirmedSummary, error: confirmedSummaryError } = useSWR(
-    buildBookingListUrl(confirmedQuery),
-    () => listBookings(confirmedQuery),
-    { revalidateOnFocus: false, shouldRetryOnError: false },
-  );
-  const { data: completedSummary, error: completedSummaryError } = useSWR(
-    buildBookingListUrl(completedQuery),
-    () => listBookings(completedQuery),
-    { revalidateOnFocus: false, shouldRetryOnError: false },
-  );
+    isError: listError,
+    refetch: revalidateList,
+  } = useFetch<BookingListResponse>(endpoint);
+  const {
+    data: totalSummary,
+    isError: totalSummaryError,
+    refetch: refetchTotalSummary,
+  } = useFetch<BookingListResponse>(summaryEndpoints.total);
+  const {
+    data: pendingSummary,
+    isError: pendingSummaryError,
+    refetch: refetchPendingSummary,
+  } = useFetch<BookingListResponse>(summaryEndpoints.pending);
+  const {
+    data: confirmedSummary,
+    isError: confirmedSummaryError,
+    refetch: refetchConfirmedSummary,
+  } = useFetch<BookingListResponse>(summaryEndpoints.confirmed);
+  const {
+    data: completedSummary,
+    isError: completedSummaryError,
+    refetch: refetchCompletedSummary,
+  } = useFetch<BookingListResponse>(summaryEndpoints.completed);
+  const revalidateKeys = [
+    endpoint,
+    summaryEndpoints.total,
+    summaryEndpoints.pending,
+    summaryEndpoints.confirmed,
+    summaryEndpoints.completed,
+  ];
 
   const bookings = bookingList?.data ?? [];
   const meta = bookingList?.meta;
@@ -346,36 +329,30 @@ export default function ServiceBookingsDashboard() {
     setSelectedBooking(null);
   }
 
-  function handleMutationSuccess(updatedBooking: Booking, message: string) {
+  function handleMutationSuccess(_updatedBooking: Booking, message: string) {
     toast.success(message);
-    void revalidateList(
-      (current) =>
-        current
-          ? {
-              ...current,
-              data: current.data.map((booking) =>
-                booking._id === updatedBooking._id ? updatedBooking : booking,
-              ),
-            }
-          : current,
-      { revalidate: true },
-    );
-    void mutateCache(
-      (key) =>
-        typeof key === "string" &&
-        key.startsWith("/booking") &&
-        key !== listKey,
-    );
     closeAction();
   }
 
+  function refetchSummaries() {
+    void refetchTotalSummary();
+    void refetchPendingSummary();
+    void refetchConfirmedSummary();
+    void refetchCompletedSummary();
+  }
+
   function handleCancellationConflict() {
-    void mutateCache(
-      (key) => typeof key === "string" && key.startsWith("/booking"),
-    );
     if (!selectedBooking) return;
-    void getBooking(selectedBooking._id)
-      .then((latestBooking) => {
+    void revalidateList()
+      .then((latestList) => {
+        refetchSummaries();
+        const latestBooking = latestList?.data?.find(
+          (booking) => booking._id === selectedBooking._id,
+        );
+        if (!latestBooking) {
+          closeAction();
+          return;
+        }
         setSelectedBooking(latestBooking);
         if (
           latestBooking.status !== "pending" &&
@@ -385,8 +362,8 @@ export default function ServiceBookingsDashboard() {
           closeAction();
         }
       })
-      .catch((error: unknown) => {
-        toast.error(getBookingApiError(error, "Could not refresh this booking."));
+      .catch(() => {
+        toast.error("Could not refresh this booking. Please try again.");
       });
   }
 
@@ -471,11 +448,7 @@ export default function ServiceBookingsDashboard() {
             type="button"
             size="sm"
             variant="outline"
-            onClick={() =>
-              void mutateCache(
-                (key) => typeof key === "string" && key.startsWith("/booking"),
-              )
-            }
+            onClick={refetchSummaries}
           >
             Retry summary counts
           </Button>
@@ -548,7 +521,7 @@ export default function ServiceBookingsDashboard() {
 
         {listError && bookingList && (
           <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm">
-            <span>{getBookingApiError(listError, "Could not refresh bookings.")}</span>
+            <span>Could not refresh bookings.</span>
             <Button type="button" variant="outline" size="sm" onClick={() => void revalidateList()}>
               Retry
             </Button>
@@ -691,7 +664,7 @@ export default function ServiceBookingsDashboard() {
       {selectedBooking && activeAction === "details" && (
         <BookingDetailsDialog
           key={`details-${selectedBooking._id}`}
-          bookingId={selectedBooking._id}
+          booking={selectedBooking}
           open
           onClose={closeAction}
         />
@@ -701,6 +674,7 @@ export default function ServiceBookingsDashboard() {
           key={`price-${selectedBooking._id}-${selectedBooking.updatedAt}`}
           booking={selectedBooking}
           open
+          revalidateKey={revalidateKeys}
           onClose={closeAction}
           onSuccess={handleMutationSuccess}
         />
@@ -710,6 +684,7 @@ export default function ServiceBookingsDashboard() {
           key={`status-${selectedBooking._id}-${selectedBooking.updatedAt}`}
           booking={selectedBooking}
           open
+          revalidateKey={revalidateKeys}
           onClose={closeAction}
           onSuccess={handleMutationSuccess}
           onRequestCancel={() => setActiveAction("cancel")}
@@ -720,6 +695,7 @@ export default function ServiceBookingsDashboard() {
           key={`management-${selectedBooking._id}-${selectedBooking.updatedAt}`}
           booking={selectedBooking}
           open
+          revalidateKey={revalidateKeys}
           onClose={closeAction}
           onSuccess={handleMutationSuccess}
         />
@@ -729,6 +705,7 @@ export default function ServiceBookingsDashboard() {
           key={`cancel-${selectedBooking._id}-${selectedBooking.updatedAt}`}
           booking={selectedBooking}
           open
+          revalidateKey={revalidateKeys}
           onClose={closeAction}
           onSuccess={handleMutationSuccess}
           onConflict={handleCancellationConflict}

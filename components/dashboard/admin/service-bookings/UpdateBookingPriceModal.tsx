@@ -18,13 +18,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { usePatch } from "@/hooks/swr/usePatch";
-import { getBookingApiError } from "@/lib/api/bookings";
 import type { Booking, BookingResponse } from "@/types/admin/booking.type";
 import { formatBookingAmount } from "./bookingUtils";
 
 type UpdateBookingPriceModalProps = {
   booking: Booking;
   open: boolean;
+  revalidateKey: string | string[];
   onClose: () => void;
   onSuccess: (booking: Booking, message: string) => void;
 };
@@ -44,10 +44,13 @@ type FormValues = z.infer<typeof formSchema>;
 export default function UpdateBookingPriceModal({
   booking,
   open,
+  revalidateKey,
   onClose,
   onSuccess,
 }: UpdateBookingPriceModalProps) {
-  const { mutate: patchBookingPrice, isLoading } = usePatch("/booking");
+  const { mutate: patchBookingPrice, isLoading } = usePatch("/booking", {
+    revalidateKey,
+  });
   const {
     register,
     handleSubmit,
@@ -82,7 +85,11 @@ export default function UpdateBookingPriceModal({
         response.message || "Booking price updated successfully.",
       );
     } catch (error: unknown) {
-      const message = getBookingApiError(error, "Failed to update the booking price.");
+      const responseError = error as { message?: string; error?: string };
+      const message =
+        responseError.message ||
+        responseError.error ||
+        "Failed to update the booking price.";
       setError("root.serverError", { message });
       toast.error(message);
     }

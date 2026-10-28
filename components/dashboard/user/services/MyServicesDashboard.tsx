@@ -36,10 +36,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useFetch } from "@/hooks/swr/useFetch";
-import {
-  buildMyBookingListUrl,
-  getBookingApiError,
-} from "@/lib/api/bookings";
 import type {
   Booking,
   BookingListResponse,
@@ -76,9 +72,7 @@ export default function MyServicesDashboard() {
     useState("");
   const [status, setStatus] = useState<BookingStatus | "all">("all");
   const [page, setPage] = useState(1);
-  const [selectedBookingId, setSelectedBookingId] = useState<
-    string | null
-  >(null);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [bookingToCancel, setBookingToCancel] =
     useState<Booking | null>(null);
   useEffect(() => {
@@ -89,13 +83,16 @@ export default function MyServicesDashboard() {
     return () => clearTimeout(timeout);
   }, [search]);
   const endpoint = useMemo(
-    () =>
-      buildMyBookingListUrl({
-        page,
-        limit: PAGE_SIZE,
-        status: status === "all" ? undefined : status,
-        bookingNumber: debouncedBookingNumber || undefined,
-      }),
+    () => {
+      const params = new URLSearchParams();
+      if (status !== "all") params.set("status", status);
+      if (debouncedBookingNumber) {
+        params.set("bookingNumber", debouncedBookingNumber);
+      }
+      params.set("page", String(page));
+      params.set("limit", String(PAGE_SIZE));
+      return `/booking/mine?${params.toString()}`;
+    },
     [debouncedBookingNumber, page, status],
   );
   const { data, isLoading, isError, refetch } =
@@ -254,10 +251,7 @@ export default function MyServicesDashboard() {
               className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm"
             >
               <span>
-                {getBookingApiError(
-                  isError,
-                  "Could not refresh your bookings.",
-                )}
+                Could not refresh your bookings.
               </span>
               <Button
                 type="button"
@@ -334,9 +328,7 @@ export default function MyServicesDashboard() {
                             variant="outline"
                             size="sm"
                             className="rounded-full"
-                            onClick={() =>
-                              setSelectedBookingId(booking._id)
-                            }
+                          onClick={() => setSelectedBooking(booking)}
                             aria-label={`View details for booking ${booking.bookingNumber}`}
                           >
                             <Eye
@@ -431,9 +423,9 @@ export default function MyServicesDashboard() {
       </Card>
 
       <MyBookingDetailsDialog
-        bookingId={selectedBookingId}
-        open={Boolean(selectedBookingId)}
-        onClose={() => setSelectedBookingId(null)}
+        booking={selectedBooking}
+        open={Boolean(selectedBooking)}
+        onClose={() => setSelectedBooking(null)}
       />
       <CancelMyBookingDialog
         booking={bookingToCancel}

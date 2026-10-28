@@ -20,12 +20,12 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { usePatch } from "@/hooks/swr/usePatch";
-import { getBookingApiError } from "@/lib/api/bookings";
 import type { Booking, BookingManagementUpdate, BookingResponse } from "@/types/admin/booking.type";
 
 type UpdateBookingManagementModalProps = {
   booking: Booking;
   open: boolean;
+  revalidateKey: string | string[];
   onClose: () => void;
   onSuccess: (booking: Booking, message: string) => void;
 };
@@ -62,10 +62,13 @@ function toDateTimeInput(value?: string) {
 export default function UpdateBookingManagementModal({
   booking,
   open,
+  revalidateKey,
   onClose,
   onSuccess,
 }: UpdateBookingManagementModalProps) {
-  const { mutate: patchBookingManagement, isLoading } = usePatch("/booking");
+  const { mutate: patchBookingManagement, isLoading } = usePatch("/booking", {
+    revalidateKey,
+  });
   const originalValues: FormValues = {
     isSiteVisit: booking.isSiteVisit,
     siteVisitDate: toDateTimeInput(booking.siteVisitDate),
@@ -129,10 +132,11 @@ export default function UpdateBookingManagementModal({
         response.message || "Booking management information updated.",
       );
     } catch (error: unknown) {
-      const message = getBookingApiError(
-        error,
-        "Failed to update booking management information.",
-      );
+      const responseError = error as { message?: string; error?: string };
+      const message =
+        responseError.message ||
+        responseError.error ||
+        "Failed to update booking management information.";
       setError("root.serverError", { message });
       toast.error(message);
     }

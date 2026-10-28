@@ -14,7 +14,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { usePatch } from "@/hooks/swr/usePatch";
-import { getBookingApiError } from "@/lib/api/bookings";
 import type {
   Booking,
   BookingResponse,
@@ -23,6 +22,7 @@ import type {
 type CancelBookingDialogProps = {
   booking: Booking;
   open: boolean;
+  revalidateKey: string | string[];
   onClose: () => void;
   onSuccess: (booking: Booking, message: string) => void;
   onConflict: () => void;
@@ -36,12 +36,14 @@ const canCancelBooking = (booking: Booking) =>
 export default function CancelBookingDialog({
   booking,
   open,
+  revalidateKey,
   onClose,
   onSuccess,
   onConflict,
 }: CancelBookingDialogProps) {
-  const { mutate: patchCancelBooking, isLoading } =
-    usePatch("/booking");
+  const { mutate: patchCancelBooking, isLoading } = usePatch("/booking", {
+    revalidateKey,
+  });
   const eligible = canCancelBooking(booking);
 
   async function submit() {
@@ -61,8 +63,11 @@ export default function CancelBookingDialog({
         response.message || "Booking cancelled successfully.",
       );
     } catch (error: unknown) {
+      const responseError = error as { message?: string; error?: string };
       toast.error(
-        getBookingApiError(error, "Failed to cancel this booking."),
+        responseError.message ||
+          responseError.error ||
+          "Failed to cancel this booking.",
       );
       if (
         typeof error === "object" &&

@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import DashboardButton from "@/components/dashboard/DashboardButton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { usePatch } from "@/hooks/swr/usePatch";
-import { getBookingApiError } from "@/lib/api/bookings";
 import type { Booking, BookingResponse } from "@/types/admin/booking.type";
 
 export default function CancelMyBookingDialog({ booking, open, listKey, onClose, onSuccess }: {
@@ -29,7 +28,12 @@ export default function CancelMyBookingDialog({ booking, open, listKey, onClose,
       toast.success(response.message || "Booking cancelled successfully.");
       onSuccess(response.data);
     } catch (error: unknown) {
-      toast.error(getBookingApiError(error, "Could not cancel this booking."));
+      const responseError = error as { message?: string; error?: string };
+      toast.error(
+        responseError.message ||
+          responseError.error ||
+          "Could not cancel this booking.",
+      );
     }
   }
 

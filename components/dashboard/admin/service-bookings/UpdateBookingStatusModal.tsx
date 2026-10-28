@@ -24,13 +24,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { usePatch } from "@/hooks/swr/usePatch";
-import { getBookingApiError } from "@/lib/api/bookings";
 import type { Booking, BookingResponse, BookingStatus } from "@/types/admin/booking.type";
 import { formatBookingStatus } from "./bookingUtils";
 
 type UpdateBookingStatusModalProps = {
   booking: Booking;
   open: boolean;
+  revalidateKey: string | string[];
   onClose: () => void;
   onSuccess: (booking: Booking, message: string) => void;
   onRequestCancel: () => void;
@@ -56,11 +56,14 @@ const canCancelBooking = (status: BookingStatus) =>
 export default function UpdateBookingStatusModal({
   booking,
   open,
+  revalidateKey,
   onClose,
   onSuccess,
   onRequestCancel,
 }: UpdateBookingStatusModalProps) {
-  const { mutate: patchBookingStatus, isLoading } = usePatch("/booking");
+  const { mutate: patchBookingStatus, isLoading } = usePatch("/booking", {
+    revalidateKey,
+  });
   const {
     control,
     handleSubmit,
@@ -96,7 +99,12 @@ export default function UpdateBookingStatusModal({
         response.message || "Booking status updated successfully.",
       );
     } catch (error: unknown) {
-      toast.error(getBookingApiError(error, "Failed to update booking status."));
+      const responseError = error as { message?: string; error?: string };
+      toast.error(
+        responseError.message ||
+          responseError.error ||
+          "Failed to update booking status.",
+      );
     }
   }
 
