@@ -389,17 +389,15 @@ export default async function ServiceDetailPage({
               </ul>
 
               <div className="flex flex-wrap items-center gap-5">
-                <Button href="/contact">Talk to an expert</Button>
+                <Button href={`/services/${service.slug}/book`}>Book Now</Button>
 
-                {projectCount > 0 && (
-                  <Link
-                    href="#service-projects"
-                    className="inline-flex items-center gap-[7px] text-[13px] font-extrabold text-navy transition-[gap,color] duration-200 hover:gap-[11px] hover:text-blue"
-                  >
-                    See our work
-                    <ArrowUpRight size={16} aria-hidden="true" />
-                  </Link>
-                )}
+                <Link
+                  href="/services"
+                  className="inline-flex items-center gap-[7px] text-[13px] font-extrabold text-navy transition-[gap,color] duration-200 hover:gap-[11px] hover:text-blue"
+                >
+                  See our work
+                  <ArrowUpRight size={16} aria-hidden="true" />
+                </Link>
               </div>
             </div>
           </Reveal>
