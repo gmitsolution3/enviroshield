@@ -2,6 +2,7 @@ import {
   BarChart3,
   CirclePile,
   ClipboardList,
+  ClipboardCheck,
   FileText,
   FolderKanban,
   LayoutDashboard,
@@ -33,6 +34,7 @@ export const dashboardIcons = {
   products: Package,
   myOrders: ShoppingBag,
   myServices: ClipboardList,
+  serviceBookings: ClipboardCheck,
 } satisfies Record<string, LucideIcon>;
 
 export type DashboardIcon = keyof typeof dashboardIcons;
@@ -84,6 +86,11 @@ export const dashboardNavigation: Record<
       title: "Service Management",
       href: "/dashboard/services",
       icon: "services",
+    },
+    {
+      title: "Service Booking",
+      href: "/dashboard/service-bookings",
+      icon: "serviceBookings",
     },
     {
       title: "Project Management",
