@@ -1,20 +1,25 @@
 "use client";
 
 import {
-  CalendarDays,
-  Ban,
+  tableFeatures,
+  useTable,
+  type ColumnDef,
+} from "@tanstack/react-table";
+import {
   BadgeCheck,
+  Ban,
+  CalendarDays,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Clock3,
+  DollarSign,
   Eye,
   MoreHorizontal,
   Search,
   Settings2,
   Users,
   X,
-  DollarSign,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -29,9 +34,14 @@ import DashboardButton from "@/components/dashboard/DashboardButton";
 import DashboardEmpty from "@/components/dashboard/DashboardEmpty";
 import DashboardError from "@/components/dashboard/DashboardError";
 import DashboardLoading from "@/components/dashboard/DashboardLoading";
-import { useFetch } from "@/hooks/swr/useFetch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,12 +51,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -55,7 +59,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Booking, BookingListResponse, BookingStatus } from "@/types/admin/booking.type";
+import { useFetch } from "@/hooks/swr/useFetch";
+import type {
+  Booking,
+  BookingListResponse,
+  BookingStatus,
+} from "@/types/admin/booking.type";
 import {
   formatBookingAmount,
   formatBookingDate,
@@ -64,6 +73,7 @@ import {
 } from "./bookingUtils";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
+const tableFeaturesConfig = tableFeatures({});
 const STATUS_OPTIONS: BookingStatus[] = [
   "pending",
   "confirmed",
@@ -87,9 +97,11 @@ function MetricCard({
 }) {
   const toneStyles = {
     blue: "bg-indigo/[0.08] text-indigo",
-    amber: "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
+    amber:
+      "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
     teal: "bg-teal/[0.08] text-teal",
-    green: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300",
+    green:
+      "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300",
   };
 
   return (
@@ -108,7 +120,9 @@ function MetricCard({
         <p className="font-display text-2xl font-bold tracking-tight">
           {value === undefined ? "—" : value.toLocaleString("en-BD")}
         </p>
-        <p className="mt-2 text-sm text-muted-foreground">{description}</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {description}
+        </p>
       </CardContent>
     </Card>
   );
@@ -149,7 +163,12 @@ function serviceName(booking: Booking) {
     : "Service unavailable";
 }
 
-type BookingAction = "details" | "price" | "status" | "management" | "cancel";
+type BookingAction =
+  | "details"
+  | "price"
+  | "status"
+  | "management"
+  | "cancel";
 
 function BookingActions({
   booking,
@@ -159,18 +178,14 @@ function BookingActions({
   onAction: (booking: Booking, action: BookingAction) => void;
 }) {
   return (
-    <div className="flex items-center gap-2">
-      <Button
-        type="button"
+    <div className="flex items-center gap-1.5">
+      <DashboardButton
         variant="outline"
-        size="sm"
-        className="h-8 rounded-full border-blue/30 bg-muted/30 px-3 text-navy shadow-sm hover:bg-blue/10 hover:text-blue"
+        className="h-8 w-8 rounded-lg border-blue/30 bg-muted/30 p-0 text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
+        icon={<Eye className="h-4 w-4" />}
         onClick={() => onAction(booking, "details")}
-        aria-label={`View details for booking ${booking.bookingNumber}`}
-      >
-        <Eye className="mr-1.5 h-4 w-4" aria-hidden="true" />
-        View Details
-      </Button>
+        ariaLabel={`View details for booking ${booking.bookingNumber}`}
+      />
       <DropdownMenu>
         <DropdownMenuTrigger>
           <DashboardButton
@@ -180,25 +195,40 @@ function BookingActions({
             ariaLabel={`Actions for booking ${booking.bookingNumber}`}
           />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuContent align="end" className="w-40">
           <DropdownMenuGroup>
-            <DropdownMenuLabel>Booking actions</DropdownMenuLabel>
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer" onClick={() => onAction(booking, "price")}>
-              <DollarSign className="mr-2 h-4 w-4" />Update Price
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => onAction(booking, "price")}
+            >
+              <DollarSign className="mr-2 h-4 w-4" />
+              Update Price
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer" onClick={() => onAction(booking, "status")}>
-              <BadgeCheck className="mr-2 h-4 w-4" />Update Status
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => onAction(booking, "status")}
+            >
+              <BadgeCheck className="mr-2 h-4 w-4" />
+              Update Status
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer" onClick={() => onAction(booking, "management")}>
-              <Settings2 className="mr-2 h-4 w-4" />Manage Site Visit / Notes
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => onAction(booking, "management")}
+            >
+              <Settings2 className="mr-2 h-4 w-4" />
+              Manage Site Visit / Notes
             </DropdownMenuItem>
-            {(booking.status === "pending" || booking.status === "confirmed" || booking.status === "in-progress") && (
+            {(booking.status === "pending" ||
+              booking.status === "confirmed" ||
+              booking.status === "in-progress") && (
               <DropdownMenuItem
                 className="cursor-pointer text-red-600 focus:text-red-600"
                 onClick={() => onAction(booking, "cancel")}
               >
-                <Ban className="mr-2 h-4 w-4" />Cancel Booking
+                <Ban className="mr-2 h-4 w-4" />
+                Cancel Booking
               </DropdownMenuItem>
             )}
           </DropdownMenuGroup>
@@ -210,11 +240,13 @@ function BookingActions({
 
 export default function ServiceBookingsDashboard() {
   const [bookingNumber, setBookingNumber] = useState("");
-  const [debouncedBookingNumber, setDebouncedBookingNumber] = useState("");
+  const [debouncedBookingNumber, setDebouncedBookingNumber] =
+    useState("");
   const [status, setStatus] = useState<BookingStatus | "all">("all");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [selectedBooking, setSelectedBooking] =
+    useState<Booking | null>(null);
   const [activeAction, setActiveAction] = useState<
     "details" | "price" | "status" | "management" | "cancel" | null
   >(null);
@@ -237,10 +269,25 @@ export default function ServiceBookingsDashboard() {
     return `/booking?${params.toString()}`;
   }, [debouncedBookingNumber, page, pageSize, status]);
   const summaryEndpoints = useMemo(() => {
-    const totalParams = new URLSearchParams({ page: "1", limit: "1" });
-    const pendingParams = new URLSearchParams({ page: "1", limit: "1", status: "pending" });
-    const confirmedParams = new URLSearchParams({ page: "1", limit: "1", status: "confirmed" });
-    const completedParams = new URLSearchParams({ page: "1", limit: "1", status: "completed" });
+    const totalParams = new URLSearchParams({
+      page: "1",
+      limit: "1",
+    });
+    const pendingParams = new URLSearchParams({
+      page: "1",
+      limit: "1",
+      status: "pending",
+    });
+    const confirmedParams = new URLSearchParams({
+      page: "1",
+      limit: "1",
+      status: "confirmed",
+    });
+    const completedParams = new URLSearchParams({
+      page: "1",
+      limit: "1",
+      status: "completed",
+    });
     return {
       total: `/booking?${totalParams.toString()}`,
       pending: `/booking?${pendingParams.toString()}`,
@@ -285,8 +332,10 @@ export default function ServiceBookingsDashboard() {
   const bookings = bookingList?.data ?? [];
   const meta = bookingList?.meta;
   const totalPages = Math.max(1, meta?.totalPages ?? 1);
-  const isSearchPending = bookingNumber.trim() !== debouncedBookingNumber;
-  const hasActiveFilters = status !== "all" || Boolean(bookingNumber.trim());
+  const isSearchPending =
+    bookingNumber.trim() !== debouncedBookingNumber;
+  const hasActiveFilters =
+    status !== "all" || Boolean(bookingNumber.trim());
 
   function updateBookingNumber(value: string) {
     setBookingNumber(value);
@@ -311,15 +360,17 @@ export default function ServiceBookingsDashboard() {
   function updatePageSize(value: string | null) {
     if (!value) return;
     const nextLimit = Number(value);
-    if (!Number.isInteger(nextLimit) || nextLimit < 1 || nextLimit > 100) return;
+    if (
+      !Number.isInteger(nextLimit) ||
+      nextLimit < 1 ||
+      nextLimit > 100
+    )
+      return;
     setPageSize(nextLimit);
     setPage(1);
   }
 
-  function openAction(
-    booking: Booking,
-    action: BookingAction,
-  ) {
+  function openAction(booking: Booking, action: BookingAction) {
     setSelectedBooking(booking);
     setActiveAction(action);
   }
@@ -329,7 +380,10 @@ export default function ServiceBookingsDashboard() {
     setSelectedBooking(null);
   }
 
-  function handleMutationSuccess(_updatedBooking: Booking, message: string) {
+  function handleMutationSuccess(
+    _updatedBooking: Booking,
+    message: string,
+  ) {
     toast.success(message);
     closeAction();
   }
@@ -363,9 +417,97 @@ export default function ServiceBookingsDashboard() {
         }
       })
       .catch(() => {
-        toast.error("Could not refresh this booking. Please try again.");
+        toast.error(
+          "Could not refresh this booking. Please try again.",
+        );
       });
   }
+
+  const columns: ColumnDef<typeof tableFeaturesConfig, Booking>[] = [
+    {
+      accessorKey: "bookingNumber",
+      header: "Booking ID",
+      cell: ({ row }) => (
+        <span className="whitespace-nowrap text-sm font-semibold text-navy dark:text-foreground">
+          {row.original.bookingNumber}
+        </span>
+      ),
+    },
+    {
+      id: "customer",
+      header: "Customer",
+      cell: ({ row }) => (
+        <span className="text-sm font-medium text-foreground">
+          {customerName(row.original)}
+        </span>
+      ),
+    },
+    {
+      id: "service",
+      header: "Service",
+      cell: ({ row }) => (
+        <span className="text-sm font-medium text-foreground">
+          {serviceName(row.original)}
+        </span>
+      ),
+    },
+    {
+      id: "siteVisit",
+      header: "Site Visit",
+      cell: ({ row }) => {
+        const booking = row.original;
+        return (
+          <span className="whitespace-nowrap text-sm text-muted-foreground">
+            {booking.isSiteVisit
+              ? booking.siteVisitDate
+                ? formatBookingDate(booking.siteVisitDate)
+                : "Requested"
+              : "Not requested"}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "finalPrice",
+      header: "Final Price",
+      cell: ({ row }) => (
+        <span className="whitespace-nowrap text-sm font-medium text-foreground">
+          {formatBookingAmount(row.original.finalPrice)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Booking Status",
+      cell: ({ row }) => (
+        <BookingStatusBadge status={row.original.status} />
+      ),
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Date Submitted",
+      cell: ({ row }) => (
+        <span className="whitespace-nowrap text-sm text-muted-foreground">
+          {formatBookingDate(row.original.createdAt)}
+        </span>
+      ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <BookingActions
+          booking={row.original}
+          onAction={openAction}
+        />
+      ),
+    },
+  ];
+  const table = useTable({
+    features: tableFeaturesConfig,
+    columns,
+    data: bookings,
+  });
 
   if (listLoading && !bookingList) return <DashboardLoading />;
   if (listError && !bookingList) {
@@ -389,7 +531,8 @@ export default function ServiceBookingsDashboard() {
             Service Booking
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Manage customer service booking requests and track their progress.
+            Manage customer service booking requests and track their
+            progress.
           </p>
           {meta && !isSearchPending && (
             <p className="mt-1 text-sm text-muted-foreground">
@@ -412,28 +555,44 @@ export default function ServiceBookingsDashboard() {
         <MetricCard
           title="Total Bookings"
           value={totalSummary?.meta.total}
-          description={totalSummaryError ? "Could not load booking count." : "All bookings across every page."}
+          description={
+            totalSummaryError
+              ? "Could not load booking count."
+              : "All bookings across every page."
+          }
           icon={CalendarDays}
           tone="blue"
         />
         <MetricCard
           title="Pending Review"
           value={pendingSummary?.meta.total}
-          description={pendingSummaryError ? "Could not load pending count." : "All bookings awaiting review."}
+          description={
+            pendingSummaryError
+              ? "Could not load pending count."
+              : "All bookings awaiting review."
+          }
           icon={Clock3}
           tone="amber"
         />
         <MetricCard
           title="Confirmed"
           value={confirmedSummary?.meta.total}
-          description={confirmedSummaryError ? "Could not load confirmed count." : "All confirmed bookings."}
+          description={
+            confirmedSummaryError
+              ? "Could not load confirmed count."
+              : "All confirmed bookings."
+          }
           icon={Users}
           tone="teal"
         />
         <MetricCard
           title="Completed"
           value={completedSummary?.meta.total}
-          description={completedSummaryError ? "Could not load completed count." : "All completed bookings."}
+          description={
+            completedSummaryError
+              ? "Could not load completed count."
+              : "All completed bookings."
+          }
           icon={CheckCircle2}
           tone="green"
         />
@@ -442,7 +601,8 @@ export default function ServiceBookingsDashboard() {
       {summaryError && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 p-3">
           <p role="status" className="text-sm text-muted-foreground">
-            Some summary counts are unavailable. The booking list is still usable.
+            Some summary counts are unavailable. The booking list is
+            still usable.
           </p>
           <Button
             type="button"
@@ -464,7 +624,9 @@ export default function ServiceBookingsDashboard() {
             />
             <Input
               value={bookingNumber}
-              onChange={(event) => updateBookingNumber(event.target.value)}
+              onChange={(event) =>
+                updateBookingNumber(event.target.value)
+              }
               placeholder="Enter exact booking number..."
               aria-label="Filter by exact booking number"
               className="h-10 rounded-full border-blue/20 bg-background pl-9 pr-10 shadow-sm focus-visible:ring-blue/20"
@@ -511,7 +673,8 @@ export default function ServiceBookingsDashboard() {
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          Booking-number filtering uses an exact match. Search the booking number (for example, ESB-20261028-A1B2C3D4).
+          Booking-number filtering uses an exact match. Search the
+          booking number (for example, ESB-20261028-A1B2C3D4).
         </p>
         {isSearchPending && (
           <p role="status" className="text-xs text-muted-foreground">
@@ -520,9 +683,17 @@ export default function ServiceBookingsDashboard() {
         )}
 
         {listError && bookingList && (
-          <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm">
+          <div
+            role="alert"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm"
+          >
             <span>Could not refresh bookings.</span>
-            <Button type="button" variant="outline" size="sm" onClick={() => void revalidateList()}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void revalidateList()}
+            >
               Retry
             </Button>
           </div>
@@ -531,107 +702,144 @@ export default function ServiceBookingsDashboard() {
         {bookings.length === 0 ? (
           <DashboardEmpty
             title="No bookings found"
-            description={hasActiveFilters ? "Try another booking number or status filter." : "There are no service bookings yet."}
-            icon={<CalendarDays className="h-6 w-6 text-muted-foreground" />}
+            description={
+              hasActiveFilters
+                ? "Try another booking number or status filter."
+                : "There are no service bookings yet."
+            }
+            icon={
+              <CalendarDays className="h-6 w-6 text-muted-foreground" />
+            }
           />
         ) : (
           <>
-          <Card className="hidden overflow-hidden rounded-2xl border-border/70 p-0 shadow-sm md:block">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[1320px]">
-                <thead className="border-b bg-muted/50">
-                  <tr>
-                    {["Booking ID", "Customer", "Contact Information", "Service", "Project Location", "Site Visit", "Final Price", "Booking Status", "Date Submitted", "Actions"].map((heading) => (
-                      <th key={heading} scope="col" className="px-5 py-3 text-left text-sm font-medium text-muted-foreground">
-                        {heading}
-                      </th>
+            <Card className="hidden overflow-hidden rounded-2xl border-border/70 p-0 shadow-sm md:block">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[1320px]">
+                  <thead className="border-b bg-muted/50">
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <tr key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => (
+                          <th
+                            key={header.id}
+                            scope="col"
+                            className="px-5 py-3 text-left text-sm font-medium text-muted-foreground"
+                          >
+                            {header.isPlaceholder ? null : (
+                              <table.FlexRender header={header} />
+                            )}
+                          </th>
+                        ))}
+                      </tr>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {bookings.map((booking) => (
-                    <tr key={booking._id} className="border-b transition-colors last:border-0 hover:bg-muted/30">
-                      <td className="whitespace-nowrap px-5 py-4 text-sm font-semibold text-navy dark:text-foreground">
+                  </thead>
+                  <tbody>
+                    {table.getRowModel().rows.map((row) => (
+                      <tr
+                        key={row.id}
+                        className="border-b transition-colors last:border-0 hover:bg-muted/30"
+                      >
+                        {row.getAllCells().map((cell) => (
+                          <td key={cell.id} className="px-5 py-4">
+                            <table.FlexRender cell={cell} />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+            <div className="space-y-3 md:hidden">
+              {bookings.map((booking) => (
+                <article
+                  key={booking._id}
+                  className="rounded-2xl border border-border/70 bg-background p-4 shadow-sm"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-mono text-xs font-semibold tracking-wide text-muted-foreground">
                         {booking.bookingNumber}
-                      </td>
-                      <td className="px-5 py-4 text-sm font-medium text-foreground">
+                      </p>
+                      <h2 className="mt-1 truncate font-semibold text-navy dark:text-foreground">
                         {customerName(booking)}
-                      </td>
-                      <td className="px-5 py-4">
-                        {customerEmail(booking) !== "Email unavailable" ? (
-                          <a href={`mailto:${customerEmail(booking)}`} className="block max-w-[220px] truncate text-sm text-muted-foreground hover:text-blue">
-                            {customerEmail(booking)}
-                          </a>
-                        ) : (
-                          <span className="block text-sm text-muted-foreground">Email unavailable</span>
-                        )}
-                        {customerPhone(booking) !== "Phone unavailable" ? (
-                          <a href={`tel:${customerPhone(booking)}`} className="mt-1 block whitespace-nowrap text-xs text-muted-foreground hover:text-blue">
-                            {customerPhone(booking)}
-                          </a>
-                        ) : (
-                          <span className="mt-1 block text-xs text-muted-foreground">Phone unavailable</span>
-                        )}
-                      </td>
-                      <td className="px-5 py-4 text-sm font-medium text-foreground">{serviceName(booking)}</td>
-                      <td className="max-w-[180px] px-5 py-4 text-sm text-muted-foreground">
-                        <span className="block truncate">{booking.project?.location || "Location unavailable"}</span>
-                        {booking.project?.areaSize != null && <span className="mt-1 block text-xs">{booking.project.areaSize}{booking.project.areaUnit ? ` ${booking.project.areaUnit}` : ""}</span>}
-                      </td>
-                      <td className="whitespace-nowrap px-5 py-4 text-sm text-muted-foreground">
-                        {booking.isSiteVisit ? (booking.siteVisitDate ? formatBookingDate(booking.siteVisitDate) : "Requested") : "Not requested"}
-                      </td>
-                      <td className="whitespace-nowrap px-5 py-4 text-sm font-medium text-foreground">{formatBookingAmount(booking.finalPrice)}</td>
-                      <td className="px-5 py-4"><BookingStatusBadge status={booking.status} /></td>
-                      <td className="whitespace-nowrap px-5 py-4 text-sm text-muted-foreground">{formatBookingDate(booking.createdAt)}</td>
-                      <td className="px-5 py-4">
-                        <BookingActions booking={booking} onAction={openAction} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-          <div className="space-y-3 md:hidden">
-            {bookings.map((booking) => (
-              <article key={booking._id} className="rounded-2xl border border-border/70 bg-background p-4 shadow-sm">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-mono text-xs font-semibold tracking-wide text-muted-foreground">{booking.bookingNumber}</p>
-                    <h2 className="mt-1 truncate font-semibold text-navy dark:text-foreground">{customerName(booking)}</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">{serviceName(booking)}</p>
+                      </h2>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {serviceName(booking)}
+                      </p>
+                    </div>
+                    <BookingStatusBadge status={booking.status} />
                   </div>
-                  <BookingStatusBadge status={booking.status} />
-                </div>
-                <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-border/60 pt-4 text-sm">
-                  <div className="min-w-0"><dt className="text-xs text-muted-foreground">Location</dt><dd className="mt-1 truncate font-medium text-foreground">{booking.project?.location || "Unavailable"}</dd></div>
-                  <div><dt className="text-xs text-muted-foreground">Area</dt><dd className="mt-1 font-medium text-foreground">{booking.project?.areaSize != null ? `${booking.project.areaSize}${booking.project.areaUnit ? ` ${booking.project.areaUnit}` : ""}` : "Not provided"}</dd></div>
-                  <div><dt className="text-xs text-muted-foreground">Site visit</dt><dd className="mt-1 font-medium text-foreground">{booking.isSiteVisit ? (booking.siteVisitDate ? formatBookingDate(booking.siteVisitDate) : "Requested") : "Not requested"}</dd></div>
-                  <div><dt className="text-xs text-muted-foreground">Final price</dt><dd className="mt-1 font-medium text-foreground">{formatBookingAmount(booking.finalPrice)}</dd></div>
-                  <div className="col-span-2 min-w-0"><dt className="text-xs text-muted-foreground">Contact</dt><dd className="mt-1 truncate text-foreground">{customerEmail(booking)}{customerPhone(booking) !== "Phone unavailable" ? ` · ${customerPhone(booking)}` : ""}</dd></div>
-                  <div className="col-span-2"><dt className="text-xs text-muted-foreground">Submitted</dt><dd className="mt-1 font-medium text-foreground">{formatBookingDate(booking.createdAt)}</dd></div>
-                </dl>
-                <div className="mt-4 flex justify-end border-t border-border/60 pt-3">
-                  <BookingActions booking={booking} onAction={openAction} />
-                </div>
-              </article>
-            ))}
-          </div>
+                  <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-border/60 pt-4 text-sm">
+                    <div className="min-w-0">
+                      <dt className="text-xs text-muted-foreground">
+                        Location
+                      </dt>
+                      <dd className="mt-1 truncate font-medium text-foreground">
+                        {booking.project?.location || "Unavailable"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-muted-foreground">
+                        Area
+                      </dt>
+                      <dd className="mt-1 font-medium text-foreground">
+                        {booking.project?.areaSize != null
+                          ? `${booking.project.areaSize}${booking.project.areaUnit ? ` ${booking.project.areaUnit}` : ""}`
+                          : "Not provided"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-muted-foreground">
+                        Site visit
+                      </dt>
+                      <dd className="mt-1 font-medium text-foreground">
+                        {booking.isSiteVisit
+                          ? booking.siteVisitDate
+                            ? formatBookingDate(booking.siteVisitDate)
+                            : "Requested"
+                          : "Not requested"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-muted-foreground">
+                        Final price
+                      </dt>
+                      <dd className="mt-1 font-medium text-foreground">
+                        {formatBookingAmount(booking.finalPrice)}
+                      </dd>
+                    </div>
+                  </dl>
+                  <div className="mt-4 flex justify-end border-t border-border/60 pt-3">
+                    <BookingActions
+                      booking={booking}
+                      onAction={openAction}
+                    />
+                  </div>
+                </article>
+              ))}
+            </div>
           </>
         )}
 
         {meta && meta.total > 0 && (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Rows per page:</span>
-              <Select value={String(pageSize)} onValueChange={updatePageSize}>
+              <span className="text-sm text-muted-foreground">
+                Rows per page:
+              </span>
+              <Select
+                value={String(pageSize)}
+                onValueChange={updatePageSize}
+              >
                 <SelectTrigger className="h-8 w-20 rounded-full border-blue/30 bg-muted/30 px-4 text-xs font-semibold text-navy shadow-sm transition-all duration-200 hover:border-blue/40 hover:bg-blue/5 focus:ring-2 focus:ring-blue/10">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {PAGE_SIZE_OPTIONS.map((size) => (
-                    <SelectItem key={size} value={String(size)}>{size}</SelectItem>
+                    <SelectItem key={size} value={String(size)}>
+                      {size}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -640,18 +848,27 @@ export default function ServiceBookingsDashboard() {
               <DashboardButton
                 variant="outline"
                 disabled={page <= 1 || listLoading || isSearchPending}
-                onClick={() => setPage((value) => Math.max(1, value - 1))}
+                onClick={() =>
+                  setPage((value) => Math.max(1, value - 1))
+                }
                 icon={<ChevronLeft className="h-4 w-4" />}
                 className="h-8 w-8 rounded-full border-blue bg-blue p-0 text-white shadow-[0_3px_10px_rgba(1,110,220,0.18)] transition-[background-color,box-shadow] duration-200 hover:bg-[#005cb9] hover:text-white hover:shadow-[0_4px_12px_rgba(1,110,220,0.24)] disabled:pointer-events-none disabled:opacity-50"
                 ariaLabel="Previous page"
               />
-              <span className="text-sm text-muted-foreground" aria-live="polite">
+              <span
+                className="text-sm text-muted-foreground"
+                aria-live="polite"
+              >
                 Page {meta.page} of {totalPages}
               </span>
               <DashboardButton
                 variant="outline"
-                disabled={page >= totalPages || listLoading || isSearchPending}
-                onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
+                disabled={
+                  page >= totalPages || listLoading || isSearchPending
+                }
+                onClick={() =>
+                  setPage((value) => Math.min(totalPages, value + 1))
+                }
                 icon={<ChevronRight className="h-4 w-4" />}
                 className="h-8 w-8 rounded-full border-blue bg-blue p-0 text-white shadow-[0_3px_10px_rgba(1,110,220,0.18)] transition-[background-color,box-shadow] duration-200 hover:bg-[#005cb9] hover:text-white hover:shadow-[0_4px_12px_rgba(1,110,220,0.24)] disabled:pointer-events-none disabled:opacity-50"
                 ariaLabel="Next page"
