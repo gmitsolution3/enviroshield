@@ -2,14 +2,19 @@
 
 import {
   CalendarDays,
+  Ban,
+  BadgeCheck,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Clock3,
   Eye,
+  MoreHorizontal,
   Search,
+  Settings2,
   Users,
   X,
+  DollarSign,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -17,12 +22,25 @@ import { toast } from "sonner";
 import useSWR, { useSWRConfig } from "swr";
 
 import BookingDetailsDialog from "@/components/dashboard/admin/service-bookings/BookingDetailsDialog";
+import CancelBookingDialog from "@/components/dashboard/admin/service-bookings/CancelBookingDialog";
+import UpdateBookingManagementModal from "@/components/dashboard/admin/service-bookings/UpdateBookingManagementModal";
+import UpdateBookingPriceModal from "@/components/dashboard/admin/service-bookings/UpdateBookingPriceModal";
+import UpdateBookingStatusModal from "@/components/dashboard/admin/service-bookings/UpdateBookingStatusModal";
 import DashboardButton from "@/components/dashboard/DashboardButton";
 import DashboardEmpty from "@/components/dashboard/DashboardEmpty";
 import DashboardError from "@/components/dashboard/DashboardError";
 import DashboardLoading from "@/components/dashboard/DashboardLoading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Card,
   CardContent,
@@ -37,7 +55,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { buildBookingListUrl, getBookingApiError, listBookings } from "@/lib/api/bookings";
+import {
+  buildBookingListUrl,
+  getBooking,
+  getBookingApiError,
+  listBookings,
+} from "@/lib/api/bookings";
 import type { Booking, BookingListQuery, BookingStatus } from "@/types/admin/booking.type";
 import {
   formatBookingDate,
@@ -137,7 +160,10 @@ export default function ServiceBookingsDashboard() {
   const [status, setStatus] = useState<BookingStatus | "all">("all");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [activeAction, setActiveAction] = useState<
+    "details" | "price" | "status" | "management" | "cancel" | null
+  >(null);
   const { mutate: mutateCache } = useSWRConfig();
 
   useEffect(() => {
@@ -247,11 +273,61 @@ export default function ServiceBookingsDashboard() {
     setPage(1);
   }
 
-  function handleMutationSuccess(message: string) {
+  function openAction(
+    booking: Booking,
+    action: "details" | "price" | "status" | "management" | "cancel",
+  ) {
+    setSelectedBooking(booking);
+    setActiveAction(action);
+  }
+
+  function closeAction() {
+    setActiveAction(null);
+    setSelectedBooking(null);
+  }
+
+  function handleMutationSuccess(updatedBooking: Booking, message: string) {
     toast.success(message);
+    void revalidateList(
+      (current) =>
+        current
+          ? {
+              ...current,
+              data: current.data.map((booking) =>
+                booking._id === updatedBooking._id ? updatedBooking : booking,
+              ),
+            }
+          : current,
+      { revalidate: true },
+    );
+    void mutateCache(
+      (key) =>
+        typeof key === "string" &&
+        key.startsWith("/booking") &&
+        key !== listKey,
+    );
+    closeAction();
+  }
+
+  function handleCancellationConflict() {
     void mutateCache(
       (key) => typeof key === "string" && key.startsWith("/booking"),
     );
+    if (!selectedBooking) return;
+    void getBooking(selectedBooking._id)
+      .then((latestBooking) => {
+        setSelectedBooking(latestBooking);
+        if (
+          latestBooking.status !== "pending" &&
+          latestBooking.status !== "confirmed" &&
+          latestBooking.status !== "in-progress"
+        ) {
+          closeAction();
+        }
+      })
+      .catch((error: unknown) => {
+        toast.error(getBookingApiError(error, "Could not refresh this booking."));
+      });
   }
 
   if (listLoading && !bookingList) return <DashboardLoading />;
@@ -472,12 +548,60 @@ export default function ServiceBookingsDashboard() {
                           variant="outline"
                           size="sm"
                           className="h-8 rounded-full border-blue/30 bg-muted/30 px-3 text-navy shadow-sm hover:bg-blue/10 hover:text-blue"
-                          onClick={() => setSelectedBookingId(booking._id)}
+                          onClick={() => openAction(booking, "details")}
                           aria-label={`View details for booking ${booking.bookingNumber}`}
                         >
                           <Eye className="mr-1.5 h-4 w-4" aria-hidden="true" />
                           View Details
                         </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger>
+                            <DashboardButton
+                              variant="outline"
+                              className="ml-2 h-8 w-8 rounded-lg border-blue/30 bg-muted/30 p-0 text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
+                              icon={<MoreHorizontal className="h-4 w-4" />}
+                              ariaLabel={`Actions for booking ${booking.bookingNumber}`}
+                            />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuGroup>
+                              <DropdownMenuLabel>Booking actions</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() => openAction(booking, "price")}
+                              >
+                                <DollarSign className="mr-2 h-4 w-4" />
+                                Update Price
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() => openAction(booking, "status")}
+                              >
+                                <BadgeCheck className="mr-2 h-4 w-4" />
+                                Update Status
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() => openAction(booking, "management")}
+                              >
+                                <Settings2 className="mr-2 h-4 w-4" />
+                                Manage Site Visit / Notes
+                              </DropdownMenuItem>
+                              {(booking.status === "pending" ||
+                                booking.status === "confirmed" ||
+                                booking.status === "in-progress") && (
+                                <DropdownMenuItem
+                                  className="cursor-pointer text-red-600 focus:text-red-600"
+                                  onClick={() => openAction(booking, "cancel")}
+                                >
+                                  <Ban className="mr-2 h-4 w-4" />
+                                  Cancel Booking
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuGroup>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </td>
                     </tr>
                   ))}
@@ -527,13 +651,52 @@ export default function ServiceBookingsDashboard() {
         )}
       </section>
 
-      <BookingDetailsDialog
-        key={selectedBookingId ?? "booking-dialog-closed"}
-        bookingId={selectedBookingId}
-        open={Boolean(selectedBookingId)}
-        onClose={() => setSelectedBookingId(null)}
-        onMutationSuccess={handleMutationSuccess}
-      />
+      {selectedBooking && activeAction === "details" && (
+        <BookingDetailsDialog
+          key={`details-${selectedBooking._id}`}
+          bookingId={selectedBooking._id}
+          open
+          onClose={closeAction}
+        />
+      )}
+      {selectedBooking && activeAction === "price" && (
+        <UpdateBookingPriceModal
+          key={`price-${selectedBooking._id}-${selectedBooking.updatedAt}`}
+          booking={selectedBooking}
+          open
+          onClose={closeAction}
+          onSuccess={handleMutationSuccess}
+        />
+      )}
+      {selectedBooking && activeAction === "status" && (
+        <UpdateBookingStatusModal
+          key={`status-${selectedBooking._id}-${selectedBooking.updatedAt}`}
+          booking={selectedBooking}
+          open
+          onClose={closeAction}
+          onSuccess={handleMutationSuccess}
+          onRequestCancel={() => setActiveAction("cancel")}
+        />
+      )}
+      {selectedBooking && activeAction === "management" && (
+        <UpdateBookingManagementModal
+          key={`management-${selectedBooking._id}-${selectedBooking.updatedAt}`}
+          booking={selectedBooking}
+          open
+          onClose={closeAction}
+          onSuccess={handleMutationSuccess}
+        />
+      )}
+      {selectedBooking && activeAction === "cancel" && (
+        <CancelBookingDialog
+          key={`cancel-${selectedBooking._id}-${selectedBooking.updatedAt}`}
+          booking={selectedBooking}
+          open
+          onClose={closeAction}
+          onSuccess={handleMutationSuccess}
+          onConflict={handleCancellationConflict}
+        />
+      )}
     </div>
   );
 }
