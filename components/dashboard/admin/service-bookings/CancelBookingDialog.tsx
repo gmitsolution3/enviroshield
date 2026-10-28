@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertTriangle, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -13,125 +14,96 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { usePatch } from "@/hooks/swr/usePatch";
-import type {
-  Booking,
-  BookingResponse,
-} from "@/types/admin/booking.type";
+import { axiosInstance } from "@/lib/axios";
+import type { Booking } from "@/types/admin/booking.type";
 
 type CancelBookingDialogProps = {
-  booking: Booking;
+  booking: Booking | null;
   open: boolean;
-  revalidateKey: string | string[];
+  revalidateKey?: string;
   onClose: () => void;
-  onSuccess: (booking: Booking, message: string) => void;
-  onConflict: () => void;
+  onSuccess?: () => void;
 };
-
-const canCancelBooking = (booking: Booking) =>
-  booking.status === "pending" ||
-  booking.status === "confirmed" ||
-  booking.status === "in-progress";
 
 export default function CancelBookingDialog({
   booking,
   open,
-  revalidateKey,
   onClose,
   onSuccess,
-  onConflict,
 }: CancelBookingDialogProps) {
-  const { mutate: patchCancelBooking, isLoading } = usePatch("/booking", {
-    revalidateKey,
-  });
-  const eligible = canCancelBooking(booking);
+  const [isCancelling, setIsCancelling] = useState(false);
 
-  async function submit() {
-    if (isLoading || !eligible) return;
+  const handleCancel = async () => {
+    if (!booking) return;
+
+    setIsCancelling(true);
     try {
-      const response: BookingResponse = await patchCancelBooking({
-        id: `${encodeURIComponent(booking._id)}/cancel`,
-        data: undefined,
-      });
-      if (!response.success || !response.data?._id) {
-        throw new Error(
-          response.message || "Failed to cancel this booking.",
-        );
-      }
-      onSuccess(
-        response.data,
-        response.message || "Booking cancelled successfully.",
-      );
+      await axiosInstance.patch(`/booking/${booking._id}/cancel`);
+      toast.success("Booking cancelled successfully.");
+      onSuccess?.();
+      onClose();
     } catch (error: unknown) {
-      const responseError = error as { message?: string; error?: string };
-      toast.error(
-        responseError.message ||
-          responseError.error ||
-          "Failed to cancel this booking.",
-      );
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        "statusCode" in error &&
-        (error.statusCode === 404 || error.statusCode === 409)
-      ) {
-        onConflict();
-      }
+      const err = error as { response?: { data?: { message?: string } }; message?: string };
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to cancel booking.";
+      toast.error(message);
+    } finally {
+      setIsCancelling(false);
     }
-  }
+  };
 
   return (
     <AlertDialog
       open={open}
-      onOpenChange={(value) => !value && !isLoading && onClose()}
+      onOpenChange={(value) => {
+        if (!value && !isCancelling) {
+          onClose();
+        }
+      }}
     >
-      <AlertDialogContent className="max-w-md overflow-hidden rounded-2xl border-0 p-0 shadow-2xl">
-        <div className="p-6">
-          <AlertDialogHeader className="space-y-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-              <AlertTriangle className="h-6 w-6" aria-hidden="true" />
-            </div>
-            <div className="space-y-2">
-              <AlertDialogTitle className="text-xl font-bold text-navy">
-                Cancel booking?
-              </AlertDialogTitle>
-              <AlertDialogDescription className="text-sm leading-6 text-muted-foreground">
-                Booking{" "}
-                <span className="font-semibold text-foreground">
-                  {booking.bookingNumber}
-                </span>{" "}
-                will change to Cancelled. The booking record will
-                remain in the system.
-              </AlertDialogDescription>
-            </div>
-          </AlertDialogHeader>
+      <AlertDialogContent className="rounded-2xl border-0 p-6 shadow-2xl sm:max-w-md">
+        <AlertDialogHeader className="text-left">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300">
+            <AlertTriangle className="h-5 w-5" aria-hidden="true" />
+          </div>
+          <AlertDialogTitle className="pt-2 text-xl font-bold text-navy">
+            Cancel Booking
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-sm leading-relaxed text-muted-foreground">
+            Are you sure you want to cancel booking{" "}
+            <span className="font-semibold text-foreground">
+              #{booking?.bookingNumber}
+            </span>
+            ? Its status will be changed to cancelled and the customer will be
+            notified.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
 
-          <AlertDialogFooter className="mt-6 gap-3 sm:justify-end">
-            <AlertDialogCancel
-              disabled={isLoading}
-              className="min-h-10 rounded-xl px-5"
-            >
-              Keep booking
-            </AlertDialogCancel>
-            <AlertDialogAction
-              disabled={isLoading || !eligible}
-              onClick={(event) => {
-                event.preventDefault();
-                void submit();
-              }}
-              className="min-h-10 rounded-xl bg-red-600 px-5 font-semibold text-white shadow-sm hover:bg-red-700"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Cancelling...
-                </>
-              ) : (
-                "Confirm cancellation"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </div>
+        <AlertDialogFooter className="mt-4 gap-2 sm:gap-0">
+          <AlertDialogCancel
+            disabled={isCancelling}
+            onClick={onClose}
+            className="rounded-full"
+          >
+            Keep Booking
+          </AlertDialogCancel>
+          <AlertDialogAction
+            disabled={isCancelling}
+            onClick={handleCancel}
+            className="rounded-full bg-red-600 text-white hover:bg-red-700 focus:ring-red-600"
+          >
+            {isCancelling ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Cancelling...
+              </>
+            ) : (
+              "Confirm Cancellation"
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
