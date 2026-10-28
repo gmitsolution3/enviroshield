@@ -9,12 +9,18 @@ import {
   Eye,
   Search,
   Users,
+  X,
   type LucideIcon,
 } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import useSWR, { useSWRConfig } from "swr";
 
+import BookingDetailsDialog from "@/components/dashboard/admin/service-bookings/BookingDetailsDialog";
 import DashboardButton from "@/components/dashboard/DashboardButton";
 import DashboardEmpty from "@/components/dashboard/DashboardEmpty";
+import DashboardError from "@/components/dashboard/DashboardError";
+import DashboardLoading from "@/components/dashboard/DashboardLoading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,13 +29,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -38,47 +37,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { BookingStatus, ServiceBooking } from "./serviceBookingData";
-import { serviceBookings } from "./serviceBookingData";
+import { buildBookingListUrl, getBookingApiError, listBookings } from "@/lib/api/bookings";
+import type { Booking, BookingListQuery, BookingStatus } from "@/types/admin/booking.type";
+import {
+  formatBookingDate,
+  formatBookingStatus,
+  getBookingStatusClass,
+} from "./bookingUtils";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 const STATUS_OPTIONS: BookingStatus[] = [
-  "Pending",
-  "Confirmed",
-  "Completed",
-  "Cancelled",
+  "pending",
+  "confirmed",
+  "in-progress",
+  "completed",
+  "cancelled",
+  "rejected",
 ];
-
-const statusStyles: Record<BookingStatus, string> = {
-  Pending:
-    "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-300",
-  Confirmed:
-    "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300",
-  Completed:
-    "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300",
-  Cancelled:
-    "border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300",
-};
-
-function formatDate(value: string, withTime = false) {
-  return new Intl.DateTimeFormat("en-BD", {
-    dateStyle: "medium",
-    timeZone: "Asia/Dhaka",
-    ...(withTime ? { timeStyle: "short" as const } : {}),
-  }).format(new Date(value));
-}
-
-function StatusBadge({ status }: { status: BookingStatus }) {
-  return (
-    <Badge
-      variant="outline"
-      className={`rounded-full px-3 py-1 text-[11px] font-semibold ${statusStyles[status]}`}
-    >
-      {status}
-    </Badge>
-  );
-}
-
 function MetricCard({
   title,
   value,
@@ -87,7 +62,7 @@ function MetricCard({
   tone,
 }: {
   title: string;
-  value: number;
+  value?: number;
   description: string;
   icon: LucideIcon;
   tone: "blue" | "amber" | "teal" | "green";
@@ -113,7 +88,7 @@ function MetricCard({
       </CardHeader>
       <CardContent>
         <p className="font-display text-2xl font-bold tracking-tight">
-          {value.toLocaleString("en-BD")}
+          {value === undefined ? "—" : value.toLocaleString("en-BD")}
         </p>
         <p className="mt-2 text-sm text-muted-foreground">{description}</p>
       </CardContent>
@@ -121,81 +96,174 @@ function MetricCard({
   );
 }
 
-function DetailItem({ label, children }: { label: string; children: ReactNode }) {
+function BookingStatusBadge({ status }: { status: BookingStatus }) {
   return (
-    <div className="min-w-0 rounded-xl border border-border/60 bg-muted/20 p-4">
-      <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <div className="mt-1.5 break-words text-sm font-medium text-foreground">
-        {children}
-      </div>
-    </div>
+    <Badge
+      variant="outline"
+      className={`rounded-full px-3 py-1 text-[11px] font-semibold ${getBookingStatusClass(status)}`}
+    >
+      {formatBookingStatus(status)}
+    </Badge>
   );
 }
 
+function customerName(booking: Booking) {
+  return typeof booking.userId === "object"
+    ? booking.userId.name || "Name unavailable"
+    : "Customer information unavailable";
+}
+
+function customerEmail(booking: Booking) {
+  return typeof booking.userId === "object"
+    ? booking.userId.email || "Email unavailable"
+    : "Email unavailable";
+}
+
+function customerPhone(booking: Booking) {
+  return typeof booking.userId === "object"
+    ? booking.userId.phone || "Phone unavailable"
+    : "Phone unavailable";
+}
+
+function serviceName(booking: Booking) {
+  return typeof booking.serviceId === "object" && booking.serviceId
+    ? booking.serviceId.name
+    : "Service unavailable";
+}
+
 export default function ServiceBookingsDashboard() {
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("all");
+  const [bookingNumber, setBookingNumber] = useState("");
+  const [debouncedBookingNumber, setDebouncedBookingNumber] = useState("");
+  const [status, setStatus] = useState<BookingStatus | "all">("all");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [selectedBooking, setSelectedBooking] =
-    useState<ServiceBooking | null>(null);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const { mutate: mutateCache } = useSWRConfig();
 
-  const metrics = useMemo(
+  useEffect(() => {
+    const timeout = setTimeout(
+      () => setDebouncedBookingNumber(bookingNumber.trim()),
+      350,
+    );
+    return () => clearTimeout(timeout);
+  }, [bookingNumber]);
+
+  const listQuery = useMemo<BookingListQuery>(
     () => ({
-      total: serviceBookings.length,
-      pending: serviceBookings.filter((booking) => booking.status === "Pending")
-        .length,
-      confirmed: serviceBookings.filter(
-        (booking) => booking.status === "Confirmed",
-      ).length,
-      completed: serviceBookings.filter(
-        (booking) => booking.status === "Completed",
-      ).length,
+      page,
+      limit: Math.min(100, Math.max(1, pageSize)),
+      ...(status === "all" ? {} : { status }),
+      ...(debouncedBookingNumber
+        ? { bookingNumber: debouncedBookingNumber }
+        : {}),
     }),
+    [debouncedBookingNumber, page, pageSize, status],
+  );
+  const listKey = useMemo(() => buildBookingListUrl(listQuery), [listQuery]);
+  const {
+    data: bookingList,
+    error: listError,
+    isLoading: listLoading,
+    mutate: revalidateList,
+  } = useSWR(listKey, () => listBookings(listQuery), {
+    keepPreviousData: true,
+    revalidateOnFocus: false,
+    shouldRetryOnError: false,
+    onSuccess: (result) => {
+      if (page > Math.max(1, result.meta.totalPages)) {
+        setPage(Math.max(1, result.meta.totalPages));
+      }
+    },
+  });
+
+  const unfilteredSummaryQuery = useMemo<BookingListQuery>(
+    () => ({ page: 1, limit: 1 }),
     [],
   );
+  const { data: totalSummary, error: totalSummaryError } = useSWR(
+    buildBookingListUrl(unfilteredSummaryQuery),
+    () => listBookings(unfilteredSummaryQuery),
+    { revalidateOnFocus: false, shouldRetryOnError: false },
+  );
+  const pendingQuery = useMemo<BookingListQuery>(
+    () => ({ page: 1, limit: 1, status: "pending" }),
+    [],
+  );
+  const confirmedQuery = useMemo<BookingListQuery>(
+    () => ({ page: 1, limit: 1, status: "confirmed" }),
+    [],
+  );
+  const completedQuery = useMemo<BookingListQuery>(
+    () => ({ page: 1, limit: 1, status: "completed" }),
+    [],
+  );
+  const { data: pendingSummary, error: pendingSummaryError } = useSWR(
+    buildBookingListUrl(pendingQuery),
+    () => listBookings(pendingQuery),
+    { revalidateOnFocus: false, shouldRetryOnError: false },
+  );
+  const { data: confirmedSummary, error: confirmedSummaryError } = useSWR(
+    buildBookingListUrl(confirmedQuery),
+    () => listBookings(confirmedQuery),
+    { revalidateOnFocus: false, shouldRetryOnError: false },
+  );
+  const { data: completedSummary, error: completedSummaryError } = useSWR(
+    buildBookingListUrl(completedQuery),
+    () => listBookings(completedQuery),
+    { revalidateOnFocus: false, shouldRetryOnError: false },
+  );
 
-  const filteredBookings = useMemo(() => {
-    const query = search.trim().toLowerCase();
+  const bookings = bookingList?.data ?? [];
+  const meta = bookingList?.meta;
+  const totalPages = Math.max(1, meta?.totalPages ?? 1);
+  const isSearchPending = bookingNumber.trim() !== debouncedBookingNumber;
+  const hasActiveFilters = status !== "all" || Boolean(bookingNumber.trim());
 
-    return serviceBookings.filter((booking) => {
-      const matchesStatus = status === "all" || booking.status === status;
-      const matchesSearch =
-        !query ||
-        [
-          booking.id,
-          booking.customerName,
-          booking.email,
-          booking.phone,
-          booking.service,
-        ].some((value) => value.toLowerCase().includes(query));
-
-      return matchesStatus && matchesSearch;
-    });
-  }, [search, status]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredBookings.length / pageSize));
-  const pageBookings = filteredBookings.slice((page - 1) * pageSize, page * pageSize);
-
-  function updateSearch(value: string) {
-    setSearch(value);
+  function updateBookingNumber(value: string) {
+    setBookingNumber(value);
     setPage(1);
   }
 
   function updateStatus(value: string | null) {
-    setStatus(value ?? "all");
+    if (!value || value === "all") setStatus("all");
+    else if (STATUS_OPTIONS.includes(value as BookingStatus)) {
+      setStatus(value as BookingStatus);
+    }
+    setPage(1);
+  }
+
+  function clearFilters() {
+    setBookingNumber("");
+    setDebouncedBookingNumber("");
+    setStatus("all");
     setPage(1);
   }
 
   function updatePageSize(value: string | null) {
     if (!value) return;
-    setPageSize(Number(value));
+    const nextLimit = Number(value);
+    if (!Number.isInteger(nextLimit) || nextLimit < 1 || nextLimit > 100) return;
+    setPageSize(nextLimit);
     setPage(1);
   }
 
-  function changePage(nextPage: number) {
-    setPage(Math.min(totalPages, Math.max(1, nextPage)));
+  function handleMutationSuccess(message: string) {
+    toast.success(message);
+    void mutateCache(
+      (key) => typeof key === "string" && key.startsWith("/booking"),
+    );
   }
+
+  if (listLoading && !bookingList) return <DashboardLoading />;
+  if (listError && !bookingList) {
+    return <DashboardError onRetry={() => void revalidateList()} />;
+  }
+
+  const summaryError =
+    totalSummaryError ||
+    pendingSummaryError ||
+    confirmedSummaryError ||
+    completedSummaryError;
 
   return (
     <div className="mx-auto w-full max-w-[1440px] space-y-8 p-6 sm:p-8 lg:p-10">
@@ -210,12 +278,17 @@ export default function ServiceBookingsDashboard() {
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
             Manage customer service booking requests and track their progress.
           </p>
+          {meta && !isSearchPending && (
+            <p className="mt-1 text-sm text-muted-foreground">
+              Showing {bookings.length} of {meta.total} bookings
+            </p>
+          )}
         </div>
         <Badge
           variant="outline"
           className="w-fit rounded-full border-blue/20 bg-blue/5 px-3 py-1.5 text-sm font-semibold text-blue"
         >
-          UI preview · sample bookings
+          {totalSummary?.meta.total ?? "—"} total bookings
         </Badge>
       </section>
 
@@ -225,33 +298,53 @@ export default function ServiceBookingsDashboard() {
       >
         <MetricCard
           title="Total Bookings"
-          value={metrics.total}
-          description="Sample booking requests in this preview."
+          value={totalSummary?.meta.total}
+          description={totalSummaryError ? "Could not load booking count." : "All bookings across every page."}
           icon={CalendarDays}
           tone="blue"
         />
         <MetricCard
           title="Pending Review"
-          value={metrics.pending}
-          description="Requests awaiting an initial review."
+          value={pendingSummary?.meta.total}
+          description={pendingSummaryError ? "Could not load pending count." : "All bookings awaiting review."}
           icon={Clock3}
           tone="amber"
         />
         <MetricCard
           title="Confirmed"
-          value={metrics.confirmed}
-          description="Bookings with a confirmed appointment."
+          value={confirmedSummary?.meta.total}
+          description={confirmedSummaryError ? "Could not load confirmed count." : "All confirmed bookings."}
           icon={Users}
           tone="teal"
         />
         <MetricCard
           title="Completed"
-          value={metrics.completed}
-          description="Appointments marked as completed."
+          value={completedSummary?.meta.total}
+          description={completedSummaryError ? "Could not load completed count." : "All completed bookings."}
           icon={CheckCircle2}
           tone="green"
         />
       </section>
+
+      {summaryError && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 p-3">
+          <p role="status" className="text-sm text-muted-foreground">
+            Some summary counts are unavailable. The booking list is still usable.
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() =>
+              void mutateCache(
+                (key) => typeof key === "string" && key.startsWith("/booking"),
+              )
+            }
+          >
+            Retry summary counts
+          </Button>
+        </div>
+      )}
 
       <section className="space-y-4" aria-label="Booking list">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -261,14 +354,26 @@ export default function ServiceBookingsDashboard() {
               aria-hidden="true"
             />
             <Input
-              value={search}
-              onChange={(event) => updateSearch(event.target.value)}
-              placeholder="Search booking, customer, contact, or service..."
-              aria-label="Search service bookings"
-              className="h-10 rounded-full border-blue/20 bg-background pl-9 shadow-sm focus-visible:ring-blue/20"
+              value={bookingNumber}
+              onChange={(event) => updateBookingNumber(event.target.value)}
+              placeholder="Enter exact booking number..."
+              aria-label="Filter by exact booking number"
+              className="h-10 rounded-full border-blue/20 bg-background pl-9 pr-10 shadow-sm focus-visible:ring-blue/20"
             />
+            {bookingNumber && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full text-muted-foreground"
+                onClick={() => updateBookingNumber("")}
+                aria-label="Clear booking number filter"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
-          <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
             <span className="text-sm font-medium text-muted-foreground">
               Status:
             </span>
@@ -280,18 +385,44 @@ export default function ServiceBookingsDashboard() {
                 <SelectItem value="all">All Statuses</SelectItem>
                 {STATUS_OPTIONS.map((option) => (
                   <SelectItem key={option} value={option}>
-                    {option}
+                    {formatBookingStatus(option)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {hasActiveFilters && (
+              <DashboardButton
+                variant="outline"
+                onClick={clearFilters}
+                className="h-9 rounded-full border-blue/60 bg-muted/30 px-4 text-xs font-semibold text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
+              >
+                Clear filters
+              </DashboardButton>
+            )}
           </div>
         </div>
+        <p className="text-xs text-muted-foreground">
+          Booking-number filtering uses an exact match. Search the booking number (for example, ESB-20261028-A1B2C3D4).
+        </p>
+        {isSearchPending && (
+          <p role="status" className="text-xs text-muted-foreground">
+            Searching booking number…
+          </p>
+        )}
 
-        {pageBookings.length === 0 ? (
+        {listError && bookingList && (
+          <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm">
+            <span>{getBookingApiError(listError, "Could not refresh bookings.")}</span>
+            <Button type="button" variant="outline" size="sm" onClick={() => void revalidateList()}>
+              Retry
+            </Button>
+          </div>
+        )}
+
+        {bookings.length === 0 ? (
           <DashboardEmpty
             title="No bookings found"
-            description="Try another search term or choose a different booking status."
+            description={hasActiveFilters ? "Try another booking number or status filter." : "There are no service bookings yet."}
             icon={<CalendarDays className="h-6 w-6 text-muted-foreground" />}
           />
         ) : (
@@ -300,74 +431,49 @@ export default function ServiceBookingsDashboard() {
               <table className="w-full min-w-[1040px]">
                 <thead className="border-b bg-muted/50">
                   <tr>
-                    {[
-                      "Booking ID",
-                      "Customer",
-                      "Contact Information",
-                      "Service",
-                      "Requested Date",
-                      "Booking Status",
-                      "Date Submitted",
-                      "Actions",
-                    ].map((heading) => (
-                      <th
-                        key={heading}
-                        scope="col"
-                        className="px-5 py-3 text-left text-sm font-medium text-muted-foreground"
-                      >
+                    {["Booking ID", "Customer", "Contact Information", "Service", "Booking Status", "Date Submitted", "Actions"].map((heading) => (
+                      <th key={heading} scope="col" className="px-5 py-3 text-left text-sm font-medium text-muted-foreground">
                         {heading}
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {pageBookings.map((booking) => (
-                    <tr
-                      key={booking.id}
-                      className="border-b transition-colors last:border-0 hover:bg-muted/30"
-                    >
+                  {bookings.map((booking) => (
+                    <tr key={booking._id} className="border-b transition-colors last:border-0 hover:bg-muted/30">
                       <td className="whitespace-nowrap px-5 py-4 text-sm font-semibold text-navy dark:text-foreground">
-                        {booking.id}
-                      </td>
-                      <td className="px-5 py-4">
-                        <p className="whitespace-nowrap text-sm font-medium text-foreground">
-                          {booking.customerName}
-                        </p>
-                      </td>
-                      <td className="px-5 py-4">
-                        <a
-                          href={`mailto:${booking.email}`}
-                          className="block max-w-[220px] truncate text-sm text-muted-foreground hover:text-blue"
-                        >
-                          {booking.email}
-                        </a>
-                        <a
-                          href={`tel:${booking.phone.replace(/[^+\d]/g, "")}`}
-                          className="mt-1 block whitespace-nowrap text-xs text-muted-foreground hover:text-blue"
-                        >
-                          {booking.phone}
-                        </a>
+                        {booking.bookingNumber}
                       </td>
                       <td className="px-5 py-4 text-sm font-medium text-foreground">
-                        {booking.service}
-                      </td>
-                      <td className="whitespace-nowrap px-5 py-4 text-sm text-muted-foreground">
-                        {formatDate(booking.requestedDate, true)}
+                        {customerName(booking)}
                       </td>
                       <td className="px-5 py-4">
-                        <StatusBadge status={booking.status} />
+                        {customerEmail(booking) !== "Email unavailable" ? (
+                          <a href={`mailto:${customerEmail(booking)}`} className="block max-w-[220px] truncate text-sm text-muted-foreground hover:text-blue">
+                            {customerEmail(booking)}
+                          </a>
+                        ) : (
+                          <span className="block text-sm text-muted-foreground">Email unavailable</span>
+                        )}
+                        {customerPhone(booking) !== "Phone unavailable" ? (
+                          <a href={`tel:${customerPhone(booking)}`} className="mt-1 block whitespace-nowrap text-xs text-muted-foreground hover:text-blue">
+                            {customerPhone(booking)}
+                          </a>
+                        ) : (
+                          <span className="mt-1 block text-xs text-muted-foreground">Phone unavailable</span>
+                        )}
                       </td>
-                      <td className="whitespace-nowrap px-5 py-4 text-sm text-muted-foreground">
-                        {formatDate(booking.submittedAt)}
-                      </td>
+                      <td className="px-5 py-4 text-sm font-medium text-foreground">{serviceName(booking)}</td>
+                      <td className="px-5 py-4"><BookingStatusBadge status={booking.status} /></td>
+                      <td className="whitespace-nowrap px-5 py-4 text-sm text-muted-foreground">{formatBookingDate(booking.createdAt)}</td>
                       <td className="px-5 py-4">
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
                           className="h-8 rounded-full border-blue/30 bg-muted/30 px-3 text-navy shadow-sm hover:bg-blue/10 hover:text-blue"
-                          onClick={() => setSelectedBooking(booking)}
-                          aria-label={`View details for booking ${booking.id}`}
+                          onClick={() => setSelectedBookingId(booking._id)}
+                          aria-label={`View details for booking ${booking.bookingNumber}`}
                         >
                           <Eye className="mr-1.5 h-4 w-4" aria-hidden="true" />
                           View Details
@@ -381,21 +487,17 @@ export default function ServiceBookingsDashboard() {
           </Card>
         )}
 
-        {filteredBookings.length > 0 && (
+        {meta && meta.total > 0 && (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">
-                Rows per page:
-              </span>
+              <span className="text-sm text-muted-foreground">Rows per page:</span>
               <Select value={String(pageSize)} onValueChange={updatePageSize}>
                 <SelectTrigger className="h-8 w-20 rounded-full border-blue/30 bg-muted/30 px-4 text-xs font-semibold text-navy shadow-sm transition-all duration-200 hover:border-blue/40 hover:bg-blue/5 focus:ring-2 focus:ring-blue/10">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {PAGE_SIZE_OPTIONS.map((size) => (
-                    <SelectItem key={size} value={String(size)}>
-                      {size}
-                    </SelectItem>
+                    <SelectItem key={size} value={String(size)}>{size}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -403,19 +505,19 @@ export default function ServiceBookingsDashboard() {
             <div className="flex items-center gap-2 self-end sm:self-auto">
               <DashboardButton
                 variant="outline"
-                disabled={page <= 1}
-                onClick={() => changePage(page - 1)}
+                disabled={page <= 1 || listLoading || isSearchPending}
+                onClick={() => setPage((value) => Math.max(1, value - 1))}
                 icon={<ChevronLeft className="h-4 w-4" />}
                 className="h-8 w-8 rounded-full border-blue bg-blue p-0 text-white shadow-[0_3px_10px_rgba(1,110,220,0.18)] transition-[background-color,box-shadow] duration-200 hover:bg-[#005cb9] hover:text-white hover:shadow-[0_4px_12px_rgba(1,110,220,0.24)] disabled:pointer-events-none disabled:opacity-50"
                 ariaLabel="Previous page"
               />
               <span className="text-sm text-muted-foreground" aria-live="polite">
-                Page {page} of {totalPages}
+                Page {meta.page} of {totalPages}
               </span>
               <DashboardButton
                 variant="outline"
-                disabled={page >= totalPages}
-                onClick={() => changePage(page + 1)}
+                disabled={page >= totalPages || listLoading || isSearchPending}
+                onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
                 icon={<ChevronRight className="h-4 w-4" />}
                 className="h-8 w-8 rounded-full border-blue bg-blue p-0 text-white shadow-[0_3px_10px_rgba(1,110,220,0.18)] transition-[background-color,box-shadow] duration-200 hover:bg-[#005cb9] hover:text-white hover:shadow-[0_4px_12px_rgba(1,110,220,0.24)] disabled:pointer-events-none disabled:opacity-50"
                 ariaLabel="Next page"
@@ -425,71 +527,13 @@ export default function ServiceBookingsDashboard() {
         )}
       </section>
 
-      <Dialog
-        open={Boolean(selectedBooking)}
-        onOpenChange={(open) => {
-          if (!open) setSelectedBooking(null);
-        }}
-      >
-        <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-2xl">
-          {selectedBooking && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="font-display text-xl font-bold">
-                  Booking Details
-                </DialogTitle>
-                <DialogDescription>
-                  Request {selectedBooking.id} · submitted {formatDate(selectedBooking.submittedAt)}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <DetailItem label="Booking ID">{selectedBooking.id}</DetailItem>
-                <DetailItem label="Current status">
-                  <StatusBadge status={selectedBooking.status} />
-                </DetailItem>
-                <DetailItem label="Customer">
-                  {selectedBooking.customerName}
-                </DetailItem>
-                <DetailItem label="Service requested">
-                  {selectedBooking.service}
-                </DetailItem>
-                <DetailItem label="Email">
-                  <a
-                    className="hover:text-blue"
-                    href={`mailto:${selectedBooking.email}`}
-                  >
-                    {selectedBooking.email}
-                  </a>
-                </DetailItem>
-                <DetailItem label="Phone">
-                  <a
-                    className="hover:text-blue"
-                    href={`tel:${selectedBooking.phone.replace(/[^+\d]/g, "")}`}
-                  >
-                    {selectedBooking.phone}
-                  </a>
-                </DetailItem>
-                <DetailItem label="Requested appointment">
-                  {formatDate(selectedBooking.requestedDate, true)}
-                </DetailItem>
-                <DetailItem label="Date submitted">
-                  {formatDate(selectedBooking.submittedAt, true)}
-                </DetailItem>
-                <div className="sm:col-span-2">
-                  <DetailItem label="Property address">
-                    {selectedBooking.propertyAddress}
-                  </DetailItem>
-                </div>
-                <div className="sm:col-span-2">
-                  <DetailItem label="Request notes">
-                    {selectedBooking.notes}
-                  </DetailItem>
-                </div>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      <BookingDetailsDialog
+        key={selectedBookingId ?? "booking-dialog-closed"}
+        bookingId={selectedBookingId}
+        open={Boolean(selectedBookingId)}
+        onClose={() => setSelectedBookingId(null)}
+        onMutationSuccess={handleMutationSuccess}
+      />
     </div>
   );
 }

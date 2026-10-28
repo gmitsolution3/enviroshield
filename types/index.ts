@@ -8,3 +8,4 @@ export * from "./admin/category.type";
 export * from "./admin/product.type";
 export * from "./admin/inventory.type";
 export * from "./admin/order.type";
+export * from "./admin/booking.type";
