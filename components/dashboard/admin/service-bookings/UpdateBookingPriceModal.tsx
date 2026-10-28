@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DollarSign, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { axiosInstance } from "@/lib/axios";
 import type { Booking } from "@/types/admin/booking.type";
+import { formatBookingAmount } from "./bookingUtils";
 
 type UpdateBookingPriceModalProps = {
   booking: Booking | null;
@@ -79,7 +80,7 @@ export default function UpdateBookingPriceModal({
 
     const numericPrice = Number(values.finalPrice);
     if (booking.finalPrice === numericPrice) {
-      toast.info("Price is already set to BDT " + numericPrice.toLocaleString());
+      toast.info("Price is already set to BDT " + formatBookingAmount(numericPrice));
       onClose();
       return;
     }
@@ -108,72 +109,79 @@ export default function UpdateBookingPriceModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(val) => !val && handleClose()}>
-      <DialogContent className="max-w-md rounded-2xl border-0 p-0 shadow-2xl">
-        <DialogHeader className="border-b px-6 py-5 text-left sm:px-7">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 mb-2">
-            <DollarSign className="h-5 w-5" />
-          </div>
-          <DialogTitle className="text-xl font-bold text-navy">
-            Update Final Price
-          </DialogTitle>
-          <DialogDescription className="text-sm leading-6">
-            Set or adjust the final agreed service price for booking{" "}
-            <span className="font-semibold text-foreground">
-              #{booking?.bookingNumber}
-            </span>
-            .
-          </DialogDescription>
-        </DialogHeader>
+    <Dialog open={open && Boolean(booking)} onOpenChange={(val) => !val && handleClose()}>
+      <DialogContent className="max-h-[92vh] overflow-hidden rounded-2xl border-0 p-0 shadow-2xl sm:max-w-xl">
+        <div className="flex max-h-[92vh] flex-col">
+          <DialogHeader className="border-b px-6 py-5 text-left sm:px-8">
+            <DialogTitle className="text-xl font-bold text-navy">
+              Update Final Price
+            </DialogTitle>
+            <DialogDescription className="text-sm leading-6">
+              Adjust the final agreed price for booking{" "}
+              <span className="font-semibold text-foreground">
+                #{booking?.bookingNumber}
+              </span>
+              .
+            </DialogDescription>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-4 px-6 py-6 sm:px-7">
-            <div className="space-y-2">
-              <Label htmlFor="final-price-input" className="text-sm font-semibold text-navy">
-                Final Price (BDT)
-              </Label>
-              <Input
-                id="final-price-input"
-                type="number"
-                step="any"
-                min="0"
-                placeholder="e.g. 15000"
-                disabled={isSubmitting}
-                {...register("finalPrice")}
-                className="h-10 rounded-xl"
-              />
-              {errors.finalPrice && (
-                <p className="text-xs text-destructive">{errors.finalPrice.message}</p>
-              )}
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col overflow-hidden">
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6 sm:px-8">
+              {/* Current Price Box */}
+              <div className="rounded-xl border bg-muted/20 p-4 text-sm">
+                <span className="text-muted-foreground">Current final price: </span>
+                <span className="font-semibold text-foreground">
+                  {booking?.finalPrice != null
+                    ? `BDT ${formatBookingAmount(booking.finalPrice)}`
+                    : "Not set (Quote Pending)"}
+                </span>
+              </div>
+
+              {/* Price Input */}
+              <div className="space-y-2">
+                <Label htmlFor="final-price-input" className="text-sm font-semibold text-navy">
+                  New Final Price (BDT)
+                </Label>
+                <Input
+                  id="final-price-input"
+                  type="number"
+                  step="any"
+                  min="0"
+                  placeholder="e.g. 15000"
+                  disabled={isSubmitting}
+                  {...register("finalPrice")}
+                  className="h-11 rounded-xl"
+                />
+                {errors.finalPrice && (
+                  <p className="text-xs text-destructive">{errors.finalPrice.message}</p>
+                )}
+                <p className="text-xs leading-5 text-muted-foreground">
+                  Enter the total finalized price in BDT for this booking request.
+                </p>
+              </div>
             </div>
-          </div>
 
-          <div className="flex items-center justify-end gap-3 border-t bg-slate-50/70 px-6 py-4 dark:bg-muted/30 sm:px-7">
-            <DashboardButton
-              type="button"
-              variant="outline"
-              disabled={isSubmitting}
-              onClick={handleClose}
-              className="rounded-full"
-            >
-              Cancel
-            </DashboardButton>
-            <DashboardButton
-              type="submit"
-              disabled={isSubmitting}
-              className="rounded-full px-6"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
-                </>
-              ) : (
-                "Update Price"
-              )}
-            </DashboardButton>
-          </div>
-        </form>
+            {/* Footer */}
+            <div className="flex flex-col-reverse gap-3 border-t bg-muted/20 px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
+              <DashboardButton
+                type="button"
+                variant="outline"
+                className="min-h-10 rounded-xl px-5 text-xs font-bold"
+                disabled={isSubmitting}
+                onClick={handleClose}
+              >
+                Cancel
+              </DashboardButton>
+              <DashboardButton
+                type="submit"
+                disabled={isSubmitting}
+                icon={isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : undefined}
+              >
+                {isSubmitting ? "Updating..." : "Update Price"}
+              </DashboardButton>
+            </div>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

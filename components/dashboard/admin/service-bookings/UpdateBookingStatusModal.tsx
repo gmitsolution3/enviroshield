@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BadgeCheck, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -115,84 +115,89 @@ export default function UpdateBookingStatusModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(val) => !val && handleClose()}>
-      <DialogContent className="max-w-md rounded-2xl border-0 p-0 shadow-2xl">
-        <DialogHeader className="border-b px-6 py-5 text-left sm:px-7">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue/10 text-blue mb-2">
-            <BadgeCheck className="h-5 w-5" />
-          </div>
-          <DialogTitle className="text-xl font-bold text-navy">
-            Update Booking Status
-          </DialogTitle>
-          <DialogDescription className="text-sm leading-6">
-            Change the current workflow status for booking{" "}
-            <span className="font-semibold text-foreground">
-              #{booking?.bookingNumber}
-            </span>
-            .
-          </DialogDescription>
-        </DialogHeader>
+    <Dialog open={open && Boolean(booking)} onOpenChange={(val) => !val && handleClose()}>
+      <DialogContent className="max-h-[92vh] overflow-hidden rounded-2xl border-0 p-0 shadow-2xl sm:max-w-xl">
+        <div className="flex max-h-[92vh] flex-col">
+          <DialogHeader className="border-b px-6 py-5 text-left sm:px-8">
+            <DialogTitle className="text-xl font-bold text-navy">
+              Update Booking Status
+            </DialogTitle>
+            <DialogDescription className="text-sm leading-6">
+              Choose the new fulfillment status for booking{" "}
+              <span className="font-semibold text-foreground">
+                #{booking?.bookingNumber}
+              </span>
+              .
+            </DialogDescription>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-4 px-6 py-6 sm:px-7">
-            <div className="space-y-2">
-              <Label htmlFor="status-select" className="text-sm font-semibold text-navy">
-                New Status
-              </Label>
-              <Controller
-                control={control}
-                name="status"
-                render={({ field }) => (
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={isSubmitting}
-                  >
-                    <SelectTrigger id="status-select" className="h-10 w-full rounded-xl">
-                      <SelectValue placeholder="Select booking status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BOOKING_STATUSES.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {formatBookingStatus(status)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col overflow-hidden">
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6 sm:px-8">
+              {/* Current Status Box */}
+              <div className="rounded-xl border bg-muted/20 p-4 text-sm">
+                <span className="text-muted-foreground">Current status: </span>
+                <span className="font-semibold text-foreground">
+                  {booking ? formatBookingStatus(booking.status) : "—"}
+                </span>
+              </div>
+
+              {/* Status Select */}
+              <div className="space-y-2">
+                <Label htmlFor="status-select" className="text-sm font-semibold text-navy">
+                  New status
+                </Label>
+                <Controller
+                  control={control}
+                  name="status"
+                  render={({ field }) => (
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={isSubmitting}
+                    >
+                      <SelectTrigger id="status-select" className="h-11 w-full rounded-xl">
+                        <SelectValue placeholder="Select booking status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {BOOKING_STATUSES.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {formatBookingStatus(status)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.status && (
+                  <p className="text-xs text-destructive">{errors.status.message}</p>
                 )}
-              />
-              {errors.status && (
-                <p className="text-xs text-destructive">{errors.status.message}</p>
-              )}
+                <p className="text-xs leading-5 text-muted-foreground">
+                  Select the workflow stage for this service booking.
+                </p>
+              </div>
             </div>
-          </div>
 
-          <div className="flex items-center justify-end gap-3 border-t bg-slate-50/70 px-6 py-4 dark:bg-muted/30 sm:px-7">
-            <DashboardButton
-              type="button"
-              variant="outline"
-              disabled={isSubmitting}
-              onClick={handleClose}
-              className="rounded-full"
-            >
-              Cancel
-            </DashboardButton>
-            <DashboardButton
-              type="submit"
-              disabled={isSubmitting}
-              className="rounded-full px-6"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
-                </>
-              ) : (
-                "Update Status"
-              )}
-            </DashboardButton>
-          </div>
-        </form>
+            {/* Footer */}
+            <div className="flex flex-col-reverse gap-3 border-t bg-muted/20 px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
+              <DashboardButton
+                type="button"
+                variant="outline"
+                className="min-h-10 rounded-xl px-5 text-xs font-bold"
+                disabled={isSubmitting}
+                onClick={handleClose}
+              >
+                Cancel
+              </DashboardButton>
+              <DashboardButton
+                type="submit"
+                disabled={isSubmitting}
+                icon={isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : undefined}
+              >
+                {isSubmitting ? "Updating..." : "Update Status"}
+              </DashboardButton>
+            </div>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

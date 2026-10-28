@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, Ban, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -20,7 +20,6 @@ import type { Booking } from "@/types/admin/booking.type";
 type CancelBookingDialogProps = {
   booking: Booking | null;
   open: boolean;
-  revalidateKey?: string;
   onClose: () => void;
   onSuccess?: () => void;
 };
@@ -56,54 +55,66 @@ export default function CancelBookingDialog({
 
   return (
     <AlertDialog
-      open={open}
+      open={open && Boolean(booking)}
       onOpenChange={(value) => {
         if (!value && !isCancelling) {
           onClose();
         }
       }}
     >
-      <AlertDialogContent className="rounded-2xl border-0 p-6 shadow-2xl sm:max-w-md">
-        <AlertDialogHeader className="text-left">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300">
-            <AlertTriangle className="h-5 w-5" aria-hidden="true" />
-          </div>
-          <AlertDialogTitle className="pt-2 text-xl font-bold text-navy">
-            Cancel Booking
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-sm leading-relaxed text-muted-foreground">
-            Are you sure you want to cancel booking{" "}
-            <span className="font-semibold text-foreground">
-              #{booking?.bookingNumber}
-            </span>
-            ? Its status will be changed to cancelled and the customer will be
-            notified.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+      <AlertDialogContent className="max-w-md overflow-hidden rounded-2xl border-0 p-0 shadow-2xl">
+        <div className="p-6">
+          <AlertDialogHeader className="space-y-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
 
-        <AlertDialogFooter className="mt-4 gap-2 sm:gap-0">
-          <AlertDialogCancel
-            disabled={isCancelling}
-            onClick={onClose}
-            className="rounded-full"
-          >
-            Keep Booking
-          </AlertDialogCancel>
-          <AlertDialogAction
-            disabled={isCancelling}
-            onClick={handleCancel}
-            className="rounded-full bg-red-600 text-white hover:bg-red-700 focus:ring-red-600"
-          >
-            {isCancelling ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Cancelling...
-              </>
-            ) : (
-              "Confirm Cancellation"
-            )}
-          </AlertDialogAction>
-        </AlertDialogFooter>
+            <div className="space-y-2">
+              <AlertDialogTitle className="text-xl font-bold text-navy">
+                Cancel booking?
+              </AlertDialogTitle>
+
+              <AlertDialogDescription className="text-sm leading-6 text-muted-foreground">
+                Are you sure you want to cancel booking{" "}
+                <span className="font-semibold text-foreground">
+                  #{booking?.bookingNumber}
+                </span>
+                ? Its workflow status will be marked as cancelled.
+              </AlertDialogDescription>
+            </div>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter className="mt-6 gap-3 sm:justify-end">
+            <AlertDialogCancel
+              disabled={isCancelling}
+              onClick={onClose}
+              className="min-h-10 rounded-xl px-5"
+            >
+              Keep Booking
+            </AlertDialogCancel>
+
+            <AlertDialogAction
+              disabled={isCancelling || !booking}
+              onClick={(event) => {
+                event.preventDefault();
+                void handleCancel();
+              }}
+              className="min-h-10 rounded-xl bg-red-600 px-5 font-semibold text-white shadow-sm hover:bg-red-700"
+            >
+              {isCancelling ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Cancelling...
+                </>
+              ) : (
+                <>
+                  <Ban className="mr-2 h-4 w-4" />
+                  Cancel Booking
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </div>
       </AlertDialogContent>
     </AlertDialog>
   );

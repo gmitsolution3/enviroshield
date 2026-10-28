@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarClock, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { axiosInstance } from "@/lib/axios";
 import type { Booking } from "@/types/admin/booking.type";
+import { formatBookingDate } from "./bookingUtils";
 
 type UpdateBookingManagementModalProps = {
   booking: Booking | null;
@@ -140,119 +141,135 @@ export default function UpdateBookingManagementModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(val) => !val && handleClose()}>
-      <DialogContent className="max-h-[92vh] max-w-lg overflow-y-auto rounded-2xl border-0 p-0 shadow-2xl">
-        <DialogHeader className="border-b px-6 py-5 text-left sm:px-7">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 mb-2">
-            <CalendarClock className="h-5 w-5" />
-          </div>
-          <DialogTitle className="text-xl font-bold text-navy">
-            Manage Site Visit & Notes
-          </DialogTitle>
-          <DialogDescription className="text-sm leading-6">
-            Schedule an inspection visit and add internal notes for booking{" "}
-            <span className="font-semibold text-foreground">
-              #{booking?.bookingNumber}
-            </span>
-            .
-          </DialogDescription>
-        </DialogHeader>
+    <Dialog open={open && Boolean(booking)} onOpenChange={(val) => !val && handleClose()}>
+      <DialogContent className="max-h-[92vh] overflow-hidden rounded-2xl border-0 p-0 shadow-2xl sm:max-w-xl">
+        <div className="flex max-h-[92vh] flex-col">
+          <DialogHeader className="border-b px-6 py-5 text-left sm:px-8">
+            <DialogTitle className="text-xl font-bold text-navy">
+              Manage Site Visit & Notes
+            </DialogTitle>
+            <DialogDescription className="text-sm leading-6">
+              Configure the site visit inspection schedule and internal notes for booking{" "}
+              <span className="font-semibold text-foreground">
+                #{booking?.bookingNumber}
+              </span>
+              .
+            </DialogDescription>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-5 px-6 py-6 sm:px-7">
-            {/* Site Visit Toggle & Date */}
-            <div className="space-y-4 rounded-xl border border-slate-100 bg-slate-50/70 p-4 dark:border-border/60 dark:bg-muted/30">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="site-visit-switch" className="text-sm font-semibold text-navy">
-                    Site Visit Inspection
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Enable if a physical inspection or site assessment is required.
-                  </p>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col overflow-hidden">
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6 sm:px-8">
+              {/* Current Overview Box */}
+              <div className="rounded-xl border bg-muted/20 p-4 text-sm space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Site visit:</span>
+                  <span className="font-semibold text-foreground">
+                    {booking?.isSiteVisit ? "Enabled / Required" : "Disabled"}
+                  </span>
                 </div>
-                <Controller
-                  control={control}
-                  name="isSiteVisit"
-                  render={({ field }) => (
-                    <Switch
-                      id="site-visit-switch"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      disabled={isSubmitting}
-                    />
-                  )}
-                />
+                {booking?.siteVisitDate && (
+                  <div className="flex items-center justify-between text-xs pt-1 border-t border-border/50">
+                    <span className="text-muted-foreground">Scheduled inspection:</span>
+                    <span className="font-medium text-foreground">
+                      {formatBookingDate(booking.siteVisitDate)}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {isSiteVisit && (
-                <div className="space-y-2 pt-2 border-t border-slate-200/60 dark:border-border/40">
-                  <Label htmlFor="site-visit-time" className="text-xs font-semibold text-navy">
-                    Scheduled Inspection Date & Time
-                  </Label>
-                  <Input
-                    id="site-visit-time"
-                    type="datetime-local"
-                    disabled={isSubmitting}
-                    {...register("siteVisitDate")}
-                    className="h-10 rounded-xl bg-white dark:bg-background"
-                  />
-                  {errors.siteVisitDate && (
-                    <p className="text-xs text-destructive">
-                      {errors.siteVisitDate.message}
+              {/* Site Visit Switch */}
+              <div className="space-y-4 rounded-xl border bg-muted/10 p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="site-visit-switch" className="text-sm font-semibold text-navy">
+                      Site Visit Inspection
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Enable if a physical inspection or site assessment is required.
                     </p>
-                  )}
+                  </div>
+                  <Controller
+                    control={control}
+                    name="isSiteVisit"
+                    render={({ field }) => (
+                      <Switch
+                        id="site-visit-switch"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isSubmitting}
+                      />
+                    )}
+                  />
                 </div>
-              )}
+
+                {isSiteVisit && (
+                  <div className="space-y-2 pt-3 border-t border-border/60">
+                    <Label htmlFor="site-visit-time" className="text-xs font-semibold text-navy">
+                      Scheduled Inspection Date & Time
+                    </Label>
+                    <Input
+                      id="site-visit-time"
+                      type="datetime-local"
+                      disabled={isSubmitting}
+                      {...register("siteVisitDate")}
+                      className="h-11 rounded-xl bg-background"
+                    />
+                    {errors.siteVisitDate && (
+                      <p className="text-xs text-destructive">
+                        {errors.siteVisitDate.message}
+                      </p>
+                    )}
+                    <p className="text-xs leading-5 text-muted-foreground">
+                      Set the planned inspection date and time for the site team.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Admin Notes */}
+              <div className="space-y-2">
+                <Label htmlFor="mgmt-admin-notes" className="text-sm font-semibold text-navy">
+                  Internal Admin Notes
+                </Label>
+                <Textarea
+                  id="mgmt-admin-notes"
+                  rows={4}
+                  placeholder="Record internal notes, scope observations, or client requirements..."
+                  disabled={isSubmitting}
+                  {...register("adminNotes")}
+                  className="min-h-28 resize-none rounded-xl"
+                />
+                {errors.adminNotes && (
+                  <p className="text-xs text-destructive">{errors.adminNotes.message}</p>
+                )}
+                <p className="text-xs leading-5 text-muted-foreground">
+                  Internal notes are private to administrators and never shown to the customer.
+                </p>
+              </div>
             </div>
 
-            {/* Admin Notes */}
-            <div className="space-y-2">
-              <Label htmlFor="mgmt-admin-notes" className="text-sm font-semibold text-navy">
-                Internal Admin Notes
-              </Label>
-              <Textarea
-                id="mgmt-admin-notes"
-                rows={4}
-                placeholder="Record inspection details, scope observations, or internal team instructions..."
+            {/* Footer */}
+            <div className="flex flex-col-reverse gap-3 border-t bg-muted/20 px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
+              <DashboardButton
+                type="button"
+                variant="outline"
+                className="min-h-10 rounded-xl px-5 text-xs font-bold"
                 disabled={isSubmitting}
-                {...register("adminNotes")}
-                className="rounded-xl"
-              />
-              {errors.adminNotes && (
-                <p className="text-xs text-destructive">{errors.adminNotes.message}</p>
-              )}
+                onClick={handleClose}
+              >
+                Cancel
+              </DashboardButton>
+              <DashboardButton
+                type="submit"
+                disabled={isSubmitting}
+                icon={isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : undefined}
+              >
+                {isSubmitting ? "Saving..." : "Save Details"}
+              </DashboardButton>
             </div>
-          </div>
-
-          <div className="flex items-center justify-end gap-3 border-t bg-slate-50/70 px-6 py-4 dark:bg-muted/30 sm:px-7">
-            <DashboardButton
-              type="button"
-              variant="outline"
-              disabled={isSubmitting}
-              onClick={handleClose}
-              className="rounded-full"
-            >
-              Cancel
-            </DashboardButton>
-            <DashboardButton
-              type="submit"
-              disabled={isSubmitting}
-              className="rounded-full px-6"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Save Details"
-              )}
-            </DashboardButton>
-          </div>
-        </form>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
 }
-
