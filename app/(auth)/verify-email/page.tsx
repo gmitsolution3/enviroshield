@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { VerifyEmailCard } from "@/components/auth/VerifyEmailCard";
+
 export const metadata: Metadata = {
   title: "Verify Your Email",
   description:
@@ -11,7 +13,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function VerifyEmailPage() {
+type VerifyEmailPageProps = {
+  searchParams: Promise<{
+    email?: string;
+    callbackUrl?: string;
+  }>;
+};
+
+export default async function VerifyEmailPage({
+  searchParams,
+}: VerifyEmailPageProps) {
+  const params = await searchParams;
+
   return (
     <main className="min-h-screen bg-mist">
       <section
@@ -72,45 +85,10 @@ export default function VerifyEmailPage() {
 
           {/* Verification panel */}
           <div className="flex items-center px-[55px] py-[55px] max-[900px]:px-8 max-[900px]:py-10 max-[600px]:px-6 max-[600px]:py-8">
-            <div className="w-full text-center">
-              <div
-                className="mx-auto mb-6 grid size-[64px] place-items-center rounded-full bg-[#e9f3fd] text-blue"
-                aria-hidden="true"
-              >
-                <span className="text-[25px] font-extrabold">@</span>
-              </div>
-
-              <div className="mb-3 text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
-                EMAIL VERIFICATION
-              </div>
-
-              <h2 className="text-[32px] font-extrabold leading-[1.1] tracking-[-0.04em] text-navy">
-                Verify your email
-              </h2>
-
-              <p className="mx-auto mt-4 max-w-[430px] text-[15px] leading-[1.8] text-ink">
-                We sent a verification link to your email address.
-              </p>
-
-              <p className="mx-auto mt-2 max-w-[400px] text-[13px] leading-[1.7] text-ink">
-                Please check your inbox and click the link to activate
-                your account.
-              </p>
-
-              <div className="mt-8 border-t border-line pt-7">
-                <Link
-                  href="/login"
-                  className="inline-flex items-center justify-center rounded-full bg-blue px-7 py-3 text-[13px] font-extrabold text-white transition-colors hover:bg-[#005cb9]"
-                >
-                  Back to login
-                </Link>
-              </div>
-
-              <p className="mt-5 text-[12px] text-ink">
-                Didn&apos;t receive the email? Check your spam or junk
-                folder.
-              </p>
-            </div>
+            <VerifyEmailCard
+              email={params.email}
+              callbackUrl={params.callbackUrl}
+            />
           </div>
         </div>
       </section>

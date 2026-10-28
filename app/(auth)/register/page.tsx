@@ -11,10 +11,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RegisterPage() {
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    callbackUrl?: string;
+  }>;
+}) {
+  const params = await searchParams;
+
   return (
     <main className="min-h-screen">
-      <RegisterForm />
+      <RegisterForm callbackUrl={params.callbackUrl} />
     </main>
   );
 }

@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
+import { getSafeRedirectUrl } from "@/lib/redirects";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -21,26 +22,6 @@ const loginSchema = z.object({
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
-
-function getSafeRedirectUrl(callbackUrl?: string) {
-  if (!callbackUrl) {
-    return "/dashboard";
-  }
-
-  if (!callbackUrl.startsWith("/") || callbackUrl.startsWith("//")) {
-    return "/dashboard";
-  }
-
-  try {
-    const redirectUrl = new URL(callbackUrl, window.location.origin);
-    if (redirectUrl.origin !== window.location.origin) {
-      return "/dashboard";
-    }
-    return `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`;
-  } catch {
-    return "/dashboard";
-  }
-}
 
 const fieldVariants = {
   hidden: {
@@ -84,14 +65,21 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
       });
 
       if (error) {
+        if (error.code === "EMAIL_NOT_VERIFIED") {
+          const verifyUrl = callbackUrl
+            ? `/verify-email?email=${encodeURIComponent(values.email)}&callbackUrl=${encodeURIComponent(callbackUrl)}`
+            : `/verify-email?email=${encodeURIComponent(values.email)}`;
+          toast.error("Please verify your email address before logging in.");
+          router.push(verifyUrl);
+          return;
+        }
+
         const message =
           error.code === "BANNED_USER"
             ? "Your account has been banned. Please contact Enviroshield support if you believe this is a mistake."
-            : error.code === "EMAIL_NOT_VERIFIED"
-              ? "Please verify your email address before logging in."
-              : error.code === "INVALID_EMAIL_OR_PASSWORD"
-                ? "Invalid email or password."
-                : "Unable to sign in. Please try again.";
+            : error.code === "INVALID_EMAIL_OR_PASSWORD"
+              ? "Invalid email or password."
+              : "Unable to sign in. Please try again.";
 
         setServerError(message);
         toast.error(message);
@@ -285,7 +273,11 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
                     </Label>
 
                     <Link
-                      href="/forgot-password"
+                      href={
+                        callbackUrl
+                          ? `/forgot-password?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                          : "/forgot-password"
+                      }
                       className="text-[12px] font-medium text-ink transition-colors hover:text-blue"
                     >
                       Forgot password?
@@ -384,7 +376,11 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
               >
                 Don&apos;t have an account?{" "}
                 <Link
-                  href="/register"
+                  href={
+                    callbackUrl
+                      ? `/register?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                      : "/register"
+                  }
                   className="font-extrabold text-navy transition-colors hover:text-blue hover:underline"
                 >
                   Create an account

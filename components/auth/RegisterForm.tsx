@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
+import { getSafeRedirectUrl } from "@/lib/redirects";
 
 const passwordRules = {
   minLength: (password: string) => password.length >= 8,
@@ -110,7 +111,7 @@ const fieldVariants = {
   },
 };
 
-export function RegisterForm() {
+export function RegisterForm({ callbackUrl }: { callbackUrl?: string }) {
   const router = useRouter();
 
   const [serverError, setServerError] = useState<string | null>(null);
@@ -175,11 +176,14 @@ export function RegisterForm() {
   async function onSubmit(values: RegisterFormValues) {
     setServerError(null);
 
+    const targetRedirect = getSafeRedirectUrl(callbackUrl);
+
     const { error } = await authClient.signUp.email({
       name: values.name,
       email: values.email,
       password: values.password,
       phone: values.phone,
+      callbackURL: targetRedirect,
     });
 
     if (error) {
@@ -193,7 +197,10 @@ export function RegisterForm() {
     }
 
     toast.success("Account created successfully.");
-    router.push("/verify-email");
+    const verifyUrl = callbackUrl
+      ? `/verify-email?email=${encodeURIComponent(values.email)}&callbackUrl=${encodeURIComponent(callbackUrl)}`
+      : `/verify-email?email=${encodeURIComponent(values.email)}`;
+    router.push(verifyUrl);
     router.refresh();
   }
 
@@ -684,7 +691,11 @@ export function RegisterForm() {
               >
                 Already have an account?{" "}
                 <Link
-                  href="/login"
+                  href={
+                    callbackUrl
+                      ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                      : "/login"
+                  }
                   className="font-extrabold text-navy transition-colors hover:text-blue hover:underline"
                 >
                   Sign in

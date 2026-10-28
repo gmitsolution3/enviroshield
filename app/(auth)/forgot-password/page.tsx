@@ -11,7 +11,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    callbackUrl?: string;
+  }>;
+}) {
+  const params = await searchParams;
+  const loginUrl = params.callbackUrl
+    ? `/login?callbackUrl=${encodeURIComponent(params.callbackUrl)}`
+    : "/login";
+
   return (
     <main className="min-h-screen bg-mist">
       <section
@@ -85,12 +96,12 @@ export default function ForgotPasswordPage() {
               </p>
 
               <div className="mt-8">
-                <ForgotPasswordForm />
+                <ForgotPasswordForm callbackUrl={params.callbackUrl} />
               </div>
 
               <div className="mt-7 border-t border-line pt-6 text-center">
                 <Link
-                  href="/login"
+                  href={loginUrl}
                   className="text-[13px] font-bold text-navy transition-colors hover:text-blue"
                 >
                   ← Back to login

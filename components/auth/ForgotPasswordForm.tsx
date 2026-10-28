@@ -17,9 +17,13 @@ const forgotPasswordSchema = z.object({
 
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
-export function ForgotPasswordForm() {
+export function ForgotPasswordForm({ callbackUrl }: { callbackUrl?: string }) {
   const [submitted, setSubmitted] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+
+  const loginUrl = callbackUrl
+    ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+    : "/login";
 
   const {
     register,
@@ -161,7 +165,7 @@ export function ForgotPasswordForm() {
 
       <div className="text-center">
         <Link
-          href="/login"
+          href={loginUrl}
           className="text-[13px] font-bold text-navy transition-colors hover:text-blue"
         >
           ← Back to login

@@ -2,125 +2,132 @@ import Container from "@/components/Container";
 
 export default function CheckoutSuccessLoading() {
   return (
-    <section className="min-h-[70vh] bg-mist/30 py-12 sm:py-16">
+    <section className="min-h-[80vh] bg-mist/35 py-14 max-[600px]:py-9">
       <Container>
         <div
           role="status"
           aria-label="Loading your order confirmation"
           aria-busy="true"
-          className="mx-auto max-w-5xl"
+          className="mx-auto max-w-[1080px]"
         >
-          {/* Page heading */}
-          <div className="mb-8 border-b border-line pb-7 sm:mb-10">
-            <div className="mb-5 flex items-center gap-2">
-              <div className="size-2 rounded-full bg-blue/60" />
-              <div className="h-2.5 w-24 animate-pulse rounded-full bg-blue/15 motion-reduce:animate-none" />
-            </div>
-
-            <div className="h-8 w-64 max-w-full animate-pulse rounded-lg bg-navy/10 motion-reduce:animate-none sm:h-10 sm:w-80" />
-
-            <div className="mt-3 h-4 w-full max-w-md animate-pulse rounded bg-ink/[0.07] motion-reduce:animate-none" />
+          {/* Top breadcrumb skeleton */}
+          <div className="mb-6 flex items-center gap-2">
+            <div className="size-4 animate-pulse rounded bg-blue/20 motion-reduce:animate-none" />
+            <div className="h-4 w-44 animate-pulse rounded bg-blue/15 motion-reduce:animate-none" />
           </div>
 
-          <div className="grid items-start gap-6 lg:grid-cols-[1fr_340px]">
+          {/* Hero Banner Card Skeleton */}
+          <div className="overflow-hidden rounded-3xl border border-line bg-white p-6 shadow-[0_12px_36px_rgba(0,51,78,0.06)] sm:p-10 lg:p-12">
+            <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
+              <div>
+                {/* Status pill skeleton */}
+                <div className="h-7 w-36 animate-pulse rounded-full bg-emerald-100/70 motion-reduce:animate-none" />
+
+                {/* Big heading skeleton */}
+                <div className="mt-5 space-y-2.5">
+                  <div className="h-10 w-3/4 max-w-md animate-pulse rounded-lg bg-navy/10 motion-reduce:animate-none" />
+                  <div className="h-10 w-1/2 max-w-xs animate-pulse rounded-lg bg-blue/15 motion-reduce:animate-none" />
+                </div>
+
+                {/* Description skeleton */}
+                <div className="mt-4 space-y-2">
+                  <div className="h-4 w-full max-w-lg animate-pulse rounded bg-ink/[0.08] motion-reduce:animate-none" />
+                  <div className="h-4 w-4/5 max-w-md animate-pulse rounded bg-ink/[0.08] motion-reduce:animate-none" />
+                </div>
+
+                {/* Action buttons skeleton */}
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <div className="h-12 w-48 animate-pulse rounded-full bg-blue/20 motion-reduce:animate-none" />
+                  <div className="h-12 w-40 animate-pulse rounded-full bg-ink/[0.08] motion-reduce:animate-none" />
+                </div>
+              </div>
+
+              {/* Graphic icon skeleton */}
+              <div className="flex flex-col items-center py-2">
+                <div className="size-36 animate-pulse rounded-full border border-emerald-200/50 bg-emerald-50/70 p-6 sm:size-40 motion-reduce:animate-none">
+                  <div className="size-full rounded-full bg-emerald-100/80" />
+                </div>
+
+                <div className="mt-5 h-16 w-full max-w-[320px] animate-pulse rounded-2xl border border-line bg-white motion-reduce:animate-none" />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             {/* Main order details */}
             <div className="space-y-6">
               {/* Order information */}
-              <div className="overflow-hidden rounded-2xl border border-line bg-white">
-                <div className="flex items-center justify-between border-b border-line bg-[#f8faff] px-5 py-4 sm:px-6">
-                  <div className="h-4 w-32 animate-pulse rounded bg-navy/10 motion-reduce:animate-none" />
-                  <div className="h-6 w-20 animate-pulse rounded-full bg-blue/[0.08] motion-reduce:animate-none" />
+              <div className="rounded-3xl border border-line bg-white p-5 shadow-[0_8px_28px_rgba(0,51,78,0.04)] sm:p-7">
+                <div className="flex items-center gap-3 border-b border-line pb-4">
+                  <div className="size-11 animate-pulse rounded-2xl bg-blue/10 motion-reduce:animate-none" />
+                  <div className="space-y-1.5">
+                    <div className="h-4 w-32 animate-pulse rounded bg-navy/10 motion-reduce:animate-none" />
+                    <div className="h-3 w-48 animate-pulse rounded bg-ink/[0.06] motion-reduce:animate-none" />
+                  </div>
                 </div>
 
-                <div className="grid gap-5 p-5 sm:grid-cols-2 sm:p-6">
-                  <div>
-                    <div className="mb-3 h-3 w-20 animate-pulse rounded bg-ink/10 motion-reduce:animate-none" />
-                    <div className="h-5 w-36 animate-pulse rounded bg-blue/10 motion-reduce:animate-none" />
-                  </div>
-
-                  <div>
-                    <div className="mb-3 h-3 w-24 animate-pulse rounded bg-ink/10 motion-reduce:animate-none" />
-                    <div className="h-5 w-28 animate-pulse rounded bg-ink/[0.07] motion-reduce:animate-none" />
-                  </div>
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  {[1, 2, 3, 4].map((item) => (
+                    <div
+                      key={item}
+                      className="rounded-2xl border border-line bg-mist/20 p-4"
+                    >
+                      <div className="h-3 w-20 animate-pulse rounded bg-ink/10 motion-reduce:animate-none" />
+                      <div className="mt-2 h-5 w-32 animate-pulse rounded bg-navy/10 motion-reduce:animate-none" />
+                    </div>
+                  ))}
                 </div>
               </div>
 
               {/* Delivery information */}
-              <div className="rounded-2xl border border-line bg-white p-5 sm:p-6">
-                <div className="mb-6 flex items-center justify-between gap-4">
-                  <div className="h-4 w-36 animate-pulse rounded bg-navy/10 motion-reduce:animate-none" />
-                  <div className="size-8 animate-pulse rounded-xl bg-blue/[0.07] motion-reduce:animate-none" />
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="size-11 shrink-0 animate-pulse rounded-xl bg-blue/[0.08] motion-reduce:animate-none" />
-
-                  <div className="min-w-0 flex-1 space-y-3 pt-1">
-                    <div className="h-3.5 w-2/5 animate-pulse rounded bg-ink/10 motion-reduce:animate-none" />
-                    <div className="h-3 w-4/5 animate-pulse rounded bg-ink/[0.07] motion-reduce:animate-none" />
-                    <div className="h-3 w-3/5 animate-pulse rounded bg-ink/[0.07] motion-reduce:animate-none" />
+              <div className="rounded-3xl border border-line bg-white p-5 shadow-[0_8px_28px_rgba(0,51,78,0.04)] sm:p-7">
+                <div className="flex items-center gap-3 border-b border-line pb-4">
+                  <div className="size-11 animate-pulse rounded-2xl bg-blue/10 motion-reduce:animate-none" />
+                  <div className="space-y-1.5">
+                    <div className="h-4 w-36 animate-pulse rounded bg-navy/10 motion-reduce:animate-none" />
+                    <div className="h-3 w-52 animate-pulse rounded bg-ink/[0.06] motion-reduce:animate-none" />
                   </div>
                 </div>
-              </div>
 
-              {/* Purchased items */}
-              <div className="overflow-hidden rounded-2xl border border-line bg-white">
-                <div className="border-b border-line bg-[#f8faff] px-5 py-4 sm:px-6">
-                  <div className="h-4 w-28 animate-pulse rounded bg-navy/10 motion-reduce:animate-none" />
-                </div>
-
-                <div className="divide-y divide-line px-5 sm:px-6">
-                  {[1, 2].map((item) => (
-                    <div
-                      key={item}
-                      className="flex gap-4 py-5"
-                    >
-                      <div className="size-[76px] shrink-0 animate-pulse rounded-xl border border-line bg-mist/70 motion-reduce:animate-none" />
-
-                      <div className="min-w-0 flex-1 py-1">
-                        <div className="h-4 w-3/4 max-w-56 animate-pulse rounded bg-navy/[0.09] motion-reduce:animate-none" />
-
-                        <div className="mt-3 h-3 w-24 animate-pulse rounded bg-ink/[0.07] motion-reduce:animate-none" />
-
-                        <div className="mt-4 h-3 w-16 animate-pulse rounded bg-blue/10 motion-reduce:animate-none" />
-                      </div>
-
-                      <div className="hidden pt-1 sm:block">
-                        <div className="h-4 w-20 animate-pulse rounded bg-ink/10 motion-reduce:animate-none" />
-                      </div>
-                    </div>
-                  ))}
+                <div className="mt-5 space-y-3">
+                  <div className="h-4 w-40 animate-pulse rounded bg-navy/10 motion-reduce:animate-none" />
+                  <div className="h-3 w-3/4 animate-pulse rounded bg-ink/[0.07] motion-reduce:animate-none" />
+                  <div className="h-3 w-1/2 animate-pulse rounded bg-ink/[0.07] motion-reduce:animate-none" />
                 </div>
               </div>
             </div>
 
             {/* Order summary */}
-            <aside className="overflow-hidden rounded-2xl border border-line bg-white lg:sticky lg:top-24">
-              <div className="border-b border-line bg-[#f8faff] px-5 py-4">
-                <div className="h-4 w-32 animate-pulse rounded bg-navy/10 motion-reduce:animate-none" />
+            <aside className="rounded-3xl border border-line bg-white p-5 shadow-[0_8px_28px_rgba(0,51,78,0.04)] sm:p-7">
+              <div className="flex items-center gap-3 border-b border-line pb-4">
+                <div className="size-11 animate-pulse rounded-2xl bg-blue/10 motion-reduce:animate-none" />
+                <div className="space-y-1.5">
+                  <div className="h-4 w-32 animate-pulse rounded bg-navy/10 motion-reduce:animate-none" />
+                  <div className="h-3 w-40 animate-pulse rounded bg-ink/[0.06] motion-reduce:animate-none" />
+                </div>
               </div>
 
-              <div className="space-y-5 p-5">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="h-3 w-20 animate-pulse rounded bg-ink/[0.08] motion-reduce:animate-none" />
-                  <div className="h-3 w-16 animate-pulse rounded bg-ink/[0.08] motion-reduce:animate-none" />
-                </div>
-
-                <div className="flex items-center justify-between gap-4">
-                  <div className="h-3 w-24 animate-pulse rounded bg-ink/[0.08] motion-reduce:animate-none" />
-                  <div className="h-3 w-12 animate-pulse rounded bg-ink/[0.08] motion-reduce:animate-none" />
-                </div>
-
-                <div className="border-t border-dashed border-line pt-5">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="h-4 w-16 animate-pulse rounded bg-navy/10 motion-reduce:animate-none" />
-                    <div className="h-6 w-28 animate-pulse rounded bg-blue/15 motion-reduce:animate-none" />
+              <div className="divide-y divide-line">
+                {[1, 2].map((item) => (
+                  <div key={item} className="flex gap-4 py-4">
+                    <div className="size-16 shrink-0 animate-pulse rounded-xl border border-line bg-mist/70 motion-reduce:animate-none" />
+                    <div className="min-w-0 flex-1 space-y-2 py-1">
+                      <div className="h-4 w-3/4 animate-pulse rounded bg-navy/10 motion-reduce:animate-none" />
+                      <div className="h-3 w-20 animate-pulse rounded bg-ink/[0.07] motion-reduce:animate-none" />
+                    </div>
                   </div>
+                ))}
+              </div>
+
+              <div className="mt-4 space-y-3 border-t border-line pt-4">
+                <div className="flex justify-between">
+                  <div className="h-3 w-16 animate-pulse rounded bg-ink/[0.07] motion-reduce:animate-none" />
+                  <div className="h-3 w-20 animate-pulse rounded bg-ink/[0.07] motion-reduce:animate-none" />
                 </div>
-
-                <div className="h-12 w-full animate-pulse rounded-xl bg-blue/10 motion-reduce:animate-none" />
-
-                <div className="mx-auto h-3 w-40 animate-pulse rounded bg-ink/[0.06] motion-reduce:animate-none" />
+                <div className="flex justify-between">
+                  <div className="h-4 w-20 animate-pulse rounded bg-navy/10 motion-reduce:animate-none" />
+                  <div className="h-5 w-24 animate-pulse rounded bg-blue/15 motion-reduce:animate-none" />
+                </div>
               </div>
             </aside>
           </div>
