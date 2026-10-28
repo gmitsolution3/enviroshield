@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { CalendarClock, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
@@ -17,49 +17,23 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { axiosInstance } from "@/lib/axios";
-import type { Booking, BookingStatus } from "@/types/admin/booking.type";
-import { formatBookingStatus } from "./bookingUtils";
+import type { Booking } from "@/types/admin/booking.type";
 
-type UpdateBookingModalProps = {
+type UpdateBookingManagementModalProps = {
   booking: Booking | null;
   open: boolean;
-  revalidateKey: string | string[];
   onClose: () => void;
   onSuccess?: () => void;
 };
 
-const BOOKING_STATUSES = [
-  "pending",
-  "confirmed",
-  "in-progress",
-  "completed",
-  "cancelled",
-  "rejected",
-] as const satisfies readonly BookingStatus[];
-
 const formSchema = z
   .object({
-    status: z.enum(BOOKING_STATUSES, { message: "Select a booking status." }),
-    finalPrice: z
-      .string()
-      .trim()
-      .refine(
-        (val) => val === "" || (!Number.isNaN(Number(val)) && Number(val) >= 0),
-        "Price must be a positive number.",
-      ),
     isSiteVisit: z.boolean(),
     siteVisitDate: z.string(),
-    adminNotes: z.string().max(2000, "Notes must be 2000 characters or fewer."),
+    adminNotes: z.string().max(2000, "Notes must be 2,000 characters or fewer."),
   })
   .superRefine((values, context) => {
     if (
@@ -70,7 +44,7 @@ const formSchema = z
       context.addIssue({
         code: "custom",
         path: ["siteVisitDate"],
-        message: "Enter a valid site-visit date.",
+        message: "Enter a valid site-visit date and time.",
       });
     }
   });
@@ -85,12 +59,12 @@ function toDateTimeInput(value?: string) {
   return new Date(date.getTime() - offset).toISOString().slice(0, 16);
 }
 
-export default function UpdateBookingModal({
+export default function UpdateBookingManagementModal({
   booking,
   open,
   onClose,
   onSuccess,
-}: UpdateBookingModalProps) {
+}: UpdateBookingManagementModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -102,8 +76,6 @@ export default function UpdateBookingModal({
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      status: "pending",
-      finalPrice: "",
       isSiteVisit: false,
       siteVisitDate: "",
       adminNotes: "",
@@ -115,9 +87,6 @@ export default function UpdateBookingModal({
   useEffect(() => {
     if (open && booking) {
       reset({
-        status: booking.status,
-        finalPrice:
-          booking.finalPrice != null ? String(booking.finalPrice) : "",
         isSiteVisit: Boolean(booking.isSiteVisit),
         siteVisitDate: toDateTimeInput(booking.siteVisitDate),
         adminNotes: booking.adminNotes || "",
@@ -135,61 +104,27 @@ export default function UpdateBookingModal({
 
     setIsSubmitting(true);
     try {
-      const promises: Promise<unknown>[] = [];
+      const payload: {
+        isSiteVisit: boolean;
+        siteVisitDate?: string;
+        adminNotes?: string;
+      } = {
+        isSiteVisit: values.isSiteVisit,
+        adminNotes: values.adminNotes.trim(),
+      };
 
-      // 1. Update Status if changed
-      if (values.status !== booking.status) {
-        promises.push(
-          axiosInstance.patch(`/booking/${booking._id}/status`, {
-            status: values.status,
-          }),
-        );
+      if (values.isSiteVisit && values.siteVisitDate) {
+        payload.siteVisitDate = new Date(values.siteVisitDate).toISOString();
       }
 
-      // 2. Update Price if changed or provided
-      const currentPriceStr =
-        booking.finalPrice != null ? String(booking.finalPrice) : "";
-      if (values.finalPrice !== currentPriceStr && values.finalPrice !== "") {
-        promises.push(
-          axiosInstance.patch(`/booking/${booking._id}/price`, {
-            finalPrice: Number(values.finalPrice),
-          }),
-        );
-      }
+      const response = await axiosInstance.patch(
+        `/booking/${booking._id}/management`,
+        payload,
+      );
 
-      // 3. Update Management (Site visit & admin notes) if changed
-      const originalDate = toDateTimeInput(booking.siteVisitDate);
-      const isManagementChanged =
-        values.isSiteVisit !== booking.isSiteVisit ||
-        (values.isSiteVisit && values.siteVisitDate !== originalDate) ||
-        values.adminNotes.trim() !== (booking.adminNotes || "").trim();
-
-      if (isManagementChanged) {
-        const payload: {
-          isSiteVisit: boolean;
-          siteVisitDate?: Date;
-          adminNotes?: string;
-        } = {
-          isSiteVisit: values.isSiteVisit,
-          adminNotes: values.adminNotes.trim(),
-        };
-
-        if (values.isSiteVisit && values.siteVisitDate) {
-          payload.siteVisitDate = new Date(values.siteVisitDate);
-        }
-
-        promises.push(
-          axiosInstance.patch(`/booking/${booking._id}/management`, payload),
-        );
-      }
-
-      if (promises.length > 0) {
-        await Promise.all(promises);
-        toast.success("Booking updated successfully.");
-      } else {
-        toast.info("No changes were made.");
-      }
-
+      toast.success(
+        response.data?.message || "Booking details updated successfully.",
+      );
       onSuccess?.();
       onClose();
     } catch (error: unknown) {
@@ -197,7 +132,7 @@ export default function UpdateBookingModal({
       const message =
         err?.response?.data?.message ||
         err?.message ||
-        "Failed to update booking.";
+        "Failed to update booking site visit and notes.";
       toast.error(message);
     } finally {
       setIsSubmitting(false);
@@ -206,13 +141,16 @@ export default function UpdateBookingModal({
 
   return (
     <Dialog open={open} onOpenChange={(val) => !val && handleClose()}>
-      <DialogContent className="max-h-[92vh] max-w-xl overflow-y-auto rounded-2xl border-0 p-0 shadow-2xl">
+      <DialogContent className="max-h-[92vh] max-w-lg overflow-y-auto rounded-2xl border-0 p-0 shadow-2xl">
         <DialogHeader className="border-b px-6 py-5 text-left sm:px-7">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 mb-2">
+            <CalendarClock className="h-5 w-5" />
+          </div>
           <DialogTitle className="text-xl font-bold text-navy">
-            Update Booking
+            Manage Site Visit & Notes
           </DialogTitle>
           <DialogDescription className="text-sm leading-6">
-            Modify the status, price, inspection schedule, and admin notes for{" "}
+            Schedule an inspection visit and add internal notes for booking{" "}
             <span className="font-semibold text-foreground">
               #{booking?.bookingNumber}
             </span>
@@ -222,67 +160,15 @@ export default function UpdateBookingModal({
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-5 px-6 py-6 sm:px-7">
-            {/* Status Field */}
-            <div className="space-y-2">
-              <Label htmlFor="booking-status" className="text-sm font-semibold text-navy">
-                Booking Status
-              </Label>
-              <Controller
-                control={control}
-                name="status"
-                render={({ field }) => (
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={isSubmitting}
-                  >
-                    <SelectTrigger id="booking-status" className="h-10 w-full rounded-xl">
-                      <SelectValue placeholder="Select booking status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BOOKING_STATUSES.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {formatBookingStatus(status)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.status && (
-                <p className="text-xs text-destructive">{errors.status.message}</p>
-              )}
-            </div>
-
-            {/* Final Price Field */}
-            <div className="space-y-2">
-              <Label htmlFor="final-price" className="text-sm font-semibold text-navy">
-                Final Agreed Price (BDT)
-              </Label>
-              <Input
-                id="final-price"
-                type="number"
-                step="any"
-                min="0"
-                placeholder="e.g. 15000"
-                disabled={isSubmitting}
-                {...register("finalPrice")}
-                className="h-10 rounded-xl"
-              />
-              {errors.finalPrice && (
-                <p className="text-xs text-destructive">{errors.finalPrice.message}</p>
-              )}
-            </div>
-
             {/* Site Visit Toggle & Date */}
             <div className="space-y-4 rounded-xl border border-slate-100 bg-slate-50/70 p-4 dark:border-border/60 dark:bg-muted/30">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="site-visit-toggle" className="text-sm font-semibold text-navy">
-                    Site Visit Required
+                  <Label htmlFor="site-visit-switch" className="text-sm font-semibold text-navy">
+                    Site Visit Inspection
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    Enable if an onsite inspection or technical visit is needed.
+                    Enable if a physical inspection or site assessment is required.
                   </p>
                 </div>
                 <Controller
@@ -290,7 +176,7 @@ export default function UpdateBookingModal({
                   name="isSiteVisit"
                   render={({ field }) => (
                     <Switch
-                      id="site-visit-toggle"
+                      id="site-visit-switch"
                       checked={field.value}
                       onCheckedChange={field.onChange}
                       disabled={isSubmitting}
@@ -300,12 +186,12 @@ export default function UpdateBookingModal({
               </div>
 
               {isSiteVisit && (
-                <div className="space-y-2 pt-2">
-                  <Label htmlFor="site-visit-date" className="text-xs font-semibold text-navy">
+                <div className="space-y-2 pt-2 border-t border-slate-200/60 dark:border-border/40">
+                  <Label htmlFor="site-visit-time" className="text-xs font-semibold text-navy">
                     Scheduled Inspection Date & Time
                   </Label>
                   <Input
-                    id="site-visit-date"
+                    id="site-visit-time"
                     type="datetime-local"
                     disabled={isSubmitting}
                     {...register("siteVisitDate")}
@@ -322,13 +208,13 @@ export default function UpdateBookingModal({
 
             {/* Admin Notes */}
             <div className="space-y-2">
-              <Label htmlFor="admin-notes" className="text-sm font-semibold text-navy">
+              <Label htmlFor="mgmt-admin-notes" className="text-sm font-semibold text-navy">
                 Internal Admin Notes
               </Label>
               <Textarea
-                id="admin-notes"
-                rows={3}
-                placeholder="Add internal notes, client requirements, or inspection summaries..."
+                id="mgmt-admin-notes"
+                rows={4}
+                placeholder="Record inspection details, scope observations, or internal team instructions..."
                 disabled={isSubmitting}
                 {...register("adminNotes")}
                 className="rounded-xl"
@@ -360,7 +246,7 @@ export default function UpdateBookingModal({
                   Saving...
                 </>
               ) : (
-                "Save Changes"
+                "Save Details"
               )}
             </DashboardButton>
           </div>
@@ -369,3 +255,4 @@ export default function UpdateBookingModal({
     </Dialog>
   );
 }
+

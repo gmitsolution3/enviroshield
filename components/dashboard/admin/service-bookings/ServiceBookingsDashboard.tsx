@@ -6,12 +6,14 @@ import {
   type ColumnDef,
 } from "@tanstack/react-table";
 import {
+  BadgeCheck,
   Ban,
   Calendar,
+  CalendarClock,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
-  Edit,
+  DollarSign,
   Eye,
   Filter,
   MoreHorizontal,
@@ -55,7 +57,9 @@ import {
   getBookingStatusClass,
 } from "./bookingUtils";
 import CancelBookingDialog from "./CancelBookingDialog";
-import UpdateBookingModal from "./UpdateBookingModal";
+import UpdateBookingManagementModal from "./UpdateBookingManagementModal";
+import UpdateBookingPriceModal from "./UpdateBookingPriceModal";
+import UpdateBookingStatusModal from "./UpdateBookingStatusModal";
 import ViewBookingModal from "./ViewBookingModal";
 
 const features = tableFeatures({});
@@ -78,7 +82,9 @@ export default function ServiceBookingsDashboard() {
 
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
+  const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -139,9 +145,19 @@ export default function ServiceBookingsDashboard() {
     setIsViewModalOpen(true);
   };
 
-  const handleEdit = (booking: Booking) => {
+  const handleUpdateStatus = (booking: Booking) => {
     setSelectedBooking(booking);
-    setIsEditModalOpen(true);
+    setIsStatusModalOpen(true);
+  };
+
+  const handleUpdatePrice = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsPriceModalOpen(true);
+  };
+
+  const handleUpdateManagement = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsManagementModalOpen(true);
   };
 
   const handleCancel = (booking: Booking) => {
@@ -299,25 +315,46 @@ export default function ServiceBookingsDashboard() {
                   ariaLabel={`Actions for booking ${booking.bookingNumber}`}
                 />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuContent align="end" className="w-52">
                 <DropdownMenuGroup>
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                  <DropdownMenuLabel>Booking Actions</DropdownMenuLabel>
                   <DropdownMenuSeparator />
+
                   <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={() => handleEdit(booking)}
+                    onClick={() => handleUpdateStatus(booking)}
                   >
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit Booking
+                    <BadgeCheck className="mr-2 h-4 w-4 text-blue" />
+                    Update Status
                   </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => handleUpdatePrice(booking)}
+                  >
+                    <DollarSign className="mr-2 h-4 w-4 text-emerald-600" />
+                    Update Price
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => handleUpdateManagement(booking)}
+                  >
+                    <CalendarClock className="mr-2 h-4 w-4 text-amber-600" />
+                    Manage Site Visit / Notes
+                  </DropdownMenuItem>
+
                   {canCancel && (
-                    <DropdownMenuItem
-                      className="cursor-pointer text-destructive focus:text-destructive"
-                      onClick={() => handleCancel(booking)}
-                    >
-                      <Ban className="mr-2 h-4 w-4" />
-                      Cancel Booking
-                    </DropdownMenuItem>
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="cursor-pointer text-destructive focus:text-destructive"
+                        onClick={() => handleCancel(booking)}
+                      >
+                        <Ban className="mr-2 h-4 w-4" />
+                        Cancel Booking
+                      </DropdownMenuItem>
+                    </>
                   )}
                 </DropdownMenuGroup>
               </DropdownMenuContent>
@@ -505,7 +542,7 @@ export default function ServiceBookingsDashboard() {
         </div>
       )}
 
-      {/* Modals & Dialogs */}
+      {/* Dedicated Modals & Dialogs */}
       <ViewBookingModal
         isModalOpen={isViewModalOpen}
         setIsModalOpen={(open) => {
@@ -515,12 +552,31 @@ export default function ServiceBookingsDashboard() {
         booking={selectedBooking}
       />
 
-      <UpdateBookingModal
+      <UpdateBookingStatusModal
         booking={selectedBooking}
-        open={isEditModalOpen}
-        revalidateKey={endpoint}
+        open={isStatusModalOpen}
         onClose={() => {
-          setIsEditModalOpen(false);
+          setIsStatusModalOpen(false);
+          setSelectedBooking(null);
+        }}
+        onSuccess={() => void refetch()}
+      />
+
+      <UpdateBookingPriceModal
+        booking={selectedBooking}
+        open={isPriceModalOpen}
+        onClose={() => {
+          setIsPriceModalOpen(false);
+          setSelectedBooking(null);
+        }}
+        onSuccess={() => void refetch()}
+      />
+
+      <UpdateBookingManagementModal
+        booking={selectedBooking}
+        open={isManagementModalOpen}
+        onClose={() => {
+          setIsManagementModalOpen(false);
           setSelectedBooking(null);
         }}
         onSuccess={() => void refetch()}
@@ -529,7 +585,6 @@ export default function ServiceBookingsDashboard() {
       <CancelBookingDialog
         booking={selectedBooking}
         open={isCancelDialogOpen}
-        revalidateKey={endpoint}
         onClose={() => {
           setIsCancelDialogOpen(false);
           setSelectedBooking(null);
