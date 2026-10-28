@@ -186,6 +186,26 @@ export default function ServicesDashboard() {
     },
 
     {
+      accessorKey: "price",
+      header: "Base Price",
+
+      cell: ({ row }) => {
+        const price = row.original.price;
+
+        return (
+          <div className="min-w-[120px] space-y-0.5">
+            <div className="font-semibold text-slate-800 dark:text-foreground">
+              {price != null && price > 0
+                ? `BDT ${price.toLocaleString("en-BD")}`
+                : "Quote Pending"}
+            </div>
+            <span className="text-[11px] text-slate-400">starting from</span>
+          </div>
+        );
+      },
+    },
+
+    {
       accessorKey: "status",
       header: "Status",
 

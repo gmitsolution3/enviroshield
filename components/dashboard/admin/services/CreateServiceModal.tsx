@@ -75,6 +75,7 @@ const formSchema = z.object({
     .string()
     .min(1, "Service name is required")
     .max(100, "Service name must be 100 characters or less"),
+  price: z.number().min(0, "Price must be 0 or positive"),
   slug: z
     .string()
     .min(1, "Slug is required")
@@ -113,6 +114,7 @@ const createDefaultContentSection = () => ({
 
 const defaultValues: FormValues = {
   name: "",
+  price: 0,
   slug: "",
   isFeatured: false,
   primaryImage: {
@@ -235,6 +237,7 @@ export default function CreateServiceModal({
   const stepFields = [
     [
       "name",
+      "price",
       "slug",
       "isFeatured",
       "primaryImage",
@@ -298,6 +301,7 @@ export default function CreateServiceModal({
     try {
       const payload = {
         name: data.name,
+        price: Number(data.price) || 0,
         slug: data.slug,
         isFeatured: data.isFeatured,
 
@@ -479,7 +483,7 @@ export default function CreateServiceModal({
                   title="Basic Information"
                   description="Configure the basic information for this service."
                 >
-                  <div className="grid gap-5 md:grid-cols-2">
+                  <div className="grid gap-5 md:grid-cols-3">
                     <div className="space-y-2">
                       <Label
                         className="text-sm font-semibold text-navy"
@@ -531,6 +535,30 @@ export default function CreateServiceModal({
                       {errors.slug && (
                         <p className="text-sm text-destructive">
                           {errors.slug.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label
+                        className="text-sm font-semibold text-navy"
+                        htmlFor="service-price"
+                      >
+                        Starting Price (BDT)
+                      </Label>
+
+                      <Input
+                        id="service-price"
+                        type="number"
+                        min="0"
+                        step="any"
+                        placeholder="e.g. 12000"
+                        {...register("price", { valueAsNumber: true })}
+                      />
+
+                      {errors.price && (
+                        <p className="text-sm text-destructive">
+                          {errors.price.message}
                         </p>
                       )}
                     </div>

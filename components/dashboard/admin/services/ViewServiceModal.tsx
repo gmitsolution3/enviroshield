@@ -4,6 +4,7 @@ import {
   Calendar,
   CheckCircle,
   Clock,
+  DollarSign,
   ExternalLink,
   Globe,
   ImageIcon,
@@ -159,7 +160,17 @@ export default function ViewServiceModal({
                 </div>
 
                 {/* Hero Meta */}
-                <div className="mt-7 grid gap-3 sm:grid-cols-3">
+                <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <HeroMeta
+                    icon={<DollarSign className="h-4 w-4" />}
+                    label="Starting Price"
+                    value={
+                      service.price != null && service.price > 0
+                        ? `BDT ${service.price.toLocaleString("en-BD")}`
+                        : "Quote Pending"
+                    }
+                  />
+
                   <HeroMeta
                     icon={<Calendar className="h-4 w-4" />}
                     label="Created"
@@ -197,6 +208,17 @@ export default function ViewServiceModal({
               />
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <InfoCard
+                  label="Starting Price"
+                  value={
+                    service.price != null && service.price > 0
+                      ? `BDT ${service.price.toLocaleString("en-BD")}`
+                      : "Quote Pending"
+                  }
+                  icon={<DollarSign className="h-4 w-4" />}
+                  accent="blue"
+                />
+
                 <InfoCard
                   label="Service Name"
                   value={service.name}

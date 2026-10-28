@@ -184,6 +184,17 @@ export default async function ServiceDetailPage({
       url: siteUrl,
     },
 
+    ...(service.price != null && service.price > 0
+      ? {
+          offers: {
+            "@type": "Offer",
+            price: service.price,
+            priceCurrency: "BDT",
+            availability: "https://schema.org/InStock",
+          },
+        }
+      : {}),
+
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": `${serviceUrl}#webpage`,
@@ -340,6 +351,20 @@ export default async function ServiceDetailPage({
                 text={service.description}
                 headingId="service-overview-heading"
               />
+
+              {service.price != null && service.price > 0 && (
+                <div className="mt-6 flex flex-wrap items-baseline gap-2.5 rounded-2xl border border-blue/20 bg-blue/5 px-4 py-3 sm:px-5 sm:py-3.5">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-blue">
+                    Starting from
+                  </span>
+                  <span className="font-display text-2xl font-bold tracking-tight text-navy sm:text-3xl">
+                    BDT {service.price.toLocaleString("en-BD")}
+                  </span>
+                  <span className="text-xs text-ink/70">
+                    / estimated base project cost
+                  </span>
+                </div>
+              )}
 
               <ul className="mb-9 mt-8 divide-y divide-line border-y border-line">
                 {benefits.map((benefit) => (

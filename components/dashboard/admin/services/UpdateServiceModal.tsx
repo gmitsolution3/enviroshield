@@ -85,6 +85,7 @@ const formSchema = z.object({
     .string()
     .min(1, "Service name is required")
     .max(100, "Service name must be 100 characters or less"),
+  price: z.number().min(0, "Price must be 0 or positive"),
   slug: z
     .string()
     .min(1, "Slug is required")
@@ -118,6 +119,7 @@ const createDefaultContentSection = () => ({
 
 const defaultValues: FormValues = {
   name: "",
+  price: 0,
   slug: "",
   isFeatured: false,
   primaryImage: { url: "", publicId: "", alt: "", caption: "" },
@@ -200,6 +202,7 @@ const mapContentSection = (section?: {
 
 const getServiceFormValues = (service: IService): FormValues => ({
   name: service.name ?? "",
+  price: service.price ?? 0,
   slug: service.slug ?? "",
   isFeatured: service.isFeatured ?? false,
   primaryImage: mapImage(service.primaryImage),
@@ -263,6 +266,7 @@ export default function UpdateServiceModal({
   const stepFields = [
     [
       "name",
+      "price",
       "slug",
       "isFeatured",
       "primaryImage",
@@ -342,6 +346,7 @@ export default function UpdateServiceModal({
         id: service._id,
         data: {
           name: values.name,
+          price: Number(values.price) || 0,
           slug: values.slug,
           isFeatured: values.isFeatured,
           primaryImage: values.primaryImage,
@@ -461,7 +466,7 @@ export default function UpdateServiceModal({
                   title="Basic Information"
                   description="Configure the basic information for this service."
                 >
-                  <div className="grid gap-5 md:grid-cols-2">
+                  <div className="grid gap-5 md:grid-cols-3">
                     <Field label="Service Name" error={errors.name?.message}>
                       <Input
                         {...register("name", {
@@ -477,6 +482,15 @@ export default function UpdateServiceModal({
                     </Field>
                     <Field label="Slug" error={errors.slug?.message}>
                       <Input {...register("slug")} placeholder="roof-waterproofing" />
+                    </Field>
+                    <Field label="Starting Price (BDT)" error={errors.price?.message}>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="any"
+                        placeholder="e.g. 12000"
+                        {...register("price", { valueAsNumber: true })}
+                      />
                     </Field>
                   </div>
 

@@ -32,6 +32,7 @@ export interface IService {
   _id: string;
   name: string;
   slug: string;
+  price: number;
   isFeatured: boolean;
 
   primaryImage: IServiceImage;
