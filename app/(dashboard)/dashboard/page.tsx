@@ -5,8 +5,6 @@ import { requireAuth } from "@/lib/auth-guards";
 export default async function DashboardPage() {
   const session = await requireAuth();
 
-  console.log(session)
-
   const role = session.user.role ?? "user";
 
   if (role === "admin") {
