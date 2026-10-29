@@ -81,14 +81,14 @@ test("Frontend API exports getPublicSettings and admin settings methods with fal
 
 // 5. Admin Settings Page & Tab Architecture
 test("Admin Settings page supports SEO, Analytics, Advertising, Consent, and preserved Account cards", () => {
-  const pagePath = path.join(frontendDir, "app/(dashboard)/dashboard/(general-dashboard)/settings/page.tsx");
+  const pagePath = path.join(frontendDir, "app/(dashboard)/dashboard/(admin-dashboard)/settings/page.tsx");
   const managerPath = path.join(frontendDir, "components/dashboard/admin/settings/AdminSettingsManager.tsx");
 
-  assert(fs.existsSync(pagePath), "settings/page.tsx must exist");
+  assert(fs.existsSync(pagePath), "settings/page.tsx must exist in (admin-dashboard)");
   assert(fs.existsSync(managerPath), "AdminSettingsManager.tsx must exist");
 
   const pageContent = fs.readFileSync(pagePath, "utf8");
-  assert(pageContent.includes('session?.user?.role === "admin"'), "Must check admin role");
+  assert(pageContent.includes('requireRole("admin")'), "Must enforce admin role authorization");
   assert(pageContent.includes("<AdminSettingsManager"), "Must render AdminSettingsManager");
 
   const managerContent = fs.readFileSync(managerPath, "utf8");

@@ -1,6 +1,19 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { settingsApi } from "@/lib/api/settings";
+import {
+  ISettings,
+  defaultSettingsValues,
+} from "@/types/admin/settings.type";
 import {
   Activity,
   AlertCircle,
@@ -16,24 +29,13 @@ import {
   Trash2,
   User,
 } from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { settingsApi } from "@/lib/api/settings";
-import {
-  ISettings,
-  defaultSettingsValues,
-} from "@/types/admin/settings.type";
-import { GeneralSeoSettings } from "./GeneralSeoSettings";
-import { AnalyticsSettings } from "./AnalyticsSettings";
+import DashboardButton from "@/components/dashboard/DashboardButton";
+import { SettingsSkeleton } from "./SettingsSkeleton";
 import { AdvertisingSettings } from "./AdvertisingSettings";
+import { AnalyticsSettings } from "./AnalyticsSettings";
+import { GeneralSeoSettings } from "./GeneralSeoSettings";
 import { PrivacyConsentSettings } from "./PrivacyConsentSettings";
 
 interface AdminSettingsManagerProps {
@@ -61,7 +63,9 @@ export function AdminSettingsManager({
   const [savedSettings, setSavedSettings] = useState<ISettings>(
     initialSettings || defaultSettingsValues,
   );
-  const [isLoading, setIsLoading] = useState(!initialSettings && isAdmin);
+  const [isLoading, setIsLoading] = useState(
+    !initialSettings && isAdmin,
+  );
   const [isPending, startTransition] = useTransition();
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -90,23 +94,36 @@ export function AdminSettingsManager({
     const newErrors: Record<string, string> = {};
 
     // GA4 validation
-    if (settings.analytics.ga4.enabled && settings.analytics.ga4.measurementId) {
-      if (!/^G-[A-Z0-9]+$/i.test(settings.analytics.ga4.measurementId)) {
+    if (
+      settings.analytics.ga4.enabled &&
+      settings.analytics.ga4.measurementId
+    ) {
+      if (
+        !/^G-[A-Z0-9]+$/i.test(settings.analytics.ga4.measurementId)
+      ) {
         newErrors["analytics.ga4.measurementId"] =
           "Measurement ID must be in the format G-XXXXXXXXXX";
       }
     }
 
     // GTM validation
-    if (settings.analytics.gtm.enabled && settings.analytics.gtm.containerId) {
-      if (!/^GTM-[A-Z0-9]+$/i.test(settings.analytics.gtm.containerId)) {
+    if (
+      settings.analytics.gtm.enabled &&
+      settings.analytics.gtm.containerId
+    ) {
+      if (
+        !/^GTM-[A-Z0-9]+$/i.test(settings.analytics.gtm.containerId)
+      ) {
         newErrors["analytics.gtm.containerId"] =
           "Container ID must be in the format GTM-XXXXXXX";
       }
     }
 
     // Meta Pixel validation
-    if (settings.marketing.metaPixel.enabled && settings.marketing.metaPixel.pixelId) {
+    if (
+      settings.marketing.metaPixel.enabled &&
+      settings.marketing.metaPixel.pixelId
+    ) {
       if (!/^\d{8,20}$/.test(settings.marketing.metaPixel.pixelId)) {
         newErrors["marketing.metaPixel.pixelId"] =
           "Meta Pixel ID must contain 8–20 digits";
@@ -114,8 +131,15 @@ export function AdminSettingsManager({
     }
 
     // Google Ads validation
-    if (settings.marketing.googleAds.enabled && settings.marketing.googleAds.conversionId) {
-      if (!/^(AW-)?[0-9]+$/i.test(settings.marketing.googleAds.conversionId)) {
+    if (
+      settings.marketing.googleAds.enabled &&
+      settings.marketing.googleAds.conversionId
+    ) {
+      if (
+        !/^(AW-)?[0-9]+$/i.test(
+          settings.marketing.googleAds.conversionId,
+        )
+      ) {
         newErrors["marketing.googleAds.conversionId"] =
           "Conversion ID must be numbers or AW-XXXXXXXXX";
       }
@@ -127,7 +151,9 @@ export function AdminSettingsManager({
 
   const handleSave = () => {
     if (!validate()) {
-      toast.error("Please correct the highlighted validation errors.");
+      toast.error(
+        "Please correct the highlighted validation errors.",
+      );
       return;
     }
 
@@ -140,7 +166,10 @@ export function AdminSettingsManager({
       } catch (error: unknown) {
         console.error("Save settings error:", error);
         let msg = "Failed to save settings.";
-        const errObj = error as { response?: { data?: { message?: string } }; message?: string };
+        const errObj = error as {
+          response?: { data?: { message?: string } };
+          message?: string;
+        };
         if (typeof errObj?.response?.data?.message === "string") {
           msg = errObj.response.data.message;
         } else if (typeof errObj?.message === "string") {
@@ -152,12 +181,7 @@ export function AdminSettingsManager({
   };
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[400px] flex-col items-center justify-center gap-3">
-        <Loader2 className="h-8 w-8 animate-spin text-blue" />
-        <p className="text-sm text-muted-foreground">Loading settings...</p>
-      </div>
-    );
+    return <SettingsSkeleton />;
   }
 
   return (
@@ -253,23 +277,19 @@ export function AdminSettingsManager({
                   Unsaved changes
                 </span>
               )}
-              <Button
+              <DashboardButton
                 onClick={handleSave}
                 disabled={isPending}
-                className="rounded-xl gap-2 font-medium"
-              >
-                {isPending ? (
-                  <>
+                icon={
+                  isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
+                  ) : (
                     <Save className="h-4 w-4" />
-                    Save Settings
-                  </>
-                )}
-              </Button>
+                  )
+                }
+              >
+                {isPending ? "Saving..." : "Save Settings"}
+              </DashboardButton>
             </div>
           )}
         </div>
@@ -287,7 +307,9 @@ export function AdminSettingsManager({
       {isAdmin && activeTab === "analytics" && (
         <AnalyticsSettings
           data={settings.analytics}
-          onChange={(analytics) => setSettings({ ...settings, analytics })}
+          onChange={(analytics) =>
+            setSettings({ ...settings, analytics })
+          }
           errors={errors}
         />
       )}
@@ -295,7 +317,9 @@ export function AdminSettingsManager({
       {isAdmin && activeTab === "advertising" && (
         <AdvertisingSettings
           data={settings.marketing}
-          onChange={(marketing) => setSettings({ ...settings, marketing })}
+          onChange={(marketing) =>
+            setSettings({ ...settings, marketing })
+          }
           errors={errors}
         />
       )}
@@ -303,7 +327,9 @@ export function AdminSettingsManager({
       {isAdmin && activeTab === "consent" && (
         <PrivacyConsentSettings
           data={settings.consent}
-          onChange={(consent) => setSettings({ ...settings, consent })}
+          onChange={(consent) =>
+            setSettings({ ...settings, consent })
+          }
           errors={errors}
         />
       )}
@@ -339,14 +365,20 @@ export function AdminSettingsManager({
                   </div>
 
                   <div>
-                    <p className="text-sm font-medium">Notifications</p>
+                    <p className="text-sm font-medium">
+                      Notifications
+                    </p>
                     <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                      Notification preferences will be available here in the future.
+                      Notification preferences will be available here
+                      in the future.
                     </p>
                   </div>
                 </div>
 
-                <Badge variant="secondary" className="shrink-0 rounded-full">
+                <Badge
+                  variant="secondary"
+                  className="shrink-0 rounded-full"
+                >
                   Coming soon
                 </Badge>
               </div>
@@ -362,12 +394,16 @@ export function AdminSettingsManager({
                   <div>
                     <p className="text-sm font-medium">Appearance</p>
                     <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                      Theme and appearance preferences will be available here.
+                      Theme and appearance preferences will be
+                      available here.
                     </p>
                   </div>
                 </div>
 
-                <Badge variant="secondary" className="shrink-0 rounded-full">
+                <Badge
+                  variant="secondary"
+                  className="shrink-0 rounded-full"
+                >
                   Coming soon
                 </Badge>
               </div>
@@ -397,13 +433,19 @@ export function AdminSettingsManager({
             <CardContent className="px-6 py-2 sm:px-7">
               <div className="flex items-center justify-between gap-6 py-5">
                 <div>
-                  <p className="text-sm font-medium">Password &amp; security</p>
+                  <p className="text-sm font-medium">
+                    Password &amp; security
+                  </p>
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                    Change your password and manage your account security from your profile.
+                    Change your password and manage your account
+                    security from your profile.
                   </p>
                 </div>
 
-                <Button variant="ghost" className="shrink-0 rounded-full">
+                <Button
+                  variant="ghost"
+                  className="shrink-0 rounded-full"
+                >
                   <a href="/dashboard/profile">
                     Manage
                     <ChevronRight className="ml-1 h-4 w-4" />
@@ -415,13 +457,19 @@ export function AdminSettingsManager({
 
               <div className="flex items-center justify-between gap-6 py-5">
                 <div>
-                  <p className="text-sm font-medium">Active sessions</p>
+                  <p className="text-sm font-medium">
+                    Active sessions
+                  </p>
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                    Session management will be available here in the future.
+                    Session management will be available here in the
+                    future.
                   </p>
                 </div>
 
-                <Badge variant="secondary" className="shrink-0 rounded-full">
+                <Badge
+                  variant="secondary"
+                  className="shrink-0 rounded-full"
+                >
                   Coming soon
                 </Badge>
               </div>
@@ -452,7 +500,9 @@ export function AdminSettingsManager({
               <div>
                 <p className="text-sm font-medium">Delete account</p>
                 <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted-foreground">
-                  Permanently delete your Enviroshield account and associated data. This functionality is not available yet.
+                  Permanently delete your Enviroshield account and
+                  associated data. This functionality is not available
+                  yet.
                 </p>
               </div>
 

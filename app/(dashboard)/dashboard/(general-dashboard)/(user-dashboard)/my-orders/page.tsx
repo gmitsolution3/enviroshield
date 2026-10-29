@@ -1,4 +1,3 @@
-
 import MyOrdersDashboard from "@/components/dashboard/user/orders/MyOrdersDashboard";
 import { requireAuth } from "@/lib/auth-guards";
 
@@ -7,3 +6,4 @@ export default async function MyOrdersPage() {
 
   return <MyOrdersDashboard userId={session.user.id} />;
 }
+
