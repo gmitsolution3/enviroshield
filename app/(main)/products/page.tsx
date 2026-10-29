@@ -73,10 +73,7 @@ export async function generateMetadata({
   const numberRegex = /^\d+(\.\d+)?$/;
   const hasPrice = numberRegex.test(rawMin) || numberRegex.test(rawMax);
 
-  const rawSearch = (first(params.search) || "").trim();
-  const hasSearch = rawSearch.length > 0;
-
-  const hasFilters = hasCategory || hasPrice || hasSearch;
+  const hasFilters = hasCategory || hasPrice;
 
   const title = isFirstPage
     ? "Paints, Primers & Finishing Products in Bangladesh | Enviroshield"

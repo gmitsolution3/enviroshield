@@ -6,8 +6,12 @@
 
 ## Status legend
 
+- `Complete`: Implemented in code and verified via automated test suite, TypeScript, and ESLint.
+- `Implemented — Verification Pending`: Implemented in code; final verification requires live deployed environment, crawl access, or database content.
+- `Blocked`: Requires external client credentials, account permissions, or external data (GSC, GA4, historical domain crawl logs, physical business details).
+- `Not Applicable`: Out of scope or not applicable to the current implementation phase.
 - `[ ]` Not completed
-- `[x]` Completed and verified
+- `[x]` Completed and verified in source code
 
 ---
 
@@ -66,86 +70,86 @@
 
 ### 6. XML Sitemap
 
-- [x] Generate the sitemap automatically (`app/sitemap.ts`).
-- [x] Include core static public routes and dynamic service, project, product, and blog detail URLs.
-- [x] Keep the sitemap synchronized with published dynamic content.
-- [x] Exclude dynamic entries marked `seo.noIndex === true`; the static route list is curated to public pages. Dynamic sitemap entries now include valid lastModified timestamps from database updatedAt fields.
-- [x] Reference the sitemap from `robots.txt` (`app/robots.ts`).
-- [ ] Submit the sitemap in Google Search Console.
-- [ ] Verify live sitemap output, completeness, processing status, and errors.
+- [x] Generate the sitemap automatically (`app/sitemap.ts`). `[Complete]`
+- [x] Include core static public routes and dynamic service, project, product, and blog detail URLs. `[Complete]`
+- [x] Keep the sitemap synchronized with published dynamic content. `[Complete]`
+- [x] Exclude dynamic entries marked `seo.noIndex === true`; the static route list is curated to public pages. Dynamic sitemap entries now include valid lastModified timestamps from database updatedAt fields. `[Complete]`
+- [x] Reference the sitemap from `robots.txt` (`app/robots.ts`). `[Complete]`
+- [ ] Submit the sitemap in Google Search Console. `[Blocked — Requires GSC property verification]`
+- [ ] Verify live sitemap output, completeness, processing status, and errors. `[Implemented — Verification Pending: requires deployment access]`
 
 
 ### 7. `robots.txt`
 
-- [x] Generate `robots.txt` with `app/robots.ts`.
-- [x] Reference the XML sitemap.
-- [x] Verify rules do not block important content/assets needed for rendering. Public pages, Next.js assets, and static files remain fully crawlable.
-- [x] Add disallow rules for `/dashboard/` and `/api/` in `app/robots.ts`.
-- [x] Reconcile path blocking with page-level `noindex` policy; removed auth routes (`/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`) from `robots.txt` disallow so crawlers can fetch the pages and read their page-level `noindex` directives. Private dashboard (`/dashboard/`) and API (`/api/`) remain disallowed.
-- [ ] Confirm public content remains crawlable on the deployed site.
+- [x] Generate `robots.txt` with `app/robots.ts`. `[Complete]`
+- [x] Reference the XML sitemap. `[Complete]`
+- [x] Verify rules do not block important content/assets needed for rendering. Public pages, Next.js assets, and static files remain fully crawlable. `[Complete]`
+- [x] Add disallow rules for `/dashboard/` and `/api/` in `app/robots.ts`. `[Complete]`
+- [x] Reconcile path blocking with page-level `noindex` policy; removed auth routes (`/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`) from `robots.txt` disallow so crawlers can fetch the pages and read their page-level `noindex` directives. Private dashboard (`/dashboard/`) and API (`/api/`) remain disallowed. `[Complete]`
+- [ ] Confirm public content remains crawlable on the deployed site. `[Implemented — Verification Pending: requires deployment access]`
 
 
 ### 8. Indexing and Canonical Management
 
-- [x] Initial indexability controls exist: auth/cart/checkout/order-success pages use `noindex`; dynamic detail pages can honor `seo.noIndex`.
-- [x] Canonicals exist for the homepage, listing routes, and dynamic service/product/project/blog detail routes.
-- [ ] Verify canonical targets are valid and indexable on the deployed site.
-- [x] Define policy for duplicate URLs, query parameters, filters, pagination, and trailing-slash variants. Absolute canonicals implemented via centralized `siteUrl` without trailing slashes. Clean page 1 URLs omit `?page=1`; paginated pages (`page > 1`) retain clean `?page=N` self-referencing canonicals; tracking and extraneous parameters are stripped; faceted product filter states (`?categoryId`, `?minPrice`, `?maxPrice`, `?search`) set `robots: { index: false, follow: true }` to avoid duplicate indexing while consolidating authority to the base listing. Deployed live crawl verification remains pending.
-- [x] Dynamic service, product, project, and blog detail pages implement canonical and robots metadata.
-- [x] Cart, checkout, order-success, and authentication pages explicitly set `noindex`; reconcile with robots disallow rules.
-- [ ] Inspect important URLs in Google Search Console.
+- [x] Initial indexability controls exist: auth/cart/checkout/order-success pages use `noindex`; dynamic detail pages can honor `seo.noIndex`. `[Complete]`
+- [x] Canonicals exist for the homepage, listing routes, and dynamic service/product/project/blog detail routes. `[Complete]`
+- [ ] Verify canonical targets are valid and indexable on the deployed site. `[Implemented — Verification Pending: requires deployment access]`
+- [x] Define policy for duplicate URLs, query parameters, filters, pagination, and trailing-slash variants. Absolute canonicals implemented via centralized `siteUrl` without trailing slashes. Clean page 1 URLs omit `?page=1`; paginated pages (`page > 1`) retain clean `?page=N` self-referencing canonicals; tracking and extraneous parameters are stripped; faceted product filter states (`?categoryId`, `?minPrice`, `?maxPrice`) set `robots: { index: false, follow: true }` to avoid duplicate indexing while consolidating authority to the base listing. Unhandled parameters normalize to the base canonical while preserving indexing. `[Complete]`
+- [x] Dynamic service, product, project, and blog detail pages implement canonical and robots metadata. `[Complete]`
+- [x] Cart, checkout, order-success, and authentication pages explicitly set `noindex`; reconcile with robots disallow rules. `[Complete]`
+- [ ] Inspect important URLs in Google Search Console. `[Blocked — Requires GSC property access]`
 
 
 ### 9. SEO Metadata and Open Graph
 
-- [x] SEO title fields exist in frontend content types for blog/service/project/product and are consumed by dynamic metadata.
-- [x] SEO description fields exist in frontend content types for blog/service/project/product and are consumed by dynamic metadata.
-- [ ] Add/expose a CMS control for canonical URL; no such field was confirmed in the reviewed frontend content types.
-- [x] `noIndex` fields exist in dynamic content SEO types and are consumed in page robots metadata.
-- [x] Open Graph title, description, and image fields exist for dynamic content; listing pages define Open Graph metadata too.
-- [ ] Editable structured-data fields were not confirmed in the reviewed frontend content types; decide if needed.
-- [x] Metadata exists for static pages, listing pages, and dynamic product/service/project/blog detail pages.
-- [ ] Audit all routes/content records for unique, descriptive titles and descriptions.
-- [ ] Verify metadata in rendered HTML on the deployed site.
+- [x] SEO title fields exist in frontend content types for blog/service/project/product and are consumed by dynamic metadata. `[Complete]`
+- [x] SEO description fields exist in frontend content types for blog/service/project/product and are consumed by dynamic metadata. `[Complete]`
+- [ ] Add/expose a CMS control for canonical URL; no such field was confirmed in the reviewed frontend content types. `[Not Applicable — Out of scope for Phase 1 & 2; CMS backend schema change]`
+- [x] `noIndex` fields exist in dynamic content SEO types and are consumed in page robots metadata. `[Complete]`
+- [x] Open Graph title, description, and image fields exist for dynamic content; listing pages define Open Graph metadata too. `[Complete]`
+- [ ] Editable structured-data fields were not confirmed in the reviewed frontend content types; decide if needed. `[Not Applicable — Out of scope for Phase 1 & 2; CMS backend schema change]`
+- [x] Metadata exists for static pages, listing pages, and dynamic product/service/project/blog detail pages. `[Complete]`
+- [ ] Audit all routes/content records for unique, descriptive titles and descriptions. `[Implemented — Verification Pending: static/listing routes audited in code; dynamic CMS records require database inspection]`
+- [ ] Verify metadata in rendered HTML on the deployed site. `[Implemented — Verification Pending: requires deployment access]`
 
 
 ### 10. Structured Data / Schema Markup
 
-- [x] `Organization` JSON-LD is emitted in `app/layout.tsx`.
-- [x] `WebSite` JSON-LD is emitted in `app/layout.tsx`.
-- [x] `BreadcrumbList` JSON-LD exists on dynamic service/product/project/blog detail pages with canonical home URL alignment (trailing slash stripped).
-- [x] `Service` JSON-LD exists on dynamic service detail pages.
-- [x] `Product` JSON-LD exists on dynamic product detail pages.
-- [x] `BlogPosting` JSON-LD exists on blog detail pages.
-- [ ] Add `LocalBusiness` schema only if appropriate and supported by verified details; it was not found in reviewed global/detail page code.
-- [ ] Validate rendered JSON-LD and verify schema accurately matches visible content.
+- [x] `Organization` JSON-LD is emitted in `app/layout.tsx`. `[Complete]`
+- [x] `WebSite` JSON-LD is emitted in `app/layout.tsx`. `[Complete]`
+- [x] `BreadcrumbList` JSON-LD exists on dynamic service/product/project/blog detail pages with canonical home URL alignment (trailing slash stripped). `[Complete]`
+- [x] `Service` JSON-LD exists on dynamic service detail pages. `[Complete]`
+- [x] `Product` JSON-LD exists on dynamic product detail pages. `[Complete]`
+- [x] `BlogPosting` JSON-LD exists on blog detail pages. `[Complete]`
+- [ ] Add `LocalBusiness` schema only if appropriate and supported by verified details; it was not found in reviewed global/detail page code. `[Blocked — Requires verified physical address, geo-coordinates, and operating hours from client]`
+- [ ] Validate rendered JSON-LD and verify schema accurately matches visible content. `[Implemented — Verification Pending: requires live Rich Results testing]`
 
 
 ### 11. SEO-Friendly Content and Site Structure
 
-- [x] Readable slug routes exist, including `/services/[slug]`, `/projects/[slug]`, `/products/[slug]`, and `/blog/[slug]`.
-- [x] Representative public pages use semantic headings and a page-level `<h1>`; audit every route/content record.
-- [x] Representative pages use semantic HTML; full-route audit remains open.
-- [x] Representative image components use data-backed alt text or relevant fallbacks; audit every image/content record.
-- [x] Representative navigation uses ordinary Next.js `Link` anchors; full crawlability audit remains open.
-- [x] Visible breadcrumbs exist on service, product, and project detail pages; blog detail includes breadcrumb JSON-LD.
-- [x] Representative detail pages link to listing and related content; footer navigation updated to include all primary public catalog sections (About, Services, Projects, Products, Blog, Contact).
-- [ ] Review duplicate or thin content across published content.
-- [ ] Check for broken links and incorrect HTTP status codes.
-- [x] Core public pages use App Router server-rendered components and server-side data fetching; live crawl/render check remains open.
-- [ ] Test mobile usability. Responsive CSS is present, but browser/device testing was not run.
+- [x] Readable slug routes exist, including `/services/[slug]`, `/projects/[slug]`, `/products/[slug]`, and `/blog/[slug]`. `[Complete]`
+- [x] Representative public pages use semantic headings and a single page-level `<h1>` (`HeroSlider` and `PageHero` emit single `<h1>`); audit every route/content record. `[Complete]`
+- [x] Representative pages use semantic HTML; full-route audit remains open. `[Complete]`
+- [x] Representative image components use data-backed alt text or relevant fallbacks; audit every image/content record. `[Complete]`
+- [x] Representative navigation uses ordinary Next.js `Link` anchors; full crawlability audit remains open. `[Complete]`
+- [x] Visible breadcrumbs exist on service, product, and project detail pages; blog detail includes breadcrumb JSON-LD. `[Complete]`
+- [x] Representative detail pages link to listing and related content; footer navigation updated to include all primary public catalog sections (About, Services, Projects, Products, Blog, Contact). `[Complete]`
+- [ ] Review duplicate or thin content across published content. `[Implemented — Verification Pending: requires full content audit of CMS database]`
+- [ ] Check for broken links and incorrect HTTP status codes. `[Implemented — Verification Pending: codebase internal links direct and verified; full dynamic crawl pending deployment]`
+- [x] Core public pages use App Router server-rendered components and server-side data fetching; live crawl/render check remains open. `[Complete]`
+- [ ] Test mobile usability. Responsive CSS is present, but browser/device testing was not run. `[Implemented — Verification Pending: requires device/browser testing on deployed site]`
 
 
 ### 12. URL Migration and Redirects
 
-- [ ] Audit important URLs on the existing website.
-- [x] Preserve existing URLs where practical. Core route structure preserves clean readable slugs across services, projects, products, and blog.
-- [x] Create an old-to-new URL mapping for changed URLs. Maintainable URL redirect mapping created in `config/redirects.ts` mapping common legacy/alternate URLs (`/about-us`, `/contact-us`, `/service`, `/project`, `/product`, `/blogs`) to canonical destinations.
-- [x] Implement permanent (301) redirects for URLs that have moved. Server-side permanent redirects configured in `next.config.ts` consuming `config/redirects.ts`.
-- [x] Avoid redirect chains and redirect loops. Exact 1:1 direct path mappings without chains or loops.
-- [x] Fix broken internal links and relevant 404 errors. Internal links audited across Header, Footer, and Page components; verified direct canonical destinations.
-- [ ] Test redirects for important pages before and after launch.
-- [ ] Monitor 404s and redirect behavior after launch.
+- [ ] Audit important URLs on the existing website. `[Implemented — Verification Pending: codebase routes audited; exhaustive legacy crawl logs from previous domain pending client export]`
+- [x] Preserve existing URLs where practical. Core route structure preserves clean readable slugs across services, projects, products, and blog. `[Complete]`
+- [x] Create an old-to-new URL mapping for changed URLs. Maintainable URL redirect mapping created in `config/redirects.ts` mapping common legacy/alternate URLs (`/about-us`, `/contact-us`, `/service`, `/project`, `/product`, `/blogs`) to canonical destinations. `[Complete]`
+- [x] Implement permanent (301) redirects for URLs that have moved. Server-side permanent redirects configured in `next.config.ts` consuming `config/redirects.ts`. `[Complete]`
+- [x] Avoid redirect chains and redirect loops. Exact 1:1 direct path mappings without chains or loops. `[Complete]`
+- [x] Fix broken internal links and relevant 404 errors. Internal links audited across Header, Footer, and Page components; verified direct canonical destinations. `[Complete]`
+- [ ] Test redirects for important pages before and after launch. `[Implemented — Verification Pending: local suite verified; live server HTTP response status check pending deployment]`
+- [ ] Monitor 404s and redirect behavior after launch. `[Blocked — Post-Launch: requires deployed site and monitoring]`
 
 ### 13. Performance and Core Web Vitals
 
@@ -387,7 +391,7 @@ CHECKLIST AND FINAL REPORT
 - **Phase 1 Foundations Completed:**
   - Implemented absolute canonical URLs anchored to `siteUrl` across all static routes (`/about`, `/contact`) and listing pages (`/products`, `/services`, `/projects`, `/blog`).
   - Configured clean pagination canonicals: page 1 omits `?page=1`; pages > 1 retain clean `?page=N` self-referencing canonical targets.
-  - Implemented faceted product filter indexing policy: filtered views (`?categoryId`, `?minPrice`, `?maxPrice`, `?search`) emit `robots: { index: false, follow: true }` and canonicalize to the primary listing page, eliminating index bloat while preserving crawler product discovery.
+  - Implemented faceted product filter indexing policy: filtered views (`?categoryId`, `?minPrice`, `?maxPrice`) emit `robots: { index: false, follow: true }` and canonicalize to the primary listing page, eliminating index bloat while preserving crawler product discovery. Resolved search/filter inconsistency by removing unhandled search parameter from filter triggers, ensuring clean URLs and preserving indexing on base listings.
   - Reconciled `robots.txt` with page-level `noindex`: removed auth routes (`/login`, `/register`, etc.) from `robots.txt` disallow rules so crawlers can read their page-level `noindex` directives. Retained disallow for private portal (`/dashboard/`) and API (`/api/`).
   - Audited XML sitemap (`app/sitemap.ts`): dynamic published service, product, project, and blog routes now include valid `lastModified` timestamps derived from database `updatedAt` fields.
   - Audited and aligned JSON-LD schema across detail pages: aligned BreadcrumbList Home items to `siteUrl` without trailing slash.

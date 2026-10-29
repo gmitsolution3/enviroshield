@@ -64,3 +64,4 @@ export const urlRedirects: UrlRedirectRule[] = [
     status: "active",
   },
 ];
+
