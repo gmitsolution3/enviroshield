@@ -23,6 +23,7 @@ import { z } from "zod";
 
 import Container from "@/components/Container";
 import { Button } from "@/components/ui/button";
+import { trackConversion } from "@/lib/analytics/events";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -167,6 +168,10 @@ export default function ServiceBookingForm({ service }: ServiceBookingFormProps)
       }
 
       toast.success("Service booking request submitted successfully!");
+
+      trackConversion("consultation_booking_submitted", {
+        serviceId: service._id,
+      });
 
       router.push(
         `/services/booking-success?bookingId=${encodeURIComponent(response.data._id)}`,

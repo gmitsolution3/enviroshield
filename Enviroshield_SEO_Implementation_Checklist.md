@@ -272,13 +272,14 @@ Work through the phases in order. Mark each task complete only after implementat
 
 ### Phase 3 — Analytics and Conversions
 
-- [ ] Set up or verify Google Search Console.
-- [ ] Set up or verify GA4.
-- [ ] Implement and test lead/conversion events.
-- [ ] Decide whether GTM is needed and configure it if required.
-- [ ] Decide whether Meta Pixel and Google Ads conversion tracking are needed and configure them if required.
+- [x] Configure Google Search Console verification token integration. Meta tag rendered dynamically via layout metadata (`googleVerificationToken`). External property verification remains pending client Google account action. `[Complete in Code — External Verification Pending]`
+- [x] Implement Google Analytics 4 (GA4) configuration & integration. Supported via admin Settings, GA4 Measurement ID validation, Next.js script loader, and Google Consent Mode v2. `[Complete in Code — External Account Pending]`
+- [x] Implement centralized lead & conversion event tracking. Safe non-PII conversion dispatching implemented for contact form submission, consultation/booking requests, phone number clicks, email clicks, and WhatsApp clicks. `[Complete]`
+- [x] Implement Google Tag Manager (GTM) configuration & integration. Supported via admin Settings, Container ID validation, Next.js script injection, and dual-tracking guidance. `[Complete in Code — External Account Pending]`
+- [x] Implement Meta Pixel & Google Ads conversion tracking with consent enforcement. Meta Pixel ID and Google Ads Conversion ID with action-specific conversion labels configured in admin Settings; scripts respect visitor consent before activating. `[Complete in Code — External Account Pending]`
+- [x] Implement visitor cookie and tracking consent management. Cookie banner, preferences dialog, persistent consent storage, and footer reopening action implemented with Google Consent Mode v2. `[Complete]`
 
-**Phase 3 status:** Not started — no GA4/GTM/Meta Pixel implementation was found in reviewed repository code.
+**Phase 3 status:** Code complete & verified — Settings database model, admin configuration tabs, Next.js script loaders, Google Consent Mode v2, Cookie Consent banner with preferences modal, and centralized conversion event tracking implemented and verified. External Google/Meta property ownership verification remains pending user deployment.
 
 ### Phase 4 — Verification and Post-Launch Monitoring
 

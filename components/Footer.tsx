@@ -5,6 +5,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { fadeUp, viewportOnce } from "./animations/variants";
+import { CookiePreferencesButton } from "./consent/CookiePreferencesButton";
 import Container from "./Container";
 import Logo from "./Logo";
 
@@ -207,7 +208,7 @@ export default function Footer() {
         <span>© 2026 Enviro Shield. All rights reserved.</span>
 
         <span>
-          Protecting what matters. Building with confidence.
+          Protecting what matters. Building with confidence. • <CookiePreferencesButton />
         </span>
 
         <span>

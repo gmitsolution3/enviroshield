@@ -6,6 +6,9 @@ import type { Metadata } from "next";
 import { Fustat, Geist } from "next/font/google";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
+import { getPublicSettings } from "@/lib/api/settings";
+import { TrackingScripts } from "@/components/tracking/TrackingScripts";
+import { CookieConsentBanner } from "@/components/consent/CookieConsentBanner";
 
 import "./globals.css";
 
@@ -20,52 +23,77 @@ const fustat = Fustat({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicSettings();
 
-  title: {
-    default: "Enviroshield",
-    template: "%s | Enviroshield",
-  },
+  const siteName = settings.seo.siteName || "Enviroshield";
+  const defaultTitle = settings.seo.defaultTitle || "Enviroshield";
+  const defaultDesc =
+    settings.seo.defaultDescription ||
+    "Enviroshield provides waterproofing, waterproofing paint, heatproofing, epoxy and PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy floors, floor hardener, and ETP coating in Bangladesh.";
+  const defaultOgImg = settings.seo.defaultOgImage || "/images/logo.png";
 
-  description:
-    "Enviroshield provides waterproofing, waterproofing paint, heatproofing, epoxy and PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy floors, floor hardener, and ETP coating in Bangladesh.",
+  const verification: NonNullable<Metadata["verification"]> = {};
+  if (settings.seo.googleVerificationToken) {
+    verification.google = settings.seo.googleVerificationToken;
+  }
+  if (settings.seo.bingVerificationToken) {
+    verification.other = {
+      "msvalidate.01": settings.seo.bingVerificationToken,
+    };
+  }
 
-  applicationName: "Enviroshield",
+  return {
+    metadataBase: new URL(siteUrl),
 
-  robots: {
-    index: true,
-    follow: true,
-  },
+    title: {
+      default: defaultTitle,
+      template: `%s | ${siteName}`,
+    },
 
-  openGraph: {
-    type: "website",
-    siteName: "Enviroshield",
-    title: "Enviroshield",
-    description:
-      "Professional waterproofing, waterproofing paint, heatproofing, epoxy and PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy floors, floor hardener, and ETP coating.",
-    url: siteUrl,
-  },
+    description: defaultDesc,
 
-  twitter: {
-    card: "summary_large_image",
-    title: "Enviroshield",
-    description:
-      "Professional waterproofing, waterproofing paint, heatproofing, epoxy and PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy floors, floor hardener, and ETP coating in Bangladesh.",
-  },
-};
+    applicationName: siteName,
 
-export default function RootLayout({
+    verification: Object.keys(verification).length > 0 ? verification : undefined,
+
+    robots: {
+      index: settings.seo.defaultRobots?.index ?? true,
+      follow: settings.seo.defaultRobots?.follow ?? true,
+    },
+
+    openGraph: {
+      type: "website",
+      siteName,
+      title: defaultTitle,
+      description: defaultDesc,
+      url: siteUrl,
+      images: defaultOgImg ? [{ url: defaultOgImg }] : undefined,
+    },
+
+    twitter: {
+      card: "summary_large_image",
+      title: defaultTitle,
+      description: defaultDesc,
+    },
+  };
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await getPublicSettings();
+
   return (
     <html
       lang="en"
       className={cn("font-sans", geist.variable, fustat.variable)}
     >
       <body className="min-h-screen antialiased">
+        <TrackingScripts settings={settings} />
+
         <TooltipProvider>
           <script
             type="application/ld+json"
@@ -97,6 +125,8 @@ export default function RootLayout({
             }}
           />
           {children}
+
+          <CookieConsentBanner consentSettings={settings.consent} />
 
           <Toaster
             position="top-right"

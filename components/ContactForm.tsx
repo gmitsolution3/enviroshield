@@ -21,6 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { usePost } from "@/hooks/swr/usePost";
 import { EASE, viewportOnce } from "./animations/variants";
 import { useState } from "react";
+import { trackConversion } from "@/lib/analytics/events";
 
 const projectTypeOptions = [
   { value: "residential", label: "Residential" },
@@ -216,14 +217,22 @@ export function ContactForm() {
           response.message || "Your message has been sent successfully.",
         );
 
+        trackConversion("contact_form_submitted", {
+          projectType: values.projectType,
+        });
+
         setSent(true);
         reset();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as {
+        response?: { data?: { message?: string; error?: string } };
+        message?: string;
+      };
       const message =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        error?.message ||
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
         "Unable to send your message. Please try again.";
 
       toast.error(message);
