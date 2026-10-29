@@ -10,6 +10,7 @@ import Container from "@/components/Container";
 import PageHero from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
 import { getPublishedBlogs } from "@/lib/api/blogs";
+import { siteUrl } from "@/lib/site-url";
 import type { Metadata } from "next";
 
 type BlogPageProps = {
@@ -38,7 +39,9 @@ export async function generateMetadata({
     ? "Read Enviroshield's latest guides, insights, and practical advice on waterproofing, flooring, painting, protective coatings, heat insulation, and better-finished spaces."
     : `Explore more Enviroshield guides and insights on waterproofing, flooring, painting, protective coatings, insulation, and better-finished spaces — page ${page}.`;
 
-  const canonical = isFirstPage ? "/blog" : `/blog?page=${page}`;
+  const canonical = isFirstPage
+    ? `${siteUrl}/blog`
+    : `${siteUrl}/blog?page=${page}`;
 
   return {
     title,

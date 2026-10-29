@@ -74,8 +74,8 @@ export async function generateMetadata({
     : `Explore more of Enviroshield's paints, primers, decorative finishes, protective coatings, and wallcoverings on product catalogue page ${page}.`;
 
   const canonical = isFirstPage
-    ? "/products"
-    : `/products?page=${page}`;
+    ? `${siteUrl}/products`
+    : `${siteUrl}/products?page=${page}`;
 
   return {
     title,

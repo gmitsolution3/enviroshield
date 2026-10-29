@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ArrowUpRight, MapPin, Plus } from "lucide-react";
 
 import {
@@ -8,8 +9,9 @@ import {
 import Container from "@/components/Container";
 import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
+import { siteUrl } from "@/lib/site-url";
 
-export const metadata = {
+export const metadata: Metadata = {
   title:
     "Contact Enviro Shield | Waterproofing & Flooring Bangladesh",
   description:
@@ -30,6 +32,9 @@ export const metadata = {
     "ETP coating",
     "construction consultation Bangladesh",
   ],
+  alternates: {
+    canonical: `${siteUrl}/contact`,
+  },
 };
 
 const faqs = [
@@ -51,11 +56,11 @@ const faqs = [
   },
 ];
 
-// TODO: replace with your real office details.
+
    const office = {
      name: "Enviroshield Office",
      address: "House No: 22/13-15, Block-B, Bauniabad R/A, Mirpur 11, Pallabi, Dhaka 1216",
-     coords: "23.82078688876327, 90.37967728427371", // replace with your real lat,lng
+     coords: "23.82078688876327, 90.37967728427371", 
      hours: "Sat – Thu · 9:00 AM – 6:00 PM",
    };
 

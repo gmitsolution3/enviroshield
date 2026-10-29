@@ -23,8 +23,10 @@ import {
   Users,
 } from "lucide-react";
 import Image from "next/image";
+import type { Metadata } from "next";
+import { siteUrl } from "@/lib/site-url";
 
-export const metadata = {
+export const metadata: Metadata = {
   title:
     "About Enviro Shield | Waterproofing & Flooring Experts in Bangladesh",
   description:
@@ -46,6 +48,9 @@ export const metadata = {
     "ETP coating",
     "protective construction solutions",
   ],
+  alternates: {
+    canonical: `${siteUrl}/about`,
+  },
 };
 
 /* -------------------------------------------------------------------------- */

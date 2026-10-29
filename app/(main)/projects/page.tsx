@@ -15,6 +15,7 @@ import {
   getFeaturedProjects,
   getPublishedProjects,
 } from "@/lib/api/projects";
+import { siteUrl } from "@/lib/site-url";
 import type { Metadata } from "next";
 
 type ProjectsPageProps = {
@@ -44,8 +45,8 @@ export async function generateMetadata({
     : `Explore more Enviroshield projects involving waterproofing, flooring, heatproofing, injection grouting, and protective coatings in Bangladesh. Browse project examples on page ${page}.`;
 
   const canonical = isFirstPage
-    ? "/projects"
-    : `/projects?page=${page}`;
+    ? `${siteUrl}/projects`
+    : `${siteUrl}/projects?page=${page}`;
 
   return {
     title,

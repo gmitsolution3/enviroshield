@@ -15,6 +15,7 @@ import {
   getFeaturedServices,
   getPublishedServices,
 } from "@/lib/api/services";
+import { siteUrl } from "@/lib/site-url";
 import type { Metadata } from "next";
 
 type ServicesPageProps = {
@@ -44,8 +45,8 @@ export async function generateMetadata({
     : `Explore more of Enviroshield's waterproofing, flooring, heatproofing, grouting, and protective coating services on page ${page}.`;
 
   const canonical = isFirstPage
-    ? "/services"
-    : `/services?page=${page}`;
+    ? `${siteUrl}/services`
+    : `${siteUrl}/services?page=${page}`;
 
   return {
     title,
