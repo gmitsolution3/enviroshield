@@ -343,3 +343,4 @@ export interface UserActivityData {
   };
   activities: UserActivityItem[];
 }
+
