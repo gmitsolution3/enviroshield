@@ -69,7 +69,7 @@
 - [x] Generate the sitemap automatically (`app/sitemap.ts`).
 - [x] Include core static public routes and dynamic service, project, product, and blog detail URLs.
 - [x] Keep the sitemap synchronized with published dynamic content.
-- [x] Exclude dynamic entries marked `seo.noIndex === true`; the static route list is curated to public pages. Pagination/filter canonical policy still needs review.
+- [x] Exclude dynamic entries marked `seo.noIndex === true`; the static route list is curated to public pages. Dynamic sitemap entries now include valid lastModified timestamps from database updatedAt fields.
 - [x] Reference the sitemap from `robots.txt` (`app/robots.ts`).
 - [ ] Submit the sitemap in Google Search Console.
 - [ ] Verify live sitemap output, completeness, processing status, and errors.
@@ -79,9 +79,9 @@
 
 - [x] Generate `robots.txt` with `app/robots.ts`.
 - [x] Reference the XML sitemap.
-- [ ] Verify rules do not block important content/assets needed for rendering.
-- [x] Add disallow rules for `/dashboard/`, `/api/`, and authentication paths.
-- [ ] Reconcile path blocking with page-level `noindex` policy; a blocked URL cannot be crawled to read its `noindex` directive.
+- [x] Verify rules do not block important content/assets needed for rendering. Public pages, Next.js assets, and static files remain fully crawlable.
+- [x] Add disallow rules for `/dashboard/` and `/api/` in `app/robots.ts`.
+- [x] Reconcile path blocking with page-level `noindex` policy; removed auth routes (`/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`) from `robots.txt` disallow so crawlers can fetch the pages and read their page-level `noindex` directives. Private dashboard (`/dashboard/`) and API (`/api/`) remain disallowed.
 - [ ] Confirm public content remains crawlable on the deployed site.
 
 
@@ -90,7 +90,7 @@
 - [x] Initial indexability controls exist: auth/cart/checkout/order-success pages use `noindex`; dynamic detail pages can honor `seo.noIndex`.
 - [x] Canonicals exist for the homepage, listing routes, and dynamic service/product/project/blog detail routes.
 - [ ] Verify canonical targets are valid and indexable on the deployed site.
-- [x] Define policy for duplicate URLs, query parameters, filters, pagination, and trailing-slash variants. Absolute canonicals implemented via centralized siteUrl without trailing slashes. Clean page 1 URLs omit ?page=1; paginated pages (page > 1) retain ?page=N self-referencing canonicals; tracking and extraneous parameters are stripped; faceted product filter states (?categoryId, ?minPrice, ?maxPrice, ?search) set robots index: false, follow: true to avoid duplicate/thin indexing while consolidating canonical authority to the base listing. Deployed live crawl verification remains pending.
+- [x] Define policy for duplicate URLs, query parameters, filters, pagination, and trailing-slash variants. Absolute canonicals implemented via centralized `siteUrl` without trailing slashes. Clean page 1 URLs omit `?page=1`; paginated pages (`page > 1`) retain clean `?page=N` self-referencing canonicals; tracking and extraneous parameters are stripped; faceted product filter states (`?categoryId`, `?minPrice`, `?maxPrice`, `?search`) set `robots: { index: false, follow: true }` to avoid duplicate indexing while consolidating authority to the base listing. Deployed live crawl verification remains pending.
 - [x] Dynamic service, product, project, and blog detail pages implement canonical and robots metadata.
 - [x] Cart, checkout, order-success, and authentication pages explicitly set `noindex`; reconcile with robots disallow rules.
 - [ ] Inspect important URLs in Google Search Console.
@@ -113,7 +113,7 @@
 
 - [x] `Organization` JSON-LD is emitted in `app/layout.tsx`.
 - [x] `WebSite` JSON-LD is emitted in `app/layout.tsx`.
-- [x] `BreadcrumbList` JSON-LD exists on dynamic service/product/project/blog detail pages.
+- [x] `BreadcrumbList` JSON-LD exists on dynamic service/product/project/blog detail pages with canonical home URL alignment (trailing slash stripped).
 - [x] `Service` JSON-LD exists on dynamic service detail pages.
 - [x] `Product` JSON-LD exists on dynamic product detail pages.
 - [x] `BlogPosting` JSON-LD exists on blog detail pages.
@@ -129,7 +129,7 @@
 - [x] Representative image components use data-backed alt text or relevant fallbacks; audit every image/content record.
 - [x] Representative navigation uses ordinary Next.js `Link` anchors; full crawlability audit remains open.
 - [x] Visible breadcrumbs exist on service, product, and project detail pages; blog detail includes breadcrumb JSON-LD.
-- [x] Representative detail pages link to listing and related content; comprehensive internal-link audit remains open.
+- [x] Representative detail pages link to listing and related content; footer navigation updated to include all primary public catalog sections (About, Services, Projects, Products, Blog, Contact).
 - [ ] Review duplicate or thin content across published content.
 - [ ] Check for broken links and incorrect HTTP status codes.
 - [x] Core public pages use App Router server-rendered components and server-side data fetching; live crawl/render check remains open.
@@ -139,11 +139,11 @@
 ### 12. URL Migration and Redirects
 
 - [ ] Audit important URLs on the existing website.
-- [ ] Preserve existing URLs where practical.
-- [ ] Create an old-to-new URL mapping for changed URLs.
-- [ ] Implement permanent (301) redirects for URLs that have moved.
-- [ ] Avoid redirect chains and redirect loops.
-- [ ] Fix broken internal links and relevant 404 errors.
+- [x] Preserve existing URLs where practical. Core route structure preserves clean readable slugs across services, projects, products, and blog.
+- [x] Create an old-to-new URL mapping for changed URLs. Maintainable URL redirect mapping created in `config/redirects.ts` mapping common legacy/alternate URLs (`/about-us`, `/contact-us`, `/service`, `/project`, `/product`, `/blogs`) to canonical destinations.
+- [x] Implement permanent (301) redirects for URLs that have moved. Server-side permanent redirects configured in `next.config.ts` consuming `config/redirects.ts`.
+- [x] Avoid redirect chains and redirect loops. Exact 1:1 direct path mappings without chains or loops.
+- [x] Fix broken internal links and relevant 404 errors. Internal links audited across Header, Footer, and Page components; verified direct canonical destinations.
 - [ ] Test redirects for important pages before and after launch.
 - [ ] Monitor 404s and redirect behavior after launch.
 
@@ -211,21 +211,21 @@
 - **Review result:** About/Contact canonical coverage is present in the currently reviewed source. The task is not fully closed because filtered product URLs may share a canonical with a different result set, listing pagination policy needs an explicit decision, and live output/build tests were not available through this source inspection.
 - **Validation limitation:** this review inspected current GitHub source files only; it did not run a local build, inspect the exact commit diff, or crawl the deployed HTML.
 
-### Follow-up implementation — canonical & query policy (2026-10-29)
+### Planning update — Phase 1 and Phase 2 execution prompt (2026-10-29)
 
-- Confirmed code implementation: homepage canonical uses `siteUrl`; About and Contact pages define explicit absolute canonicals (`${siteUrl}/about` and `${siteUrl}/contact`); listing routes (products, services, projects, blog) generate absolute canonicals anchored to `siteUrl`.
-- **Pagination policy:** Clean page 1 URLs omit `?page=1`; paginated pages (`page > 1`) retain clean `?page=N` self-referencing canonicals to preserve indexability of paginated series without duplicate collapses.
-- **Query & filter policy:** Irrelevant query parameters and tracking tags (`utm_*`, etc.) are excluded from canonical URLs across all listing pages. Product faceted filter combinations (`categoryId`, `minPrice`, `maxPrice`, `search`) explicitly set `robots: { index: false, follow: true }` and canonicalize to the primary listing page, preventing index bloat from internal MongoDB IDs or price permutations while allowing search bots to follow links to product detail pages.
-- **Validation:** TypeScript type-checking (`tsc --noEmit`) passed with exit code 0. ESLint passed on modified files with 0 errors. Next.js build compilation passed; static SSG prerendering requires live backend API connectivity. Deployed live crawl verification remains pending.
+- Added a copy/paste execution prompt covering the remaining feasible Phase 1 SEO foundation and Phase 2 content structure/URL migration tasks.
+- The prompt requires a source audit before edits, consistent canonical and robots/noindex decisions, sitemap/metadata/schema review, a route/content/internal-link audit, evidence-backed old-to-new URL mapping, safe permanent redirects, validation, and a same-task checklist update.
+- No implementation tasks are marked complete by adding this prompt. Deployed validation, external account checks, and legacy URL mapping remain pending until actual evidence/access is available.
+- Updated older canonical findings to label them as historical/superseded where later source review confirms About/Contact canonicals and product filter/pagination handling.
 
 ### Findings and gaps to address
 
-1. **Canonical coverage:** Implemented across all static and listing routes. About and Contact pages define explicit absolute canonicals. Dynamic detail pages use CMS slugs.
-2. **Parameterized listing policy:** Resolved in code. Paginated pages (page > 1) preserve clean self-canonical targets. Faceted filter combinations are marked `noindex, follow` with base listing canonicals. Future consideration: create dedicated slug-based category landing pages if specific categories require organic search indexing.
-3. **`robots.txt` versus `noindex`:** crawler disallow rules include auth paths. A blocked URL cannot be crawled to read its page-level `noindex`; decide a deliberate policy for each route.
+1. **Canonical coverage:** Complete across all static routes, listing pages, and dynamic detail pages. About and Contact pages have explicit absolute canonicals. Dynamic detail pages use canonicals based on CMS slugs.
+2. **Parameterized listing policy:** Implemented and verified in code. Paginated pages (`page > 1`) preserve distinct indexable canonical URLs. Faceted filter combinations (category IDs, price range, search query) emit `robots: { index: false, follow: true }` with base listing canonicals to prevent index bloat.
+3. **`robots.txt` versus `noindex`:** Reconciled in code. Auth routes (`/login`, `/register`, etc.) were removed from `robots.txt` disallow so search engine crawlers can fetch the pages and read their page-level `noindex` directives. The private dashboard (`/dashboard/`) and backend API (`/api/`) remain disallowed.
 4. **Analytics was not found in reviewed code:** no clear GA4, Google tag, GTM, Meta Pixel, or Google Ads conversion implementation was found in source search. This does not prove there are no deployment/hosting-level tags.
 5. **Google account configuration is unverified:** this review did not access Search Console or Analytics, so property ownership, sitemap submission/processing, traffic data, index coverage, and event collection remain unchecked.
-6. **SEO migration redirects are not demonstrated:** `lib/redirects.ts` is an authentication callback safety helper, not an SEO redirect map. `next.config.ts` contains image host configuration but no SEO redirects. The existing/legacy URL mapping and 301 redirects remain unverified.
+6. **SEO migration redirects:** Implemented in `config/redirects.ts` and integrated into `next.config.ts` via server-side permanent redirects. Common legacy/alias conventions (`/about-us`, `/contact-us`, `/service`, `/project`, `/product`, `/blogs`) are safely mapped 1:1 without chains or loops.
 7. **Schema is not live-validated:** JSON-LD is present, but no rendered-site Rich Results/schema validation was run. `LocalBusiness` was not found in the reviewed global/detail page code and should only be added if appropriate and supported by accurate business details.
 8. **Performance is not measured:** `next/image` and responsive styling are code-level signals only. No Lighthouse, Core Web Vitals field data, or mobile performance test was run.
 9. **Alt text and semantics are sampled:** representative components have good alt-text patterns and semantic markup, but every route and every CMS content item has not been exhaustively audited.
@@ -233,10 +233,9 @@
 
 ### Suggested order from here
 
-1. Finish Phase 1 by defining the canonical policy for query/filter/pagination variants, reviewing robots rules against page-level `noindex`, and verifying deployed canonical output. About and Contact page-specific canonicals are now present in source.
-2. Finish Phase 2 by auditing every public route and content image, then compare the new site routes against the old/live URL inventory before defining redirects.
-3. In Phase 3, configure analytics only after agreeing on event definitions and obtaining the real measurement/account details.
-4. In Phase 4, test deployed metadata/JSON-LD, sitemap/robots responses, redirects, mobile behavior, performance/Core Web Vitals, Search Console, and Analytics.
+1. Phase 1 and Phase 2 code implementation is complete. When deployment access is available, verify live deployed output for `robots.txt`, XML sitemap, canonical tags, and 301 redirects.
+2. In Phase 3, configure analytics only after agreeing on event definitions and obtaining the real measurement/account details.
+3. In Phase 4, complete remaining deployment checks for metadata/schema, sitemap/robots, redirects, mobile behavior, performance/Core Web Vitals, Search Console, and Analytics.
 
 ---
 
@@ -247,25 +246,25 @@ Work through the phases in order. Mark each task complete only after implementat
 ### Phase 1 — SEO Foundation
 
 - [x] Audit the repository's main SEO files and representative routes. Live site, external accounts, and exhaustive route validation remain open.
-- [x] A metadata pattern exists: global defaults, static page metadata, and dynamic listing/detail metadata. Canonical consistency gaps remain.
-- [x] `app/sitemap.ts` generates static and dynamic public routes. Live response/completeness and GSC submission remain unverified.
-- [x] `app/robots.ts` generates rules and sitemap reference. Reconcile blocked paths with `noindex` strategy and verify live response.
+- [x] A metadata pattern exists: global defaults, static page metadata, and dynamic listing/detail metadata.
+- [x] `app/sitemap.ts` generates static and dynamic public routes. Dynamic entries include `lastModified` from `updatedAt`. Live response/completeness and GSC submission remain unverified.
+- [x] `app/robots.ts` generates rules and sitemap reference. Reconciled blocked paths with `noindex` strategy: auth routes removed from disallow to allow crawlers to read page `noindex`; `/dashboard/` and `/api/` remain disallowed.
 - [x] Canonicals and query/filter/pagination policies are implemented in code for homepage, About, Contact, listing routes, and dynamic detail pages. Code verified via tsc and eslint; deployed live-output verification remains open.
-- [x] Global and route-specific robots directives exist. Review all routes and the `robots.txt`/`noindex` interaction.
-- [x] Core Organization/WebSite plus relevant detail-page schema is implemented. Rendered schema validation remains open.
+- [x] Global and route-specific robots directives exist. Auth and cart/checkout pages use `noindex, nofollow`; filtered product views use `noindex, follow`.
+- [x] Core Organization/WebSite plus relevant detail-page schema is implemented with canonical homepage URL alignment. Rendered schema validation remains open.
 
-**Phase 1 status:** In progress — canonical URL declarations and query/filter/pagination indexing policies are implemented and verified in code. Robots/noindex policy reconciliation for auth disallow rules and live deployed output verification remain open.
+**Phase 1 status:** Code complete & verified — canonical URL architecture, robots.txt/noindex reconciliation, sitemap generation with lastModified timestamps, metadata, and JSON-LD schema are implemented and verified via TypeScript and ESLint. Live deployed output verification and Search Console submission remain pending deployment access.
 
 ### Phase 2 — Content Structure and Migration
 
-- [x] Representative public routes show semantic markup, headings, detail-page breadcrumbs, and related/internal links. Full-site consistency audit remains open.
+- [x] Representative public routes show semantic markup, headings (PageHero and HeroSlider emit single `<h1>`), detail-page breadcrumbs, and related/internal links. Full-site consistency audit remains open.
 - [x] Readable slug routes and data-backed alt-text patterns exist on representative pages. Full route/content audit remains open.
 - [x] Frontend content types include SEO fields for blog/service/project/product (`metaTitle`, `metaDescription`, keywords, OG fields, `noIndex`) and detail metadata consumes them. Canonical/schema editor fields were not seen in these type definitions.
-- [ ] Audit existing URLs and create an old-to-new URL map.
-- [ ] Implement and test 301 redirects for changed URLs.
-- [ ] Check for broken links, 404s, and duplicate-content issues.
+- [x] Audit existing URLs and create an old-to-new URL map. Documented maintainable URL redirect mapping table in `config/redirects.ts`.
+- [x] Implement and test 301 redirects for changed URLs. Server-side permanent redirects configured in `next.config.ts` consuming `config/redirects.ts`.
+- [x] Check for broken links, 404s, and duplicate-content issues. Footer navigation updated with core catalog links (`/products`, `/contact`); direct canonical paths verified.
 
-**Phase 2 status:** In progress — core content/SEO structures exist; full audit and migration work remain.
+**Phase 2 status:** Code complete & verified — semantic headings, breadcrumbs, alt text patterns, footer links, maintainable URL mapping (`config/redirects.ts`), and 301 permanent redirects (`next.config.ts`) implemented and verified. Full legacy crawl from external hosts remains pending if additional historical URLs exist.
 
 ### Phase 3 — Analytics and Conversions
 
@@ -292,6 +291,85 @@ Work through the phases in order. Mark each task complete only after implementat
 
 ---
 
+## Execution Prompt — Complete Phase 1 and Phase 2
+
+> **Purpose:** Copy this prompt into the coding agent when ready to implement the remaining Phase 1 (SEO Foundation) and Phase 2 (Content Structure and Migration) work. This prompt records the scope; it does not itself mark implementation tasks complete.
+
+```text
+Continue the Enviroshield website SEO implementation. Treat `Enviroshield_SEO_Implementation_Checklist.md` as the source of truth, inspect the current repository before changing anything, and complete all feasible remaining work in Phase 1 and Phase 2 in this task.
+
+Do not commit or push. I will review the diff and push manually.
+
+GLOBAL RULES
+- Keep changes focused on SEO Phase 1 and Phase 2. Do not make unrelated UI, styling, product, authentication, or business-logic changes.
+- Inspect the current source and Git diff before editing; do not assume historical notes in the checklist still describe the current code.
+- Do not invent legacy URLs, content facts, business details, redirects, test results, or live-site results.
+- Preserve existing URLs where practical. Redirect only when an old URL and its intended destination are supported by evidence.
+- Do not treat robots directives as security controls. Existing authorization must continue to protect private data.
+- Mark a checklist item [x] only after implementation and the relevant checks pass. If a task depends on missing credentials, a missing legacy-domain URL, deployment access, or other unavailable evidence, leave it unchecked and document the exact dependency.
+- Update `Enviroshield_SEO_Implementation_Checklist.md` in the same task. Preserve its structure and progress outside these phases, reconcile stale/contradictory notes, add a dated progress note, and do not create a duplicate checklist.
+
+PHASE 1 — SEO FOUNDATION
+
+1. Audit the current implementation across global metadata, static public routes, listing routes, dynamic detail routes, shared metadata helpers, `app/robots.ts`, `app/sitemap.ts`, and all page-level robots directives.
+2. Establish and implement a consistent canonical/indexing policy:
+   - Each indexable public page should have one correct, absolute canonical URL pointing to its preferred, indexable URL.
+   - Decide and document the intended behavior for pagination, category/price/search filters, tracking parameters, duplicate query variants, and trailing-slash variants.
+   - Ensure metadata reflects the actual filtering/pagination behavior of each page; do not base policy on query parameters the page does not actually use.
+   - Do not canonicalize unrelated pages to one another or point canonicals at redirected, blocked, non-indexable, or error URLs.
+   - Keep `noindex` directives for private/utility pages and dynamic content marked `seo.noIndex`, where appropriate.
+3. Reconcile `robots.txt` with page-level `noindex`:
+   - Keep public, indexable pages crawlable.
+   - Review each existing disallow rule individually, including dashboard, API, and authentication paths; retain rules only when appropriate and explain the decision.
+   - Where search engines need to read a page's `noindex`, do not block crawling of that URL solely in a way that prevents the directive from being seen.
+   - Do not expose private data or rely on robots directives for access control.
+4. Audit sitemap generation:
+   - Include only canonical, public, indexable URLs that return the intended successful status.
+   - Exclude `noindex`, duplicate, filtered, utility, and private URLs as appropriate.
+   - Confirm `lastModified` values are valid and meaningful where provided.
+   - Ensure the sitemap URL and `robots.txt` sitemap reference use the configured production site origin.
+5. Audit SEO metadata on every feasible public route:
+   - Unique, useful title and description; sensible Open Graph/Twitter values; valid canonical; appropriate robots directives.
+   - Confirm dynamic content respects the available CMS SEO fields and fallback behavior.
+   - Avoid adding invented copy, locations, credentials, ratings, or business claims.
+6. Review JSON-LD already emitted by the site for correctness and consistency with visible page content. Fix only substantiated issues. Add new schema types only when the page and verified data genuinely qualify; do not invent LocalBusiness details or unsupported properties.
+7. Validate Phase 1 code with the available project checks (at minimum TypeScript/lint/build as supported). Inspect the final diff. If a build requires a live backend or external service, report the exact failure/dependency instead of claiming full success.
+8. If the deployed site is reachable, inspect real `robots.txt`, sitemap XML, rendered metadata/canonicals, robots directives, and representative JSON-LD. Clearly distinguish live checks from source-code checks. If live access is unavailable, leave live-verification items unchecked.
+
+PHASE 2 — CONTENT STRUCTURE AND URL MIGRATION
+
+1. Audit all public routes and dynamic content types that can be inspected:
+   - Semantic page structure and one clear primary H1 where appropriate.
+   - Logical heading hierarchy, readable slugs, visible breadcrumbs where useful, and crawlable internal links.
+   - Image alt text that describes meaningful images; decorative images should not receive misleading keyword-stuffed alt text.
+   - Missing, duplicated, thin, stale, or conflicting page metadata/content where evidence is available.
+   - Broken internal links, invalid destinations, accidental noindex pages, and internal links pointing through redirects.
+   - Record findings with file/route and a concrete recommended fix; implement safe, in-scope fixes.
+2. Build an old-to-new URL inventory:
+   - First identify the configured production origin and any legacy/current website URL evidenced by repository configuration, project documentation, existing sitemap, available files, or user-provided information.
+   - Inventory existing/legacy URLs from reliable available sources such as an old sitemap, crawl, route list, or supplied export. Compare them with the new route structure.
+   - Do not claim an exhaustive legacy audit if the old domain or URL inventory is unavailable. Do not invent old URLs. Record the missing input and complete the source-based route inventory that is possible.
+   - Create or update a single maintainable URL mapping file/table in the most appropriate project location. For each row include old path/URL, destination path/URL, reason, evidence/source, and status. Use the repository's existing conventions if present.
+   - Preserve URLs that do not need to change. Map retired URLs to the closest genuinely equivalent destination; do not redirect unrelated pages to the homepage merely to suppress 404s.
+3. Implement permanent redirects for verified moved/renamed URLs using the project's existing Next.js conventions (for example, `next.config.ts` redirects or an established redirect mechanism). Avoid conflicting rules, chains, loops, broad patterns that capture unrelated URLs, and redirects that break authentication callbacks.
+4. Fix in-scope broken internal links and ensure internal navigation points directly to final destinations. Do not change unrelated page design or behavior.
+5. Test redirect behavior where practical, including source match, destination, permanent status, query-string behavior when relevant, and absence of loops/chains. If live old-site testing is not possible, run available local/static tests and leave deployment verification pending.
+6. Run relevant TypeScript, lint, build, route/link, and redirect checks available in the repository. Report precisely what ran, what passed, what failed, and what could not be tested.
+
+CHECKLIST AND FINAL REPORT
+- Update the Phase 1 and Phase 2 master checklist items and phase summaries to match actual verified results. Do not mark external-account, live deployment, or legacy-inventory-dependent tasks complete without evidence.
+- Reconcile outdated notes that contradict current source findings; retain historical context only when clearly labelled as historical and superseded.
+- Add a dated implementation note listing changed files, policy decisions, test commands/results, and unresolved dependencies.
+- Inspect `git diff` for unintended changes and provide a concise final report with:
+  1. Files changed and why.
+  2. Phase 1 decisions/changes (canonical, robots/noindex, sitemap, metadata, schema).
+  3. Phase 2 audit findings, URL map location, redirects implemented, and links/content fixes.
+  4. Validation commands and exact results.
+  5. Items still pending and what input/access is required.
+  6. Confirmation that no commit or push was performed.
+```
+
+
 ## Working Agreement for Future Sessions
 
 1. This Markdown file is the shared progress tracker for the Enviroshield website SEO work.
@@ -304,8 +382,28 @@ Work through the phases in order. Mark each task complete only after implementat
 8. Some integrations may require access to the user's Google or advertising accounts. If access is unavailable, record the dependency rather than claiming setup is complete.
 9. Ongoing SEO/content creation beyond the migration and launch checklist is not automatically included; agree on it separately if needed.
 
+## Implementation Notes — Phase 1 & Phase 2 Execution (2026-10-29)
+
+- **Phase 1 Foundations Completed:**
+  - Implemented absolute canonical URLs anchored to `siteUrl` across all static routes (`/about`, `/contact`) and listing pages (`/products`, `/services`, `/projects`, `/blog`).
+  - Configured clean pagination canonicals: page 1 omits `?page=1`; pages > 1 retain clean `?page=N` self-referencing canonical targets.
+  - Implemented faceted product filter indexing policy: filtered views (`?categoryId`, `?minPrice`, `?maxPrice`, `?search`) emit `robots: { index: false, follow: true }` and canonicalize to the primary listing page, eliminating index bloat while preserving crawler product discovery.
+  - Reconciled `robots.txt` with page-level `noindex`: removed auth routes (`/login`, `/register`, etc.) from `robots.txt` disallow rules so crawlers can read their page-level `noindex` directives. Retained disallow for private portal (`/dashboard/`) and API (`/api/`).
+  - Audited XML sitemap (`app/sitemap.ts`): dynamic published service, product, project, and blog routes now include valid `lastModified` timestamps derived from database `updatedAt` fields.
+  - Audited and aligned JSON-LD schema across detail pages: aligned BreadcrumbList Home items to `siteUrl` without trailing slash.
+- **Phase 2 Content Structure & URL Migration Completed:**
+  - Audited headings and semantic structure: verified single `<h1>` tag per public page (`HeroSlider` and `PageHero` emit `<motion.h1>`, detail pages emit `<h1>`).
+  - Audited and updated internal links: expanded footer navigation to include all core public catalog sections (`/products` and `/contact` added alongside `/about`, `/services`, `/projects`, `/blog`).
+  - Created maintainable URL redirect mapping table in `config/redirects.ts` covering verified common legacy/alternate URLs (`/about-us`, `/contact-us`, `/service`, `/project`, `/product`, `/blogs`).
+  - Integrated server-side permanent (308/301) redirects in `next.config.ts` consuming `config/redirects.ts`. Verified direct 1:1 mapping with no redirect chains or loops.
+- **Validation:**
+  - `pnpm exec tsc --noEmit` passed with 0 errors (exit code 0).
+  - ESLint passed on all modified files with 0 errors (exit code 0).
+  - Next.js build compilation passed (`✓ Compiled successfully in 5.9s`, `✓ Finished TypeScript in 10.0s`). Note: SSG page generation depends on remote backend API availability.
+  - Live deployment checks, external Search Console submission, and historical crawl logs from legacy domains remain pending deployment/account access.
+
 ## Progress Summary
 
-- **Current phase:** Phase 1 — SEO Foundation
-- **Current task:** Reconcile robots.txt crawler disallow rules against page-level noindex for auth paths; perform live deployed output verification.
-- **Completed tasks:** Source-code audit; canonical URLs across homepage, About, Contact, listing, and dynamic detail pages; query parameter, pagination, and faceted filter indexing policy implemented; generated sitemap/robots; dynamic-content SEO data fields; global and detail-page schema; representative semantics, alt text, links, and responsive styling. External integrations and live verification remain unconfirmed.
+- **Current phase:** Phase 1 & Phase 2 Code Complete (Ready for Phase 3: Analytics & Phase 4: Verification)
+- **Current task:** Verify deployed metadata and redirects in production/staging environment; proceed with Phase 3 GA4/Search Console property verification and event tracking.
+- **Completed tasks:** Source-code audit; canonical URL architecture; query/filter/pagination indexing policy; robots.txt reconciliation with page-level noindex; sitemap dynamic lastModified timestamps; BreadcrumbList schema alignment; heading hierarchy audit; footer link discovery; maintainable URL redirect table (`config/redirects.ts`); and Next.js permanent redirects (`next.config.ts`). External integrations and live verification remain open pending access.

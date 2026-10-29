@@ -9,11 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       disallow: [
         "/dashboard/",
         "/api/",
-        "/login",
-        "/register",
-        "/forgot-password",
-        "/reset-password",
-        "/verify-email",
       ],
     },
 

@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { urlRedirects } from "./config/redirects";
 
 const nextConfig: NextConfig = {
   images: {
@@ -20,6 +21,16 @@ const nextConfig: NextConfig = {
         hostname: "images.pexels.com",
       },
     ],
+  },
+
+  async redirects() {
+    return urlRedirects
+      .filter((rule) => rule.status === "active")
+      .map(({ source, destination, permanent }) => ({
+        source,
+        destination,
+        permanent,
+      }));
   },
 };
 

@@ -104,6 +104,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       )
       .map((service) => ({
         url: `${siteUrl}/services/${service.slug}`,
+        lastModified: service.updatedAt
+          ? new Date(service.updatedAt)
+          : undefined,
         changeFrequency: "monthly" as const,
         priority: 0.8,
       }));
@@ -130,6 +133,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       )
       .map((project) => ({
         url: `${siteUrl}/projects/${project.slug}`,
+        lastModified: project.updatedAt
+          ? new Date(project.updatedAt)
+          : undefined,
         changeFrequency: "monthly" as const,
         priority: 0.8,
       }));
@@ -174,6 +180,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       )
       .map((product) => ({
         url: `${siteUrl}/products/${product.slug}`,
+        lastModified: product.updatedAt
+          ? new Date(product.updatedAt)
+          : undefined,
         changeFrequency: "monthly" as const,
         priority: 0.7,
       }));
@@ -200,6 +209,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       )
       .map((post) => ({
         url: `${siteUrl}/blog/${post.slug}`,
+        lastModified: post.updatedAt
+          ? new Date(post.updatedAt)
+          : undefined,
         changeFrequency: "monthly" as const,
         priority: 0.7,
       }));

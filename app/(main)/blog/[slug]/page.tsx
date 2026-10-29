@@ -327,7 +327,7 @@ export default async function ArticlePage({
     "@type": "ListItem",
     position: 1,
     name: "Home",
-    item: `${siteUrl}/`,
+    item: siteUrl,
   },
   {
     "@type": "ListItem",

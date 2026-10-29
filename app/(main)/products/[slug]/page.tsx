@@ -376,7 +376,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: `${siteUrl}/`,
+        item: siteUrl,
       },
       {
         "@type": "ListItem",

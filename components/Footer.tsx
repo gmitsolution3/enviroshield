@@ -33,7 +33,9 @@ const cols = [
       { label: "About us", href: "/about" },
       { label: "Our services", href: "/services" },
       { label: "Projects", href: "/projects" },
+      { label: "Products", href: "/products" },
       { label: "Insights", href: "/blog" },
+      { label: "Contact", href: "/contact" },
     ],
   },
 ];
