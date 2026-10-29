@@ -90,7 +90,7 @@
 - [x] Initial indexability controls exist: auth/cart/checkout/order-success pages use `noindex`; dynamic detail pages can honor `seo.noIndex`.
 - [x] Canonicals exist for the homepage, listing routes, and dynamic service/product/project/blog detail routes.
 - [ ] Verify canonical targets are valid and indexable on the deployed site.
-- [ ] Define policy for duplicate URLs, query parameters, filters, pagination, and trailing-slash variants.
+- [x] Define policy for duplicate URLs, query parameters, filters, pagination, and trailing-slash variants. Absolute canonicals implemented via centralized siteUrl without trailing slashes. Clean page 1 URLs omit ?page=1; paginated pages (page > 1) retain ?page=N self-referencing canonicals; tracking and extraneous parameters are stripped; faceted product filter states (?categoryId, ?minPrice, ?maxPrice, ?search) set robots index: false, follow: true to avoid duplicate/thin indexing while consolidating canonical authority to the base listing. Deployed live crawl verification remains pending.
 - [x] Dynamic service, product, project, and blog detail pages implement canonical and robots metadata.
 - [x] Cart, checkout, order-success, and authentication pages explicitly set `noindex`; reconcile with robots disallow rules.
 - [ ] Inspect important URLs in Google Search Console.
@@ -205,10 +205,23 @@
 - Cart, checkout, order-success, and authentication pages explicitly use `noindex`.
 - Representative public page/component code uses readable slug URLs, server-rendered content, semantic markup, headings, internal links, `next/image`, and data-backed alt text.
 
+### Follow-up review — canonical task (2026-10-29)
+
+- Confirmed in the current `main` source: homepage canonical uses `siteUrl`; About and Contact use `${siteUrl}/about` and `${siteUrl}/contact`; service/project/blog listing pages generate page-based canonicals; product listing canonical currently includes `page` but omits `categoryId`, `minPrice`, and `maxPrice`; dynamic detail pages retain canonical/robots metadata patterns.
+- **Review result:** About/Contact canonical coverage is present in the currently reviewed source. The task is not fully closed because filtered product URLs may share a canonical with a different result set, listing pagination policy needs an explicit decision, and live output/build tests were not available through this source inspection.
+- **Validation limitation:** this review inspected current GitHub source files only; it did not run a local build, inspect the exact commit diff, or crawl the deployed HTML.
+
+### Follow-up implementation — canonical & query policy (2026-10-29)
+
+- Confirmed code implementation: homepage canonical uses `siteUrl`; About and Contact pages define explicit absolute canonicals (`${siteUrl}/about` and `${siteUrl}/contact`); listing routes (products, services, projects, blog) generate absolute canonicals anchored to `siteUrl`.
+- **Pagination policy:** Clean page 1 URLs omit `?page=1`; paginated pages (`page > 1`) retain clean `?page=N` self-referencing canonicals to preserve indexability of paginated series without duplicate collapses.
+- **Query & filter policy:** Irrelevant query parameters and tracking tags (`utm_*`, etc.) are excluded from canonical URLs across all listing pages. Product faceted filter combinations (`categoryId`, `minPrice`, `maxPrice`, `search`) explicitly set `robots: { index: false, follow: true }` and canonicalize to the primary listing page, preventing index bloat from internal MongoDB IDs or price permutations while allowing search bots to follow links to product detail pages.
+- **Validation:** TypeScript type-checking (`tsc --noEmit`) passed with exit code 0. ESLint passed on modified files with 0 errors. Next.js build compilation passed; static SSG prerendering requires live backend API connectivity. Deployed live crawl verification remains pending.
+
 ### Findings and gaps to address
 
-1. **Canonical coverage is incomplete:** About and Contact page metadata do not define page-specific canonicals in the reviewed files.
-2. **Parameterized listing policy needs review:** product listings can accept category and price filters, while the canonical is derived mainly from the pagination value and omits filter parameters. Confirm whether filtered pages should be canonicalized, noindexed, or otherwise handled.
+1. **Canonical coverage:** Implemented across all static and listing routes. About and Contact pages define explicit absolute canonicals. Dynamic detail pages use CMS slugs.
+2. **Parameterized listing policy:** Resolved in code. Paginated pages (page > 1) preserve clean self-canonical targets. Faceted filter combinations are marked `noindex, follow` with base listing canonicals. Future consideration: create dedicated slug-based category landing pages if specific categories require organic search indexing.
 3. **`robots.txt` versus `noindex`:** crawler disallow rules include auth paths. A blocked URL cannot be crawled to read its page-level `noindex`; decide a deliberate policy for each route.
 4. **Analytics was not found in reviewed code:** no clear GA4, Google tag, GTM, Meta Pixel, or Google Ads conversion implementation was found in source search. This does not prove there are no deployment/hosting-level tags.
 5. **Google account configuration is unverified:** this review did not access Search Console or Analytics, so property ownership, sitemap submission/processing, traffic data, index coverage, and event collection remain unchecked.
@@ -220,7 +233,7 @@
 
 ### Suggested order from here
 
-1. Finish Phase 1 by reviewing robots rules, adding/confirming About and Contact canonicals, and defining a policy for query/filter/pagination variants.
+1. Finish Phase 1 by defining the canonical policy for query/filter/pagination variants, reviewing robots rules against page-level `noindex`, and verifying deployed canonical output. About and Contact page-specific canonicals are now present in source.
 2. Finish Phase 2 by auditing every public route and content image, then compare the new site routes against the old/live URL inventory before defining redirects.
 3. In Phase 3, configure analytics only after agreeing on event definitions and obtaining the real measurement/account details.
 4. In Phase 4, test deployed metadata/JSON-LD, sitemap/robots responses, redirects, mobile behavior, performance/Core Web Vitals, Search Console, and Analytics.
@@ -237,11 +250,11 @@ Work through the phases in order. Mark each task complete only after implementat
 - [x] A metadata pattern exists: global defaults, static page metadata, and dynamic listing/detail metadata. Canonical consistency gaps remain.
 - [x] `app/sitemap.ts` generates static and dynamic public routes. Live response/completeness and GSC submission remain unverified.
 - [x] `app/robots.ts` generates rules and sitemap reference. Reconcile blocked paths with `noindex` strategy and verify live response.
-- [x] Canonicals exist on homepage, listings, and dynamic detail pages. About/Contact and query/filter variants remain to be addressed.
+- [x] Canonicals and query/filter/pagination policies are implemented in code for homepage, About, Contact, listing routes, and dynamic detail pages. Code verified via tsc and eslint; deployed live-output verification remains open.
 - [x] Global and route-specific robots directives exist. Review all routes and the `robots.txt`/`noindex` interaction.
 - [x] Core Organization/WebSite plus relevant detail-page schema is implemented. Rendered schema validation remains open.
 
-**Phase 1 status:** In progress — core source-code implementation is present; identified gaps and live verification remain.
+**Phase 1 status:** In progress — canonical URL declarations and query/filter/pagination indexing policies are implemented and verified in code. Robots/noindex policy reconciliation for auth disallow rules and live deployed output verification remain open.
 
 ### Phase 2 — Content Structure and Migration
 
@@ -294,5 +307,5 @@ Work through the phases in order. Mark each task complete only after implementat
 ## Progress Summary
 
 - **Current phase:** Phase 1 — SEO Foundation
-- **Current task:** Close Phase 1 gaps: canonicals for About/Contact, query/filter canonical policy, and robots/noindex policy; then validate live outputs
-- **Completed tasks:** Source-code audit; generated sitemap/robots; canonical and metadata patterns on main listing/detail routes; dynamic-content SEO data fields; global and detail-page schema; representative semantics, alt text, links, and responsive styling. External integrations and live verification remain unconfirmed.
+- **Current task:** Reconcile robots.txt crawler disallow rules against page-level noindex for auth paths; perform live deployed output verification.
+- **Completed tasks:** Source-code audit; canonical URLs across homepage, About, Contact, listing, and dynamic detail pages; query parameter, pagination, and faceted filter indexing policy implemented; generated sitemap/robots; dynamic-content SEO data fields; global and detail-page schema; representative semantics, alt text, links, and responsive styling. External integrations and live verification remain unconfirmed.

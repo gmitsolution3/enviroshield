@@ -65,6 +65,19 @@ export async function generateMetadata({
 
   const isFirstPage = page === 1;
 
+  const rawCategoryId = first(params.categoryId) || "";
+  const hasCategory = /^[0-9a-fA-F]{24}$/.test(rawCategoryId);
+
+  const rawMin = first(params.minPrice) || "";
+  const rawMax = first(params.maxPrice) || "";
+  const numberRegex = /^\d+(\.\d+)?$/;
+  const hasPrice = numberRegex.test(rawMin) || numberRegex.test(rawMax);
+
+  const rawSearch = (first(params.search) || "").trim();
+  const hasSearch = rawSearch.length > 0;
+
+  const hasFilters = hasCategory || hasPrice || hasSearch;
+
   const title = isFirstPage
     ? "Paints, Primers & Finishing Products in Bangladesh | Enviroshield"
     : `Paints, Primers & Finishing Products — Page ${page} | Enviroshield`;
@@ -102,7 +115,7 @@ export async function generateMetadata({
     },
 
     robots: {
-      index: true,
+      index: !hasFilters,
       follow: true,
     },
 
