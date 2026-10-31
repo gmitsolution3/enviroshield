@@ -1,5 +1,7 @@
 "use client";
 
+import { FormSection } from "../common/FormSection";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Check,
@@ -1070,27 +1072,5 @@ function Field({
       {children}
       {error && <p className="text-xs leading-5 text-red-600">{error}</p>}
     </div>
-  );
-}
-
-function FormSection({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description: string;
-  children: ReactNode;
-}) {
-  return (
-    <section className="space-y-6">
-      <div>
-        <h3 className="text-lg font-bold text-navy">{title}</h3>
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          {description}
-        </p>
-      </div>
-      <div className="space-y-5">{children}</div>
-    </section>
   );
 }
