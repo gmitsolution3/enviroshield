@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useDelete } from "@/hooks/swr/useDelete";
-import type { IProduct } from "@/types/admin/product.type";
+import type { IProduct } from "@/types/product.type";
 
 type DeleteProductDialogProps = {
   product: IProduct | null;

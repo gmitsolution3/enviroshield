@@ -1,6 +1,6 @@
 "use client";
 
-import type { ITestimonial } from "@/types/admin/testimonial.type";
+import type { ITestimonial } from "@/types/testimonial.type";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";

@@ -46,7 +46,7 @@ import {
 import type {
     AdminDashboardUser,
     AdminUsersResponse,
-} from "@/types/admin/user.type";
+} from "@/types/user.type";
 import DashboardButton from "../../DashboardButton";
 
 import EmptyUsers from "./EmptyUsers";

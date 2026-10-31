@@ -1,5 +1,5 @@
 import { Reveal } from "@/components/animations/reveal";
-import type { IProject } from "@/types/admin/project.type";
+import type { IProject } from "@/types/project.type";
 import { ArrowUpRight, CalendarDays, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

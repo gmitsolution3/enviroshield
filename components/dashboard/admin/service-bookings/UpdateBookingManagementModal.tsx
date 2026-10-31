@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { axiosInstance } from "@/lib/axios";
-import type { Booking } from "@/types/admin/booking.type";
+import type { Booking } from "@/types/booking.type";
 import { formatBookingDate } from "./bookingUtils";
 
 type UpdateBookingManagementModalProps = {

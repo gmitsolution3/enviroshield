@@ -12,7 +12,7 @@ import {
   getPublishedBlogs,
 } from "@/lib/api/blogs";
 import { siteUrl } from "@/lib/site-url";
-import type { IBlog } from "@/types/admin/blog.type";
+import type { IBlog } from "@/types/blog.type";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";

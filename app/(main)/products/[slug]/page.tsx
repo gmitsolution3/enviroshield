@@ -15,7 +15,7 @@ import { siteUrl } from "@/lib/site-url";
 import type {
   IProductImage,
   IPublishedProduct,
-} from "@/types/admin/product.type";
+} from "@/types/product.type";
 import type { JSONContent } from "@tiptap/react";
 import {
   ArrowLeft,

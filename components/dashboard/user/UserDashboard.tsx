@@ -33,7 +33,7 @@ import DashboardError from "@/components/dashboard/DashboardError";
 import { PeriodSelector } from "@/components/dashboard/analytics/PeriodSelector";
 import { InteractiveAreaChart } from "@/components/dashboard/analytics/charts/InteractiveAreaChart";
 import { analyticsApi } from "@/lib/api/analytics";
-import { AnalyticsPeriod } from "@/types/admin/analytics.type";
+import { AnalyticsPeriod } from "@/types/analytics.type";
 import { cn } from "@/lib/utils";
 
 interface UserDashboardProps {

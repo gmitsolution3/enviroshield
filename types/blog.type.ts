@@ -1,3 +1,5 @@
+export type TBlogStatus = "draft" | "published";
+
 export interface IBlogImage {
   url: string;
   publicId: string;
@@ -6,14 +8,14 @@ export interface IBlogImage {
 }
 
 export interface IBlogSeo {
-  metaTitle: string;
-  metaDescription: string;
-  keywords: string[];
-  ogTitle: string;
-  ogDescription: string;
-  ogImage: string;
-  ogImagePublicId: string;
-  noIndex: boolean;
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  ogImagePublicId?: string;
+  noIndex?: boolean;
 }
 
 export interface IBlogAuthor {
@@ -32,7 +34,7 @@ export interface IBlog {
   coverImage: IBlogImage;
   tags: string[];
   authorId: string;
-  status: "draft" | "published";
+  status: TBlogStatus;
   publishedAt?: string | null;
   seo?: IBlogSeo;
   createdAt: string;
@@ -59,3 +61,4 @@ export interface IBlogSingleResponse {
   message: string;
   data: IBlog;
 }
+

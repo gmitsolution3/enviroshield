@@ -52,7 +52,7 @@ const seoSchema = z.object({
   ogDescription: z.string().optional(),
   ogImage: z.string().optional(),
   // Empty publicIds are allowed for older OG images.
-  ogImagePublicId: z.string(),
+  ogImagePublicId: z.string().optional(),
 
   noIndex: z.boolean(),
 });
@@ -83,8 +83,8 @@ const formSchema = z.object({
   coverImage: imageSchema,
 
   tags: z
-    .array(z.string().min(1, "Tag cannot be empty"))
-    .min(1, "At least one tag is required"),
+    .array(z.string()),
+
 
   status: z.enum(["draft", "published"]),
 
@@ -413,14 +413,21 @@ export default function EditBlogModal({
           publishedAt,
 
           seo: {
-            metaTitle: values.seo.metaTitle || "",
-            metaDescription: values.seo.metaDescription || "",
-            keywords: values.seo.keywords,
-            ogTitle: values.seo.ogTitle || "",
-            ogDescription: values.seo.ogDescription || "",
-            ogImage: values.seo.ogImage || "",
-            ogImagePublicId: values.seo.ogImagePublicId || "",
-            noIndex: values.seo.noIndex,
+            metaTitle: values.seo?.metaTitle?.trim() || undefined,
+            metaDescription: values.seo?.metaDescription?.trim() || undefined,
+            keywords: values.seo?.keywords?.filter(Boolean) || [],
+            ogTitle: values.seo?.ogTitle?.trim() || undefined,
+            ogDescription: values.seo?.ogDescription?.trim() || undefined,
+            ogImage: values.seo?.ogImage?.trim() || undefined,
+            ogImagePublicId: values.seo?.ogImagePublicId?.trim() || undefined,
+            noIndex: Boolean(values.seo?.noIndex),
+
+
+
+
+
+
+
           },
         },
       });

@@ -50,7 +50,7 @@ const imageSchema = z.object({
   url: z.string().min(1, "Image is required"),
   publicId: z.string(),
   alt: z.string().min(1, "Image alt text is required"),
-  caption: z.string().min(1, "Image caption is required"),
+  caption: z.string().optional(),
 });
 
 const contentItemSchema = z.object({
@@ -67,18 +67,19 @@ const contentSectionSchema = z.object({
 });
 
 const seoSchema = z.object({
-  metaTitle: z.string().min(1, "Meta title is required"),
-  metaDescription: z.string().min(1, "Meta description is required"),
-  keywords: z
-    .array(z.string().min(1, "Keyword cannot be empty"))
-    .min(1, "At least one keyword is required"),
-  ogTitle: z.string().min(1, "OG title is required"),
-  ogDescription: z.string().min(1, "OG description is required"),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  keywords: z.array(z.string().min(1, "Keyword cannot be empty")),
+  ogTitle: z.string().optional(),
+  ogDescription: z.string().optional(),
   ogImage: z
     .string()
-    .min(1, "OG image is required")
-    .url("Enter a valid OG image URL"),
-  ogImagePublicId: z.string(),
+    .optional()
+    .refine(
+      (val) => !val || /^https?:\/\/.+/.test(val),
+      "Enter a valid OG image URL",
+    ),
+  ogImagePublicId: z.string().optional(),
   noIndex: z.boolean(),
 });
 
@@ -358,7 +359,16 @@ export default function UpdateServiceModal({
           process: values.process,
           benefits: values.benefits,
           status: values.status,
-          seo: values.seo,
+          seo: {
+            metaTitle: values.seo?.metaTitle?.trim() || undefined,
+            metaDescription: values.seo?.metaDescription?.trim() || undefined,
+            keywords: values.seo?.keywords?.filter(Boolean) || [],
+            ogTitle: values.seo?.ogTitle?.trim() || undefined,
+            ogDescription: values.seo?.ogDescription?.trim() || undefined,
+            ogImage: values.seo?.ogImage?.trim() || undefined,
+            ogImagePublicId: values.seo?.ogImagePublicId?.trim() || undefined,
+            noIndex: Boolean(values.seo?.noIndex),
+          },
         },
       });
 

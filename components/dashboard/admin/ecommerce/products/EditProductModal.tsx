@@ -38,8 +38,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import type { ICategoryResponse } from "@/types/admin/category.type";
-import type { IProduct } from "@/types/admin/product.type";
+import type { ICategoryResponse } from "@/types/category.type";
+import type { IProduct } from "@/types/product.type";
 import { generateSlug } from "@/utils/generateSlug";
 
 import DashboardButton from "@/components/dashboard/DashboardButton";
@@ -56,7 +56,7 @@ const seoSchema = z.object({
   metaDescription: z.string().trim().min(1, "Meta description is required"),
   keywords: z
     .array(z.string().trim().min(1))
-    .min(1, "Add at least one SEO keyword"),
+    .optional().default([]),
   ogTitle: z.string().trim().min(1, "OG title is required"),
   ogDescription: z.string().trim().min(1, "OG description is required"),
   ogImage: z.string().trim().url("Enter a valid OG image URL"),
@@ -79,7 +79,7 @@ const formSchema = z.object({
   shortDescription: z.string().trim().min(1, "Short description is required"),
   description: z.any(),
   primaryImage: imageSchema,
-  gallery: z.array(imageSchema).min(1, "Add at least one gallery image"),
+  gallery: z.array(imageSchema).optional().default([]),
   price: z.coerce.number().positive("Price must be greater than zero"),
   costPrice: z.coerce.number().min(0, "Cost price cannot be negative"),
   weight: z.coerce.number().positive("Weight must be greater than zero"),

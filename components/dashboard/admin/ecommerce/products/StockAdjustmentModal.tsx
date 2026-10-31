@@ -26,7 +26,7 @@ import { axiosInstance } from "@/lib/axios";
 import type {
   InventoryAdjustmentResponse,
   InventoryMovementType,
-} from "@/types/admin/inventory.type";
+} from "@/types/inventory.type";
 import type { IProduct, IProductResponse } from "@/types";
 
 type StockAdjustmentModalProps = {

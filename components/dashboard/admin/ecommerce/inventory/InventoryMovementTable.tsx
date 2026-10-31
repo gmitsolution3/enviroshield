@@ -15,7 +15,7 @@ import { Card } from "@/components/ui/card";
 import type {
   InventoryMovement,
   InventoryPagination,
-} from "@/types/admin/inventory.type";
+} from "@/types/inventory.type";
 
 type InventoryMovementTableProps = {
   title: string;
@@ -192,6 +192,11 @@ function MovementRow({
     ? "border-emerald-200 bg-emerald-50 text-emerald-700"
     : "border-red-200 bg-red-50 text-red-700";
 
+  const productObj = typeof movement.productId === "object" ? movement.productId : null;
+  const productIdStr = typeof movement.productId === "string" ? movement.productId : movement.productId?._id;
+  const performerObj = typeof movement.performedBy === "object" ? movement.performedBy : null;
+  const performerName = performerObj?.name || (typeof movement.performedBy === "string" ? movement.performedBy : "Unknown user");
+
   return (
     <tr className="transition-colors hover:bg-slate-50/70">
       <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
@@ -199,11 +204,11 @@ function MovementRow({
       </td>
       {showProductId && (
         <td className="px-5 py-4 font-mono text-xs text-slate-600">
-          {movement.productId._id || "Unavailable"}
+          {productIdStr || "Unavailable"}
         </td>
       )}
       <td className="px-5 py-4 font-mono text-xs text-slate-600">
-        {movement.productId?.name || "Product name unavailable"}
+        {productObj?.name || "Product name unavailable"}
       </td>
       <td className="px-5 py-4">
         <Badge
@@ -231,11 +236,11 @@ function MovementRow({
       </td>
       <td className="px-5 py-4">
         <p className="whitespace-nowrap text-sm font-semibold text-navy">
-          {movement.performedBy?.name || "Unknown user"}
+          {performerName}
         </p>
-        {movement.performedBy?.email && (
+        {performerObj?.email && (
           <p className="mt-1 whitespace-nowrap text-xs text-slate-400">
-            {movement.performedBy.email}
+            {performerObj.email}
           </p>
         )}
       </td>

@@ -5,8 +5,8 @@ import { useState } from "react";
 import { ArrowLeft, Package } from "lucide-react";
 
 import { useFetch } from "@/hooks/swr/useFetch";
-import type { InventoryMovementsResponse } from "@/types/admin/inventory.type";
-import type { IProductSingleResponse } from "@/types/admin/product.type";
+import type { InventoryMovementsResponse } from "@/types/inventory.type";
+import type { IProductSingleResponse } from "@/types/product.type";
 import InventoryMovementTable from "../inventory/InventoryMovementTable";
 
 const PAGE_SIZE = 10;

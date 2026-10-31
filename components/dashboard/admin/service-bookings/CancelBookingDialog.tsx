@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { axiosInstance } from "@/lib/axios";
-import type { Booking } from "@/types/admin/booking.type";
+import type { Booking } from "@/types/booking.type";
 
 type CancelBookingDialogProps = {
   booking: Booking | null;

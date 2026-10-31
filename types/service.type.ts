@@ -1,5 +1,7 @@
 import type { IProject } from "./project.type";
 
+export type TServiceStatus = "draft" | "published";
+
 export interface IServiceImage {
   url: string;
   publicId: string;
@@ -18,14 +20,14 @@ export interface IServiceContentSection {
 }
 
 export interface IServiceSeo {
-  metaTitle: string;
-  metaDescription: string;
-  keywords: string[];
-  ogTitle: string;
-  ogDescription: string;
-  ogImage: string;
-  ogImagePublicId: string;
-  noIndex: boolean;
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  ogImagePublicId?: string;
+  noIndex?: boolean;
 }
 
 export interface IService {
@@ -46,7 +48,7 @@ export interface IService {
 
   projects: IProject[];
 
-  status: "published" | "draft";
+  status: TServiceStatus;
   publishedAt?: string | null;
 
   seo?: IServiceSeo;
@@ -74,3 +76,4 @@ export interface IServiceSingleResponse {
   message: string;
   data: IService;
 }
+

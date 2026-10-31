@@ -8,7 +8,7 @@ import {
   AnalyticsPeriod,
   UserActivityData,
   UserOverviewData,
-} from "@/types/admin/analytics.type";
+} from "@/types/analytics.type";
 
 interface ApiResponse<T> {
   success: boolean;

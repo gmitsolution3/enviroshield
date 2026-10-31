@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { IConsentSettings } from "@/types/admin/settings.type";
+import { IConsentSettings } from "@/types/settings.type";
 
 interface PrivacyConsentSettingsProps {
   data: IConsentSettings;

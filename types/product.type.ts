@@ -1,5 +1,6 @@
-
 import type { ICategory } from "./category.type";
+
+export type TProductStatus = "draft" | "published";
 
 export interface IProductImage {
   url: string;
@@ -23,7 +24,7 @@ export interface IProduct {
   name: string;
   slug: string;
   sku: string;
-  categoryId: ICategory;
+  categoryId: ICategory | string;
   shortDescription: string;
   description: Record<string, unknown>;
   primaryImage: IProductImage;
@@ -35,7 +36,7 @@ export interface IProduct {
   tdsPublicId: string;
   stockQuantity: number;
   lowStockThreshold: number;
-  status: string;
+  status: TProductStatus;
   isFeatured: boolean;
   publishedAt: string | null;
   seo: IProductSeo;

@@ -62,22 +62,12 @@ export type BookingListResponse = {
   data: Booking[];
 };
 
-export type BookingResponse = {
+export type BookingSingleResponse = {
   success: boolean;
   statusCode: number;
   message: string;
   data: Booking;
 };
 
-export type BookingListQuery = {
-  page?: number;
-  limit?: number;
-  status?: BookingStatus;
-  bookingNumber?: string;
-};
+export type BookingResponse = BookingListResponse;
 
-export type BookingManagementUpdate = {
-  isSiteVisit?: boolean;
-  siteVisitDate?: string;
-  adminNotes?: string;
-};

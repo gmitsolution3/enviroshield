@@ -3,7 +3,7 @@ import {
   ISettings,
   ISettingsResponse,
   defaultSettingsValues,
-} from "@/types/admin/settings.type";
+} from "@/types/settings.type";
 
 const API_BASE_URL =
   process.env.NODE_ENV === "development"

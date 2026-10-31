@@ -55,7 +55,7 @@ export interface IContact {
   jobTitle?: string;
 
   // Service requirement
-  serviceId?: string;
+  serviceId?: string | { _id: string; name: string };
 
   // Project information
   projectName?: string;
@@ -76,20 +76,26 @@ export interface IContact {
 
   createdAt: string;
   updatedAt: string;
-  __v: number;
+  __v?: number;
 }
 
 export interface IContactResponse {
   success: boolean;
   statusCode: number;
   message: string;
-
   meta: {
     page: number;
     limit: number;
     total: number;
     totalPages: number;
   };
-
   data: IContact[];
 }
+
+export interface IContactSingleResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: IContact;
+}
+

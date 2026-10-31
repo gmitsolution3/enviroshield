@@ -2,7 +2,7 @@
 
 import { FormEvent, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { ICategory } from "@/types/admin/category.type";
+import type { ICategory } from "@/types/category.type";
 
 type Props = {
   categories: ICategory[];

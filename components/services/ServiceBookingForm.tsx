@@ -38,7 +38,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { usePost } from "@/hooks/swr/usePost";
 import type { CreateBookingRequest } from "@/lib/api/bookings";
 import { authClient } from "@/lib/auth-client";
-import type { IService } from "@/types/admin/service.type";
+import type { IService } from "@/types/service.type";
 
 const bookingSchema = z.object({
   location: z

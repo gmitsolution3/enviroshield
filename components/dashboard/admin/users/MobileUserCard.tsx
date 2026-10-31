@@ -9,7 +9,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 
-import type { AdminDashboardUser } from "@/types/admin/user.type";
+import type { AdminDashboardUser } from "@/types/user.type";
 
 import RoleBadge from "./RoleBadge";
 import UserActions from "./UserActions";

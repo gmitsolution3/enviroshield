@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { axiosInstance } from "@/lib/axios";
-import type { Booking } from "@/types/admin/booking.type";
+import type { Booking } from "@/types/booking.type";
 import { formatBookingAmount } from "./bookingUtils";
 
 type UpdateBookingPriceModalProps = {

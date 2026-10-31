@@ -19,7 +19,7 @@ import {
   getStoredConsent,
   saveConsent,
 } from "@/lib/consent/consent-store";
-import { IConsentSettings } from "@/types/admin/settings.type";
+import { IConsentSettings } from "@/types/settings.type";
 
 interface CookieConsentBannerProps {
   consentSettings: IConsentSettings;

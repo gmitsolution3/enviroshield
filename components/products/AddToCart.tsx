@@ -1,7 +1,7 @@
 "use client";
 
 import { addToCart } from "@/lib/cart";
-import type { IPublishedProduct } from "@/types/admin/product.type";
+import type { IPublishedProduct } from "@/types/product.type";
 import { useLenis } from "lenis/react";
 import { Check, Minus, Plus, ShoppingCart } from "lucide-react";
 import { useEffect, useRef, useState } from "react";

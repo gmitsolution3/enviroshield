@@ -2,10 +2,10 @@
 import type {
   IPublishedProduct,
   IPublishedProductResponse,
-} from "@/types/admin/product.type";
+} from "@/types/product.type";
 import type {
   ICategoryResponse,
-} from "@/types/admin/category.type";
+} from "@/types/category.type";
 
 const API_BASE_URL =
   process.env.NODE_ENV === "development"

@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight, Maximize2, Package, X } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { IProductImage } from "@/types/admin/product.type";
+import type { IProductImage } from "@/types/product.type";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 

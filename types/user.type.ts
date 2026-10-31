@@ -19,3 +19,4 @@ export interface AdminUsersResponse {
   users: AdminDashboardUser[];
   total: number;
 }
+

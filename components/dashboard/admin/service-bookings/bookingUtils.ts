@@ -1,5 +1,5 @@
 import { formatDateTime, formatNumber, formatStatus } from "@/lib/utils";
-import type { BookingStatus } from "@/types/admin/booking.type";
+import type { BookingStatus } from "@/types/booking.type";
 
 const bookingStatusStyles: Record<BookingStatus, string> = {
   pending:

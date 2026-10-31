@@ -45,7 +45,7 @@ import type {
   Booking,
   BookingListResponse,
   BookingStatus,
-} from "@/types/admin/booking.type";
+} from "@/types/booking.type";
 import {
   UserDashboardMetric,
   UserStatusBadge,

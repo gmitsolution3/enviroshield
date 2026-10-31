@@ -1,5 +1,5 @@
 import { Reveal } from "@/components/animations/reveal";
-import type { IBlog } from "@/types/admin/blog.type";
+import type { IBlog } from "@/types/blog.type";
 import { ArrowUpRight, CalendarDays, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

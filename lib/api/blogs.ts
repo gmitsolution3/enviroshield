@@ -2,7 +2,7 @@ import type {
   IBlog,
   IBlogResponse,
   IBlogSingleResponse,
-} from "@/types/admin/blog.type";
+} from "@/types/blog.type";
 
 const API_BASE_URL =
   process.env.NODE_ENV === "development"

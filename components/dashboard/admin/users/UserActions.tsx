@@ -47,7 +47,7 @@ import UserDetailsDialog from "./UserDetailsDialog";
 
 import { toast } from "sonner";
 
-import type { AdminDashboardUser } from "@/types/admin/user.type";
+import type { AdminDashboardUser } from "@/types/user.type";
 
 type BanDuration =
   | "one-day"

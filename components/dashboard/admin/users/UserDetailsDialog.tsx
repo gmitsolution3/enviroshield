@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { AdminDashboardUser } from "@/types/admin/user.type";
+import type { AdminDashboardUser } from "@/types/user.type";
 import {
   Ban,
   CalendarDays,

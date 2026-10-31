@@ -7,7 +7,7 @@ import {
 import Container from "@/components/Container";
 import ProjectCard from "@/components/projects/ProjectCard";
 import { SectionHeader } from "@/components/SectionHeader";
-import type { IProject } from "@/types/admin/project.type";
+import type { IProject } from "@/types/project.type";
 
 type ServiceProjectsSectionProps = {
   projects: IProject[];

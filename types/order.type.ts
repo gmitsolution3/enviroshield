@@ -63,3 +63,11 @@ export interface OrdersResponse {
   meta: InventoryPagination;
   data: AdminOrder[];
 }
+
+export interface OrderSingleResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: AdminOrder;
+}
+

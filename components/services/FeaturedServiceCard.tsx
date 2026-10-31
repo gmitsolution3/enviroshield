@@ -1,5 +1,5 @@
 import { Reveal } from "@/components/animations/reveal";
-import type { IService } from "@/types/admin/service.type";
+import type { IService } from "@/types/service.type";
 import { ArrowUpRight, Briefcase, ListChecks } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

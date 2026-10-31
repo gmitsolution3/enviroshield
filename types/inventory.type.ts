@@ -1,4 +1,4 @@
-import {IProduct} from "@/types";
+import type { IProduct } from "./product.type";
 
 export interface InventoryStats {
   totalProducts: number;
@@ -48,7 +48,7 @@ export interface LowStockResponse {
   };
 }
 
-export type InventoryMovementType = "increase" | "decrease";
+export type InventoryMovementType = "initial" | "increase" | "decrease";
 
 export interface InventoryMovementPerformer {
   name: string | null;
@@ -58,13 +58,24 @@ export interface InventoryMovementPerformer {
 
 export interface InventoryMovement {
   _id: string;
-  productId: IProduct;
+  productId:
+    | string
+    | {
+        _id: string;
+        name: string;
+        sku: string;
+        primaryImage?: {
+          url?: string;
+          alt?: string;
+          publicId?: string;
+        };
+      };
   movementType: InventoryMovementType;
   quantity: number;
   previousStock: number;
   resultingStock: number;
   reason: string;
-  performedBy: InventoryMovementPerformer | null;
+  performedBy: string | InventoryMovementPerformer | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -79,29 +90,20 @@ export interface InventoryMovementsResponse {
   };
 }
 
-export interface InventoryAdjustedProduct {
-  _id: string;
-  name: string;
-  slug: string;
-  sku: string;
-  stockQuantity: number;
-  lowStockThreshold: number;
-  status: string;
+export interface StockAdjustmentPayload {
+  movementType: "increase" | "decrease";
+  quantity: number;
+  reason: string;
 }
 
-export type InventoryAdjustmentMovement = Omit<
-  InventoryMovement,
-  "performedBy"
-> & {
-  performedBy: string;
-};
-
-export interface InventoryAdjustmentResponse {
+export interface StockAdjustmentResponse {
   success: boolean;
   statusCode: number;
   message: string;
   data: {
-    product: InventoryAdjustedProduct;
-    movement: InventoryAdjustmentMovement;
+    product: IProduct;
+    movement: InventoryMovement;
   };
 }
+
+export type InventoryAdjustmentResponse = StockAdjustmentResponse;

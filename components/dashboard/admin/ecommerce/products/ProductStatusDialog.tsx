@@ -14,7 +14,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { usePatch } from "@/hooks/swr/usePatch";
-import type { IProduct } from "@/types/admin/product.type";
+import type { IProduct } from "@/types/product.type";
 
 type ProductStatusDialogProps = {
   product: IProduct | null;

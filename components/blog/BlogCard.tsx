@@ -1,7 +1,7 @@
 "use client";
 import { formatDate } from "@/lib/utils";
 
-import type { IBlog } from "@/types/admin/blog.type";
+import type { IBlog } from "@/types/blog.type";
 import { ArrowUpRight, CalendarDays } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";

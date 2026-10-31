@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import DashboardButton from "@/components/dashboard/DashboardButton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { usePatch } from "@/hooks/swr/usePatch";
-import type { Booking, BookingResponse } from "@/types/admin/booking.type";
+import type { Booking, BookingSingleResponse } from "@/types/booking.type";
 
 export default function CancelMyBookingDialog({ booking, open, listKey, onClose, onSuccess }: {
   booking: Booking | null;
@@ -20,7 +20,7 @@ export default function CancelMyBookingDialog({ booking, open, listKey, onClose,
   async function submit() {
     if (!booking || isLoading) return;
     try {
-      const response: BookingResponse = await cancelBooking({ id: `${encodeURIComponent(booking._id)}/cancel`, data: undefined });
+      const response: BookingSingleResponse = await cancelBooking({ id: `${encodeURIComponent(booking._id)}/cancel`, data: undefined });
       if (!response.success || !response.data?._id) {
         toast.error(response.message || "Could not cancel this booking.");
         return;

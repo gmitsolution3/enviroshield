@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { axiosInstance } from "@/lib/axios";
-import type { Booking, BookingStatus } from "@/types/admin/booking.type";
+import type { Booking, BookingStatus } from "@/types/booking.type";
 import { formatBookingStatus } from "./bookingUtils";
 
 type UpdateBookingStatusModalProps = {

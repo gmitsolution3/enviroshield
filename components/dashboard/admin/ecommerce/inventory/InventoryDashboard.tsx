@@ -27,7 +27,7 @@ import type {
   InventoryProduct,
   InventoryStatsResponse,
   LowStockResponse,
-} from "@/types/admin/inventory.type";
+} from "@/types/inventory.type";
 
 const PAGE_SIZE = 10;
 

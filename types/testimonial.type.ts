@@ -1,3 +1,5 @@
+export type TTestimonialStatus = "draft" | "published";
+
 export interface ITestimonialImage {
   url: string;
   publicId: string;
@@ -10,10 +12,10 @@ export interface ITestimonial {
   clientImage?: ITestimonialImage;
   rating: number;
   content: string;
-  status: "published" | "draft";
+  status: TTestimonialStatus;
   createdAt: string;
   updatedAt: string;
-  __v: number;
+  __v?: number;
 }
 
 export interface ITestimonialResponse {
@@ -35,3 +37,4 @@ export interface ITestimonialSingleResponse {
   message: string;
   data: ITestimonial;
 }
+

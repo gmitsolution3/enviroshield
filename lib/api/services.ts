@@ -1,4 +1,4 @@
-import type { IServiceResponse, IService } from "@/types/admin/service.type";
+import type { IServiceResponse, IService } from "@/types/service.type";
 
 const API_BASE_URL =
   process.env.NODE_ENV === "development"

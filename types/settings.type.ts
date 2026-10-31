@@ -77,10 +77,10 @@ export interface ISettingsResponse {
 export const defaultSettingsValues: ISettings = {
   seo: {
     siteName: "Enviroshield",
-    defaultTitle: "Enviroshield",
+    defaultTitle: "Enviroshield | Nano-Polymer Coatings & Waterproofing",
     defaultDescription:
-      "Enviroshield provides waterproofing, waterproofing paint, heatproofing, epoxy and PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy floors, floor hardener, and ETP coating in Bangladesh.",
-    defaultOgImage: "/images/logo.png",
+      "Advanced waterproofing, corrosion protection, heat-reflective coatings and construction chemicals across Bangladesh.",
+    defaultOgImage: "",
     googleVerificationToken: "",
     bingVerificationToken: "",
     defaultRobots: {
@@ -121,8 +121,9 @@ export const defaultSettingsValues: ISettings = {
     enabled: true,
     requireAnalyticsConsent: true,
     requireMarketingConsent: true,
-    bannerTitle: "Cookie & Tracking Preferences",
+    bannerTitle: "We respect your privacy",
     bannerDescription:
-      "We use cookies and tracking technologies to enhance your experience, analyze site usage, and support our marketing efforts.",
+      "We use cookies to improve your browsing experience, provide personalized content, and analyze our traffic. You can choose which cookies to allow.",
   },
 };
+

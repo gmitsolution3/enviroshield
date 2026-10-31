@@ -7,7 +7,7 @@ import {
   VisitorConsent,
 } from "@/lib/consent/consent-store";
 import { setClientTrackingSettings } from "@/lib/analytics/events";
-import { ISettings } from "@/types/admin/settings.type";
+import { ISettings } from "@/types/settings.type";
 import { GlobalLinkTracker } from "./GlobalLinkTracker";
 
 interface TrackingScriptsProps {

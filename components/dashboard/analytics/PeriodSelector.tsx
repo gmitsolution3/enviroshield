@@ -1,6 +1,6 @@
 "use client";
 
-import { AnalyticsPeriod } from "@/types/admin/analytics.type";
+import { AnalyticsPeriod } from "@/types/analytics.type";
 import { cn } from "@/lib/utils";
 
 interface PeriodSelectorProps {

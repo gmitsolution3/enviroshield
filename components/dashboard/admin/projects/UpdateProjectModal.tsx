@@ -56,40 +56,36 @@ const galleryItemSchema = z.object({
 
 const locationSchema = z.object({
   city: z.string().min(1, "City is required"),
-  area: z.string().min(1, "Area is required"),
+  area: z.string().optional(),
   country: z.string().min(1, "Country is required"),
 });
 
 const clientSchema = z.object({
   name: z.string().min(1, "Client name is required"),
-  description: z.string().min(1, "Client description is required"),
-  logo: z.object({
-    url: z.string().min(1, "Client logo is required"),
-    publicId: z.string(),
-    alt: z.string().min(1, "Client logo alt text is required"),
-  }),
+  description: z.string().optional(),
+  logo: z
+    .object({
+      url: z.string().optional(),
+      publicId: z.string().optional(),
+      alt: z.string().optional(),
+    })
+    .optional(),
 });
 
 const seoSchema = z.object({
-  metaTitle: z.string().min(1, "Meta title is required"),
-
-  metaDescription: z.string().min(1, "Meta description is required"),
-
-  keywords: z
-    .array(z.string().min(1, "Keyword cannot be empty"))
-    .min(1, "At least one keyword is required"),
-
-  ogTitle: z.string().min(1, "OG title is required"),
-
-  ogDescription: z.string().min(1, "OG description is required"),
-
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  keywords: z.array(z.string().min(1, "Keyword cannot be empty")),
+  ogTitle: z.string().optional(),
+  ogDescription: z.string().optional(),
   ogImage: z
     .string()
-    .min(1, "OG image is required")
-    .url("Enter a valid OG image URL"),
-
-  ogImagePublicId: z.string(),
-
+    .optional()
+    .refine(
+      (val) => !val || /^https?:\/\/.+/.test(val),
+      "Enter a valid OG image URL",
+    ),
+  ogImagePublicId: z.string().optional(),
   noIndex: z.boolean(),
 });
 
@@ -115,9 +111,7 @@ const formSchema = z.object({
 
   completionDate: z.string().min(1, "Completion date is required"),
 
-  gallery: z
-    .array(galleryItemSchema)
-    .min(1, "At least one gallery image is required"),
+  gallery: z.array(galleryItemSchema),
 
   client: clientSchema,
 
@@ -464,26 +458,30 @@ export default function UpdateProjectModal({
 
         location: {
           city: data.location.city,
-          area: data.location.area,
+          area: data.location.area?.trim() || undefined,
           country: data.location.country,
         },
 
         completionDate: data.completionDate,
 
-        gallery: data.gallery.map((item) => ({
-          url: item.url,
-          publicId: item.publicId,
-          alt: item.alt,
-        })),
+        gallery: (data.gallery || [])
+          .filter((item) => Boolean(item.url))
+          .map((item) => ({
+            url: item.url,
+            publicId: item.publicId || "",
+            alt: item.alt || "",
+          })),
 
         client: {
           name: data.client.name,
-          description: data.client.description,
-          logo: {
-            url: data.client.logo.url,
-            publicId: data.client.logo.publicId,
-            alt: data.client.logo.alt,
-          },
+          description: data.client.description?.trim() || undefined,
+          logo: data.client.logo?.url
+            ? {
+                url: data.client.logo.url,
+                publicId: data.client.logo.publicId || "",
+                alt: data.client.logo.alt || "",
+              }
+            : undefined,
         },
 
         serviceId: data.serviceId,
@@ -493,14 +491,14 @@ export default function UpdateProjectModal({
         isFeatured: data.isFeatured,
 
         seo: {
-          metaTitle: data.seo.metaTitle,
-          metaDescription: data.seo.metaDescription,
-          keywords: data.seo.keywords,
-          ogTitle: data.seo.ogTitle,
-          ogDescription: data.seo.ogDescription,
-          ogImage: data.seo.ogImage,
-          ogImagePublicId: data.seo.ogImagePublicId,
-          noIndex: data.seo.noIndex,
+          metaTitle: data.seo?.metaTitle?.trim() || undefined,
+          metaDescription: data.seo?.metaDescription?.trim() || undefined,
+          keywords: data.seo?.keywords?.filter(Boolean) || [],
+          ogTitle: data.seo?.ogTitle?.trim() || undefined,
+          ogDescription: data.seo?.ogDescription?.trim() || undefined,
+          ogImage: data.seo?.ogImage?.trim() || undefined,
+          ogImagePublicId: data.seo?.ogImagePublicId?.trim() || undefined,
+          noIndex: Boolean(data.seo?.noIndex),
         },
       };
 

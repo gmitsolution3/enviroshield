@@ -40,8 +40,8 @@ const formSchema = z.object({
   clientImage: z
     .object({
       url: z.string().optional(),
-      publicId: z.string(),
-      alt: z.string().trim(),
+      publicId: z.string().optional(),
+      alt: z.string().optional(),
     })
     .optional()
     .superRefine((image, ctx) => {

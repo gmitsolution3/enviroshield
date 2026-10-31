@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/Button";
 import { getProductImageUrl } from "@/lib/products/images";
 import { getTrustedTdsUrl } from "@/lib/products/tds";
-import type { IPublishedProduct } from "@/types/admin/product.type";
+import type { IPublishedProduct } from "@/types/product.type";
 
 const CURRENCY = "৳";
 

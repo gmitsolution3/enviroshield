@@ -7,4 +7,5 @@ export interface ISlide {
   text: string;
   cta: string;
   href: string;
-};
+}
+

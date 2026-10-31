@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { IMarketingSettings } from "@/types/admin/settings.type";
+import { IMarketingSettings } from "@/types/settings.type";
 
 interface AdvertisingSettingsProps {
   data: IMarketingSettings;

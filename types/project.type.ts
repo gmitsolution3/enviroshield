@@ -1,5 +1,7 @@
 import type { IService } from "./service.type";
 
+export type TProjectStatus = "draft" | "published";
+
 export interface IProjectImage {
   url: string;
   publicId: string;
@@ -33,14 +35,14 @@ export interface IProjectClient {
 }
 
 export interface IProjectSeo {
-  metaTitle: string;
-  metaDescription: string;
-  keywords: string[];
-  ogTitle: string;
-  ogDescription: string;
-  ogImage: string;
-  ogImagePublicId: string;
-  noIndex: boolean;
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  ogImagePublicId?: string;
+  noIndex?: boolean;
 }
 
 export interface IProject {
@@ -54,9 +56,9 @@ export interface IProject {
   gallery: IProjectGalleryItem[];
   client: IProjectClient;
   serviceId: IService;
-  status: "published" | "draft";
+  status: TProjectStatus;
   isFeatured: boolean;
-  seo: IProjectSeo;
+  seo?: IProjectSeo;
   createdAt: string;
   updatedAt: string;
   __v?: number;
@@ -81,3 +83,4 @@ export interface IProjectSingleResponse {
   message: string;
   data: IProject;
 }
+

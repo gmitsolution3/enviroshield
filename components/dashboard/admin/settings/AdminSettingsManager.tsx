@@ -13,7 +13,7 @@ import { settingsApi } from "@/lib/api/settings";
 import {
   ISettings,
   defaultSettingsValues,
-} from "@/types/admin/settings.type";
+} from "@/types/settings.type";
 import {
   Activity,
   AlertCircle,

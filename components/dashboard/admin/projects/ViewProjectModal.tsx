@@ -448,26 +448,26 @@ export default function ViewProjectModal({
                 <div className="grid gap-4 p-5 md:grid-cols-2">
                   <SeoCard
                     label="Meta Title"
-                    value={project.seo.metaTitle}
+                    value={project.seo?.metaTitle}
                   />
 
                   <SeoCard
                     label="OG Title"
-                    value={project.seo.ogTitle}
+                    value={project.seo?.ogTitle}
                   />
 
                   <SeoCard
                     label="Meta Description"
-                    value={project.seo.metaDescription}
+                    value={project.seo?.metaDescription}
                   />
 
                   <SeoCard
                     label="OG Description"
-                    value={project.seo.ogDescription}
+                    value={project.seo?.ogDescription}
                   />
 
                   <OgImagePreview
-                    value={project.seo.ogImage}
+                    value={project.seo?.ogImage}
                     label="OG Image"
                   />
                 </div>
@@ -479,7 +479,7 @@ export default function ViewProjectModal({
                     </p>
 
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {project.seo.keywords?.length ? (
+                      {project.seo?.keywords?.length ? (
                         project.seo.keywords.map((keyword, index) => (
                           <span
                             key={`${keyword}-${index}`}
@@ -499,18 +499,18 @@ export default function ViewProjectModal({
                   <div className="flex items-start">
                     <div
                       className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                        project.seo.noIndex
+                        project.seo?.noIndex
                           ? "bg-amber-50 text-amber-700"
                           : "bg-emerald-50 text-emerald-700"
                       }`}
                     >
-                      {project.seo.noIndex ? (
+                      {project.seo?.noIndex ? (
                         <XCircle className="h-3.5 w-3.5" />
                       ) : (
                         <CheckCircle className="h-3.5 w-3.5" />
                       )}
 
-                      {project.seo.noIndex
+                      {project.seo?.noIndex
                         ? "Search indexing disabled"
                         : "Search indexing enabled"}
                     </div>

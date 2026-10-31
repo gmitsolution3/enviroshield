@@ -35,7 +35,7 @@ import { PeriodSelector } from "@/components/dashboard/analytics/PeriodSelector"
 import { InteractiveAreaChart } from "@/components/dashboard/analytics/charts/InteractiveAreaChart";
 import { StatusDonutChart } from "@/components/dashboard/analytics/charts/StatusDonutChart";
 import { analyticsApi } from "@/lib/api/analytics";
-import { AnalyticsPeriod } from "@/types/admin/analytics.type";
+import { AnalyticsPeriod } from "@/types/analytics.type";
 import { cn } from "@/lib/utils";
 
 interface AdminDashboardProps {

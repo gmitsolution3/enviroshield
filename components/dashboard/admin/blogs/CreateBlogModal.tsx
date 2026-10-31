@@ -50,7 +50,7 @@ const seoSchema = z.object({
   ogTitle: z.string().optional(),
   ogDescription: z.string().optional(),
   ogImage: z.string().optional(),
-  ogImagePublicId: z.string(),
+  ogImagePublicId: z.string().optional(),
   noIndex: z.boolean(),
 });
 
@@ -73,8 +73,8 @@ const formSchema = z.object({
   coverImage: imageSchema,
 
   tags: z
-    .array(z.string().min(1))
-    .min(1, "At least one tag is required"),
+    .array(z.string()),
+
 
   status: z.enum(["draft", "published"]),
   seo: seoSchema,
@@ -334,14 +334,18 @@ export default function CreateBlogModal({
         publishedAt: data.status === "published" ? new Date() : null,
 
         seo: {
-          metaTitle: data.seo.metaTitle || "",
-          metaDescription: data.seo.metaDescription || "",
-          keywords: data.seo.keywords,
-          ogTitle: data.seo.ogTitle || "",
-          ogDescription: data.seo.ogDescription || "",
-          ogImage: data.seo.ogImage || "",
-          ogImagePublicId: data.seo.ogImagePublicId,
-          noIndex: data.seo.noIndex,
+          metaTitle: data.seo.metaTitle?.trim() || undefined,
+          metaDescription: data.seo.metaDescription?.trim() || undefined,
+          keywords: data.seo.keywords?.filter(Boolean) || [],
+          ogTitle: data.seo.ogTitle?.trim() || undefined,
+          ogDescription: data.seo.ogDescription?.trim() || undefined,
+
+
+
+
+          ogImage: data.seo.ogImage?.trim() || undefined,
+          ogImagePublicId: data.seo.ogImagePublicId?.trim() || undefined,
+          noIndex: Boolean(data.seo.noIndex),
         },
       };
 

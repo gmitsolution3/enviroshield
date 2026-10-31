@@ -22,7 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { Booking } from "@/types/admin/booking.type";
+import type { Booking } from "@/types/booking.type";
 import DashboardButton from "../../DashboardButton";
 import {
   formatBookingAmount,

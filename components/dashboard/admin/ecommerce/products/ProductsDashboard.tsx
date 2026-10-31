@@ -278,7 +278,9 @@ export default function ProductsDashboard() {
       header: "Category",
       cell: ({ row }) => (
         <span className="inline-flex max-w-[170px] truncate rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600">
-          {row.original.categoryId.name}
+          {typeof row.original.categoryId === "object"
+            ? row.original.categoryId?.name
+            : row.original.categoryId}
         </span>
       ),
     },

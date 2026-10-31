@@ -236,7 +236,11 @@ export default function ViewProductModal({
 
                 <InfoCard
                   label="Category"
-                  value={product.categoryId?.name || "Uncategorized"}
+                  value={
+                    typeof product.categoryId === "object"
+                      ? product.categoryId?.name
+                      : product.categoryId || "Uncategorized"
+                  }
                   icon={<Tag className="h-4 w-4" />}
                 />
 

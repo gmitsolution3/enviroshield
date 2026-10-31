@@ -23,7 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { Booking, BookingStatus } from "@/types/admin/booking.type";
+import type { Booking, BookingStatus } from "@/types/booking.type";
 import { UserStatusBadge } from "../orders/UserDashboardUI";
 
 function Detail({ label, value }: { label: string; value: string }) {

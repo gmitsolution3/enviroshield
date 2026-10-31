@@ -1,5 +1,5 @@
 import { getStoredConsent } from "@/lib/consent/consent-store";
-import { defaultSettingsValues, ISettings } from "@/types/admin/settings.type";
+import { defaultSettingsValues, ISettings } from "@/types/settings.type";
 
 export type ConversionAction =
   | "contact_form_submitted"

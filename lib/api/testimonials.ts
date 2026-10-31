@@ -1,7 +1,7 @@
 import type {
   ITestimonial,
   ITestimonialResponse,
-} from "@/types/admin/testimonial.type";
+} from "@/types/testimonial.type";
 
 const API_BASE_URL =
   process.env.NODE_ENV === "development"

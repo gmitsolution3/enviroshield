@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { IAnalyticsSettings } from "@/types/admin/settings.type";
+import { IAnalyticsSettings } from "@/types/settings.type";
 
 interface AnalyticsSettingsProps {
   data: IAnalyticsSettings;

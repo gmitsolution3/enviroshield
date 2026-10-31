@@ -2,7 +2,7 @@ import type {
   IProject,
   IProjectResponse,
   IProjectSingleResponse,
-} from "@/types/admin/project.type";
+} from "@/types/project.type";
 
 const API_BASE_URL =
   process.env.NODE_ENV === "development"

@@ -17,7 +17,7 @@ import {
 } from "@/components/animations/reveal";
 import Container from "@/components/Container";
 
-import type { IServiceContentSection } from "@/types/admin/service.type";
+import type { IServiceContentSection } from "@/types/service.type";
 
 type ServiceFeatureCardsProps = {
   whyEnviroshield: IServiceContentSection;

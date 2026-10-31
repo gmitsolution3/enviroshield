@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ISeoSettings } from "@/types/admin/settings.type";
+import { ISeoSettings } from "@/types/settings.type";
 
 interface GeneralSeoSettingsProps {
   data: ISeoSettings;
