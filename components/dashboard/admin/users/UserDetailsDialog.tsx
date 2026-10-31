@@ -74,9 +74,9 @@ function formatDate(value: string | null, includeTime = false) {
 }
 
 function formatBanExpiry(value: string | null) {
-  if (!value) return "No expiration date recorded";
+  if (!value) return "Permanent (No expiration)";
   const expiry = new Date(value);
-  if (!Number.isFinite(expiry.getTime())) return "Not available";
+  if (!Number.isFinite(expiry.getTime())) return "Permanent (No expiration)";
 
   const formattedDate = formatDate(value, true);
   const remainingMs = expiry.getTime() - Date.now();
@@ -263,7 +263,9 @@ export default function UserDetailsDialog({
                 <dt className="text-xs font-medium text-red-900/70">
                   Status
                 </dt>
-                <dd className="mt-1 font-semibold">Banned</dd>
+                <dd className="mt-1 font-semibold">
+                  {user.banExpires ? "Temporarily Banned" : "Permanently Banned"}
+                </dd>
               </div>
               <div>
                 <dt className="text-xs font-medium text-red-900/70">

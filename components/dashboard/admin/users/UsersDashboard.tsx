@@ -268,6 +268,7 @@ export default function UsersDashboard() {
 
         cell: ({ row }) => {
           const isBanned = Boolean(row.original.banned);
+          const isPermanent = isBanned && !row.original.banExpires;
 
           return isBanned ? (
             <Badge
@@ -275,7 +276,7 @@ export default function UsersDashboard() {
               className="border-red-200 bg-red-50 text-red-700"
             >
               <Ban className="mr-1.5 h-3 w-3" />
-              Banned
+              {isPermanent ? "Permanently Banned" : "Banned"}
             </Badge>
           ) : (
             <Badge

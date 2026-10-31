@@ -71,7 +71,7 @@ export default function MobileUserCard({
             className="border-red-200 bg-red-50 text-red-700"
           >
             <Ban className="mr-1.5 h-3 w-3" />
-            Banned
+            {user.banExpires ? "Banned" : "Permanently Banned"}
           </Badge>
         ) : (
           <Badge

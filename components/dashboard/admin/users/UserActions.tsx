@@ -3,12 +3,13 @@
 import {
   Ban,
   CheckCircle2,
+  Clock3,
+  Eye,
   MoreHorizontal,
+  ShieldAlert,
   ShieldCheck,
   Trash2,
   UserRound,
-  Eye,
-  Clock3,
 } from "lucide-react";
 import { useRef, useState } from "react";
 
@@ -71,9 +72,12 @@ export default function UserActions({
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isBanOpen, setIsBanOpen] = useState(false);
+  const [isPermanentBanOpen, setIsPermanentBanOpen] = useState(false);
   const [isUnbanOpen, setIsUnbanOpen] = useState(false);
   const [banReason, setBanReason] = useState("");
   const [banReasonError, setBanReasonError] = useState("");
+  const [permanentBanReason, setPermanentBanReason] = useState("");
+  const [permanentBanReasonError, setPermanentBanReasonError] = useState("");
   const [banDuration, setBanDuration] = useState<BanDuration>("seven-days");
   const submissionInProgress = useRef(false);
 
@@ -111,15 +115,17 @@ export default function UserActions({
     onSuccess();
   }
 
-  async function handleBanToggle() {
-    if (!isBanned) {
-      setBanReason("");
-      setBanReasonError("");
-      setBanDuration("seven-days");
-      setIsBanOpen(true);
-      return;
-    }
-    setIsUnbanOpen(true);
+  function handleOpenBan() {
+    setBanReason("");
+    setBanReasonError("");
+    setBanDuration("seven-days");
+    setIsBanOpen(true);
+  }
+
+  function handleOpenPermanentBan() {
+    setPermanentBanReason("");
+    setPermanentBanReasonError("");
+    setIsPermanentBanOpen(true);
   }
 
   async function handleUnban() {
@@ -190,12 +196,56 @@ export default function UserActions({
 
       setIsBanOpen(false);
       toast.success("User banned", {
-        description: `${user.name || user.email} has been banned.`,
+        description: `${user.name || user.email} has been temporarily banned.`,
       });
       await onSuccess();
     } catch {
       toast.error("Failed to ban user", {
         description: "The user could not be banned. Please try again.",
+      });
+    } finally {
+      submissionInProgress.current = false;
+      setIsLoading(false);
+    }
+  }
+
+  async function handlePermanentBan() {
+    if (submissionInProgress.current) return;
+    const reason = permanentBanReason.trim();
+    if (!reason) {
+      setPermanentBanReasonError("Enter a reason before confirming this permanent ban.");
+      return;
+    }
+    if (reason.length > 500) {
+      setPermanentBanReasonError("The reason must be 500 characters or fewer.");
+      return;
+    }
+
+    setIsLoading(true);
+    submissionInProgress.current = true;
+    setPermanentBanReasonError("");
+
+    try {
+      // Omitting banExpiresIn applies a permanent ban without expiration
+      const { error } = await authClient.admin.banUser({
+        userId: user.id,
+        banReason: reason,
+      });
+      if (error) {
+        toast.error("Failed to permanently ban user", {
+          description: error.message || "The user could not be permanently banned.",
+        });
+        return;
+      }
+
+      setIsPermanentBanOpen(false);
+      toast.success("User permanently banned", {
+        description: `${user.name || user.email} has been permanently banned from the platform.`,
+      });
+      await onSuccess();
+    } catch {
+      toast.error("Failed to permanently ban user", {
+        description: "The user could not be permanently banned. Please try again.",
       });
     } finally {
       submissionInProgress.current = false;
@@ -238,12 +288,13 @@ export default function UserActions({
           variant="ghost"
           size="icon"
           disabled={isLoading}
+          aria-label={`Actions for ${user.name || user.email}`}
         >
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-52">
         <DropdownMenuItem
           onClick={() => setIsDetailsOpen(true)}
         >
@@ -268,22 +319,34 @@ export default function UserActions({
           )}
         </DropdownMenuItem>
 
-        <DropdownMenuItem
-          disabled={isLoading || isCurrentUser}
-          onClick={handleBanToggle}
-        >
-          {isBanned ? (
-            <>
-              <CheckCircle2 className="mr-2 h-4 w-4" />
-              Unban user
-            </>
-          ) : (
-            <>
-              <Ban className="mr-2 h-4 w-4" />
-              Ban user
-            </>
-          )}
-        </DropdownMenuItem>
+        {isBanned ? (
+          <DropdownMenuItem
+            disabled={isLoading || isCurrentUser}
+            onClick={() => setIsUnbanOpen(true)}
+          >
+            <CheckCircle2 className="mr-2 h-4 w-4 text-emerald-600" />
+            Unban user
+          </DropdownMenuItem>
+        ) : (
+          <>
+            <DropdownMenuItem
+              disabled={isLoading || isCurrentUser}
+              onClick={handleOpenBan}
+            >
+              <Ban className="mr-2 h-4 w-4 text-amber-600" />
+              Temporary ban
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              disabled={isLoading || isCurrentUser}
+              onClick={handleOpenPermanentBan}
+              className="text-red-700 focus:text-red-700"
+            >
+              <ShieldAlert className="mr-2 h-4 w-4 text-red-600" />
+              Permanent ban
+            </DropdownMenuItem>
+          </>
+        )}
 
         <DropdownMenuSeparator />
 
@@ -312,21 +375,19 @@ export default function UserActions({
         onOpenChange={setIsDetailsOpen}
       />
 
+      {/* Temporary Ban Dialog */}
       <AlertDialog
         open={isBanOpen}
         onOpenChange={(open) => {
-          if (isLoading) return;
-          setIsBanOpen(open);
-          if (!open) setBanReasonError("");
+          if (!isLoading) setIsBanOpen(open);
         }}
       >
         <AlertDialogContent className="sm:max-w-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle>Ban this user?</AlertDialogTitle>
+            <AlertDialogTitle>Temporary Ban</AlertDialogTitle>
             <AlertDialogDescription>
-              This will prevent {user.name || user.email} from signing in and
-              revoke their active sessions. Provide a reason for the account
-              record.
+              This will temporarily prevent {user.name || user.email} from signing in and
+              revoke their active sessions until the ban expires.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
@@ -408,6 +469,83 @@ export default function UserActions({
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Permanent Ban Dialog */}
+      <AlertDialog
+        open={isPermanentBanOpen}
+        onOpenChange={(open) => {
+          if (!isLoading) setIsPermanentBanOpen(open);
+        }}
+      >
+        <AlertDialogContent className="sm:max-w-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <ShieldAlert className="h-5 w-5" />
+              Permanently Ban User
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to permanently ban{" "}
+              <span className="font-semibold text-foreground">
+                {user.name || user.email}
+              </span>
+              ? This user will have no expiration date and will be indefinitely locked out of their account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor={`perm-ban-reason-${user.id}`} className="text-sm font-medium">
+                Permanent ban reason
+              </label>
+              <Textarea
+                id={`perm-ban-reason-${user.id}`}
+                value={permanentBanReason}
+                onChange={(event) => {
+                  setPermanentBanReason(event.target.value);
+                  if (event.target.value.trim()) setPermanentBanReasonError("");
+                }}
+                placeholder="Specify the reason for permanently banning this user..."
+                maxLength={500}
+                aria-invalid={Boolean(permanentBanReasonError)}
+                aria-describedby={permanentBanReasonError ? `perm-ban-reason-error-${user.id}` : undefined}
+                disabled={isLoading}
+              />
+              {permanentBanReasonError && (
+                <p
+                  id={`perm-ban-reason-error-${user.id}`}
+                  className="text-sm text-destructive"
+                  role="alert"
+                >
+                  {permanentBanReasonError}
+                </p>
+              )}
+              <p className="text-right text-xs text-muted-foreground">
+                {permanentBanReason.length}/500
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs text-red-800">
+              <p className="font-semibold">Important:</p>
+              <p className="mt-1">
+                Permanent bans revoke all existing user sessions and do not expire automatically. The ban can only be lifted manually by an administrator.
+              </p>
+            </div>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <Button
+              type="button"
+              className="bg-red-600 text-white hover:bg-red-700"
+              disabled={isLoading}
+              onClick={handlePermanentBan}
+            >
+              {isLoading ? "Banning..." : "Confirm permanent ban"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Unban Dialog */}
       <AlertDialog
         open={isUnbanOpen}
         onOpenChange={(open) => {
@@ -432,6 +570,7 @@ export default function UserActions({
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Delete User Dialog */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
