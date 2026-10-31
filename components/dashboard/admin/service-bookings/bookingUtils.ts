@@ -1,3 +1,4 @@
+import { formatDateTime, formatNumber, formatStatus } from "@/lib/utils";
 import type { BookingStatus } from "@/types/admin/booking.type";
 
 const bookingStatusStyles: Record<BookingStatus, string> = {
@@ -16,10 +17,7 @@ const bookingStatusStyles: Record<BookingStatus, string> = {
 };
 
 export function formatBookingStatus(status: BookingStatus) {
-  return status
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+  return formatStatus(status);
 }
 
 export function getBookingStatusClass(status: BookingStatus) {
@@ -27,18 +25,9 @@ export function getBookingStatusClass(status: BookingStatus) {
 }
 
 export function formatBookingDate(value?: string) {
-  if (!value) return "—";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat("en-BD", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "Asia/Dhaka",
-  }).format(date);
+  return formatDateTime(value);
 }
 
 export function formatBookingAmount(value: number) {
-  return new Intl.NumberFormat("en-BD", {
-    maximumFractionDigits: 2,
-  }).format(value);
+  return formatNumber(value, { maximumFractionDigits: 2 });
 }

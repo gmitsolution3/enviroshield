@@ -1,4 +1,5 @@
 "use client";
+import { getInitials } from "@/lib/utils";
 
 import {
     Ban,
@@ -207,12 +208,7 @@ export default function UsersDashboard() {
         cell: ({ row }) => {
           const user = row.original;
 
-          const initials = user.name
-            ?.split(" ")
-            .map((part) => part[0])
-            .join("")
-            .slice(0, 2)
-            .toUpperCase();
+          const initials = getInitials(user.name, user.email);
 
           return (
             <div className="flex min-w-0 items-center gap-3">

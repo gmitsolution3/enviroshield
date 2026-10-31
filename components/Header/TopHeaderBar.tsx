@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
+import { getInitials } from "@/lib/utils";
 
 import Container from "../Container";
 
@@ -36,26 +37,6 @@ type TopHeaderBarProps = {
   cartTriggerRef: React.RefObject<HTMLButtonElement | null>;
 };
 
-function getInitials(
-  name?: string | null,
-  email?: string | null,
-) {
-  const trimmedName = name?.trim();
-
-  if (trimmedName) {
-    const initials = trimmedName
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part.charAt(0))
-      .join("")
-      .toUpperCase();
-
-    if (initials) return initials;
-  }
-
-  return email?.trim().charAt(0).toUpperCase() || "U";
-}
 
 export default function TopHeaderBar({
   onCartClick,

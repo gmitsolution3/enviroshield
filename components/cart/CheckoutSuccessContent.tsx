@@ -1,5 +1,6 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import {
   ArrowRight,
   Check,
@@ -14,7 +15,6 @@ import {
   Truck,
   XCircle,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -26,18 +26,16 @@ import {
   type CreatedOrderConfirmation,
 } from "@/lib/api/orders";
 import { getProductImageUrl } from "@/lib/products/images";
+import {
+  formatCurrency,
+  formatDateTime,
+  formatStatus,
+} from "@/lib/utils";
 
-const money = (amount: number, currency: string) =>
-  new Intl.NumberFormat("en-BD", {
-    style: "currency",
-    currency,
-  }).format(amount);
+const money = formatCurrency;
 
 const pretty = (value: string) =>
-  value
-    ? value.charAt(0).toUpperCase() +
-      value.slice(1).replaceAll("_", " ")
-    : "Not available";
+  formatStatus(value, "Not available");
 
 type OrderStatusPresentation = {
   label: string;
@@ -53,7 +51,10 @@ type OrderStatusPresentation = {
   textClass: string;
 };
 
-const orderStatusPresentations: Record<string, OrderStatusPresentation> = {
+const orderStatusPresentations: Record<
+  string,
+  OrderStatusPresentation
+> = {
   pending: {
     label: "Order Placed",
     heading: "Order Placed",
@@ -61,10 +62,12 @@ const orderStatusPresentations: Record<string, OrderStatusPresentation> = {
     message:
       "We have received your order. Our team is preparing your items and will share updates as your order progresses.",
     cardTitle: "Order Received",
-    cardMessage: "We will notify you as soon as your order moves to preparation.",
+    cardMessage:
+      "We will notify you as soon as your order moves to preparation.",
     Icon: CheckCircle2,
     badgeClass: "border-emerald-200 bg-emerald-50 text-emerald-800",
-    iconFrameClass: "border-emerald-200 bg-emerald-50 shadow-[0_0_0_12px_rgba(16,185,129,0.06)]",
+    iconFrameClass:
+      "border-emerald-200 bg-emerald-50 shadow-[0_0_0_12px_rgba(16,185,129,0.06)]",
     iconClass: "bg-emerald-100 text-emerald-700",
     textClass: "text-emerald-900",
   },
@@ -78,7 +81,8 @@ const orderStatusPresentations: Record<string, OrderStatusPresentation> = {
     cardMessage: "Your order is moving to preparation.",
     Icon: CheckCircle2,
     badgeClass: "border-blue/20 bg-blue/5 text-blue",
-    iconFrameClass: "border-blue/20 bg-blue/5 shadow-[0_0_0_12px_rgba(1,110,220,0.06)]",
+    iconFrameClass:
+      "border-blue/20 bg-blue/5 shadow-[0_0_0_12px_rgba(1,110,220,0.06)]",
     iconClass: "bg-blue/10 text-blue",
     textClass: "text-blue",
   },
@@ -92,7 +96,8 @@ const orderStatusPresentations: Record<string, OrderStatusPresentation> = {
     cardMessage: "Your order is being prepared for delivery.",
     Icon: PackageCheck,
     badgeClass: "border-blue/20 bg-blue/5 text-blue",
-    iconFrameClass: "border-blue/20 bg-blue/5 shadow-[0_0_0_12px_rgba(1,110,220,0.06)]",
+    iconFrameClass:
+      "border-blue/20 bg-blue/5 shadow-[0_0_0_12px_rgba(1,110,220,0.06)]",
     iconClass: "bg-blue/10 text-blue",
     textClass: "text-blue",
   },
@@ -106,7 +111,8 @@ const orderStatusPresentations: Record<string, OrderStatusPresentation> = {
     cardMessage: "Your order has been shipped for delivery.",
     Icon: Truck,
     badgeClass: "border-blue/20 bg-blue/5 text-blue",
-    iconFrameClass: "border-blue/20 bg-blue/5 shadow-[0_0_0_12px_rgba(1,110,220,0.06)]",
+    iconFrameClass:
+      "border-blue/20 bg-blue/5 shadow-[0_0_0_12px_rgba(1,110,220,0.06)]",
     iconClass: "bg-blue/10 text-blue",
     textClass: "text-blue",
   },
@@ -120,7 +126,8 @@ const orderStatusPresentations: Record<string, OrderStatusPresentation> = {
     cardMessage: "This order is marked as delivered.",
     Icon: CheckCircle2,
     badgeClass: "border-emerald-200 bg-emerald-50 text-emerald-800",
-    iconFrameClass: "border-emerald-200 bg-emerald-50 shadow-[0_0_0_12px_rgba(16,185,129,0.06)]",
+    iconFrameClass:
+      "border-emerald-200 bg-emerald-50 shadow-[0_0_0_12px_rgba(16,185,129,0.06)]",
     iconClass: "bg-emerald-100 text-emerald-700",
     textClass: "text-emerald-900",
   },
@@ -131,10 +138,12 @@ const orderStatusPresentations: Record<string, OrderStatusPresentation> = {
     message:
       "This order has been cancelled. Its payment status below reflects the current payment record.",
     cardTitle: "Order Cancelled",
-    cardMessage: "This order is cancelled. See the current payment status below.",
+    cardMessage:
+      "This order is cancelled. See the current payment status below.",
     Icon: XCircle,
     badgeClass: "border-red-200 bg-red-50 text-red-800",
-    iconFrameClass: "border-red-200 bg-red-50 shadow-[0_0_0_12px_rgba(239,68,68,0.06)]",
+    iconFrameClass:
+      "border-red-200 bg-red-50 shadow-[0_0_0_12px_rgba(239,68,68,0.06)]",
     iconClass: "bg-red-100 text-red-700",
     textClass: "text-red-900",
   },
@@ -153,13 +162,14 @@ export default function CheckoutSuccessContent({
   const [copied, setCopied] = useState(false);
 
   const checked = !orderId.trim() || orderLookup?.orderId === orderId;
-  const order = orderLookup?.orderId === orderId
-    ? orderLookup.order ?? null
-    : null;
+  const order =
+    orderLookup?.orderId === orderId
+      ? (orderLookup.order ?? null)
+      : null;
   const loadError = !orderId.trim()
     ? "The order ID is missing from this confirmation link."
     : orderLookup?.orderId === orderId
-      ? orderLookup.error ?? ""
+      ? (orderLookup.error ?? "")
       : "";
 
   useEffect(() => {
@@ -262,17 +272,13 @@ export default function CheckoutSuccessContent({
     ? new Date(order.createdAt)
     : null;
 
-  const formattedDate =
-    placedDate && !Number.isNaN(placedDate.getTime())
-      ? new Intl.DateTimeFormat("en-BD", {
-          dateStyle: "medium",
-          timeStyle: "short",
-          timeZone: "Asia/Dhaka",
-        }).format(placedDate)
-      : null;
+  const formattedDate = placedDate
+    ? formatDateTime(placedDate, undefined, "") || null
+    : null;
 
   const statusPresentation =
-    orderStatusPresentations[order.status] ?? {
+    orderStatusPresentations[order.status] ??
+    ({
       label: `Order ${pretty(order.status)}`,
       heading: "Order status",
       highlight: pretty(order.status),
@@ -284,7 +290,7 @@ export default function CheckoutSuccessContent({
       iconFrameClass: "border-blue/20 bg-blue/5",
       iconClass: "bg-blue/10 text-blue",
       textClass: "text-blue",
-    } satisfies OrderStatusPresentation;
+    } satisfies OrderStatusPresentation);
   const isCancelled = order.status === "cancelled";
   const StatusIcon = statusPresentation.Icon;
 
@@ -298,7 +304,11 @@ export default function CheckoutSuccessContent({
               href="/dashboard/my-orders"
               className="inline-flex items-center gap-2 text-sm font-semibold text-blue transition-colors hover:text-deep"
             >
-              <ArrowRight size={16} className="rotate-180" aria-hidden="true" />
+              <ArrowRight
+                size={16}
+                className="rotate-180"
+                aria-hidden="true"
+              />
               View All My Orders
             </Link>
           </div>
@@ -444,13 +454,19 @@ export default function CheckoutSuccessContent({
                   </div>
 
                   <div className="grid gap-3">
-                    <div className={`flex items-center gap-3 rounded-2xl p-3.5 ${statusPresentation.iconFrameClass}`}>
-                      <span className={`grid size-9 shrink-0 place-items-center rounded-xl ${statusPresentation.iconClass}`}>
+                    <div
+                      className={`flex items-center gap-3 rounded-2xl p-3.5 ${statusPresentation.iconFrameClass}`}
+                    >
+                      <span
+                        className={`grid size-9 shrink-0 place-items-center rounded-xl ${statusPresentation.iconClass}`}
+                      >
                         <StatusIcon size={19} aria-hidden="true" />
                       </span>
 
                       <div className="min-w-0">
-                        <p className={`text-sm font-bold ${statusPresentation.textClass}`}>
+                        <p
+                          className={`text-sm font-bold ${statusPresentation.textClass}`}
+                        >
                           {pretty(order.status)}
                         </p>
                         <p className="mt-0.5 text-xs text-ink/60">
@@ -472,7 +488,8 @@ export default function CheckoutSuccessContent({
                           Payment method
                         </p>
                         <p className="mt-1 text-xs font-semibold text-ink/70">
-                          Payment status: {pretty(order.paymentStatus)}
+                          Payment status:{" "}
+                          {pretty(order.paymentStatus)}
                         </p>
                       </div>
                     </div>
@@ -545,8 +562,12 @@ export default function CheckoutSuccessContent({
                   </p>
                 )}
 
-                <div className={`mt-5 flex items-start gap-3 rounded-2xl p-4 ${isCancelled ? "bg-red-50" : "bg-mist/70"}`}>
-                  <span className={`grid size-10 shrink-0 place-items-center rounded-xl bg-white shadow-sm ${isCancelled ? "text-red-700" : "text-blue"}`}>
+                <div
+                  className={`mt-5 flex items-start gap-3 rounded-2xl p-4 ${isCancelled ? "bg-red-50" : "bg-mist/70"}`}
+                >
+                  <span
+                    className={`grid size-10 shrink-0 place-items-center rounded-xl bg-white shadow-sm ${isCancelled ? "text-red-700" : "text-blue"}`}
+                  >
                     {isCancelled ? (
                       <XCircle size={21} aria-hidden="true" />
                     ) : (
@@ -556,7 +577,9 @@ export default function CheckoutSuccessContent({
 
                   <div>
                     <p className="text-sm font-bold text-navy">
-                      {isCancelled ? "Cancellation information" : "Delivery updates"}
+                      {isCancelled
+                        ? "Cancellation information"
+                        : "Delivery updates"}
                     </p>
                     <p className="mt-1 text-xs leading-5 text-ink/65">
                       {isCancelled
@@ -682,52 +705,52 @@ export default function CheckoutSuccessContent({
 
           {/* Reassurance cards */}
           {!isCancelled && (
-          <div className="mt-6 grid gap-3 rounded-3xl border border-blue/10 bg-gradient-to-r from-blue/[0.07] via-white to-mist/80 p-5 sm:grid-cols-3 sm:p-6">
-            <div className="flex items-center gap-3">
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-blue shadow-sm">
-                <ShieldCheck size={20} aria-hidden="true" />
-              </span>
+            <div className="mt-6 grid gap-3 rounded-3xl border border-blue/10 bg-gradient-to-r from-blue/[0.07] via-white to-mist/80 p-5 sm:grid-cols-3 sm:p-6">
+              <div className="flex items-center gap-3">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-blue shadow-sm">
+                  <ShieldCheck size={20} aria-hidden="true" />
+                </span>
 
-              <div>
-                <p className="text-sm font-bold text-navy">
-                  Quality products
-                </p>
-                <p className="mt-0.5 text-xs text-ink/60">
-                  Solutions you can rely on
-                </p>
+                <div>
+                  <p className="text-sm font-bold text-navy">
+                    Quality products
+                  </p>
+                  <p className="mt-0.5 text-xs text-ink/60">
+                    Solutions you can rely on
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-blue shadow-sm">
+                  <PackageCheck size={20} aria-hidden="true" />
+                </span>
+
+                <div>
+                  <p className="text-sm font-bold text-navy">
+                    Helpful support
+                  </p>
+                  <p className="mt-0.5 text-xs text-ink/60">
+                    We&apos;re here when you need us
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-blue shadow-sm">
+                  <Truck size={20} aria-hidden="true" />
+                </span>
+
+                <div>
+                  <p className="text-sm font-bold text-navy">
+                    Delivery updates
+                  </p>
+                  <p className="mt-0.5 text-xs text-ink/60">
+                    We&apos;ll keep you informed
+                  </p>
+                </div>
               </div>
             </div>
-
-            <div className="flex items-center gap-3">
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-blue shadow-sm">
-                <PackageCheck size={20} aria-hidden="true" />
-              </span>
-
-              <div>
-                <p className="text-sm font-bold text-navy">
-                  Helpful support
-                </p>
-                <p className="mt-0.5 text-xs text-ink/60">
-                  We&apos;re here when you need us
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-blue shadow-sm">
-                <Truck size={20} aria-hidden="true" />
-              </span>
-
-              <div>
-                <p className="text-sm font-bold text-navy">
-                  Delivery updates
-                </p>
-                <p className="mt-0.5 text-xs text-ink/60">
-                  We&apos;ll keep you informed
-                </p>
-              </div>
-            </div>
-          </div>
           )}
         </div>
       </Container>

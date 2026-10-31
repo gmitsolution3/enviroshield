@@ -1,3 +1,8 @@
+import {
+  formatCurrency,
+  formatDateTime,
+  formatStatus,
+} from "@/lib/utils";
 import type { AdminOrder } from "@/types";
 
 export interface OrderMutationResponse {
@@ -7,7 +12,10 @@ export interface OrderMutationResponse {
   data: AdminOrder;
 }
 
-export function getOrderActionError(error: unknown, fallback: string) {
+export function getOrderActionError(
+  error: unknown,
+  fallback: string,
+) {
   if (typeof error === "object" && error !== null) {
     const response = error as {
       message?: unknown;
@@ -20,7 +28,11 @@ export function getOrderActionError(error: unknown, fallback: string) {
       const messages = response.errors
         .map((item) => {
           if (typeof item === "string") return item;
-          if (typeof item === "object" && item !== null && "message" in item) {
+          if (
+            typeof item === "object" &&
+            item !== null &&
+            "message" in item
+          ) {
             return String(item.message);
           }
           return "";
@@ -33,27 +45,13 @@ export function getOrderActionError(error: unknown, fallback: string) {
 }
 
 export function prettyOrderStatus(status: string) {
-  return status.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return formatStatus(status);
 }
 
 export function formatOrderAmount(amount: number, currency: string) {
-  try {
-    return new Intl.NumberFormat("en-BD", {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  } catch {
-    return `${currency} ${amount.toLocaleString("en-BD")}`;
-  }
+  return formatCurrency(amount, currency);
 }
 
 export function formatOrderDate(date?: string) {
-  if (!date) return "—";
-  const parsed = new Date(date);
-  if (Number.isNaN(parsed.getTime())) return "—";
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(parsed);
+  return formatDateTime(date);
 }

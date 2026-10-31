@@ -1,12 +1,9 @@
 "use client";
+import { formatTaka } from "@/lib/utils";
 
+import { ArrowRight, ShieldCheck, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  ShieldCheck,
-  ShoppingBag,
-} from "lucide-react";
 
 import Container from "@/components/Container";
 import CartItemRow from "@/components/cart/CartItemRow";
@@ -15,8 +12,7 @@ import { getProductImageUrl } from "@/lib/products/images";
 
 import CartLoader from "@/components/cart/CartLoader";
 
-const money = (amount: number) =>
-  `৳${amount.toLocaleString("en-BD")}`;
+const money = formatTaka;
 
 export default function CartPageContent() {
   const { items, subtotal, hydrated } = useCart();
@@ -77,10 +73,7 @@ export default function CartPageContent() {
                 </div>
 
                 {items.map((item) => (
-                  <CartItemRow
-                    key={item.productId}
-                    item={item}
-                  />
+                  <CartItemRow key={item.productId} item={item} />
                 ))}
               </div>
 
@@ -90,10 +83,7 @@ export default function CartPageContent() {
                 <div className="flex items-center justify-between gap-3 border-b border-line pb-4">
                   <div className="flex min-w-0 items-center gap-3">
                     <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-blue/10 text-blue">
-                      <ShoppingBag
-                        size={21}
-                        aria-hidden="true"
-                      />
+                      <ShoppingBag size={21} aria-hidden="true" />
                     </span>
 
                     <div>
@@ -170,9 +160,7 @@ export default function CartPageContent() {
                   </div>
 
                   <div className="flex items-start justify-between gap-4">
-                    <span className="text-ink/65">
-                      Delivery
-                    </span>
+                    <span className="text-ink/65">Delivery</span>
 
                     <span className="max-w-[165px] text-right text-xs leading-5 text-ink/60">
                       Calculated at checkout based on your delivery
@@ -202,8 +190,8 @@ export default function CartPageContent() {
 
                     <p>
                       Cart prices are estimates. Stock, item prices,
-                      and delivery charges are verified when you
-                      place your order.
+                      and delivery charges are verified when you place
+                      your order.
                     </p>
                   </div>
                 </div>

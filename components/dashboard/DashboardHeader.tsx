@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { authClient } from "@/lib/auth-client";
+import { getInitials } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -44,12 +45,7 @@ interface DashboardHeaderProps {
 export function DashboardHeader({ user }: DashboardHeaderProps) {
   const router = useRouter();
 
-  const initials = user.name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const initials = getInitials(user.name, user.email);
 
   async function handleLogout() {
     await authClient.signOut();

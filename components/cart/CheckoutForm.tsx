@@ -1,7 +1,13 @@
 "use client";
+import { formatTaka } from "@/lib/utils";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ArrowRight, ShieldCheck, ShoppingBag } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  ShieldCheck,
+  ShoppingBag,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -101,8 +107,7 @@ const initialValues: CheckoutValues = {
   customerNote: "",
 };
 
-const money = (amount: number) =>
-  `৳${amount.toLocaleString("en-BD")}`;
+const money = formatTaka;
 
 function messageFromError(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -718,7 +723,8 @@ export default function CheckoutForm() {
                   </div>
 
                   <span className="shrink-0 rounded-full bg-mist px-3 py-1.5 text-xs font-bold text-navy">
-                    {items.length} {items.length === 1 ? "item" : "items"}
+                    {items.length}{" "}
+                    {items.length === 1 ? "item" : "items"}
                   </span>
                 </div>
 
@@ -767,7 +773,9 @@ export default function CheckoutForm() {
 
                 <div className="space-y-3 border-t border-line pt-5 text-sm">
                   <div className="flex justify-between gap-4">
-                    <span className="text-ink/65">Estimated subtotal</span>
+                    <span className="text-ink/65">
+                      Estimated subtotal
+                    </span>
                     <span className="font-semibold tabular-nums text-navy">
                       {money(subtotal)}
                     </span>
@@ -785,7 +793,8 @@ export default function CheckoutForm() {
                       Final total
                     </span>
                     <span className="max-w-[170px] text-right text-xs leading-5 text-ink/60">
-                      Confirmed with server-verified prices and delivery
+                      Confirmed with server-verified prices and
+                      delivery
                     </span>
                   </div>
 
@@ -796,8 +805,9 @@ export default function CheckoutForm() {
                       aria-hidden="true"
                     />
                     <p>
-                      Cart prices are estimates. Stock, item prices, and delivery
-                      charges are verified when you place your order.
+                      Cart prices are estimates. Stock, item prices,
+                      and delivery charges are verified when you place
+                      your order.
                     </p>
                   </div>
                 </div>

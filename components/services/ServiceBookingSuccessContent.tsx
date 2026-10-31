@@ -1,4 +1,5 @@
 "use client";
+import { formatDateTime } from "@/lib/utils";
 
 import {
   ArrowRight,
@@ -27,15 +28,7 @@ import {
   type BookingUserSummary,
 } from "@/lib/api/bookings";
 
-const formatDate = (dateString?: string) => {
-  if (!dateString) return "Not specified";
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return dateString;
-  return new Intl.DateTimeFormat("en-BD", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
-};
+const formatDate = (dateString?: string) => formatDateTime(dateString, undefined, "Not specified");
 
 type StatusPresentation = {
   label: string;

@@ -1,4 +1,5 @@
 "use client";
+import { getInitials } from "@/lib/utils";
 
 import { cn } from "@/lib/utils";
 import { ChevronDown, Settings } from "lucide-react";
@@ -111,12 +112,7 @@ export function DashboardSidebar({
     }
   }, [pathname, navigation]);
 
-  const initials = user.name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const initials = getInitials(user.name, user.email);
 
   const settingsActive = pathname.startsWith("/dashboard/settings");
 

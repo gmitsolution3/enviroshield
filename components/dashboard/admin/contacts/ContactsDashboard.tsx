@@ -1,4 +1,5 @@
 "use client";
+import { formatDate } from "@/lib/utils";
 
 import {
   Calendar,
@@ -76,11 +77,7 @@ const sourceLabels: Record<TContactSource, string> = {
 };
 
 function formatContactDate(value: string) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(value));
+  return formatDate(value);
 }
 
 function formatProjectType(value?: string) {

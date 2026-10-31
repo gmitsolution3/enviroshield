@@ -1,4 +1,5 @@
 "use client";
+import { formatDate as formatAppDate } from "@/lib/utils";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -65,12 +66,7 @@ const iconInputClass =
   "pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60 transition-colors group-focus-within/field:text-blue";
 
 function formatDate(date?: Date | string | null) {
-  if (!date) return "—";
-  return new Date(date).toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
+  return formatAppDate(date, { month: "long" });
 }
 
 export function ProfileForm({ user }: ProfileFormProps) {

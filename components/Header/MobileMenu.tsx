@@ -25,6 +25,7 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 import { authClient } from "@/lib/auth-client";
+import { getInitials } from "@/lib/utils";
 
 import { EASE } from "../animations/variants";
 import { Button } from "../Button";
@@ -42,19 +43,6 @@ type MobileMenuProps = {
   onCartClick: () => void;
 };
 
-function getInitials(name?: string | null, email?: string | null) {
-  if (name?.trim()) {
-    return name
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((part) => part.charAt(0))
-      .join("")
-      .toUpperCase();
-  }
-
-  return email?.trim().charAt(0).toUpperCase() || "U";
-}
 
 export default function MobileMenu({
   open,

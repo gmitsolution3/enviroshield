@@ -1,3 +1,4 @@
+import { getInitials } from "@/lib/utils";
 import { Ban, CheckCircle2 } from "lucide-react";
 
 import {
@@ -26,12 +27,7 @@ export default function MobileUserCard({
 }: MobileUserCardProps) {
   const isBanned = Boolean(user.banned);
 
-  const initials = user.name
-    ?.split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const initials = getInitials(user.name, user.email);
 
   return (
     <div className="rounded-2xl border p-4">

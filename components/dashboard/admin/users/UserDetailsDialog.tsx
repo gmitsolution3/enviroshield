@@ -1,4 +1,5 @@
 "use client";
+import { getInitials } from "@/lib/utils";
 
 import {
   Avatar,
@@ -100,14 +101,7 @@ export default function UserDetailsDialog({
   onOpenChange,
 }: UserDetailsDialogProps) {
   const name = user.name.trim() || "Unnamed user";
-  const initials =
-    user.name
-      .trim()
-      .split(/\s+/)
-      .map((part) => part[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "U";
+  const initials = getInitials(user.name, user.email);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -1,4 +1,5 @@
 "use client";
+import { formatDate } from "@/lib/utils";
 
 import type { IBlog } from "@/types/admin/blog.type";
 import { ArrowUpRight, CalendarDays } from "lucide-react";
@@ -40,13 +41,7 @@ export default function BlogCard({
 }) {
   const reduce = useReducedMotion();
 
-  const publishedDate = post.publishedAt
-    ? new Date(post.publishedAt).toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-      })
-    : null;
+  const publishedDate = post.publishedAt ? formatDate(post.publishedAt, { day: "2-digit" }) : null;
 
   const primaryTag = post.tags?.[0];
   const authorName = post.author?.name || "Enviroshield";
