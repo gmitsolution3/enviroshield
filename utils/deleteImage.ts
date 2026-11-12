@@ -1,6 +1,6 @@
 export const deleteImage = async (
   publicId: string,
-): Promise<void> => {
+): Promise<void> => { 
   if (!publicId) {
     throw new Error("Image public ID is required for deletion.");
   }
