@@ -6,7 +6,6 @@ import {
   Clock,
   ImageIcon,
   MapPin,
-  Search,
   ShieldCheck,
   Star,
   User,
@@ -28,7 +27,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/utils/formatDate";
-import { HeroMeta, InfoCard, ModalEmptyState as EmptyState, OgImagePreview, SectionHeading, SeoCard, TimelineItem } from "../common/ViewModalUI";
+import { HeroMeta, InfoCard, ModalEmptyState as EmptyState, SectionHeading, TimelineItem } from "../common/ViewModalUI";
 
 type ViewProjectModalProps = {
   isModalOpen: boolean;
@@ -414,108 +413,6 @@ export default function ViewProjectModal({
                     description="There are currently no additional gallery images for this project."
                   />
                 )}
-              </div>
-            </section>
-
-            {/* SEO */}
-            <section>
-              <SectionHeading
-                eyebrow="Discoverability"
-                title="SEO & Social"
-                description="Search engine and social sharing configuration for this project."
-              />
-
-              <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-100 bg-slate-50/70 px-5 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue/10 text-blue">
-                      <Search className="h-4 w-4" />
-                    </div>
-
-                    <div>
-                      <h4 className="text-sm font-semibold text-navy">
-                        Search Engine Configuration
-                      </h4>
-
-                      <p className="text-xs text-slate-500">
-                        Metadata used by search engines and social
-                        platforms.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid gap-4 p-5 md:grid-cols-2">
-                  <SeoCard
-                    label="Meta Title"
-                    value={project.seo?.metaTitle}
-                  />
-
-                  <SeoCard
-                    label="OG Title"
-                    value={project.seo?.ogTitle}
-                  />
-
-                  <SeoCard
-                    label="Meta Description"
-                    value={project.seo?.metaDescription}
-                  />
-
-                  <SeoCard
-                    label="OG Description"
-                    value={project.seo?.ogDescription}
-                  />
-
-                  <OgImagePreview
-                    value={project.seo?.ogImage}
-                    label="OG Image"
-                  />
-                </div>
-
-                <div className="grid gap-4 border-t border-slate-100 bg-slate-50/50 p-5 md:grid-cols-[1fr_auto]">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                      Keywords
-                    </p>
-
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {project.seo?.keywords?.length ? (
-                        project.seo.keywords.map((keyword, index) => (
-                          <span
-                            key={`${keyword}-${index}`}
-                            className="rounded-full border border-blue/15 bg-blue/5 px-3 py-1.5 text-xs font-medium text-blue"
-                          >
-                            {keyword}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-sm text-slate-500">
-                          No keywords
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-start">
-                    <div
-                      className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                        project.seo?.noIndex
-                          ? "bg-amber-50 text-amber-700"
-                          : "bg-emerald-50 text-emerald-700"
-                      }`}
-                    >
-                      {project.seo?.noIndex ? (
-                        <XCircle className="h-3.5 w-3.5" />
-                      ) : (
-                        <CheckCircle className="h-3.5 w-3.5" />
-                      )}
-
-                      {project.seo?.noIndex
-                        ? "Search indexing disabled"
-                        : "Search indexing enabled"}
-                    </div>
-                  </div>
-                </div>
               </div>
             </section>
 

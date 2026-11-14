@@ -296,6 +296,7 @@ export default function ViewServiceModal({
               description="The reasons and advantages presented for choosing Enviroshield."
               section={service.whyEnviroshield}
               imagePosition="left"
+              imageSrc="/images/service/why.png"
             />
 
             {/* =====================================================
@@ -307,6 +308,7 @@ export default function ViewServiceModal({
               description="The process used to deliver this service."
               section={service.process}
               imagePosition="right"
+              imageSrc="/images/service/process.png"
             />
 
             {/* =====================================================
@@ -318,6 +320,7 @@ export default function ViewServiceModal({
               description="The key benefits associated with this service."
               section={service.benefits}
               imagePosition="left"
+              imageSrc="/images/service/benefits.png"
             />
 
             {/* =====================================================

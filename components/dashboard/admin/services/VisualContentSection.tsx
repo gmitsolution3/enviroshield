@@ -1,32 +1,27 @@
 import Image from "next/image";
-import { ImageIcon } from "lucide-react";
-import type { IService } from "@/types";
+import type { IServiceContentSection } from "@/types";
 
 export function VisualContentSection({
   title,
   section,
   imagePosition,
+  imageSrc,
 }: {
   eyebrow: string;
   title: string;
   description: string;
-  section: IService["whyEnviroshield"];
+  section: IServiceContentSection;
   imagePosition: "left" | "right";
+  imageSrc: string;
 }) {
   const image = (
     <div className="relative min-h-[280px] overflow-hidden rounded-2xl bg-slate-100 lg:min-h-[360px]">
-      {section?.image?.url ? (
-        <Image
-          src={section.image.url}
-          alt={section.image.alt || title}
-          fill
-          className="object-cover"
-        />
-      ) : (
-        <div className="flex h-full min-h-[280px] items-center justify-center">
-          <ImageIcon className="h-12 w-12 text-slate-300" />
-        </div>
-      )}
+      <Image
+        src={imageSrc}
+        alt={title}
+        fill
+        className="object-cover"
+      />
 
       <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
 
@@ -34,12 +29,6 @@ export function VisualContentSection({
         <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/60">
           {title}
         </p>
-
-        {section?.image?.caption?.trim() ? (
-          <p className="mt-1 max-w-md text-sm font-medium text-white">
-            {section.image.caption}
-          </p>
-        ) : null}
       </div>
     </div>
   );
@@ -85,4 +74,3 @@ export function VisualContentSection({
     </div>
   );
 }
-

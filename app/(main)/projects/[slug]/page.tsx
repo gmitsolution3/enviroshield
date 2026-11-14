@@ -42,43 +42,20 @@ export async function generateMetadata({
   try {
     const project = await getPublishedProjectBySlug(slug);
 
-    const seo = project.seo;
-
-    const title = seo?.metaTitle?.trim() || `${project.title} | Enviroshield`;
-
-    const description = seo?.metaDescription?.trim() || project.description;
-
-    const keywords = seo?.keywords?.filter(Boolean) ?? [];
-
+    const title = `${project.title} | Enviroshield`;
+    const description = project.description;
     const canonical = `${siteUrl}/projects/${project.slug}`;
-
-    const ogTitle = seo?.ogTitle?.trim() || title;
-
-    const ogDescription = seo?.ogDescription?.trim() || description;
-
-    const ogImage = seo?.ogImage?.trim() || project.primaryImage.url;
+    const ogImage = project.primaryImage.url;
 
     return {
       title,
       description,
-      keywords,
-
       alternates: {
         canonical,
       },
-
-      robots: {
-        index: seo?.noIndex !== true,
-        follow: seo?.noIndex !== true,
-        googleBot: {
-          index: seo?.noIndex !== true,
-          follow: seo?.noIndex !== true,
-        },
-      },
-
       openGraph: {
-        title: ogTitle,
-        description: ogDescription,
+        title,
+        description,
         type: "article",
         url: canonical,
         images: [
@@ -88,11 +65,10 @@ export async function generateMetadata({
           },
         ],
       },
-
       twitter: {
         card: "summary_large_image",
-        title: ogTitle,
-        description: ogDescription,
+        title,
+        description,
         images: [ogImage],
       },
     };

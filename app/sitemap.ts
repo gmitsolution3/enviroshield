@@ -134,8 +134,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     projectRoutes = projects
       .filter(
         (project) =>
-          project.status === "published" &&
-          project.seo?.noIndex !== true,
+          project.status === "published",
       )
       .map((project) => ({
         url: `${siteUrl}/projects/${project.slug}`,

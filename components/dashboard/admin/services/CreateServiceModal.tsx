@@ -51,7 +51,6 @@ const contentItemSchema = z.object({
 });
 
 const contentSectionSchema = z.object({
-  image: imageSchema,
   items: z
     .array(contentItemSchema)
     .min(1, "At least one item is required"),
@@ -107,12 +106,6 @@ type CreateServiceModalProps = {
 };
 
 const createDefaultContentSection = () => ({
-  image: {
-    url: "",
-    publicId: "",
-    alt: "",
-    caption: "",
-  },
   items: [{ title: "", description: "" }],
 });
 
@@ -368,32 +361,14 @@ export default function CreateServiceModal({
         description: data.description,
 
         whyEnviroshield: {
-          image: {
-            url: data.whyEnviroshield.image.url,
-            publicId: data.whyEnviroshield.image.publicId,
-            alt: data.whyEnviroshield.image.alt,
-            caption: data.whyEnviroshield.image.caption?.trim() || undefined,
-          },
           items: data.whyEnviroshield.items,
         },
 
         process: {
-          image: {
-            url: data.process.image.url,
-            publicId: data.process.image.publicId,
-            alt: data.process.image.alt,
-            caption: data.process.image.caption?.trim() || undefined,
-          },
           items: data.process.items,
         },
 
         benefits: {
-          image: {
-            url: data.benefits.image.url,
-            publicId: data.benefits.image.publicId,
-            alt: data.benefits.image.alt,
-            caption: data.benefits.image.caption?.trim() || undefined,
-          },
           items: data.benefits.items,
         },
 
@@ -740,12 +715,9 @@ export default function CreateServiceModal({
                   title="Why Enviroshield"
                   description="Explain why customers should choose Enviroshield for this service."
                   sectionName="whyEnviroshield"
-                  control={control}
                   register={register}
                   errors={errors}
                   fields={whyEnviroshieldItems}
-                  setValue={setValue}
-                  watch={watch}
                 />
               )}
 
@@ -755,12 +727,9 @@ export default function CreateServiceModal({
                   title="Process"
                   description="Describe the process involved in delivering this service."
                   sectionName="process"
-                  control={control}
                   register={register}
                   errors={errors}
                   fields={processItems}
-                  setValue={setValue}
-                  watch={watch}
                 />
               )}
 
@@ -770,12 +739,9 @@ export default function CreateServiceModal({
                   title="Benefits"
                   description="Highlight the main benefits customers receive from this service."
                   sectionName="benefits"
-                  control={control}
                   register={register}
                   errors={errors}
                   fields={benefitsItems}
-                  setValue={setValue}
-                  watch={watch}
                 />
               )}
 
@@ -1227,131 +1193,21 @@ type ContentSectionProps = {
   title: string;
   description: string;
   sectionName: ContentSectionName;
-  control: any;
   register: any;
   errors: any;
   fields: any;
-  setValue: any;
-  watch: any;
 };
 
 function ContentSection({
   title,
   description,
   sectionName,
-  control,
   register,
   errors,
   fields,
-  setValue,
-  watch,
 }: ContentSectionProps) {
   return (
     <FormSection title={title} description={description}>
-      <div className="space-y-5 rounded-2xl border bg-muted/10 p-5">
-        <div>
-          <h4 className="text-sm font-bold text-navy">
-            Section Image
-          </h4>
-
-          <p className="mt-1 text-xs text-muted-foreground">
-            Upload the image and provide accessible metadata.
-          </p>
-        </div>
-
-        <Controller
-          control={control}
-          name={`${sectionName}.image.url`}
-          render={({ field }: any) => (
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold">Image</Label>
-
-              <ImageUploader
-                value={field.value}
-                imagePublicId={watch(`${sectionName}.image.publicId`)}
-                onFileSelect={(file) => {
-                  setValue(
-                    `${sectionName}.image.alt`,
-                    formatAltFromFileName(file.name),
-                    {
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    },
-                  );
-                }}
-                onChange={(url, publicId, file) => {
-                  field.onChange(url);
-
-                  setValue(
-                    `${sectionName}.image.publicId`,
-                    publicId,
-                    {
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    },
-                  );
-
-                  if (file) {
-                    setValue(
-                      `${sectionName}.image.alt`,
-                      formatAltFromFileName(file.name),
-                      {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                      },
-                    );
-                  }
-                }}
-              />
-
-              {errors?.[sectionName]?.image?.url && (
-                <p className="text-xs text-red-600">
-                  {errors[sectionName].image.url.message}
-                </p>
-              )}
-            </div>
-          )}
-        />
-
-        <div className="grid gap-5 md:grid-cols-2">
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-navy">
-              Alt Text
-            </Label>
-
-            <Input
-              {...register(`${sectionName}.image.alt`)}
-              placeholder="Describe the image"
-            />
-
-            {errors?.[sectionName]?.image?.alt && (
-              <p className="text-xs text-red-600">
-                {errors[sectionName].image.alt.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-navy">
-              Caption{" "}
-              <span className="text-xs font-normal text-muted-foreground">
-                (Optional)
-              </span>
-            </Label>
-
-            <Input
-              {...register(`${sectionName}.image.caption`)}
-              placeholder="Image caption (optional)"
-            />
-
-            {errors?.[sectionName]?.image?.caption && (
-              <p className="text-xs text-red-600">
-                {errors[sectionName].image.caption.message}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
 
       <div className="space-y-4">
         <div className="flex items-end justify-between gap-4">

@@ -34,17 +34,6 @@ export interface IProjectClient {
   logo?: IProjectClientLogo;
 }
 
-export interface IProjectSeo {
-  metaTitle?: string;
-  metaDescription?: string;
-  keywords?: string[];
-  ogTitle?: string;
-  ogDescription?: string;
-  ogImage?: string;
-  ogImagePublicId?: string;
-  noIndex?: boolean;
-}
-
 export interface IProject {
   _id: string;
   title: string;
@@ -58,7 +47,6 @@ export interface IProject {
   serviceId: IService;
   status: TProjectStatus;
   isFeatured: boolean;
-  seo?: IProjectSeo;
   createdAt: string;
   updatedAt: string;
   __v?: number;

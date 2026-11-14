@@ -63,7 +63,6 @@ const contentItemSchema = z.object({
 });
 
 const contentSectionSchema = z.object({
-  image: imageSchema,
   items: z.array(contentItemSchema).min(1, "At least one item is required"),
 });
 
@@ -109,15 +108,10 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
-type ImagePath =
-  | "primaryImage"
-  | "whyEnviroshield.image"
-  | "process.image"
-  | "benefits.image";
+type ImagePath = "primaryImage";
 type ContentSectionName = "whyEnviroshield" | "process" | "benefits";
 
 const createDefaultContentSection = () => ({
-  image: { url: "", publicId: "", alt: "", caption: "" },
   items: [{ title: "", description: "" }],
 });
 
@@ -191,10 +185,8 @@ const mapImage = (image?: {
 });
 
 const mapContentSection = (section?: {
-  image?: { url?: string; publicId?: string; alt?: string; caption?: string };
   items?: { title?: string; description?: string }[];
 }) => ({
-  image: mapImage(section?.image),
   items:
     section?.items?.length
       ? section.items.map((item) => ({
@@ -381,25 +373,13 @@ export default function UpdateServiceModal({
           detailHeading: values.detailHeading,
           description: values.description,
           whyEnviroshield: {
-            ...values.whyEnviroshield,
-            image: {
-              ...values.whyEnviroshield.image,
-              caption: values.whyEnviroshield.image.caption?.trim() || undefined,
-            },
+            items: values.whyEnviroshield.items,
           },
           process: {
-            ...values.process,
-            image: {
-              ...values.process.image,
-              caption: values.process.image.caption?.trim() || undefined,
-            },
+            items: values.process.items,
           },
           benefits: {
-            ...values.benefits,
-            image: {
-              ...values.benefits.image,
-              caption: values.benefits.image.caption?.trim() || undefined,
-            },
+            items: values.benefits.items,
           },
           status: values.status,
           seo: {
@@ -641,12 +621,9 @@ export default function UpdateServiceModal({
                   title="Why Enviroshield"
                   description="Explain why customers should choose Enviroshield for this service."
                   sectionName="whyEnviroshield"
-                  control={control}
                   register={register}
                   errors={errors}
                   fields={whyEnviroshieldItems}
-                  setValue={setValue}
-                  watch={watch}
                 />
               )}
 
@@ -655,12 +632,9 @@ export default function UpdateServiceModal({
                   title="Process"
                   description="Describe the process customers can expect when using this service."
                   sectionName="process"
-                  control={control}
                   register={register}
                   errors={errors}
                   fields={processItems}
-                  setValue={setValue}
-                  watch={watch}
                 />
               )}
 
@@ -669,12 +643,9 @@ export default function UpdateServiceModal({
                   title="Benefits"
                   description="Highlight the main benefits customers receive from this service."
                   sectionName="benefits"
-                  control={control}
                   register={register}
                   errors={errors}
                   fields={benefitsItems}
-                  setValue={setValue}
-                  watch={watch}
                 />
               )}
 
@@ -1021,41 +992,23 @@ type ContentSectionProps = {
   title: string;
   description: string;
   sectionName: ContentSectionName;
-  control: any;
   register: any;
   errors: any;
   fields: any;
-  setValue: any;
-  watch: any;
 };
 
 function ContentSection({
   title,
   description,
   sectionName,
-  control,
   register,
   errors,
   fields,
-  setValue,
-  watch,
 }: ContentSectionProps) {
   const sectionErrors = errors?.[sectionName];
 
   return (
     <FormSection title={title} description={description}>
-      <ImageFields
-        title={`${title} Image`}
-        urlName={`${sectionName}.image.url`}
-        publicIdName={`${sectionName}.image.publicId`}
-        altName={`${sectionName}.image.alt`}
-        captionName={`${sectionName}.image.caption`}
-        control={control}
-        register={register}
-        errors={errors}
-        setValue={setValue}
-        watch={watch}
-      />
 
       <div className="space-y-4">
         <div className="flex items-end justify-between gap-4">

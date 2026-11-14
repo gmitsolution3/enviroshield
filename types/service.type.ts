@@ -15,7 +15,6 @@ export interface IServiceContentItem {
 }
 
 export interface IServiceContentSection {
-  image: IServiceImage;
   items: IServiceContentItem[];
 }
 

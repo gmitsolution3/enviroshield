@@ -74,23 +74,6 @@ const clientSchema = z.object({
     .optional(),
 });
 
-const seoSchema = z.object({
-  metaTitle: z.string().optional(),
-  metaDescription: z.string().optional(),
-  keywords: z.array(z.string().min(1, "Keyword cannot be empty")),
-  ogTitle: z.string().optional(),
-  ogDescription: z.string().optional(),
-  ogImage: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || /^https?:\/\/.+/.test(val),
-      "Enter a valid OG image URL",
-    ),
-  ogImagePublicId: z.string().optional(),
-  noIndex: z.boolean(),
-});
-
 const formSchema = z.object({
   title: z
     .string()
@@ -124,8 +107,6 @@ const formSchema = z.object({
   status: z.enum(["draft", "published"]),
 
   isFeatured: z.boolean(),
-
-  seo: seoSchema,
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -183,17 +164,6 @@ const defaultValues: FormValues = {
   status: "draft",
 
   isFeatured: false,
-
-  seo: {
-    metaTitle: "",
-    metaDescription: "",
-    keywords: [],
-    ogTitle: "",
-    ogDescription: "",
-    ogImage: "",
-    ogImagePublicId: "",
-    noIndex: false,
-  },
 };
 
 const steps = [
@@ -221,12 +191,6 @@ const steps = [
     shortTitle: "Gallery",
     description: "Project gallery images",
   },
-  {
-    number: "05",
-    title: "SEO",
-    shortTitle: "SEO",
-    description: "Search and social sharing settings",
-  },
 ];
 
 export default function CreateProjectModal({
@@ -238,8 +202,6 @@ export default function CreateProjectModal({
   servicesError = false,
 }: CreateProjectModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [seoKeywordInput, setSeoKeywordInput] = useState("");
-  const [ogImageCustomized, setOgImageCustomized] = useState(false);
 
   const { mutate: postProject, isLoading } = usePost("/project", {
     revalidateKey: "/project",
@@ -271,36 +233,12 @@ export default function CreateProjectModal({
     name: "gallery",
   });
 
-  const currentKeywords = watch("seo.keywords") ?? [];
-  const currentMetaTitle = watch("seo.metaTitle");
-  const currentOgTitle = watch("seo.ogTitle");
-  const currentMetaDescription = watch("seo.metaDescription");
-  const currentOgDescription = watch("seo.ogDescription");
-
-  // Keep the OG image synced with the primary image until a custom
-  // OG image is uploaded.
-  const syncOgImageWithPrimary = (url: string, publicId: string) => {
-    if (ogImageCustomized) return;
-
-    setValue("seo.ogImage", url, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-
-    setValue("seo.ogImagePublicId", publicId, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-  };
-
   const handleClose = () => {
     if (isLoading) return;
 
     // Do not reset the form here: the persistent hook keeps the draft.
     setIsModalOpen(false);
-    setSeoKeywordInput("");
     setCurrentStep(0);
-    setOgImageCustomized(false);
   };
 
   const handleNextStep = async (
@@ -338,10 +276,6 @@ export default function CreateProjectModal({
       case 3:
         isValid = await trigger("gallery");
         break;
-
-      case 4:
-        isValid = await trigger("seo");
-        break;
     }
 
     if (!isValid) return;
@@ -357,56 +291,6 @@ export default function CreateProjectModal({
     if (stepIndex >= currentStep) return;
 
     setCurrentStep(stepIndex);
-  };
-
-  const addKeyword = () => {
-    const rawInput = seoKeywordInput.trim();
-
-    if (!rawInput) return;
-
-    // Split by comma to support single or multiple comma-separated keywords
-    const tokens = rawInput
-      .split(",")
-      .map((k) => k.trim().replace(/\s+/g, " "))
-      .filter((k) => k.length > 0);
-
-    if (tokens.length === 0) {
-      setSeoKeywordInput("");
-      return;
-    }
-
-    const existingLower = new Set(currentKeywords.map((k) => k.toLowerCase()));
-    const toAdd: string[] = [];
-
-    for (const token of tokens) {
-      const lower = token.toLowerCase();
-      if (!existingLower.has(lower)) {
-        toAdd.push(token);
-        existingLower.add(lower);
-      }
-    }
-
-    if (toAdd.length > 0) {
-      setValue("seo.keywords", [...currentKeywords, ...toAdd], {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
-    }
-
-    setSeoKeywordInput("");
-  };
-
-  const removeKeyword = (index: number) => {
-    setValue(
-      "seo.keywords",
-      currentKeywords.filter(
-        (_, keywordIndex) => keywordIndex !== index,
-      ),
-      {
-        shouldDirty: true,
-        shouldValidate: true,
-      },
-    );
   };
 
   const onSubmit = async (data: FormValues) => {
@@ -455,17 +339,6 @@ export default function CreateProjectModal({
         status: data.status,
 
         isFeatured: data.isFeatured,
-
-        seo: {
-          metaTitle: data.seo?.metaTitle?.trim() || undefined,
-          metaDescription: data.seo?.metaDescription?.trim() || undefined,
-          keywords: data.seo?.keywords?.filter(Boolean) || [],
-          ogTitle: data.seo?.ogTitle?.trim() || undefined,
-          ogDescription: data.seo?.ogDescription?.trim() || undefined,
-          ogImage: data.seo?.ogImage?.trim() || undefined,
-          ogImagePublicId: data.seo?.ogImagePublicId?.trim() || undefined,
-          noIndex: Boolean(data.seo?.noIndex),
-        },
       };
 
       const response = await postProject(payload);
@@ -476,9 +349,7 @@ export default function CreateProjectModal({
         // Clear the saved draft only after the API succeeds.
         clearDraft();
         setIsModalOpen(false);
-        setSeoKeywordInput("");
         setCurrentStep(0);
-        setOgImageCustomized(false);
 
         onSuccess?.();
       }
@@ -513,7 +384,7 @@ export default function CreateProjectModal({
 
             <DialogDescription className="text-sm leading-6">
               Create a new Enviroshield project and configure all
-              project, client, gallery, and SEO information.
+              project, client, and gallery information.
             </DialogDescription>
           </DialogHeader>
 
@@ -522,7 +393,7 @@ export default function CreateProjectModal({
             <div className="relative">
               <div className="absolute left-[7%] right-[7%] top-5 hidden h-px bg-border md:block" />
 
-              <div className="relative grid grid-cols-5 gap-2">
+              <div className="relative grid grid-cols-4 gap-2">
                 {steps.map((step, index) => {
                   const isCompleted = index < currentStep;
                   const isActive = index === currentStep;
@@ -647,7 +518,6 @@ export default function CreateProjectModal({
                     name="primaryImage"
                     title="Primary Image"
                     showCaption
-                    onImageChange={syncOgImageWithPrimary}
                   />
 
                   <div className="grid gap-4 md:grid-cols-2">
@@ -1007,217 +877,6 @@ export default function CreateProjectModal({
                       {errors.gallery.root.message}
                     </p>
                   )}
-                </FormSection>
-              )}
-
-              {/* STEP 5 — SEO */}
-              {currentStep === 4 && (
-                <FormSection
-                  title="SEO"
-                  description="Configure search engine and social sharing information for this project."
-                >
-                  <Field
-                    label="Meta Title"
-                    error={errors.seo?.metaTitle?.message}
-                  >
-                    <Input
-                      {...register("seo.metaTitle", {
-                        onChange: (event) => {
-                          const nextValue = event.target.value;
-
-                          if (
-                            !currentOgTitle ||
-                            currentOgTitle === currentMetaTitle
-                          ) {
-                            setValue("seo.ogTitle", nextValue, {
-                              shouldDirty: true,
-                              shouldValidate: true,
-                            });
-                          }
-                        },
-                      })}
-                      placeholder="Industrial Roof Waterproofing Project"
-                    />
-                  </Field>
-
-                  <Field
-                    label="Meta Description"
-                    error={errors.seo?.metaDescription?.message}
-                  >
-                    <Textarea
-                      {...register("seo.metaDescription", {
-                        onChange: (event) => {
-                          const nextValue = event.target.value;
-
-                          if (
-                            !currentOgDescription ||
-                            currentOgDescription ===
-                              currentMetaDescription
-                          ) {
-                            setValue("seo.ogDescription", nextValue, {
-                              shouldDirty: true,
-                              shouldValidate: true,
-                            });
-                          }
-                        },
-                      })}
-                      placeholder="Industrial roof waterproofing project completed by Enviroshield."
-                      className="min-h-28 resize-none"
-                    />
-                  </Field>
-
-                  {/* Keywords */}
-                  <div className="space-y-3">
-                    <div>
-                      <Label>Keywords</Label>
-
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Add relevant SEO keywords, separated by commas or one at a time.
-                      </p>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Input
-                        value={seoKeywordInput}
-                        onChange={(event) =>
-                          setSeoKeywordInput(event.target.value)
-                        }
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter") {
-                            event.preventDefault();
-                            addKeyword();
-                          }
-                        }}
-                        placeholder="e.g. roof waterproofing, polyurethane coating, basement sealing"
-                      />
-
-                      <DashboardButton
-                        type="button"
-                        variant="outline"
-                        icon={<Plus className="h-4 w-4" />}
-                        onClick={addKeyword}
-                        className="h-10 shrink-0 rounded-full border-blue/30 bg-muted/30 px-4 text-xs font-semibold text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
-                      >
-                        Add
-                      </DashboardButton>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      {currentKeywords.map((keyword, index) => (
-                        <div
-                          key={`${keyword}-${index}`}
-                          className="flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-sm"
-                        >
-                          <span>{keyword}</span>
-
-                          <button
-                            type="button"
-                            onClick={() => removeKeyword(index)}
-                            className="text-muted-foreground transition-colors hover:text-destructive"
-                            aria-label={`Remove ${keyword}`}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-
-                    {errors.seo?.keywords && (
-                      <p className="text-sm text-destructive">
-                        {errors.seo.keywords.message}
-                      </p>
-                    )}
-
-                    {errors.seo?.keywords?.map?.(
-                      (error, index) =>
-                        error && (
-                          <p
-                            key={index}
-                            className="text-sm text-destructive"
-                          >
-                            {error.message}
-                          </p>
-                        ),
-                    )}
-                  </div>
-
-                  <div className="grid gap-5 md:grid-cols-2">
-                    <Field
-                      label="OG Title"
-                      error={errors.seo?.ogTitle?.message}
-                    >
-                      <Input
-                        {...register("seo.ogTitle")}
-                        placeholder="Industrial Roof Waterproofing"
-                      />
-                    </Field>
-
-                    <Field
-                      label="OG Image"
-                      error={errors.seo?.ogImage?.message}
-                    >
-                      <Controller
-                        control={control}
-                        name="seo.ogImage"
-                        render={({ field }) => (
-                          <ImageUploader
-                            value={field.value}
-                            imagePublicId={watch(
-                              "seo.ogImagePublicId",
-                            )}
-                            onChange={(url, publicId) => {
-                              setOgImageCustomized(true);
-                              field.onChange(url);
-
-                              setValue(
-                                "seo.ogImagePublicId",
-                                publicId,
-                                {
-                                  shouldDirty: true,
-                                  shouldValidate: true,
-                                },
-                              );
-                            }}
-                          />
-                        )}
-                      />
-                    </Field>
-                  </div>
-
-                  <Field
-                    label="OG Description"
-                    error={errors.seo?.ogDescription?.message}
-                  >
-                    <Textarea
-                      {...register("seo.ogDescription")}
-                      placeholder="A completed industrial waterproofing project."
-                      className="min-h-28 resize-none"
-                    />
-                  </Field>
-
-                  <Controller
-                    control={control}
-                    name="seo.noIndex"
-                    render={({ field }) => (
-                      <div className="flex items-center justify-between rounded-xl border p-4">
-                        <div>
-                          <Label className="font-semibold text-navy">
-                            No Index
-                          </Label>
-
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            Prevent search engines from indexing this
-                            project.
-                          </p>
-                        </div>
-
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </div>
-                    )}
-                  />
                 </FormSection>
               )}
 

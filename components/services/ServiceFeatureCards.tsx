@@ -32,6 +32,7 @@ type Card = {
   tab: string;
   countLabel: string;
   icon: typeof ShieldCheck;
+  image: string;
   numbered?: boolean;
   dark?: boolean;
   section: IServiceContentSection;
@@ -50,6 +51,7 @@ export default function ServiceFeatureCards({
       tab: "Our strengths",
       countLabel: "reasons",
       icon: ShieldCheck,
+      image: "/images/service/why.png",
       section: whyEnviroshield,
     },
     {
@@ -59,6 +61,7 @@ export default function ServiceFeatureCards({
       tab: "How we work",
       countLabel: "steps",
       icon: Workflow,
+      image: "/images/service/process.png",
       section: process,
     },
     {
@@ -68,6 +71,7 @@ export default function ServiceFeatureCards({
       tab: "What you get",
       countLabel: "benefits",
       icon: Layers3,
+      image: "/images/service/benefits.png",
       section: benefits,
     },
   ].filter((card) => (card.section?.items?.length ?? 0) > 0);
@@ -123,15 +127,13 @@ export default function ServiceFeatureCards({
                 >
                   {/* Photo with a solid tab */}
                   <div className="relative aspect-[3/2] shrink-0 overflow-hidden bg-mist">
-                    {card.section.image?.url && (
-                      <Image
-                        src={card.section.image.url}
-                        alt={card.section.image.alt || card.title}
-                        fill
-                        sizes="(max-width: 1000px) 100vw, 33vw"
-                        className="object-cover"
-                      />
-                    )}
+                    <Image
+                      src={card.image}
+                      alt={card.title}
+                      fill
+                      sizes="(max-width: 1000px) 100vw, 33vw"
+                      className="object-cover"
+                    />
 
                     <span className="absolute bottom-0 left-0 rounded-tr-[12px] bg-blue px-4 py-2.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-white">
                       {card.number} — {card.tab}
