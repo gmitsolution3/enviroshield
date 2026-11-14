@@ -95,11 +95,11 @@ export default function ViewProjectModal({
                     Primary Image
                   </p>
 
-                  {project.primaryImage?.caption && (
+                  {project.primaryImage?.caption?.trim() ? (
                     <p className="mt-1 text-sm text-white/90">
                       {project.primaryImage.caption}
                     </p>
-                  )}
+                  ) : null}
                 </div>
               </div>
 

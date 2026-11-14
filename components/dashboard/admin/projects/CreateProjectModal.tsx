@@ -47,7 +47,7 @@ const imageSchema = z.object({
   url: z.string().min(1, "Image is required"),
   publicId: z.string().min(1, "Image public ID is required"),
   alt: z.string().min(1, "Image alt text is required"),
-  caption: z.string().min(1, "Image caption is required"),
+  caption: z.string().optional(),
 });
 
 const galleryItemSchema = z.object({
@@ -303,7 +303,7 @@ export default function CreateProjectModal({
           url: data.primaryImage.url,
           publicId: data.primaryImage.publicId,
           alt: data.primaryImage.alt,
-          caption: data.primaryImage.caption,
+          caption: data.primaryImage.caption?.trim() || undefined,
         },
 
         description: data.description,
@@ -1065,12 +1065,15 @@ function ImageFields({
         {showCaption && (
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-navy">
-              Caption
+              Caption{" "}
+              <span className="text-xs font-normal text-muted-foreground">
+                (Optional)
+              </span>
             </Label>
 
             <Input
               {...register(`${name}.caption`)}
-              placeholder="Image caption"
+              placeholder="Image caption (optional)"
             />
 
             {errors?.caption && (

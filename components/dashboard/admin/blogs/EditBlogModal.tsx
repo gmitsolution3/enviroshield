@@ -418,7 +418,7 @@ export default function EditBlogModal({
             url: values.coverImage.url,
             publicId: values.coverImage.publicId,
             alt: values.coverImage.alt,
-            caption: values.coverImage.caption || "",
+            caption: values.coverImage.caption?.trim() || undefined,
           },
 
           tags: values.tags,
@@ -748,12 +748,15 @@ export default function EditBlogModal({
                           htmlFor="edit-cover-image-caption"
                           className="text-sm font-semibold text-navy"
                         >
-                          Caption
+                          Caption{" "}
+                          <span className="text-xs font-normal text-muted-foreground">
+                            (Optional)
+                          </span>
                         </Label>
 
                         <Input
                           id="edit-cover-image-caption"
-                          placeholder="Building a more sustainable future"
+                          placeholder="Image caption (optional)"
                           {...register("coverImage.caption")}
                         />
                       </div>

@@ -116,11 +116,11 @@ export default function ViewBlogModal({
                     Cover Image
                   </p>
 
-                  {blog.coverImage?.caption && (
+                  {blog.coverImage?.caption?.trim() ? (
                     <p className="mt-1 text-sm text-white/90">
                       {blog.coverImage.caption}
                     </p>
-                  )}
+                  ) : null}
                 </div>
               </div>
 

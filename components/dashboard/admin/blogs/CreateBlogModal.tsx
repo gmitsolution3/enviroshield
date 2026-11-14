@@ -344,7 +344,7 @@ export default function CreateBlogModal({
           url: data.coverImage.url,
           publicId: data.coverImage.publicId,
           alt: data.coverImage.alt,
-          caption: data.coverImage.caption || "",
+          caption: data.coverImage.caption?.trim() || undefined,
         },
 
         tags: data.tags,
@@ -674,12 +674,15 @@ export default function CreateBlogModal({
                           htmlFor="cover-image-caption"
                           className="text-sm font-semibold text-navy"
                         >
-                          Caption
+                          Caption{" "}
+                          <span className="text-xs font-normal text-muted-foreground">
+                            (Optional)
+                          </span>
                         </Label>
 
                         <Input
                           id="cover-image-caption"
-                          placeholder="Building a more sustainable future"
+                          placeholder="Image caption (optional)"
                           {...register("coverImage.caption")}
                         />
                       </div>

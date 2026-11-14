@@ -31,7 +31,7 @@ export default function ServiceCard({
       initial="hidden"
       whileInView="visible"
       viewport={viewportOnce}
-      transition={{ delay: (index % 3) * 0.1 }}
+      transition={{ delay: (index % 4) * 0.1 }}
       whileHover={reduce ? undefined : { y: -8 }}
     >
       {/* Image: clear, no overlay on the photo */}
@@ -40,7 +40,7 @@ export default function ServiceCard({
           src={service.primaryImage.url}
           alt={service.primaryImage.alt || service.name}
           fill
-          sizes="(max-width: 768px) 90vw, 33vw"
+          sizes="(max-width: 768px) 90vw, (max-width: 1280px) 50vw, 25vw"
           className="object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.07]"
         />
 

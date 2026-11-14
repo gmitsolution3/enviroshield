@@ -472,11 +472,11 @@ export default async function ArticlePage({
                 />
               </div>
 
-              {post.coverImage.caption && (
+              {post.coverImage?.caption?.trim() ? (
                 <figcaption className="mt-3 text-center text-[14px] leading-[1.6] text-ink/70">
                   {post.coverImage.caption}
                 </figcaption>
-              )}
+              ) : null}
             </figure>
           </Reveal>
         </Container>

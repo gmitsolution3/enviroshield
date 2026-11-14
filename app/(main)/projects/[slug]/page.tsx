@@ -331,15 +331,23 @@ export default async function ProjectDetailPage({
       >
         <Container className="grid grid-cols-2 items-center gap-[80px] max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
           <Reveal dir="image">
-            <div className="relative h-[600px] overflow-hidden rounded-[16px] max-[600px]:h-[340px]">
-              <Image
-                src={project.primaryImage.url}
-                alt={project.primaryImage.alt || project.title}
-                fill
-                sizes="(max-width: 900px) 100vw, 45vw"
-                className="object-cover"
-              />
-            </div>
+            <figure>
+              <div className="relative h-[600px] overflow-hidden rounded-[16px] max-[600px]:h-[340px]">
+                <Image
+                  src={project.primaryImage.url}
+                  alt={project.primaryImage.alt || project.title}
+                  fill
+                  sizes="(max-width: 900px) 100vw, 45vw"
+                  className="object-cover"
+                />
+              </div>
+
+              {project.primaryImage?.caption?.trim() ? (
+                <figcaption className="mt-3 text-[13px] leading-[1.6] text-ink/70">
+                  {project.primaryImage.caption}
+                </figcaption>
+              ) : null}
+            </figure>
           </Reveal>
 
           <Reveal dir="up" delay={0.15}>

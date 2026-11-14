@@ -5,6 +5,7 @@ import { Button } from "@/components/Button";
 import Container from "@/components/Container";
 import { SectionHeader } from "@/components/SectionHeader";
 import ServiceCard from "@/components/services/ServiceCard";
+import { cn } from "@/lib/utils";
 import type { IService } from "@/types";
 import { motion, useReducedMotion } from "motion/react";
 
@@ -65,10 +66,14 @@ export default function ServicesSectionContent({
             aria-label="Featured services"
           >
             <div
-              className="
-                flex w-max gap-[14px]
-                md:grid md:w-auto md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] md:gap-5
-              "
+              className={cn(
+                "flex w-max gap-[14px] md:grid md:w-auto md:gap-5",
+                services.length >= 4
+                  ? "md:grid-cols-2 xl:grid-cols-4"
+                  : services.length === 3
+                    ? "md:grid-cols-3"
+                    : "md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]",
+              )}
             >
               {services.map((service, index) => (
                 <div
