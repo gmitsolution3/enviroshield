@@ -39,7 +39,7 @@ const imageSchema = z.object({
   url: z.string().min(1, "Image is required"),
   publicId: z.string().min(1, "Image public ID is required"),
   alt: z.string().min(1, "Image alt text is required"),
-  caption: z.string().min(1, "Image caption is required"),
+  caption: z.string().optional(),
 });
 
 const contentItemSchema = z.object({
@@ -313,7 +313,7 @@ export default function CreateServiceModal({
           url: data.primaryImage.url,
           publicId: data.primaryImage.publicId,
           alt: data.primaryImage.alt,
-          caption: data.primaryImage.caption,
+          caption: data.primaryImage.caption?.trim() || undefined,
         },
 
         detailHeading: data.detailHeading,
@@ -324,7 +324,7 @@ export default function CreateServiceModal({
             url: data.whyEnviroshield.image.url,
             publicId: data.whyEnviroshield.image.publicId,
             alt: data.whyEnviroshield.image.alt,
-            caption: data.whyEnviroshield.image.caption,
+            caption: data.whyEnviroshield.image.caption?.trim() || undefined,
           },
           items: data.whyEnviroshield.items,
         },
@@ -334,7 +334,7 @@ export default function CreateServiceModal({
             url: data.process.image.url,
             publicId: data.process.image.publicId,
             alt: data.process.image.alt,
-            caption: data.process.image.caption,
+            caption: data.process.image.caption?.trim() || undefined,
           },
           items: data.process.items,
         },
@@ -344,7 +344,7 @@ export default function CreateServiceModal({
             url: data.benefits.image.url,
             publicId: data.benefits.image.publicId,
             alt: data.benefits.image.alt,
-            caption: data.benefits.image.caption,
+            caption: data.benefits.image.caption?.trim() || undefined,
           },
           items: data.benefits.items,
         },
@@ -1177,11 +1177,14 @@ function ImageFields({
 
         <div className="space-y-2">
           <Label className="text-sm font-semibold text-navy">
-            Caption
+            Caption{" "}
+            <span className="text-xs font-normal text-muted-foreground">
+              (Optional)
+            </span>
           </Label>
 
           <Input
-            placeholder="Image caption"
+            placeholder="Image caption (optional)"
             {...register(captionName)}
           />
 
@@ -1308,12 +1311,15 @@ function ContentSection({
 
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-navy">
-              Caption
+              Caption{" "}
+              <span className="text-xs font-normal text-muted-foreground">
+                (Optional)
+              </span>
             </Label>
 
             <Input
               {...register(`${sectionName}.image.caption`)}
-              placeholder="Image caption"
+              placeholder="Image caption (optional)"
             />
 
             {errors?.[sectionName]?.image?.caption && (

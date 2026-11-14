@@ -335,11 +335,11 @@ export default async function ServiceDetailPage({
                 />
               </div>
 
-              {service.primaryImage.caption && (
+              {service.primaryImage?.caption?.trim() ? (
                 <figcaption className="mt-3 text-[13px] leading-[1.6] text-ink/70">
                   {service.primaryImage.caption}
                 </figcaption>
-              )}
+              ) : null}
             </figure>
           </Reveal>
 

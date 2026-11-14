@@ -105,11 +105,11 @@ export default function ViewServiceModal({
                     Primary Image
                   </p>
 
-                  {service.primaryImage.caption && (
+                  {service.primaryImage?.caption?.trim() ? (
                     <p className="mt-1 text-sm text-white/90">
                       {service.primaryImage.caption}
                     </p>
-                  )}
+                  ) : null}
                 </div>
               </div>
 

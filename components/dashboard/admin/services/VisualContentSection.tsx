@@ -35,11 +35,11 @@ export function VisualContentSection({
           {title}
         </p>
 
-        {section?.image?.caption && (
+        {section?.image?.caption?.trim() ? (
           <p className="mt-1 max-w-md text-sm font-medium text-white">
             {section.image.caption}
           </p>
-        )}
+        ) : null}
       </div>
     </div>
   );

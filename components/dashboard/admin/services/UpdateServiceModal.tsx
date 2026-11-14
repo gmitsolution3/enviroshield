@@ -353,12 +353,33 @@ export default function UpdateServiceModal({
           price: Number(values.price) || 0,
           slug: values.slug,
           isFeatured: values.isFeatured,
-          primaryImage: values.primaryImage,
+          primaryImage: {
+            ...values.primaryImage,
+            caption: values.primaryImage.caption?.trim() || undefined,
+          },
           detailHeading: values.detailHeading,
           description: values.description,
-          whyEnviroshield: values.whyEnviroshield,
-          process: values.process,
-          benefits: values.benefits,
+          whyEnviroshield: {
+            ...values.whyEnviroshield,
+            image: {
+              ...values.whyEnviroshield.image,
+              caption: values.whyEnviroshield.image.caption?.trim() || undefined,
+            },
+          },
+          process: {
+            ...values.process,
+            image: {
+              ...values.process.image,
+              caption: values.process.image.caption?.trim() || undefined,
+            },
+          },
+          benefits: {
+            ...values.benefits,
+            image: {
+              ...values.benefits.image,
+              caption: values.benefits.image.caption?.trim() || undefined,
+            },
+          },
           status: values.status,
           seo: {
             metaTitle: values.seo?.metaTitle?.trim() || undefined,
@@ -959,8 +980,13 @@ function ImageFields({
           )}
         </div>
         <div className="space-y-2">
-          <Label className="text-sm font-semibold text-navy">Caption</Label>
-          <Input placeholder="Image caption" {...register(captionName)} />
+          <Label className="text-sm font-semibold text-navy">
+            Caption{" "}
+            <span className="text-xs font-normal text-muted-foreground">
+              (Optional)
+            </span>
+          </Label>
+          <Input placeholder="Image caption (optional)" {...register(captionName)} />
           {imageErrors?.caption?.message && (
             <p className="text-xs text-red-600">{imageErrors.caption.message}</p>
           )}
