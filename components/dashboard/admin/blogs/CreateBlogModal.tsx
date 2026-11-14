@@ -262,19 +262,38 @@ export default function CreateBlogModal({
   };
 
   const addSeoKeyword = () => {
-    const keyword = seoKeywordInput.trim();
+    const rawInput = seoKeywordInput.trim();
 
-    if (!keyword) return;
+    if (!rawInput) return;
 
-    if (currentKeywords.includes(keyword)) {
+    // Split by comma to support single or multiple comma-separated keywords
+    const tokens = rawInput
+      .split(",")
+      .map((k) => k.trim().replace(/\s+/g, " "))
+      .filter((k) => k.length > 0);
+
+    if (tokens.length === 0) {
       setSeoKeywordInput("");
       return;
     }
 
-    setValue("seo.keywords", [...currentKeywords, keyword], {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+    const existingLower = new Set(currentKeywords.map((k) => k.toLowerCase()));
+    const toAdd: string[] = [];
+
+    for (const token of tokens) {
+      const lower = token.toLowerCase();
+      if (!existingLower.has(lower)) {
+        toAdd.push(token);
+        existingLower.add(lower);
+      }
+    }
+
+    if (toAdd.length > 0) {
+      setValue("seo.keywords", [...currentKeywords, ...toAdd], {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
 
     setSeoKeywordInput("");
   };
@@ -938,7 +957,7 @@ export default function CreateBlogModal({
                         </Label>
 
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Add relevant keywords, one at a time.
+                          Add relevant keywords, separated by commas or one at a time.
                         </p>
                       </div>
 
@@ -954,7 +973,7 @@ export default function CreateBlogModal({
                               addSeoKeyword();
                             }
                           }}
-                          placeholder="e.g. environmental protection"
+                          placeholder="e.g. environmental protection, waterproofing, sustainability"
                           disabled={isLoading}
                         />
 

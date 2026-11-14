@@ -301,6 +301,54 @@ export default function CreateServiceModal({
     });
   };
 
+  const addKeyword = () => {
+    const rawInput = seoKeywordInput.trim();
+
+    if (!rawInput) return;
+
+    // Split by comma to support single or multiple comma-separated keywords
+    const tokens = rawInput
+      .split(",")
+      .map((k) => k.trim().replace(/\s+/g, " "))
+      .filter((k) => k.length > 0);
+
+    if (tokens.length === 0) {
+      setSeoKeywordInput("");
+      return;
+    }
+
+    const existingLower = new Set(currentKeywords.map((k) => k.toLowerCase()));
+    const toAdd: string[] = [];
+
+    for (const token of tokens) {
+      const lower = token.toLowerCase();
+      if (!existingLower.has(lower)) {
+        toAdd.push(token);
+        existingLower.add(lower);
+      }
+    }
+
+    if (toAdd.length > 0) {
+      setValue("seo.keywords", [...currentKeywords, ...toAdd], {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
+
+    setSeoKeywordInput("");
+  };
+
+  const removeKeyword = (index: number) => {
+    setValue(
+      "seo.keywords",
+      currentKeywords.filter((_, keywordIndex) => keywordIndex !== index),
+      {
+        shouldDirty: true,
+        shouldValidate: true,
+      },
+    );
+  };
+
   const onSubmit = async (data: FormValues) => {
     try {
       const payload = {
@@ -814,7 +862,7 @@ export default function CreateServiceModal({
                         <Label>Keywords</Label>
 
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Add at least one SEO keyword.
+                          Add relevant SEO keywords, separated by commas or one at a time.
                         </p>
                       </div>
 
@@ -824,31 +872,20 @@ export default function CreateServiceModal({
                           onChange={(event) =>
                             setSeoKeywordInput(event.target.value)
                           }
-                          placeholder="e.g. roof waterproofing"
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") {
+                              event.preventDefault();
+                              addKeyword();
+                            }
+                          }}
+                          placeholder="e.g. roof waterproofing, chemical coating, pu flooring"
                         />
 
                         <DashboardButton
                           type="button"
                           variant="outline"
                           icon={<Plus className="h-4 w-4" />}
-                          onClick={() => {
-                            const keyword = seoKeywordInput.trim();
-
-                            if (!keyword) return;
-                            if (currentKeywords.includes(keyword))
-                              return;
-
-                            setValue(
-                              "seo.keywords",
-                              [...currentKeywords, keyword],
-                              {
-                                shouldDirty: true,
-                                shouldValidate: true,
-                              },
-                            );
-
-                            setSeoKeywordInput("");
-                          }}
+                          onClick={addKeyword}
                           className="h-10 shrink-0 rounded-full border-blue/30 bg-muted/30 px-4 text-xs font-semibold text-navy shadow-sm transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue hover:shadow-md"
                         >
                           Add
@@ -865,22 +902,7 @@ export default function CreateServiceModal({
 
                             <button
                               type="button"
-                              onClick={() => {
-                                const updatedKeywords =
-                                  currentKeywords.filter(
-                                    (_, keywordIndex) =>
-                                      keywordIndex !== index,
-                                  );
-
-                                setValue(
-                                  "seo.keywords",
-                                  updatedKeywords,
-                                  {
-                                    shouldDirty: true,
-                                    shouldValidate: true,
-                                  },
-                                );
-                              }}
+                              onClick={() => removeKeyword(index)}
                               className="text-muted-foreground transition-colors hover:text-destructive"
                               aria-label={`Remove ${keyword}`}
                             >

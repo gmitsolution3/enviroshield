@@ -410,19 +410,38 @@ export default function UpdateProjectModal({
   };
 
   const addKeyword = () => {
-    const keyword = seoKeywordInput.trim();
+    const rawInput = seoKeywordInput.trim();
 
-    if (!keyword) return;
+    if (!rawInput) return;
 
-    if (currentKeywords.includes(keyword)) {
-      toast.error("This keyword already exists.");
+    // Split by comma to support single or multiple comma-separated keywords
+    const tokens = rawInput
+      .split(",")
+      .map((k) => k.trim().replace(/\s+/g, " "))
+      .filter((k) => k.length > 0);
+
+    if (tokens.length === 0) {
+      setSeoKeywordInput("");
       return;
     }
 
-    setValue("seo.keywords", [...currentKeywords, keyword], {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+    const existingLower = new Set(currentKeywords.map((k) => k.toLowerCase()));
+    const toAdd: string[] = [];
+
+    for (const token of tokens) {
+      const lower = token.toLowerCase();
+      if (!existingLower.has(lower)) {
+        toAdd.push(token);
+        existingLower.add(lower);
+      }
+    }
+
+    if (toAdd.length > 0) {
+      setValue("seo.keywords", [...currentKeywords, ...toAdd], {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
 
     setSeoKeywordInput("");
   };
@@ -1080,7 +1099,7 @@ export default function UpdateProjectModal({
                       <Label>Keywords</Label>
 
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Add at least one SEO keyword.
+                        Add relevant SEO keywords, separated by commas or one at a time.
                       </p>
                     </div>
 
@@ -1090,7 +1109,13 @@ export default function UpdateProjectModal({
                         onChange={(event) =>
                           setSeoKeywordInput(event.target.value)
                         }
-                        placeholder="e.g. roof waterproofing"
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            addKeyword();
+                          }
+                        }}
+                        placeholder="e.g. roof waterproofing, polyurethane coating, basement sealing"
                       />
 
                       <DashboardButton
