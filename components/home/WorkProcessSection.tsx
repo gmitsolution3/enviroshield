@@ -1,6 +1,5 @@
 "use client";
 
-import { images } from "@/lib/data/content";
 import { Layers, Paintbrush, ShieldCheck, Sun } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
@@ -12,17 +11,13 @@ import { SectionHeader } from "../SectionHeader";
 
 // Swap these with the exact assets from your design.
 const DECOR_SRC = "/images/work-paint.webp"; // paint brushes + blue splash, top-left
-const BIG_IMAGE = {
-  src: images.painter,
-  alt: "Painter carefully preparing an interior wall",
-};
-const SMALL_IMAGE = {
-  src: "https://images.pexels.com/photos/16751235/pexels-photo-16751235.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
-  alt: "Man painting a patterned blue wall",
+const PROCESS_IMAGE = {
+  src: "/images/enviro-supreme-7-layers-waterproofing-method.png",
+  alt: "Enviro Supreme Seven Layers Waterproofing System diagram",
 };
 
 const imgClass =
-  "object-cover transition-transform duration-[0.6s] group-hover:scale-[1.04]";
+  "object-contain transition-transform duration-[0.6s] group-hover:scale-[1.04]";
 
 function PhotoFx() {
   return (
@@ -188,25 +183,15 @@ export default function WorkProcessSection() {
         </Reveal>
 
         <Reveal dir="image" delay={0.2}>
-          <div className="relative h-[585px] max-[900px]:mx-auto max-[900px]:h-[470px] max-[900px]:w-full max-[900px]:max-w-[600px] max-[600px]:h-[380px]">
-            <div className="group absolute top-0 right-0 h-[64.6%] w-[75%] overflow-hidden rounded-[18px]">
+          <div className="relative mx-auto w-full max-w-[580px]">
+            <div className="group relative aspect-[645/454] w-full overflow-hidden rounded-[20px] border-[6px] border-white bg-white shadow-[0_20px_50px_rgba(0,51,78,0.14)] ring-1 ring-navy/[0.06] transition-all duration-500 hover:shadow-[0_28px_64px_rgba(0,51,78,0.22)]">
               <Image
-                src={BIG_IMAGE.src}
-                alt={BIG_IMAGE.alt}
+                src={PROCESS_IMAGE.src}
+                alt={PROCESS_IMAGE.alt}
                 fill
-                sizes="(max-width: 900px) 70vw, 32vw"
+                sizes="(max-width: 900px) 90vw, 45vw"
                 className={imgClass}
-              />
-              <PhotoFx />
-            </div>
-
-            <div className="group absolute bottom-0 left-0 box-border h-[53.8%] w-[65.4%] overflow-hidden rounded-[18px] border-[8px] border-white bg-white">
-              <Image
-                src={SMALL_IMAGE.src}
-                alt={SMALL_IMAGE.alt}
-                fill
-                sizes="(max-width: 900px) 60vw, 25vw"
-                className={imgClass}
+                priority
               />
               <PhotoFx />
             </div>

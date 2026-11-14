@@ -13,7 +13,7 @@ export default async function ProductsSection() {
   try {
     const result = await getPublishedProducts({
       page: 1,
-      limit: 6,
+      limit: 8,
     });
 
     products = result.data;

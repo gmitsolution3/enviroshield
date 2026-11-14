@@ -94,7 +94,7 @@ const leaders = [
     name: "Engr. Tony Stephen",
     role: "Founder, EnviroShield Pvt. Ltd. Australia",
     badge: "FOUNDER & CHIEF ADVISER",
-    image: "/images/leadership/engr-tony-stephen.png",
+    image: "/images/leadership/ceo.png",
     alt: "Engr. Tony Stephen, Founder of EnviroShield Pvt. Ltd. Australia",
     credentials: [
       "BSc Engineer, Swinburne University of Technology, Australia",
@@ -106,7 +106,7 @@ const leaders = [
     name: "Engr. Mohammad Mahbubur Rahman",
     role: "Managing Director, EnviroShield Pvt. Ltd. (Bangladesh)",
     badge: "MANAGING DIRECTOR",
-    image: "/images/leadership/engr-mohammad-mahbubur-rahman.jpg",
+    image: "/images/leadership/md.png",
     alt: "Engr. Mohammad Mahbubur Rahman, Managing Director of EnviroShield Bangladesh",
     credentials: [
       "MSc Engineer (IUT)",
