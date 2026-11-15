@@ -2,6 +2,7 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header/Header";
 import SmoothScroll from "@/components/smooth-scroll";
 import { CartProvider } from "@/components/cart/CartProvider";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 export default function MainLayout({
   children,
@@ -14,6 +15,7 @@ export default function MainLayout({
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
+        <WhatsAppButton />
       </SmoothScroll>
     </CartProvider>
   );

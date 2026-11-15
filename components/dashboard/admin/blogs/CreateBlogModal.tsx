@@ -233,19 +233,38 @@ export default function CreateBlogModal({
   };
 
   const addTag = () => {
-    const tag = tagInput.trim();
+    const rawInput = tagInput.trim();
 
-    if (!tag) return;
+    if (!rawInput) return;
 
-    if (currentTags.includes(tag)) {
+    // Split by comma to support single or multiple comma-separated tags
+    const tokens = rawInput
+      .split(",")
+      .map((t) => t.trim().replace(/\s+/g, " "))
+      .filter((t) => t.length > 0);
+
+    if (tokens.length === 0) {
       setTagInput("");
       return;
     }
 
-    setValue("tags", [...currentTags, tag], {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+    const existingLower = new Set(currentTags.map((t) => t.toLowerCase()));
+    const toAdd: string[] = [];
+
+    for (const token of tokens) {
+      const lower = token.toLowerCase();
+      if (!existingLower.has(lower)) {
+        toAdd.push(token);
+        existingLower.add(lower);
+      }
+    }
+
+    if (toAdd.length > 0) {
+      setValue("tags", [...currentTags, ...toAdd], {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
 
     setTagInput("");
   };
@@ -770,8 +789,7 @@ export default function CreateBlogModal({
                       </Label>
 
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Add relevant tags to help categorize this
-                        blog.
+                        Add relevant tags, separated by commas or one at a time.
                       </p>
                     </div>
 
@@ -787,7 +805,7 @@ export default function CreateBlogModal({
                             addTag();
                           }
                         }}
-                        placeholder="e.g. sustainability"
+                        placeholder="e.g. sustainability, waterproofing, coating"
                         disabled={isLoading}
                       />
 

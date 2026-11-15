@@ -8,13 +8,9 @@ import Container from "@/components/Container";
 import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
 import { SectionHeader } from "@/components/SectionHeader";
-import FeaturedServiceCard from "@/components/services/FeaturedServiceCard";
 import ServiceCard from "@/components/services/ServiceCard";
 import ServicesPagination from "@/components/services/ServicesPagination";
-import {
-  getFeaturedServices,
-  getPublishedServices,
-} from "@/lib/api/services";
+import { getPublishedServices } from "@/lib/api/services";
 import { siteUrl } from "@/lib/site-url";
 import type { Metadata } from "next";
 
@@ -116,32 +112,13 @@ export default async function ServicesPage({
     Number.parseInt(params.page || "1", 10) || 1,
   );
 
-  // Fetch published and featured services concurrently.
-  const [result, allFeaturedServices] = await Promise.all([
-    getPublishedServices({
-      page,
-      limit: 12,
-    }),
-    getFeaturedServices().catch((error) => {
-      console.error("Failed to fetch featured services:", error);
-      return [];
-    }),
-  ]);
+  const result = await getPublishedServices({
+    page,
+    limit: 12,
+  });
 
   const services = result.data;
   const total = result.meta.total;
-
-  // Display featured spotlights on the first page only.
-  const featuredServices = page === 1 ? allFeaturedServices : [];
-
-  // Avoid displaying featured services a second time in the grid.
-  const featuredIds = new Set(
-    allFeaturedServices.map((service) => service._id),
-  );
-
-  const gridServices = services.filter(
-    (service) => !featuredIds.has(service._id),
-  );
 
   const stats = [
     { value: total, label: "Services offered" },
@@ -202,78 +179,18 @@ export default async function ServicesPage({
             headingId="services-page-heading"
           />
 
-          {services.length > 0 || featuredServices.length > 0 ? (
+          {services.length > 0 ? (
             <>
-              {/* FEATURED SERVICES — ORIGINAL SPOTLIGHT DESIGN */}
-              {featuredServices.length > 0 && (
-                <section
-                  aria-labelledby="featured-services-heading"
-                  className="mt-12"
-                >
-                  <div className="mb-8 flex items-end justify-between border-b border-line pb-4">
-                    <div>
-                      <p className="mb-2 text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
-                        OUR SPECIALTIES
-                      </p>
-
-                      <h3
-                        id="featured-services-heading"
-                        className="text-[24px] font-extrabold tracking-[-0.03em] text-navy"
-                      >
-                        Featured Services
-                      </h3>
-                    </div>
-
-                    <span className="text-[14px] text-ink">
-                      {featuredServices.length}{" "}
-                      {featuredServices.length === 1
-                        ? "service"
-                        : "services"}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col gap-8">
-                    {featuredServices.map((service) => (
-                      <FeaturedServiceCard
-                        key={service._id}
-                        service={service}
-                      />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* REGULAR SERVICES — EXISTING CARD DESIGN */}
-              {gridServices.length > 0 && (
-                <>
-                  {allFeaturedServices.length > 0 && (
-                    <div className="mb-8 mt-16 flex items-end justify-between border-b border-line pb-4">
-                      <h3 className="text-[24px] font-extrabold tracking-[-0.03em] text-navy">
-                        More Services
-                      </h3>
-
-                      <span className="text-[14px] text-ink">
-                        {total} in total
-                      </span>
-                    </div>
-                  )}
-
-                  <StaggerContainer
-                    className={`grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-[22px] ${
-                      featuredServices.length > 0 ? "" : "mt-12"
-                    }`}
-                  >
-                    {gridServices.map((service, index) => (
-                      <StaggerItem key={service._id}>
-                        <ServiceCard
-                          service={service}
-                          index={index}
-                        />
-                      </StaggerItem>
-                    ))}
-                  </StaggerContainer>
-                </>
-              )}
+              <StaggerContainer className="mt-12 grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-[22px]">
+                {services.map((service, index) => (
+                  <StaggerItem key={service._id}>
+                    <ServiceCard
+                      service={service}
+                      index={index}
+                    />
+                  </StaggerItem>
+                ))}
+              </StaggerContainer>
 
               {/* PAGINATION */}
               <ServicesPagination

@@ -300,31 +300,36 @@ export default function AboutPage() {
 
         <Container className="grid grid-cols-2 items-center gap-[80px] max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
           <Reveal dir="image">
-            <div className="grid grid-cols-[1.2fr_0.8fr] gap-4">
-              <div className="group relative h-[520px] overflow-hidden rounded-[20px] shadow-md max-[600px]:h-[340px]">
+            <div className="flex flex-col gap-4">
+              {/* Full-width 16:9 Team Photo (who-we-are-2.png) - Preserves all 5 team members without cropping or downsampling */}
+              <div className="group relative aspect-[16/9] w-full overflow-hidden rounded-[20px] shadow-md">
                 <Image
-                  src="/images/home/rooftop-waterproofing-application.jpg"
-                  alt="Enviro Shield specialist applying protective waterproof coating"
+                  src="/images/who-we-are-2.png"
+                  alt="Enviro Shield leadership and engineering team"
                   fill
-                  sizes="(max-width: 900px) 60vw, 28vw"
-                  className={imgClass}
+                  priority
+                  quality={95}
+                  sizes="(max-width: 900px) 100vw, 600px"
+                  className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                 />
                 <PhotoFx />
               </div>
 
-              <div className="flex flex-col gap-4">
-                <div className="group relative flex-1 overflow-hidden rounded-[20px] shadow-sm">
+              {/* Action Shot (who-we-are-1.png) + Australian Heritage Experience Card */}
+              <div className="grid grid-cols-[1.15fr_0.85fr] gap-4 max-[540px]:grid-cols-1">
+                <div className="group relative aspect-[4/3] overflow-hidden rounded-[20px] shadow-sm max-[540px]:aspect-[16/10]">
                   <Image
-                    src="/images/home/completed-waterproof-rooftop-coating.jpg"
-                    alt="Completed waterproof rooftop coating"
+                    src="/images/who-we-are-1.png"
+                    alt="Enviro Shield specialist inspecting waterproof coating"
                     fill
-                    sizes="(max-width: 900px) 40vw, 18vw"
-                    className={imgClass}
+                    quality={95}
+                    sizes="(max-width: 900px) 60vw, 350px"
+                    className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                   <PhotoFx />
                 </div>
 
-                <div className="group relative overflow-hidden rounded-[20px] bg-gradient-to-br from-blue to-[#0d5ac1] p-6 text-white shadow-lg transition-transform duration-300 hover:scale-[1.02] max-[600px]:p-4">
+                <div className="group relative flex flex-col justify-between overflow-hidden rounded-[20px] bg-gradient-to-br from-blue to-[#0d5ac1] p-6 text-white shadow-lg transition-transform duration-300 hover:scale-[1.02] max-[600px]:p-5">
                   <div className="flex items-center gap-2">
                     <span className="relative flex h-2.5 w-2.5">
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-paste opacity-75" />
@@ -334,11 +339,13 @@ export default function AboutPage() {
                       AUSTRALIAN HERITAGE
                     </span>
                   </div>
-                  <div className="mt-2 text-[46px] font-extrabold leading-none tracking-[-0.04em] max-[600px]:text-[34px]">
-                    17+
-                  </div>
-                  <div className="mt-2 text-[13px] font-medium text-white/90">
-                    Years Industry Experience (Since 2009)
+                  <div>
+                    <div className="text-[42px] font-extrabold leading-none tracking-[-0.04em] max-[600px]:text-[34px]">
+                      17+
+                    </div>
+                    <div className="mt-2 text-[13px] font-medium text-white/90">
+                      Years Industry Experience (Since 2009)
+                    </div>
                   </div>
                 </div>
               </div>

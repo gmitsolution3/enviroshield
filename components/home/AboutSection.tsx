@@ -8,19 +8,18 @@ import Container from "../Container";
 import { Reveal } from "../Reveal";
 import { SectionHeader } from "../SectionHeader";
 
-// Swap these with the exact photos from your design.
 const aboutImages = {
+  hero: {
+    src: "/images/about-1.png",
+    alt: "Enviro Shield certified engineers supervising on-site waterproofing project",
+  },
   application: {
-    src: "/images/home/rooftop-waterproofing-application.jpg",
-    alt: "Enviroshield specialist applying protective waterproof coating to building rooftop",
+    src: "/images/about-2.png",
+    alt: "Enviro Shield specialist applying protective waterproofing coating with roller",
   },
-  completedRooftop: {
-    src: "/images/home/completed-waterproof-rooftop-coating.jpg",
-    alt: "Completed seamless waterproof and heat-insulated residential rooftop terrace",
-  },
-  terraceBalcony: {
-    src: "/images/home/terrace-waterproofing-protective-floor.png",
-    alt: "Finished protective waterproof floor coating on residential balcony terrace",
+  completed: {
+    src: "/images/about-3.png",
+    alt: "Completed seamless waterproof protective flooring on rooftop terrace",
   },
 };
 
@@ -30,11 +29,6 @@ const avatars = [
   "https://i.pravatar.cc/80?img=47",
   "https://i.pravatar.cc/80?img=45",
 ];
-
-const photoClass =
-  "group relative h-[340px] overflow-hidden rounded-[18px] max-[600px]:h-[210px]";
-const imgClass =
-  "object-cover transition-transform duration-[0.6s] group-hover:scale-[1.04]";
 
 function PhotoFx() {
   return (
@@ -69,21 +63,22 @@ export default function AboutSection() {
       <Container className="grid grid-cols-2 items-center gap-16 max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
         {/* ---------- Left: image collage ---------- */}
         <Reveal dir="image">
-          <div className="grid grid-cols-2 gap-5 max-[900px]:mx-auto max-[900px]:w-full max-[900px]:max-w-[580px] max-[600px]:gap-3">
-            {/* left column (offset down) */}
-            <div className="flex flex-col gap-[27px] pt-[70px] max-[600px]:gap-3 max-[600px]:pt-10">
-              <div className={photoClass}>
-                <Image
-                  src={aboutImages.application.src}
-                  alt={aboutImages.application.alt}
-                  fill
-                  sizes="(max-width: 900px) 45vw, 25vw"
-                  className={imgClass}
-                />
-                <PhotoFx />
-              </div>
+          <div className="flex flex-col gap-4 max-[900px]:mx-auto max-[900px]:w-full max-[900px]:max-w-[580px]">
+            {/* Main Hero Photo: Engineers on Site (16:9 Landscape) */}
+            <div className="group relative aspect-[16/9] w-full overflow-hidden rounded-[20px] shadow-lg">
+              <Image
+                src={aboutImages.hero.src}
+                alt={aboutImages.hero.alt}
+                fill
+                priority
+                quality={95}
+                sizes="(max-width: 900px) 100vw, 600px"
+                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+              />
+              <PhotoFx />
 
-              <div className="flex h-[128px] flex-col items-center justify-center gap-2 rounded-[18px] bg-mist max-[600px]:h-[100px]">
+              {/* Floating Social Proof Card */}
+              <div className="absolute bottom-4 left-4 z-10 flex items-center gap-3 rounded-2xl border border-white/40 bg-white/95 px-4 py-2.5 shadow-xl backdrop-blur-md max-[600px]:bottom-3 max-[600px]:left-3 max-[600px]:px-3 max-[600px]:py-2">
                 <div className="flex items-center">
                   {avatars.map((src, i) => (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -92,43 +87,51 @@ export default function AboutSection() {
                       src={src}
                       alt=""
                       aria-hidden="true"
-                      className={`h-[42px] w-[42px] rounded-full border-2 border-white bg-white object-cover max-[600px]:h-9 max-[600px]:w-9 ${
-                        i > 0 ? "-ml-2.5" : ""
+                      className={`h-8 w-8 rounded-full border-2 border-white bg-white object-cover max-[600px]:h-7 max-[600px]:w-7 ${
+                        i > 0 ? "-ml-2" : ""
                       }`}
                     />
                   ))}
                   <span
-                    className="-ml-2.5 grid h-[42px] w-[42px] place-items-center rounded-full border-2 border-white bg-blue text-[22px] leading-none text-white max-[600px]:h-9 max-[600px]:w-9"
+                    className="-ml-2 grid h-8 w-8 place-items-center rounded-full border-2 border-white bg-blue text-xs font-bold text-white max-[600px]:h-7 max-[600px]:w-7"
                     aria-hidden="true"
                   >
                     +
                   </span>
                 </div>
-                <span className="text-[15px] text-ink">
-                  Happy Customer
-                </span>
+                <div>
+                  <span className="block text-[13px] font-bold leading-tight text-navy max-[600px]:text-[12px]">
+                    500+ Projects
+                  </span>
+                  <span className="text-[11px] font-medium text-slate-500 max-[600px]:text-[10px]">
+                    Happy Customers
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* right column */}
-            <div className="flex flex-col gap-[27px] max-[600px]:gap-3">
-              <div className={photoClass}>
+            {/* Bottom Row: 2 Complementary Images Side by Side (~2:1 Landscape) */}
+            <div className="grid grid-cols-2 gap-4 max-[500px]:gap-3">
+              <div className="group relative aspect-[2/1] overflow-hidden rounded-[18px] shadow-md">
                 <Image
-                  src={aboutImages.completedRooftop.src}
-                  alt={aboutImages.completedRooftop.alt}
+                  src={aboutImages.application.src}
+                  alt={aboutImages.application.alt}
                   fill
-                  sizes="(max-width: 900px) 45vw, 25vw"
-                  className={imgClass}
+                  quality={95}
+                  sizes="(max-width: 900px) 50vw, 300px"
+                  className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                 />
                 <PhotoFx />
               </div>
-              <div className={photoClass}>
+
+              <div className="group relative aspect-[2/1] overflow-hidden rounded-[18px] shadow-md">
                 <Image
-                  src={aboutImages.terraceBalcony.src}
-                  alt={aboutImages.terraceBalcony.alt}
+                  src={aboutImages.completed.src}
+                  alt={aboutImages.completed.alt}
                   fill
-                  sizes="(max-width: 900px) 45vw, 25vw"
-                  className={imgClass}
+                  quality={95}
+                  sizes="(max-width: 900px) 50vw, 300px"
+                  className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                 />
                 <PhotoFx />
               </div>
