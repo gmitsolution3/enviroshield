@@ -175,11 +175,27 @@ export default async function BlogPage({
         className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
       >
         <Container>
-          <SectionHeader
-            eyebrow="ALL NEWS"
-            title="Latest news & updates"
-            headingId="blog-heading"
-          />
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <SectionHeader
+              eyebrow="ALL NEWS"
+              title="Latest news & updates"
+              headingId="blog-heading"
+            />
+
+            {blogs.length > 0 && (
+              <span className="mb-6 inline-flex shrink-0 items-center rounded-full border border-line bg-mist/80 px-4 py-1.5 text-xs font-semibold text-ink/80">
+                Showing{" "}
+                <strong className="mx-1 font-bold text-navy">
+                  {blogs.length}
+                </strong>{" "}
+                {blogs.length === 1 ? "article" : "articles"} out of{" "}
+                <strong className="mx-1 font-bold text-navy">
+                  {total}
+                </strong>{" "}
+                {total === 1 ? "article" : "articles"}
+              </span>
+            )}
+          </div>
 
           {blogs.length > 0 ? (
             <>
@@ -195,13 +211,14 @@ export default async function BlogPage({
                         More News & Updates
                       </h3>
 
-                      <span className="text-[14px] text-ink">
-                        {total} in total
+                      <span className="text-[13px] font-semibold text-ink/75">
+                        Showing {gridBlogs.length} articles out of {total} articles
                       </span>
                     </div>
                   )}
 
                   <StaggerContainer
+                    key={`blog-grid-page-${currentPage}`}
                     className={`grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-[25px] max-[600px]:gap-10 ${
                       featured ? "" : "mt-11"
                     }`}

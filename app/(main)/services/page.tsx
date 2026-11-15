@@ -172,16 +172,35 @@ export default async function ServicesPage({
         className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
       >
         <Container>
-          <SectionHeader
-            eyebrow="WHAT WE DO"
-            title="Complete waterproofing, flooring & protective coating solutions"
-            text="Explore our 12 core services: waterproofing, waterproofing paint, heatproofing, epoxy flooring, PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy floor, floor hardener, and ETP coating."
-            headingId="services-page-heading"
-          />
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <SectionHeader
+              eyebrow="WHAT WE DO"
+              title="Complete waterproofing, flooring & protective coating solutions"
+              text="Explore our 12 core services: waterproofing, waterproofing paint, heatproofing, epoxy flooring, PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy floor, floor hardener, and ETP coating."
+              headingId="services-page-heading"
+            />
+
+            {services.length > 0 && (
+              <span className="mb-6 inline-flex shrink-0 items-center rounded-full border border-line bg-mist/80 px-4 py-1.5 text-xs font-semibold text-ink/80">
+                Showing{" "}
+                <strong className="mx-1 font-bold text-navy">
+                  {services.length}
+                </strong>{" "}
+                {services.length === 1 ? "service" : "services"} out of{" "}
+                <strong className="mx-1 font-bold text-navy">
+                  {total}
+                </strong>{" "}
+                {total === 1 ? "service" : "services"}
+              </span>
+            )}
+          </div>
 
           {services.length > 0 ? (
             <>
-              <StaggerContainer className="mt-12 grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-[22px]">
+              <StaggerContainer
+                key={`services-grid-page-${page}`}
+                className="mt-12 grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-[22px]"
+              >
                 {services.map((service, index) => (
                   <StaggerItem key={service._id}>
                     <ServiceCard

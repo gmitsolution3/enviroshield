@@ -1,3 +1,6 @@
+"use client";
+
+import { useLenis } from "lenis/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -10,12 +13,32 @@ export default function ServicesPagination({
   currentPage,
   totalPages,
 }: ServicesPaginationProps) {
+  const lenis = useLenis();
+
   if (totalPages < 1) {
     return null;
   }
 
   const createPageUrl = (page: number) => {
     return page === 1 ? "/services" : `/services?page=${page}`;
+  };
+
+  const scrollToServices = () => {
+    if (lenis) {
+      const heading = document.getElementById("services-page-heading");
+      if (heading) {
+        lenis.scrollTo(heading, { offset: -100 });
+      } else {
+        lenis.scrollTo(0);
+      }
+    } else {
+      const heading = document.getElementById("services-page-heading");
+      if (heading) {
+        heading.scrollIntoView({ behavior: "smooth" });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
   };
 
   return (
@@ -26,6 +49,7 @@ export default function ServicesPagination({
       {currentPage > 1 ? (
         <Link
           href={createPageUrl(currentPage - 1)}
+          onClick={scrollToServices}
           rel="prev"
           aria-label="Previous page of services"
           className="inline-flex items-center gap-2 rounded-full border border-navy/10 px-5 py-3 text-sm font-bold text-navy transition-colors duration-200 hover:bg-navy hover:text-white"
@@ -60,6 +84,7 @@ export default function ServicesPagination({
             <Link
               key={page}
               href={createPageUrl(page)}
+              onClick={scrollToServices}
               aria-label={`Go to services page ${page}`}
               className="grid size-11 place-items-center rounded-full border border-navy/10 text-sm font-bold text-navy transition-colors duration-200 hover:bg-navy hover:text-white"
             >
@@ -72,6 +97,7 @@ export default function ServicesPagination({
       {currentPage < totalPages ? (
         <Link
           href={createPageUrl(currentPage + 1)}
+          onClick={scrollToServices}
           rel="next"
           aria-label="Next page of services"
           className="inline-flex items-center gap-2 rounded-full border border-navy/10 px-5 py-3 text-sm font-bold text-navy transition-colors duration-200 hover:bg-navy hover:text-white"

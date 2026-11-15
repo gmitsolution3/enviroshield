@@ -16,15 +16,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import ProductsPagination from "@/components/products/ProductsPagination";
 import {
   getAllCategories,
   getPublishedProducts,
@@ -204,38 +196,6 @@ function href(state: Partial<State>) {
   const query = qs.toString();
 
   return query ? `/products?${query}` : "/products";
-}
-
-function pageItems(
-  page: number,
-  totalPages: number,
-): (number | "gap")[] {
-  const set = new Set<number>([
-    1,
-    totalPages,
-    page - 1,
-    page,
-    page + 1,
-  ]);
-
-  const list = [...set]
-    .filter((value) => value >= 1 && value <= totalPages)
-    .sort((a, b) => a - b);
-
-  const items: (number | "gap")[] = [];
-
-  list.forEach((value, index) => {
-    if (
-      index > 0 &&
-      value - list[index - 1] > 1
-    ) {
-      items.push("gap");
-    }
-
-    items.push(value);
-  });
-
-  return items;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -499,11 +459,21 @@ export default async function ProductsPage({
                           ? selectedCategory.name
                           : "All Products"}
                     </h2>
-                    <span className="inline-flex items-center rounded-full border border-line bg-mist/80 px-2.5 py-0.5 text-xs font-semibold text-ink/75">
-                      {productResponse?.meta.total ?? 0}{" "}
+                    <span className="inline-flex items-center rounded-full border border-line bg-mist/80 px-3.5 py-1 text-xs font-semibold text-ink/80">
+                      Showing{" "}
+                      <strong className="mx-1 font-bold text-navy">
+                        {productResponse?.data.length ?? 0}
+                      </strong>{" "}
+                      {(productResponse?.data.length ?? 0) === 1
+                        ? "product"
+                        : "products"}{" "}
+                      out of{" "}
+                      <strong className="mx-1 font-bold text-navy">
+                        {productResponse?.meta.total ?? 0}
+                      </strong>{" "}
                       {(productResponse?.meta.total ?? 0) === 1
-                        ? "Product"
-                        : "Products"}
+                        ? "product"
+                        : "products"}
                     </span>
                   </div>
 
@@ -617,6 +587,7 @@ export default async function ProductsPage({
               ) : productResponse?.data.length ? (
                 <>
                   <div
+                    key={`product-grid-page-${productResponse.meta.page}`}
                     className="grid grid-cols-3 gap-x-6 gap-y-10 max-[1200px]:grid-cols-2 max-[600px]:grid-cols-1"
                     id="product-grid"
                   >
@@ -630,68 +601,10 @@ export default async function ProductsPage({
                     ))}
                   </div>
 
-                  {productResponse.meta.totalPages > 1 && (
-                    <Pagination className="mt-12">
-                      <PaginationContent>
-                        {productResponse.meta.page > 1 && (
-                          <PaginationItem>
-                            <PaginationPrevious
-                              href={href({
-                                ...state,
-                                page:
-                                  productResponse.meta.page - 1,
-                              })}
-                            />
-                          </PaginationItem>
-                        )}
-
-                        {pageItems(
-                          productResponse.meta.page,
-                          productResponse.meta.totalPages,
-                        ).map((item, index) =>
-                          item === "gap" ? (
-                            <PaginationItem key={`gap-${index}`}>
-                              <PaginationEllipsis />
-                            </PaginationItem>
-                          ) : (
-                            <PaginationItem key={item}>
-                              <PaginationLink
-                                href={href({
-                                  ...state,
-                                  page: item,
-                                })}
-                                isActive={
-                                  item ===
-                                  productResponse.meta.page
-                                }
-                                className={
-                                  item ===
-                                  productResponse.meta.page
-                                    ? "border-blue text-blue"
-                                    : ""
-                                }
-                              >
-                                {item}
-                              </PaginationLink>
-                            </PaginationItem>
-                          ),
-                        )}
-
-                        {productResponse.meta.page <
-                          productResponse.meta.totalPages && (
-                          <PaginationItem>
-                            <PaginationNext
-                              href={href({
-                                ...state,
-                                page:
-                                  productResponse.meta.page + 1,
-                              })}
-                            />
-                          </PaginationItem>
-                        )}
-                      </PaginationContent>
-                    </Pagination>
-                  )}
+                  <ProductsPagination
+                    currentPage={productResponse.meta.page}
+                    totalPages={productResponse.meta.totalPages}
+                  />
                 </>
               ) : (
                 <div className="rounded-xl border border-line bg-white px-6 py-20 text-center">

@@ -1,3 +1,6 @@
+"use client";
+
+import { useLenis } from "lenis/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -10,12 +13,32 @@ export default function BlogPagination({
   currentPage,
   totalPages,
 }: BlogPaginationProps) {
+  const lenis = useLenis();
+
   if (totalPages < 1) {
     return null;
   }
 
   const createPageUrl = (page: number) => {
     return page === 1 ? "/blog" : `/blog?page=${page}`;
+  };
+
+  const scrollToBlog = () => {
+    if (lenis) {
+      const heading = document.getElementById("blog-heading");
+      if (heading) {
+        lenis.scrollTo(heading, { offset: -100 });
+      } else {
+        lenis.scrollTo(0);
+      }
+    } else {
+      const heading = document.getElementById("blog-heading");
+      if (heading) {
+        heading.scrollIntoView({ behavior: "smooth" });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
   };
 
   return (
@@ -26,6 +49,7 @@ export default function BlogPagination({
       {currentPage > 1 ? (
         <Link
           href={createPageUrl(currentPage - 1)}
+          onClick={scrollToBlog}
           rel="prev"
           aria-label="Previous page of blog articles"
           className="inline-flex items-center gap-2 rounded-full border border-navy/10 px-5 py-3 text-sm font-bold text-navy transition-colors duration-200 hover:bg-navy hover:text-white"
@@ -60,6 +84,7 @@ export default function BlogPagination({
             <Link
               key={page}
               href={createPageUrl(page)}
+              onClick={scrollToBlog}
               aria-label={`Go to blog page ${page}`}
               className="grid size-11 place-items-center rounded-full border border-navy/10 text-sm font-bold text-navy transition-colors duration-200 hover:bg-navy hover:text-white"
             >
@@ -72,6 +97,7 @@ export default function BlogPagination({
       {currentPage < totalPages ? (
         <Link
           href={createPageUrl(currentPage + 1)}
+          onClick={scrollToBlog}
           rel="next"
           aria-label="Next page of blog articles"
           className="inline-flex items-center gap-2 rounded-full border border-navy/10 px-5 py-3 text-sm font-bold text-navy transition-colors duration-200 hover:bg-navy hover:text-white"
