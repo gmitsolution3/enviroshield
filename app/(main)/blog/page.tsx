@@ -88,7 +88,7 @@ export async function generateMetadata({
       url: canonical,
       images: [
         {
-          url: "https://images.pexels.com/photos/7546558/pexels-photo-7546558.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600",
+          url: "/images/blog-banner.png",
           width: 1200,
           height: 630,
           alt: "Enviroshield painting, flooring and protective coating journal",
@@ -100,9 +100,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: [
-        "https://images.pexels.com/photos/7546558/pexels-photo-7546558.jpeg?auto=compress&cs=tinysrgb&h=1200&w=1600",
-      ],
+      images: ["/images/blog-banner.png"],
     },
   };
 }
@@ -167,7 +165,8 @@ export default async function BlogPage({
         eyebrow="NEWS"
         title="Ideas, guides, and news for better spaces."
         text="Practical advice, industry news, and expert updates from our team."
-        image="/images/service-hero.jpg"
+        image="/images/blog-banner.png"
+        imageAlt="Enviroshield news and insights"
       />
 
       <section

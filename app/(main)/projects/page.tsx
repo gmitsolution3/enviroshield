@@ -83,7 +83,7 @@ export async function generateMetadata({
       url: canonical,
       images: [
         {
-          url: "/images/service-hero.jpg",
+          url: "/images/projects-banner.png",
           width: 1200,
           height: 630,
           alt: "Enviroshield completed waterproofing, flooring and protective coating projects",
@@ -95,7 +95,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: ["/images/service-hero.jpg"],
+      images: ["/images/projects-banner.png"],
     },
   };
 }
@@ -142,7 +142,7 @@ export default async function ProjectsPage({
         eyebrow="OUR PROJECTS"
         title="Projects built to perform."
         text="Discover how Enviroshield applies specialized waterproofing, flooring, insulation, grouting, and protective coating systems to residential, commercial, and industrial projects."
-        image="/images/service-hero.jpg"
+        image="/images/projects-banner.png"
         imageAlt="Enviroshield completed project"
       />
 

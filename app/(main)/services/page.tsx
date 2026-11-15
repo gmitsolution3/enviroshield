@@ -85,7 +85,7 @@ export async function generateMetadata({
       url: canonical,
       images: [
         {
-          url: "/images/service-hero.jpg",
+          url: "/images/service/service-banner.png",
           width: 1200,
           height: 630,
           alt: "Enviroshield waterproofing, flooring and protective coating services",
@@ -97,7 +97,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: ["/images/service-hero.jpg"],
+      images: ["/images/service/service-banner.png"],
     },
   };
 }
@@ -133,7 +133,7 @@ export default async function ServicesPage({
         eyebrow="OUR SERVICES"
         title="Professional waterproofing, flooring & protective coating solutions."
         text="Our core services include waterproofing, waterproofing paint, heatproofing, epoxy flooring, PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy floors, floor hardener, and ETP coating for residential, commercial, and industrial properties."
-        image="/images/service-hero.jpg"
+        image="/images/service/service-banner.png"
       />
 
       {/* STATS */}

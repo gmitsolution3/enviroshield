@@ -36,6 +36,28 @@ export const metadata: Metadata = {
   alternates: {
     canonical: `${siteUrl}/contact`,
   },
+  openGraph: {
+    title: "Contact Enviro Shield | Waterproofing & Flooring Bangladesh",
+    description:
+      "Contact Enviro Shield in Bangladesh for waterproofing, waterproofing paint, heatproofing, epoxy flooring, PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy flooring, floor hardener, and ETP coating. Request a consultation for your project.",
+    type: "website",
+    url: `${siteUrl}/contact`,
+    images: [
+      {
+        url: "/images/contact-banner.png",
+        width: 1200,
+        height: 630,
+        alt: "Contact Enviroshield for waterproofing, flooring and protective coating consultation",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact Enviro Shield | Waterproofing & Flooring Bangladesh",
+    description:
+      "Contact Enviro Shield in Bangladesh for waterproofing, waterproofing paint, heatproofing, epoxy flooring, PU flooring, injection grouting, expansion joint sealing, sports flooring, polished concrete, 3D epoxy flooring, floor hardener, and ETP coating. Request a consultation for your project.",
+    images: ["/images/contact-banner.png"],
+  },
 };
 
 const faqs = [
@@ -76,7 +98,8 @@ export default function ContactPage() {
         eyebrow="CONTACT US"
         title="Let's create something beautiful together."
         text="Tell us a little about your space and what you have in mind. We will get back to you with clear next steps."
-        image="/images/service-hero.jpg"
+        image="/images/contact-banner.png"
+        imageAlt="Contact Enviroshield"
       />
 
       <ContactSection full />

@@ -121,7 +121,7 @@ export async function generateMetadata({
       url: canonical,
       images: [
         {
-          url: "/images/service-hero.jpg",
+          url: "/images/product-banner.png",
           width: 1200,
           height: 630,
           alt: "Enviroshield paints, primers, coatings and finishing products",
@@ -133,7 +133,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: ["/images/service-hero.jpg"],
+      images: ["/images/product-banner.png"],
     },
   };
 }
@@ -350,7 +350,8 @@ export default async function ProductsPage({
         eyebrow="PRODUCTS"
         title="Finishes and materials you can trust."
         text="A curated range of paints, primers, coatings and wallcoverings — chosen for performance, feel, and longevity."
-        image="/images/service-hero.jpg"
+        image="/images/product-banner.png"
+        imageAlt="Enviroshield products catalogue"
       />
 
       <section
