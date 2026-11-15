@@ -21,7 +21,7 @@ import { useEffect, useState } from "react";
 const slides: ISlide[] = [
   {
     id: 1,
-    bg: "/images/slide-one.webp",
+    bg: "/images/slide-one.png",
     alt: "Professional roof waterproofing team applying protective coating to a commercial building",
     eyebrow: "GLOBAL EXPERTISE. LOCAL PRESENCE.",
     heading: "An *Australian Brand* in Bangladesh\nSince 2009",
@@ -41,7 +41,7 @@ const slides: ISlide[] = [
   },
   {
     id: 3,
-    bg: "/images/slide-three.webp",
+    bg: "/images/slide-three.png",
     alt: "Professional rooftop waterproofing application protecting a commercial building from water damage",
     eyebrow: "EXPERTISE YOU CAN TRUST",
     heading: "Stronger protection.\n*Smarter solutions.*",
