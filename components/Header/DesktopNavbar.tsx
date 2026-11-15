@@ -24,7 +24,7 @@ export default function DesktopNavbar({ links }: DesktopNavProps) {
   return (
     <nav
       aria-label="Primary navigation"
-      className="hidden items-center gap-[30px] text-[14px] font-bold text-[#315366] min-[901px]:flex"
+      className="hidden items-center gap-[22px] text-[16px] font-bold text-[#315366] min-[901px]:flex min-[1150px]:gap-[30px]"
     >
       {links.map((link, i) => {
         const isActive =

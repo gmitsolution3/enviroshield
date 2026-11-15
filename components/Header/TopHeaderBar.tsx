@@ -58,11 +58,11 @@ export default function TopHeaderBar({
   }
 
   return (
-    <div className="hidden h-[38px] border-b border-white/15 bg-blue text-[13px] text-white min-[901px]:block">
+    <div className="hidden h-[42px] border-b border-white/15 bg-blue text-[15px] text-white min-[901px]:block">
       <Container className="flex h-full items-center justify-between">
         {/* Contact Information */}
         <span className="flex items-center gap-[7px] font-normal text-white/90">
-          <MapPin size={14} className="text-white/80" aria-hidden="true" />
+          <MapPin size={15} className="text-white/80" aria-hidden="true" />
           House No: 22/13-15, Block-B, Bauniabad R/A, Mirpur 11,
           Pallabi, Dhaka 1216
         </span>
@@ -73,7 +73,7 @@ export default function TopHeaderBar({
               href="mailto:enviroshield.bd@gmail.com"
               className="flex items-center gap-[7px] text-white/90 transition-colors hover:text-white"
             >
-              <Mail size={14} className="text-white/80" aria-hidden="true" />
+              <Mail size={15} className="text-white/80" aria-hidden="true" />
               enviroshield.bd@gmail.com
             </a>
 
@@ -81,7 +81,7 @@ export default function TopHeaderBar({
               href="tel:+8801613220101"
               className="flex items-center gap-[7px] text-white/90 transition-colors hover:text-white"
             >
-              <Phone size={14} className="text-white/80" aria-hidden="true" />
+              <Phone size={15} className="text-white/80" aria-hidden="true" />
               +8801613220101
             </a>
           </span>
@@ -185,7 +185,7 @@ export default function TopHeaderBar({
               /* Unauthenticated User */
               <Link
                 href="/login"
-                className="inline-flex h-7 items-center justify-center rounded-full px-2.5 text-[12px] font-semibold text-white transition-colors hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="inline-flex h-7 items-center justify-center rounded-full px-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 Login
               </Link>
@@ -203,7 +203,7 @@ export default function TopHeaderBar({
             className="relative inline-grid size-7 shrink-0 place-items-center rounded-full text-white transition-colors hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             <ShoppingBag
-              size={17}
+              size={18}
               aria-hidden="true"
             />
 
