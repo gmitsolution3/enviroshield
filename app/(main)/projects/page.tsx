@@ -7,14 +7,10 @@ import { Button } from "@/components/Button";
 import Container from "@/components/Container";
 import ContactSection from "@/components/home/ContactSection";
 import PageHero from "@/components/PageHero";
-import FeaturedProjectCard from "@/components/projects/FeaturedProjectCard";
 import ProjectCard from "@/components/projects/ProjectCard";
 import ProjectsPagination from "@/components/projects/ProjectsPagination";
 import { SectionHeader } from "@/components/SectionHeader";
-import {
-  getFeaturedProjects,
-  getPublishedProjects,
-} from "@/lib/api/projects";
+import { getPublishedProjects } from "@/lib/api/projects";
 import { siteUrl } from "@/lib/site-url";
 import type { Metadata } from "next";
 
@@ -126,32 +122,13 @@ export default async function ProjectsPage({
     Number.parseInt(params.page || "1", 10) || 1,
   );
 
-  // Fetch published and featured projects concurrently.
-  const [result, allFeaturedProjects] = await Promise.all([
-    getPublishedProjects({
-      page,
-      limit: 12,
-    }),
-    getFeaturedProjects().catch((error) => {
-      console.error("Failed to fetch featured projects:", error);
-      return [];
-    }),
-  ]);
+  const result = await getPublishedProjects({
+    page,
+    limit: 12,
+  });
 
   const projects = result.data;
   const total = result.meta.total;
-
-  // Display all featured spotlights on the first page only.
-  const featuredProjects = page === 1 ? allFeaturedProjects : [];
-
-  // Exclude featured projects from the regular project grid.
-  const featuredIds = new Set(
-    allFeaturedProjects.map((project) => project._id),
-  );
-
-  const gridProjects = projects.filter(
-    (project) => !featuredIds.has(project._id),
-  );
 
   const stats = [
     { value: total, suffix: "+", label: "Projects completed" },
@@ -212,83 +189,23 @@ export default async function ProjectsPage({
             headingId="projects-page-heading"
           />
 
-          {projects.length > 0 || featuredProjects.length > 0 ? (
+          {projects.length > 0 ? (
             <>
-              {/* FEATURED PROJECTS — ORIGINAL SPOTLIGHT DESIGN */}
-              {featuredProjects.length > 0 && (
-                <section
-                  aria-labelledby="featured-projects-heading"
-                  className="mt-12"
-                >
-                  <div className="mb-8 flex items-end justify-between border-b border-line pb-4">
-                    <div>
-                      <p className="mb-2 text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
-                        OUR BEST WORK
-                      </p>
+              <StaggerContainer className="mt-12 columns-[320px] gap-[18px]">
+                {projects.map((project, index) => {
+                  const height =
+                    masonryHeights[index % masonryHeights.length];
 
-                      <h3
-                        id="featured-projects-heading"
-                        className="text-[24px] font-extrabold tracking-[-0.03em] text-navy"
-                      >
-                        Featured Projects
-                      </h3>
-                    </div>
-
-                    <span className="text-[14px] text-ink">
-                      {featuredProjects.length}{" "}
-                      {featuredProjects.length === 1
-                        ? "project"
-                        : "projects"}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col gap-8">
-                    {featuredProjects.map((project) => (
-                      <FeaturedProjectCard
-                        key={project._id}
-                        project={project}
-                      />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* REGULAR PROJECTS — EXISTING MASONRY GRID */}
-              {gridProjects.length > 0 && (
-                <>
-                  {allFeaturedProjects.length > 0 && (
-                    <div className="mb-8 mt-16 flex items-end justify-between border-b border-line pb-4">
-                      <h3 className="text-[24px] font-extrabold tracking-[-0.03em] text-navy">
-                        More Projects
-                      </h3>
-
-                      <span className="text-[14px] text-ink">
-                        {total} in total
-                      </span>
-                    </div>
-                  )}
-
-                  <StaggerContainer
-                    className={`columns-[320px] gap-[18px] ${
-                      featuredProjects.length > 0 ? "" : "mt-12"
-                    }`}
-                  >
-                    {gridProjects.map((project, index) => {
-                      const height =
-                        masonryHeights[index % masonryHeights.length];
-
-                      return (
-                        <StaggerItem
-                          key={project._id}
-                          className={`mb-[18px] break-inside-avoid ${height} max-[600px]:h-[400px]`}
-                        >
-                          <ProjectCard project={project} />
-                        </StaggerItem>
-                      );
-                    })}
-                  </StaggerContainer>
-                </>
-              )}
+                  return (
+                    <StaggerItem
+                      key={project._id}
+                      className={`mb-[18px] break-inside-avoid ${height} max-[600px]:h-[400px]`}
+                    >
+                      <ProjectCard project={project} />
+                    </StaggerItem>
+                  );
+                })}
+              </StaggerContainer>
 
               {/* PAGINATION */}
               <ProjectsPagination
