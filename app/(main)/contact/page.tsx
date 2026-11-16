@@ -82,7 +82,7 @@ const faqs = [
 
    const office = {
      name: "Enviroshield Office",
-     address: "House No: 22/13-15, Block-B, Bauniabad R/A, Mirpur 11, Pallabi, Dhaka 1216",
+     address: "House #13~15, Road # 22, Block # B, Bauniabad R/A, Mirpur-11, Dhaka., Mirpur, Bangladesh, 1216",
      coords: "23.82078688876327, 90.37967728427371", 
      hours: "Sat – Thu · 9:00 AM – 6:00 PM",
    };

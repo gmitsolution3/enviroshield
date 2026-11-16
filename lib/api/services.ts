@@ -8,11 +8,13 @@ const API_BASE_URL =
 type GetPublishedServicesOptions = {
   page?: number;
   limit?: number;
+  search?: string;
 };
 
 export async function getPublishedServices({
   page = 1,
   limit = 10,
+  search = "",
 }: GetPublishedServicesOptions = {}): Promise<IServiceResponse> {
   if (!API_BASE_URL) {
     throw new Error("API base URL is not configured.");
@@ -20,8 +22,17 @@ export async function getPublishedServices({
 
   const baseUrl = API_BASE_URL.replace(/\/$/, "");
 
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
+  if (search.trim()) {
+    params.set("search", search.trim());
+  }
+
   const response = await fetch(
-    `${baseUrl}/service/published?page=${page}&limit=${limit}`,
+    `${baseUrl}/service/published?${params.toString()}`,
     {
       next: {
         revalidate: 60,

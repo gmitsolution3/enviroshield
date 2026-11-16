@@ -12,6 +12,7 @@ const API_BASE_URL =
 type PaginationOptions = {
   page?: number;
   limit?: number;
+  search?: string;
 };
 
 function getBaseUrl() {
@@ -24,8 +25,12 @@ function getBaseUrl() {
 export async function getPublishedProjects({
   page = 1,
   limit = 10,
+  search = "",
 }: PaginationOptions = {}): Promise<IProjectResponse> {
   const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  if (search.trim()) {
+    params.set("search", search.trim());
+  }
   const response = await fetch(`${getBaseUrl()}/project/published?${params}`, {
     next: { revalidate: 60, tags: ["published-projects"] },
   });

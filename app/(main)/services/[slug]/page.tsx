@@ -392,7 +392,7 @@ export default async function ServiceDetailPage({
                 <Button href={`/services/${service.slug}/book`}>Book Now</Button>
 
                 <Link
-                  href="/services"
+                  href="/projects"
                   className="inline-flex items-center gap-[7px] text-[13px] font-extrabold text-navy transition-[gap,color] duration-200 hover:gap-[11px] hover:text-blue"
                 >
                   See our work

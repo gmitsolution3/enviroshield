@@ -1,5 +1,6 @@
 "use client";
 
+import { Search } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 
 import Link from "next/link";
@@ -15,9 +16,13 @@ type NavLink = {
 
 type DesktopNavProps = {
   links: NavLink[];
+  onSearchClick: () => void;
 };
 
-export default function DesktopNavbar({ links }: DesktopNavProps) {
+export default function DesktopNavbar({
+  links,
+  onSearchClick,
+}: DesktopNavProps) {
   const reduce = useReducedMotion();
   const pathname = usePathname();
 
@@ -64,6 +69,30 @@ export default function DesktopNavbar({ links }: DesktopNavProps) {
           </motion.div>
         );
       })}
+
+      {/* Search trigger button */}
+      <motion.div
+        initial={reduce ? false : { opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.4,
+          delay: 0.3,
+          ease: EASE,
+        }}
+      >
+        <button
+          type="button"
+          onClick={onSearchClick}
+          aria-label="Search site (Ctrl+K)"
+          className="group inline-flex items-center gap-2 rounded-full border border-line bg-mist/60 px-3.5 py-2 text-xs font-semibold text-navy transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue"
+        >
+          <Search size={15} className="text-ink/60 transition-colors group-hover:text-blue" aria-hidden="true" />
+          <span className="hidden xl:inline">Search</span>
+          <kbd className="hidden rounded border border-line bg-white px-1.5 py-0.5 text-[10px] font-bold text-ink/50 sm:inline-block">
+            Ctrl+K
+          </kbd>
+        </button>
+      </motion.div>
 
       <motion.div
         initial={reduce ? false : { opacity: 0, y: -8 }}

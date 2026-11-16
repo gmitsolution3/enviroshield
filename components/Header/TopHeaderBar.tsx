@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
 import { getInitials } from "@/lib/utils";
+import SocialIcon from "@/components/icon/SocialIcons";
 
 import Container from "../Container";
 
@@ -63,8 +64,7 @@ export default function TopHeaderBar({
         {/* Contact Information */}
         <span className="flex items-center gap-[7px] font-normal text-white/90">
           <MapPin size={15} className="text-white/80" aria-hidden="true" />
-          House No: 22/13-15, Block-B, Bauniabad R/A, Mirpur 11,
-          Pallabi, Dhaka 1216
+          House #13~15, Road # 22, Block # B, Bauniabad R/A, Mirpur-11, Dhaka-1216
         </span>
 
         <div className="flex h-full items-center gap-5">
@@ -82,9 +82,45 @@ export default function TopHeaderBar({
               className="flex items-center gap-[7px] text-white/90 transition-colors hover:text-white"
             >
               <Phone size={15} className="text-white/80" aria-hidden="true" />
-              +8801613220101
+              +880 1613-220101
             </a>
           </span>
+
+          <span
+            className="h-4 w-px bg-white/20"
+            aria-hidden="true"
+          />
+
+          {/* Social Links */}
+          <div className="flex items-center gap-2.5">
+            <a
+              href="https://www.facebook.com/enviroshieldbd"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Enviroshield on Facebook"
+              className="text-white/80 transition-colors hover:text-white"
+            >
+              <SocialIcon name="facebook" size={14} />
+            </a>
+            <a
+              href="https://www.instagram.com/enviroshield.bd"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Enviroshield on Instagram"
+              className="text-white/80 transition-colors hover:text-white"
+            >
+              <SocialIcon name="instagram" size={14} />
+            </a>
+            <a
+              href="https://www.linkedin.com/company/enviroshieldbd/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Enviroshield on LinkedIn"
+              className="text-white/80 transition-colors hover:text-white"
+            >
+              <SocialIcon name="linkedin" size={14} />
+            </a>
+          </div>
 
           <span
             className="h-4 w-px bg-white/20"

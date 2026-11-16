@@ -88,7 +88,7 @@ export default function ArticleConversionSection() {
             <div className="flex items-start gap-2">
               <MapPin className="h-3.5 w-3.5 text-paste shrink-0 mt-0.5" aria-hidden="true" />
               <span>
-                House No: 22/13-15, Block-B, Bauniabad R/A, Mirpur 11, Pallabi, Dhaka 1216
+                House #13~15, Road # 22, Block # B, Bauniabad R/A, Mirpur-11, Dhaka., Mirpur, Bangladesh, 1216
               </span>
             </div>
           </div>

@@ -86,12 +86,12 @@ export default function ContactSection({
               {
                 icon: <MapPin aria-hidden="true" />,
                 b: "Visit us",
-                t: "House No: 22/13-15, Block-B, Bauniabad R/A, Mirpur 11, Pallabi, Dhaka 1216",
+                t: "House #13~15, Road # 22, Block # B, Bauniabad R/A, Mirpur-11, Dhaka., Mirpur, Bangladesh, 1216",
               },
               {
                 icon: <Phone aria-hidden="true" />,
                 b: "Call us",
-                t: "+8801613220101 / +8801615220101",
+                t: "+880 1613-220101",
                 href: "tel:+8801613220101",
               },
               {

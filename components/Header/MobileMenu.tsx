@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   LogIn,
   LogOut,
+  Search,
   ShoppingBag,
   UserRound,
   X,
@@ -41,14 +42,15 @@ type MobileMenuProps = {
   links: NavLink[];
   onClose: () => void;
   onCartClick: () => void;
+  onSearchClick: () => void;
 };
-
 
 export default function MobileMenu({
   open,
   links,
   onClose,
   onCartClick,
+  onSearchClick,
 }: MobileMenuProps) {
   const reduce = useReducedMotion();
   const pathname = usePathname();
@@ -119,6 +121,21 @@ export default function MobileMenu({
                 className="grid size-10 place-items-center rounded-full border border-line text-navy transition-colors hover:border-blue hover:bg-mist hover:text-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue"
               >
                 <X size={19} aria-hidden="true" />
+              </button>
+            </div>
+
+            {/* Global Search Bar */}
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onSearchClick();
+                }}
+                className="flex w-full items-center gap-3 rounded-xl border border-line bg-mist/60 px-4 py-3 text-left text-sm font-semibold text-ink/60 transition-colors hover:border-blue/30 hover:bg-blue/5 hover:text-navy"
+              >
+                <Search size={18} className="text-ink/40" aria-hidden="true" />
+                <span>Search products, services, projects...</span>
               </button>
             </div>
 

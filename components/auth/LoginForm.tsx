@@ -147,10 +147,10 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
 
                 <motion.h1
                   id="login-heading"
-                  className="max-w-[440px] text-[clamp(38px,4.5vw,58px)] font-extrabold leading-[1.03] tracking-[-0.05em]"
+                  className="max-w-[440px] text-[clamp(32px,3.8vw,48px)] font-extrabold leading-[1.08] tracking-[-0.04em]"
                   variants={fieldVariants}
                 >
-                  Beautiful spaces start with the right finish.
+                  Australian Standard Protective Coatings &amp; Waterproofing Solutions Since 2009
                 </motion.h1>
 
                 <motion.p

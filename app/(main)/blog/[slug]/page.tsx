@@ -5,6 +5,7 @@ import {
 } from "@/components/animations/reveal";
 import BlogCard from "@/components/blog/BlogCard";
 import BlogContent from "@/components/blog/BlogContent";
+import BlogShareButtons from "@/components/article/BlogShareButtons";
 import { Button } from "@/components/Button";
 import Container from "@/components/Container";
 import {
@@ -199,32 +200,17 @@ export default async function ArticlePage({
   let related: IBlog[] = [];
 
   try {
-    const result = await getPublishedBlogs({ page: 1, limit: 4 });
-    related = result.data
-      .filter((item) => item._id !== post._id)
+    const result = await getPublishedBlogs({ page: 1, limit: 10 });
+    related = (result.data || [])
+      .filter(
+        (item) =>
+          String(item._id) !== String(post._id) && item.slug !== post.slug,
+      )
       .slice(0, 3);
-  } catch {
+  } catch (error) {
+    console.error("Failed to load related blogs:", error);
     related = [];
   }
-
-  const shareLinks = [
-    {
-      label: "Facebook",
-      href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(articleUrl)}`,
-    },
-    {
-      label: "LinkedIn",
-      href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(articleUrl)}`,
-    },
-    {
-      label: "X",
-      href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(articleUrl)}&text=${encodeURIComponent(post.title)}`,
-    },
-    {
-      label: "WhatsApp",
-      href: `https://wa.me/?text=${encodeURIComponent(`${post.title} ${articleUrl}`)}`,
-    },
-  ];
 
   /*
    * BlogPosting structured data
@@ -508,21 +494,8 @@ export default async function ArticlePage({
             )}
 
             {/* Share */}
-            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 border-y border-line py-5">
-              <span className="text-[13px] font-extrabold uppercase tracking-[0.12em] text-ink/60">
-                Share
-              </span>
-              {shareLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[14px] font-bold text-navy transition-colors hover:text-blue"
-                >
-                  {link.label}
-                </a>
-              ))}
+            <div className="mt-8 border-y border-line py-5">
+              <BlogShareButtons title={post.title} defaultUrl={articleUrl} />
             </div>
 
             {/* Author card */}

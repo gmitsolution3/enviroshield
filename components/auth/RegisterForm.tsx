@@ -240,9 +240,9 @@ export function RegisterForm({ callbackUrl }: { callbackUrl?: string }) {
 
                 <h1
                   id="register-heading"
-                  className="max-w-[440px] text-[clamp(38px,4.5vw,58px)] font-extrabold leading-[1.03] tracking-[-0.05em]"
+                  className="max-w-[440px] text-[clamp(32px,3.8vw,48px)] font-extrabold leading-[1.08] tracking-[-0.04em]"
                 >
-                  Create an account and bring your project to life.
+                  Australian Standard Protective Coatings &amp; Waterproofing Solutions Since 2009
                 </h1>
 
                 <p className="mt-6 max-w-[400px] text-[15px] leading-[1.8] text-white/75">

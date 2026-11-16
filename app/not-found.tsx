@@ -160,7 +160,7 @@ export default function NotFound() {
               }}
             >
               <h2 className="mb-4 text-[clamp(27px,4vw,38px)] font-extrabold leading-[1.08] tracking-[-0.045em] text-navy">
-                This page needs a fresh finish.
+                This page is out of reach.
               </h2>
 
               <p className="text-[15px] leading-[1.75] text-ink">
@@ -251,7 +251,7 @@ export default function NotFound() {
           }}
         >
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/50">
-            Painting · Wall Finishing · Transformation
+            Waterproofing · Protective Coatings · Structural Solutions
           </p>
         </motion.footer>
       </motion.div>

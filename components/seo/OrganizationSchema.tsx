@@ -24,29 +24,29 @@ export default function OrganizationSchema() {
         image: `${siteUrl}/images/logo.png`,
         description:
           "Waterproofing, industrial flooring, and protective construction solutions provider in Bangladesh.",
-        telephone: "+8801613220101",
+        telephone: "+880 1613-220101",
         email: "enviroshield.bd@gmail.com",
         address: {
           "@type": "PostalAddress",
           streetAddress:
-            "House No: 22/13-15, Block-B, Bauniabad R/A, Mirpur 11",
-          addressLocality: "Pallabi, Dhaka",
+            "House #13~15, Road # 22, Block # B, Bauniabad R/A, Mirpur-11",
+          addressLocality: "Mirpur, Dhaka",
           postalCode: "1216",
           addressCountry: "BD",
         },
         contactPoint: [
           {
             "@type": "ContactPoint",
-            telephone: "+8801613220101",
+            telephone: "+880 1613-220101",
             contactType: "customer service",
             areaServed: "BD",
             availableLanguage: ["en", "bn"],
           },
         ],
         sameAs: [
-          "https://www.facebook.com/",
-          "https://www.linkedin.com/",
-          "https://www.instagram.com/",
+          "https://www.facebook.com/enviroshieldbd",
+          "https://www.instagram.com/enviroshield.bd",
+          "https://www.linkedin.com/company/enviroshieldbd/",
         ],
         priceRange: "৳৳",
       },

@@ -1,8 +1,9 @@
 "use client";
 
 import CartDrawer from "@/components/cart/CartDrawer";
+import GlobalSearchDialog from "@/components/search/GlobalSearchDialog";
 import { useLenis } from "lenis/react";
-import { Menu } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -36,6 +37,7 @@ type CartFlight = {
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const cartTriggerRef = useRef<HTMLButtonElement>(null);
 
@@ -86,7 +88,7 @@ export default function Header() {
     const previousBodyOverflow = body.style.overflow;
     const previousHtmlOverflow = html.style.overflow;
 
-    if (open) {
+    if (open || searchOpen) {
       lenis?.stop();
 
       body.style.overflow = "hidden";
@@ -103,7 +105,7 @@ export default function Header() {
       // or the Header component unmounts.
       lenis?.start();
     };
-  }, [open, lenis]);
+  }, [open, searchOpen, lenis]);
 
   // Close the mobile menu with the Escape key.
   useEffect(() => {
@@ -228,21 +230,41 @@ export default function Header() {
           </motion.div>
 
           {/* Desktop Navigation */}
-          <DesktopNavbar links={links} />
+          <DesktopNavbar
+            links={links}
+            onSearchClick={() => setSearchOpen(true)}
+          />
 
-          {/* Mobile Menu Toggle */}
-          <button
-            className="block text-navy min-[901px]:hidden"
-            type="button"
-            aria-label="Open navigation"
-            aria-expanded={open}
-            aria-controls="mobile-navigation"
-            onClick={() => setOpen(true)}
-          >
-            <Menu aria-hidden="true" />
-          </button>
+          {/* Mobile Menu Toggle & Search */}
+          <div className="flex items-center gap-3 min-[901px]:hidden">
+            <button
+              type="button"
+              aria-label="Search website"
+              onClick={() => setSearchOpen(true)}
+              className="grid size-9 place-items-center rounded-full text-navy transition-colors hover:bg-mist"
+            >
+              <Search size={20} aria-hidden="true" />
+            </button>
+
+            <button
+              className="block text-navy"
+              type="button"
+              aria-label="Open navigation"
+              aria-expanded={open}
+              aria-controls="mobile-navigation"
+              onClick={() => setOpen(true)}
+            >
+              <Menu aria-hidden="true" />
+            </button>
+          </div>
         </Container>
       </motion.header>
+
+      {/* Global Search Dialog */}
+      <GlobalSearchDialog
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+      />
 
       {/* Mobile Navigation Drawer */}
       <MobileMenu
@@ -250,6 +272,7 @@ export default function Header() {
         links={links}
         onClose={() => setOpen(false)}
         onCartClick={() => setCartOpen(true)}
+        onSearchClick={() => setSearchOpen(true)}
       />
 
       {/* Shopping Cart Drawer */}

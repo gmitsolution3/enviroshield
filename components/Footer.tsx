@@ -13,17 +13,17 @@ const socials = [
   {
     name: "facebook",
     label: "Facebook",
-    href: "https://www.facebook.com/",
-  },
-  {
-    name: "linkedin",
-    label: "LinkedIn",
-    href: "https://www.linkedin.com/",
+    href: "https://www.facebook.com/enviroshieldbd",
   },
   {
     name: "instagram",
     label: "Instagram",
-    href: "https://www.instagram.com/",
+    href: "https://www.instagram.com/enviroshield.bd",
+  },
+  {
+    name: "linkedin",
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/company/enviroshieldbd/",
   },
 ];
 
@@ -162,7 +162,7 @@ export default function Footer() {
                 className="mt-0.5 shrink-0 text-[#91afbd]"
                 aria-hidden="true"
               />
-              <span>+8801613220101 / +8801615220101</span>
+              <span>+880 1613-220101</span>
             </a>
 
             <a
@@ -184,8 +184,8 @@ export default function Footer() {
                 aria-hidden="true"
               />
               <span>
-                House No: 22/13-15, Block-B, Bauniabad R/A,
-                <br /> Mirpur 11, Pallabi, Dhaka 1216
+                House #13~15, Road # 22, Block # B,
+                <br /> Bauniabad R/A, Mirpur-11, Dhaka-1216
               </span>
             </div>
           </div>
@@ -196,8 +196,22 @@ export default function Footer() {
       <Container className="flex flex-col justify-between gap-3 border-t border-[#214a5d] py-5 text-[11px] text-[#7797a5] min-[601px]:flex-row min-[601px]:items-center">
         <span>© 2026 Enviro Shield. All rights reserved.</span>
 
-        <span>
-          Protecting structures. Extending life. • <CookiePreferencesButton />
+        <span className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/privacy"
+            className="transition-colors duration-200 hover:text-white"
+          >
+            Privacy Policy
+          </Link>
+          <span>•</span>
+          <Link
+            href="/terms"
+            className="transition-colors duration-200 hover:text-white"
+          >
+            Terms & Conditions
+          </Link>
+          <span>•</span>
+          <CookiePreferencesButton />
         </span>
 
         <span>
