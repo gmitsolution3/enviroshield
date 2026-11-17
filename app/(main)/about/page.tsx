@@ -282,7 +282,7 @@ export default function AboutPage() {
         eyebrow="ABOUT ENVIRO SHIELD"
         title="Protecting structures. Extending life."
         text="Founded in Australia in 2009 and operating in Bangladesh since 2017, Enviro Shield Pvt. Ltd. delivers advanced waterproofing systems, epoxy/PU flooring, and in-house construction chemical manufacturing."
-        image="/images/home/completed-waterproof-rooftop-coating.jpg"
+        image="/images/about-banner.jpg"
         imageAlt="Enviroshield completed industrial waterproof rooftop coating"
       />
 

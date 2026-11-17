@@ -24,7 +24,7 @@ const slides: ISlide[] = [
     bg: "/images/slide-one.png",
     alt: "Professional roof waterproofing team applying protective coating to a commercial building",
     eyebrow: "GLOBAL EXPERTISE. LOCAL PRESENCE.",
-    heading: "An *Australian Brand* in Bangladesh\nSince 2009",
+    heading: "An *Australian Brand*\nin Bangladesh Since 2009",
     text: "Trusted waterproofing company in Bangladesh offering expert solutions to protect your property from water damage, ensuring durability and structural integrity.",
     cta: "Talk to our experts",
     href: "/contact",
@@ -129,7 +129,7 @@ export default function Hero() {
       />
 
       <Container className="relative z-[1] py-[100px] pb-[110px] text-white max-[900px]:py-[85px] max-[600px]:py-[70px] max-[600px]:pb-[90px]">
-        <div className="max-w-[650px]">
+        <div className="max-w-[850px]">
           <AnimatePresence mode="wait">
             <motion.div
               key={slide.id}
@@ -156,7 +156,7 @@ export default function Hero() {
               </motion.div>
 
               <motion.h1
-                className="mb-6 max-w-[800px] text-[clamp(45px,6.2vw,78px)] font-extrabold leading-[1.02] tracking-[-0.055em] text-white max-[600px]:text-[48px]"
+                className="mb-6 max-w-[850px] text-[clamp(36px,5vw,66px)] font-extrabold leading-[1.05] tracking-[-0.045em] text-white max-[600px]:text-[34px]"
                 initial={reduce ? false : { opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{

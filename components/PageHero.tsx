@@ -54,7 +54,7 @@ export default function PageHero({
       />
 
       <Container className="relative z-10 pb-[55px] pt-[130px] min-[601px]:pb-[75px] min-[601px]:pt-[150px]">
-        <div className="max-w-[760px]">
+        <div className="max-w-[920px]">
           <motion.div
             initial={reduce ? false : { opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -70,7 +70,7 @@ export default function PageHero({
           </motion.div>
 
           <motion.h1
-            className="mb-[19px] max-w-[760px] text-[clamp(38px,5.2vw,64px)] font-extrabold leading-[1.05] tracking-[-0.045em] text-white"
+            className="mb-[19px] max-w-[920px] text-[clamp(32px,4.5vw,56px)] font-extrabold leading-[1.08] tracking-[-0.04em] text-white"
             initial={reduce ? false : { opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.65, ease: EASE, delay: 0.2 }}
@@ -79,7 +79,7 @@ export default function PageHero({
           </motion.h1>
 
           <motion.p
-            className="max-w-[650px] text-[16px] leading-[1.7] text-white/90"
+            className="max-w-[720px] text-[16px] leading-[1.7] text-white/90"
             initial={reduce ? false : { opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.65, ease: EASE, delay: 0.35 }}
