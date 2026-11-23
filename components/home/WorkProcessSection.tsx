@@ -148,16 +148,16 @@ export default function WorkProcessSection() {
                   </span>
 
                   {/* hover lives on this inner div so it doesn't fight the stagger animation */}
-                  <div className="flex cursor-pointer items-start gap-7 rounded-[6px] bg-white p-[18px] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(0,51,78,0.12)] max-[600px]:gap-4 max-[600px]:p-4">
-                    <div className="relative grid h-[90px] w-[90px] flex-none place-items-center rounded-full bg-mist transition-colors duration-300 group-hover:bg-blue max-[600px]:h-[68px] max-[600px]:w-[68px]">
+                  <div className="flex cursor-pointer items-start gap-6 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue/30 hover:shadow-[0_16px_36px_rgba(0,51,78,0.1)] max-[600px]:gap-4 max-[600px]:p-4">
+                    <div className="relative grid h-[80px] w-[80px] flex-none place-items-center rounded-2xl bg-blue/10 transition-colors duration-300 group-hover:bg-blue max-[600px]:h-[64px] max-[600px]:w-[64px]">
                       <Icon
-                        size={40}
+                        size={36}
                         strokeWidth={1.5}
-                        className="text-navy transition-colors duration-300 group-hover:text-white max-[600px]:size-8"
+                        className="text-blue transition-colors duration-300 group-hover:text-white max-[600px]:size-7"
                         aria-hidden="true"
                       />
                       <span
-                        className="absolute top-0 right-0 grid h-7 w-7 place-items-center rounded-full bg-blue text-[12px] font-bold text-white ring-0 transition-all duration-300 group-hover:bg-navy max-[600px]:h-6 max-[600px]:w-6 max-[600px]:text-[11px]"
+                        className="absolute -top-2 -right-2 grid h-7 w-7 place-items-center rounded-full bg-navy text-[11px] font-extrabold text-paste shadow-md transition-all duration-300 group-hover:bg-navy max-[600px]:h-6 max-[600px]:w-6 max-[600px]:text-[10px]"
                         aria-hidden="true"
                       >
                         {step.number}
@@ -165,13 +165,13 @@ export default function WorkProcessSection() {
                     </div>
 
                     <div className="pt-px">
-                      <span className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.08em] text-blue">
+                      <span className="mb-1.5 inline-block rounded-full bg-blue/10 px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-blue">
                         {step.coat}
                       </span>
-                      <h3 className="mb-3 text-[20px] font-semibold leading-[26px] text-navy transition-colors duration-300 group-hover:text-blue max-[600px]:text-[18px]">
+                      <h3 className="mb-2 text-[18px] font-bold leading-snug text-navy transition-colors duration-300 group-hover:text-blue max-[600px]:text-[16px]">
                         {step.title}
                       </h3>
-                      <p className="m-0 text-[14px] leading-[23px] text-[#666]">
+                      <p className="m-0 text-[14px] leading-relaxed text-slate-600">
                         {step.description}
                       </p>
                     </div>

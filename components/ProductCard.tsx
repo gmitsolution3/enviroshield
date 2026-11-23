@@ -121,10 +121,10 @@ export function ProductCard({
         <div className="mt-auto flex items-end justify-between gap-3 pt-3">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-wider text-ink/50">
-              {product.variants && product.variants.length > 1 ? "Starting from" : "Price"}
+              {product.variants && product.variants.length > 1 ? "Starting from" : "Pricing"}
             </p>
 
-            <p className="text-[22px] font-extrabold leading-none text-blue">
+            <p className="text-[18px] font-extrabold leading-none text-blue">
               {(() => {
                 const variants = product.variants || [];
                 const lowestPrice =
@@ -132,12 +132,13 @@ export function ProductCard({
                     ? Math.min(...variants.map((v) => v.price))
                     : price;
 
-                if (lowestPrice !== null && Number.isFinite(lowestPrice) && lowestPrice >= 0) {
+                // If price is a placeholder like 100 or missing, show professional B2B quote text
+                if (lowestPrice !== null && Number.isFinite(lowestPrice) && lowestPrice > 100) {
                   return variants.length > 1
                     ? `From ${CURRENCY}${lowestPrice.toLocaleString("en-BD")}`
                     : `${CURRENCY}${lowestPrice.toLocaleString("en-BD")}`;
                 }
-                return "Contact us";
+                return "Request Quote";
               })()}
             </p>
           </div>
@@ -148,7 +149,7 @@ export function ProductCard({
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Open technical data sheet for ${name} in a new tab`}
-              className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-ink/70 transition-colors hover:border-blue hover:text-blue"
+              className="inline-flex items-center gap-1.5 rounded-full border border-blue/20 bg-blue/5 px-3 py-1.5 text-xs font-bold text-blue transition-all duration-200 hover:bg-blue hover:text-white"
             >
               <FileText size={14} aria-hidden="true" />
               View TDS

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import AboutSection from "@/components/home/AboutSection";
+import ApplicationSolutionsSection from "@/components/home/ApplicationSolutionsSection";
 import BlogSection from "@/components/home/BlogSection";
 import ClientsSection from "@/components/home/ClientsSection";
 import ContactSection from "@/components/home/ContactSection";
@@ -27,6 +28,7 @@ export default function HomePage() {
       <HeroSlider />
       <MarqueeSection />
       <AboutSection />
+      <ApplicationSolutionsSection />
       <ServicesSection />
       <WorkProcessSection />
       <ProductsSection />

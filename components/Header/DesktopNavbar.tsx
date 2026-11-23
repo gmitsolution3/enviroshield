@@ -29,7 +29,7 @@ export default function DesktopNavbar({
   return (
     <nav
       aria-label="Primary navigation"
-      className="hidden items-center gap-[22px] text-[16px] font-bold text-[#315366] min-[901px]:flex min-[1150px]:gap-[30px]"
+      className="hidden items-center gap-3 text-[15px] font-bold text-[#315366] min-[901px]:flex min-[1150px]:gap-4 min-[1350px]:gap-6 xl:text-[16px]"
     >
       {links.map((link, i) => {
         const isActive =
@@ -51,7 +51,7 @@ export default function DesktopNavbar({
           >
             <Link
               href={link.href}
-              className={`group relative transition-colors duration-200 ${
+              className={`group relative whitespace-nowrap transition-colors duration-200 ${
                 isActive ? "text-blue" : "hover:text-blue"
               }`}
             >
@@ -84,11 +84,11 @@ export default function DesktopNavbar({
           type="button"
           onClick={onSearchClick}
           aria-label="Search site (Ctrl+K)"
-          className="group inline-flex items-center gap-2 rounded-full border border-line bg-mist/60 px-3.5 py-2 text-xs font-semibold text-navy transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue"
+          className="group inline-flex items-center gap-1.5 rounded-full border border-line bg-mist/60 px-3 py-1.5 text-xs font-semibold text-navy transition-all duration-200 hover:border-blue/30 hover:bg-blue/10 hover:text-blue min-[1350px]:px-3.5 min-[1350px]:py-2"
         >
           <Search size={15} className="text-ink/60 transition-colors group-hover:text-blue" aria-hidden="true" />
-          <span className="hidden xl:inline">Search</span>
-          <kbd className="hidden rounded border border-line bg-white px-1.5 py-0.5 text-[10px] font-bold text-ink/50 sm:inline-block">
+          <span className="hidden 2xl:inline">Search</span>
+          <kbd className="hidden rounded border border-line bg-white px-1.5 py-0.5 text-[10px] font-bold text-ink/50 2xl:inline-block">
             Ctrl+K
           </kbd>
         </button>
@@ -103,7 +103,7 @@ export default function DesktopNavbar({
           ease: EASE,
         }}
       >
-        <Button href="/contact">Talk to an Expert</Button>
+        <Button href="/contact" className="whitespace-nowrap">Talk to an Expert</Button>
       </motion.div>
     </nav>
   );
