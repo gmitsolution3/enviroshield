@@ -1,4 +1,6 @@
-import { images } from "@/lib/data/content";
+"use client";
+
+import { motion, useReducedMotion } from "motion/react";
 import { Check } from "lucide-react";
 import Image from "next/image";
 import { AnimatedCounter } from "../animations/animated-counter";
@@ -55,12 +57,42 @@ function PhotoFx() {
 }
 
 export default function AboutSection() {
+  const reduce = useReducedMotion();
+
   return (
     <section
       aria-labelledby="about-heading"
-      className="py-[112px] max-[900px]:py-20 max-[600px]:py-16"
+      className="relative overflow-hidden py-[112px] max-[900px]:py-20 max-[600px]:py-16"
     >
-      <Container className="grid grid-cols-2 items-center gap-16 max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
+      {/* Animated Paint Brush Stroke (Signature left-to-right reveal when section enters view) */}
+      <motion.div
+        initial={
+          reduce
+            ? { clipPath: "inset(0 0% 0 0)" }
+            : { clipPath: "inset(0 100% 0 0)" }
+        }
+        whileInView={{ clipPath: "inset(0 0% 0 0)" }}
+        viewport={{ once: true, amount: 0.15 }}
+        transition={{
+          duration: 1.35,
+          ease: [0.2, 0.8, 0.2, 1],
+        }}
+        className="pointer-events-none absolute top-0 left-0 w-full overflow-hidden z-0 select-none"
+        aria-hidden="true"
+      >
+        <div className="relative w-full aspect-[1920/375] min-w-[1050px] max-w-none opacity-85">
+          <Image
+            src="/images/paint-brush-stroke.png"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-left-top"
+          />
+        </div>
+      </motion.div>
+
+      <Container className="relative z-10 grid grid-cols-2 items-center gap-16 max-[900px]:grid-cols-1 max-[900px]:gap-[50px]">
         {/* ---------- Left: image collage ---------- */}
         <Reveal dir="image">
           <div className="flex flex-col gap-4 max-[900px]:mx-auto max-[900px]:w-full max-[900px]:max-w-[580px]">
