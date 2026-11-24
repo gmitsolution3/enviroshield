@@ -12,6 +12,9 @@ interface ISectionHeaderProps {
   light?: boolean;
   headingLevel?: "h1" | "h2" | "h3" | "h4";
   headingId?: string;
+  eyebrowClassName?: string;
+  titleClassName?: string;
+  textClassName?: string;
 }
 
 export function SectionHeader({
@@ -22,6 +25,9 @@ export function SectionHeader({
   light = false,
   headingLevel = "h2",
   headingId,
+  eyebrowClassName,
+  titleClassName,
+  textClassName,
 }: ISectionHeaderProps) {
   const reduce = useReducedMotion();
   const Heading = headingLevel;
@@ -43,6 +49,7 @@ export function SectionHeader({
           "mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em]",
           align === "center" && "justify-center",
           light ? "text-paste" : "text-blue",
+          eyebrowClassName,
         )}
       >
         <span className="h-[2px] w-7 bg-current" aria-hidden="true" />
@@ -54,6 +61,7 @@ export function SectionHeader({
         className={cn(
           "mb-[19px] text-[clamp(35px,4vw,53px)] font-extrabold leading-[1.05] tracking-[-0.05em]",
           light ? "text-white" : "text-navy",
+          titleClassName,
         )}
       >
         {title}
@@ -64,6 +72,7 @@ export function SectionHeader({
           className={cn(
             "mb-[24px] text-[16px] leading-[1.7]",
             light ? "text-white" : "text-ink",
+            textClassName,
           )}
         >
           {text}

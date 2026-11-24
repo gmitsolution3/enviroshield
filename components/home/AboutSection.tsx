@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { useRef } from "react";
+import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { Check } from "lucide-react";
 import Image from "next/image";
 import { AnimatedCounter } from "../animations/animated-counter";
@@ -57,37 +58,43 @@ function PhotoFx() {
 }
 
 export default function AboutSection() {
+  const sectionRef = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
+
+  // Option 2: Scroll-driven interactive paint stroke
+  // Unmasks from left to right smoothly as the user scrolls into the section, completing when the header reaches upper-center
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start 85%", "start 45%"],
+  });
+
+  const rightInset = useTransform(scrollYProgress, [0, 1], [100, 0]);
+  const clipPath = useTransform(rightInset, (v) => `inset(0% ${v}% 0% 0%)`);
+  const activeClipPath = reduce ? "inset(0% 0% 0% 0%)" : clipPath;
 
   return (
     <section
+      ref={sectionRef}
       aria-labelledby="about-heading"
       className="relative overflow-hidden py-[112px] max-[900px]:py-20 max-[600px]:py-16"
     >
-      {/* Animated Paint Brush Stroke (Signature left-to-right reveal when section enters view) */}
+      {/* Scroll-Driven Paint Brush Stroke (Option 2: unmasks smoothly left-to-right with scroll) */}
       <motion.div
-        initial={
-          reduce
-            ? { clipPath: "inset(0 0% 0 0)" }
-            : { clipPath: "inset(0 100% 0 0)" }
-        }
-        whileInView={{ clipPath: "inset(0 0% 0 0)" }}
-        viewport={{ once: true, amount: 0.15 }}
-        transition={{
-          duration: 1.35,
-          ease: [0.2, 0.8, 0.2, 1],
+        style={{
+          clipPath: activeClipPath,
+          WebkitClipPath: activeClipPath,
         }}
-        className="pointer-events-none absolute top-0 left-0 w-full overflow-hidden z-0 select-none"
+        className="pointer-events-none absolute -top-6 sm:-top-10 md:-top-14 left-0 w-full h-[260px] sm:h-[320px] md:h-[380px] lg:h-[420px] overflow-hidden z-0 select-none will-change-transform"
         aria-hidden="true"
       >
-        <div className="relative w-full aspect-[1920/375] min-w-[1050px] max-w-none opacity-85">
+        <div className="relative w-full h-full min-w-[900px] lg:min-w-[1200px]">
           <Image
             src="/images/paint-brush-stroke.png"
-            alt=""
+            alt="Paint brush stroke"
             fill
             priority
             sizes="100vw"
-            className="object-cover object-left-top"
+            className="object-contain object-left-top opacity-100"
           />
         </div>
       </motion.div>
@@ -175,6 +182,8 @@ export default function AboutSection() {
           <SectionHeader
             eyebrow="ABOUT ENVIRO SHIELD"
             title="Protecting structures. Extending life."
+            eyebrowClassName="text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]"
+            titleClassName="text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
             text="Founded in Australia in 2009, EnviroShield Pvt. Ltd. is a trusted company in waterproofing, flooring, and protective coating solutions. Operating in Bangladesh since 2017 with in-house construction chemical manufacturing and imported raw materials from the UK, Germany, Australia, and China, we deliver durable, high-performance solutions for residential, commercial, and industrial projects."
             headingId="about-heading"
           />
