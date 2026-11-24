@@ -69,7 +69,7 @@ export default function ServicesSectionContent({
               className={cn(
                 "flex w-max gap-[14px] md:grid md:w-auto md:gap-5",
                 services.length >= 5
-                  ? "md:grid-cols-2 lg:grid-cols-3"
+                  ? "md:grid-cols-2 lg:grid-cols-4"
                   : services.length === 4
                     ? "md:grid-cols-2 xl:grid-cols-4"
                     : services.length === 3
