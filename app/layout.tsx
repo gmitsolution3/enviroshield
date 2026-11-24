@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import GlobalToastListener from "@/components/GlobalToastListener";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { siteUrl } from "@/lib/site-url";
@@ -86,6 +87,20 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const settings = await getPublicSettings();
+  const cookieStore = await cookies();
+  const consentCookie = cookieStore.get("enviroshield_consent");
+  let initialDecided = false;
+
+  if (consentCookie?.value) {
+    try {
+      const parsed = JSON.parse(decodeURIComponent(consentCookie.value));
+      if (parsed?.decided) {
+        initialDecided = true;
+      }
+    } catch {
+      initialDecided = false;
+    }
+  }
 
   return (
     <html
@@ -99,7 +114,10 @@ export default async function RootLayout({
           <OrganizationSchema />
           {children}
 
-          <CookieConsentBanner consentSettings={settings.consent} />
+          <CookieConsentBanner
+            consentSettings={settings.consent}
+            initialDecided={initialDecided}
+          />
 
           <Toaster
             position="top-right"

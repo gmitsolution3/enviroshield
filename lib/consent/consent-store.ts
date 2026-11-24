@@ -7,6 +7,7 @@ export interface VisitorConsent {
 }
 
 export const CONSENT_STORAGE_KEY = "enviroshield_consent_preferences";
+export const CONSENT_COOKIE_KEY = "enviroshield_consent";
 export const CONSENT_EVENT_NAME = "enviroshield_consent_change";
 export const OPEN_PREFERENCES_EVENT = "open_cookie_preferences";
 
@@ -23,22 +24,44 @@ export function getStoredConsent(): VisitorConsent {
     return defaultConsentState;
   }
 
+  // 1. Check localStorage first
   try {
     const raw = localStorage.getItem(CONSENT_STORAGE_KEY);
-    if (!raw) return defaultConsentState;
-
-    const parsed = JSON.parse(raw);
-    if (typeof parsed === "object" && parsed !== null && parsed.decided) {
-      return {
-        essential: true,
-        analytics: Boolean(parsed.analytics),
-        marketing: Boolean(parsed.marketing),
-        timestamp: Number(parsed.timestamp) || Date.now(),
-        decided: true,
-      };
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed === "object" && parsed !== null && parsed.decided) {
+        return {
+          essential: true,
+          analytics: Boolean(parsed.analytics),
+          marketing: Boolean(parsed.marketing),
+          timestamp: Number(parsed.timestamp) || Date.now(),
+          decided: true,
+        };
+      }
     }
   } catch (e) {
-    console.warn("Error parsing stored cookie consent:", e);
+    console.warn("Error reading localStorage consent:", e);
+  }
+
+  // 2. Fallback to document.cookie
+  try {
+    const match = document.cookie.match(
+      new RegExp(`(?:^|;\\s*)${CONSENT_COOKIE_KEY}=([^;]*)`),
+    );
+    if (match && match[1]) {
+      const parsed = JSON.parse(decodeURIComponent(match[1]));
+      if (typeof parsed === "object" && parsed !== null && parsed.decided) {
+        return {
+          essential: true,
+          analytics: Boolean(parsed.analytics),
+          marketing: Boolean(parsed.marketing),
+          timestamp: Number(parsed.timestamp) || Date.now(),
+          decided: true,
+        };
+      }
+    }
+  } catch (e) {
+    console.warn("Error reading cookie consent:", e);
   }
 
   return defaultConsentState;
@@ -59,15 +82,16 @@ export function saveConsent(consent: {
   if (typeof window !== "undefined") {
     try {
       localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(record));
-      // Also set a 1-year cookie for SSR awareness
-      const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
-      document.cookie = `enviroshield_consent=${encodeURIComponent(
+      // Set 1-year cookie for SSR and persistence across subpaths
+      const maxAge = 365 * 24 * 60 * 60; // 1 year in seconds
+      const cookieValue = encodeURIComponent(
         JSON.stringify({
           analytics: record.analytics,
           marketing: record.marketing,
           decided: true,
         }),
-      )}; expires=${expires}; path=/; SameSite=Lax`;
+      );
+      document.cookie = `${CONSENT_COOKIE_KEY}=${cookieValue}; max-age=${maxAge}; path=/; SameSite=Lax`;
     } catch (e) {
       console.warn("Error storing consent:", e);
     }

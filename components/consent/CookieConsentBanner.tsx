@@ -23,6 +23,7 @@ import { IConsentSettings } from "@/types/settings.type";
 
 interface CookieConsentBannerProps {
   consentSettings: IConsentSettings;
+  initialDecided?: boolean;
 }
 
 const subscribeToConsent = (callback: () => void) => {
@@ -44,7 +45,9 @@ const getServerConsentSnapshot = () => "";
 
 export function CookieConsentBanner({
   consentSettings,
+  initialDecided = false,
 }: CookieConsentBannerProps) {
+  const [mounted, setMounted] = useState(false);
   const consentRaw = useSyncExternalStore(
     subscribeToConsent,
     getConsentSnapshot,
@@ -55,12 +58,9 @@ export function CookieConsentBanner({
   const [analyticsAllowed, setAnalyticsAllowed] = useState(false);
   const [marketingAllowed, setMarketingAllowed] = useState(false);
 
-  // Parse consent state directly during render
-  const consentState = consentRaw ? getStoredConsent() : null;
-  const isDecided = Boolean(consentState?.decided);
-  const showBanner = Boolean(consentSettings?.enabled && !isDecided);
-
   useEffect(() => {
+    setMounted(true);
+
     const handleOpenModal = () => {
       const current = getStoredConsent();
       setAnalyticsAllowed(current.analytics);
@@ -77,6 +77,12 @@ export function CookieConsentBanner({
   if (!consentSettings?.enabled) {
     return null;
   }
+
+  // Check if visitor has decided:
+  // 1. If server detected decided cookie (initialDecided), don't show
+  // 2. In browser, check stored consent state
+  const isDecided = initialDecided || (mounted ? Boolean(getStoredConsent().decided) : true);
+  const showBanner = mounted && Boolean(consentSettings?.enabled && !isDecided);
 
   const handleAcceptAll = () => {
     saveConsent({ analytics: true, marketing: true });
@@ -98,12 +104,12 @@ export function CookieConsentBanner({
 
   return (
     <>
-      {/* Floating Bottom Consent Banner */}
+      {/* Floating Bottom Consent Banner (Only shown once for new undecided users) */}
       {showBanner && (
         <aside
           role="region"
           aria-label="Cookie consent banner"
-          className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-4xl rounded-2xl border border-border/80 bg-background/95 p-5 shadow-2xl backdrop-blur-md sm:p-6"
+          className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-4xl rounded-2xl border border-border/80 bg-background/95 p-5 shadow-2xl backdrop-blur-md sm:p-6 animate-in fade-in slide-in-from-bottom-4 duration-300"
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3.5">

@@ -109,7 +109,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
 
         <div className="relative z-10 mx-auto grid w-full max-w-[1080px] overflow-hidden rounded-[20px] bg-white shadow-[0_24px_80px_rgba(0,0,0,0.18)] min-[901px]:grid-cols-[0.85fr_1.15fr]">
           {/* Brand panel */}
-          <aside className="relative overflow-hidden bg-navy px-[50px] py-[55px] text-white max-[900px]:px-8 max-[900px]:py-10 max-[600px]:px-6">
+          <aside className="relative overflow-hidden bg-navy px-8 py-9 lg:px-11 lg:py-10 text-white max-[900px]:px-8 max-[900px]:py-8 max-[600px]:px-6">
             <div
               className="absolute -right-24 -top-24 size-[240px] rounded-full border border-white/10"
               aria-hidden="true"
@@ -135,7 +135,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
                 }}
               >
                 <motion.div
-                  className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste"
+                  className="mb-4 flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste"
                   variants={fieldVariants}
                 >
                   <span
@@ -147,23 +147,22 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
 
                 <motion.h1
                   id="login-heading"
-                  className="max-w-[440px] text-[clamp(32px,3.8vw,48px)] font-extrabold leading-[1.08] tracking-[-0.04em]"
+                  className="max-w-[360px] text-[clamp(24px,2.4vw,32px)] font-bold leading-[1.2] tracking-tight"
                   variants={fieldVariants}
                 >
-                  Australian Standard Protective Coatings &amp; Waterproofing Solutions Since 2009
+                  Welcome Back to Enviroshield
                 </motion.h1>
 
                 <motion.p
-                  className="mt-6 max-w-[400px] text-[15px] leading-[1.8] text-white/75"
+                  className="mt-3 max-w-[340px] text-[14px] leading-relaxed text-white/75"
                   variants={fieldVariants}
                 >
-                  Sign in to your Enviroshield account to continue
-                  managing your projects and account details.
+                  Australian standard protective coatings &amp; waterproofing solutions since 2009.
                 </motion.p>
               </motion.div>
 
               <motion.div
-                className="mt-12"
+                className="mt-8"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
@@ -184,7 +183,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
 
           {/* Form panel */}
           <motion.div
-            className="px-[55px] py-[55px] max-[900px]:px-8 max-[900px]:py-10 max-[600px]:px-6 max-[600px]:py-8"
+            className="px-8 py-9 lg:px-11 lg:py-10 max-[900px]:px-8 max-[900px]:py-8 max-[600px]:px-6 max-[600px]:py-6"
             initial="hidden"
             animate="visible"
             variants={{
