@@ -182,8 +182,8 @@ export default function AboutSection() {
           <SectionHeader
             eyebrow="ABOUT ENVIRO SHIELD"
             title="Protecting structures. Extending life."
-            eyebrowClassName="text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]"
-            titleClassName="text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
+            eyebrowClassName="text-blue min-[901px]:text-white min-[901px]:drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]"
+            titleClassName="text-navy min-[901px]:text-white min-[901px]:drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
             text="Founded in Australia in 2009, EnviroShield Pvt. Ltd. is a trusted company in waterproofing, flooring, and protective coating solutions. Operating in Bangladesh since 2017 with in-house construction chemical manufacturing and imported raw materials from the UK, Germany, Australia, and China, we deliver durable, high-performance solutions for residential, commercial, and industrial projects."
             headingId="about-heading"
           />

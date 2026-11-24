@@ -181,7 +181,7 @@ export default function Header() {
 
       {/* Main Header */}
       <motion.header
-        className="sticky top-0 z-20 h-[82px] border-b"
+        className="sticky top-0 z-40 h-[82px] border-b"
         animate={{
           backgroundColor: scrolled
             ? "rgba(255, 255, 255, 0.55)"

@@ -124,7 +124,7 @@ export default function HeroSlider() {
 
   return (
     <section
-      className="relative flex min-h-[760px] items-center overflow-hidden bg-[#001726] lg:min-h-[820px]"
+      className="relative flex min-h-[500px] sm:min-h-[600px] md:min-h-[700px] lg:min-h-[820px] items-center overflow-hidden bg-[#001726]"
       aria-label="EnviroShield Architectural Showcase"
     >
       {/* Cinematic Full-Bleed Background Photography */}
@@ -157,7 +157,7 @@ export default function HeroSlider() {
         aria-hidden="true"
       />
 
-      <Container className="relative z-10 py-[100px] pb-[110px] text-white max-[900px]:py-[85px] max-[600px]:py-[70px] max-[600px]:pb-[90px]">
+      <Container className="relative z-10 py-[80px] pb-[90px] text-white max-[900px]:py-[60px] max-[600px]:py-[36px] max-[600px]:pb-[50px]">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
           {/* Rotatable Text Column (Left for slide 1/3, Right for slide 2) */}
           <div
@@ -174,18 +174,18 @@ export default function HeroSlider() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: isTextRight ? -24 : 24 }}
                 transition={{ duration: 0.45, ease: EASE }}
-                className={`w-full max-w-[640px] rounded-2xl border border-white/10 bg-navy/25 p-6 shadow-xl backdrop-blur-md sm:p-8 md:p-10 ${
+                className={`w-full max-w-[640px] rounded-2xl border border-white/10 bg-navy/25 p-6 shadow-xl backdrop-blur-md max-[600px]:p-5 sm:p-8 md:p-10 ${
                   isTextRight ? "ml-auto" : "mr-auto"
                 }`}
               >
                 {/* Previous Eyebrow Font Style */}
-                <div className="mb-[20px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
-                  <span className="inline-block h-[2px] w-7 bg-current" aria-hidden="true" />
+                <div className="mb-2.5 sm:mb-[20px] flex items-center gap-[10px] text-[11px] sm:text-[12px] font-extrabold uppercase tracking-[0.14em] text-paste">
+                  <span className="inline-block h-[2px] w-6 bg-current" aria-hidden="true" />
                   {slide.eyebrow}
                 </div>
 
                 {/* Previous Heading Font Style */}
-                <h1 className="mb-5 text-[clamp(32px,4.5vw,58px)] font-extrabold leading-[1.06] tracking-[-0.04em] text-white">
+                <h1 className="mb-3 sm:mb-5 text-[clamp(28px,7vw,58px)] font-extrabold leading-[1.12] sm:leading-[1.06] tracking-[-0.03em] text-white">
                   {headingLines.map((line, i) => (
                     <span key={i}>
                       {renderHeadingLine(line)}
@@ -194,17 +194,22 @@ export default function HeroSlider() {
                   ))}
                 </h1>
 
-                {/* Previous Subtitle Font Style */}
-                <p className="mb-[30px] max-w-[540px] text-[15px] sm:text-[16px] leading-[1.65] text-white">
+                {/* Subtitle / Description (Concise 2 lines on mobile, full on tablet/desktop) */}
+                <p className="mb-5 sm:mb-[30px] max-w-[540px] text-[14px] sm:text-[16px] leading-[1.6] text-white/90 line-clamp-2 sm:line-clamp-none">
                   {slide.text}
                 </p>
 
-                {/* Previous Style Buttons */}
-                <div className="flex items-center gap-5 max-[600px]:max-w-[260px] max-[600px]:flex-col max-[600px]:items-stretch">
-                  <Button href={slide.href}>{slide.cta}</Button>
+                {/* CTA Action (Single comfortable button on mobile, primary + secondary on desktop) */}
+                <div className="flex items-center gap-5">
+                  <Button
+                    href={slide.href}
+                    className="max-[600px]:min-h-11 max-[600px]:px-5 max-[600px]:text-[13px]"
+                  >
+                    {slide.cta}
+                  </Button>
 
                   <Link
-                    className="inline-flex items-center gap-[7px] text-[13px] font-extrabold text-white transition-[gap,color] duration-200 hover:gap-[11px] hover:text-blue"
+                    className="hidden sm:inline-flex items-center gap-[7px] text-[13px] font-extrabold text-white transition-[gap,color] duration-200 hover:gap-[11px] hover:text-blue"
                     href="/services"
                   >
                     Explore our services

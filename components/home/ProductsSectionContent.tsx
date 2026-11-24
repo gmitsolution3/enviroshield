@@ -87,11 +87,11 @@ export default function ProductsSectionContent({
       className="relative overflow-hidden py-[112px] max-[900px]:py-20 max-[600px]:py-16"
     >
       {/* ====================================================================== */}
-      {/* LEFT SIDE PRODUCT: Rolling out from left screen edge                   */}
-      {/* Anchored so at rest exactly half the bucket extends onto the page     */}
+      {/* LEFT SIDE PRODUCT: Rolling out from left screen edge (Desktop only)    */}
+      {/* Positioned safely alongside the card grid, never above the header      */}
       {/* ====================================================================== */}
       <div
-        className="pointer-events-none absolute -left-[140px] md:-left-[155px] lg:-left-[175px] xl:-left-[195px] top-[170px] z-10 hidden md:block select-none"
+        className="pointer-events-none absolute -left-[140px] lg:-left-[170px] xl:-left-[190px] top-[340px] z-10 hidden xl:block select-none"
         aria-hidden="true"
       >
         <div className="relative">
@@ -152,11 +152,10 @@ export default function ProductsSectionContent({
       </div>
 
       {/* ====================================================================== */}
-      {/* RIGHT SIDE PRODUCT: Rolling out from right screen edge                 */}
-      {/* Anchored so at rest exactly half the bucket extends onto the page     */}
+      {/* RIGHT SIDE PRODUCT: Rolling out from right screen edge (Desktop only)   */}
       {/* ====================================================================== */}
       <div
-        className="pointer-events-none absolute -right-[140px] md:-right-[155px] lg:-right-[175px] xl:-right-[195px] bottom-[100px] z-10 hidden md:block select-none"
+        className="pointer-events-none absolute -right-[140px] lg:-right-[170px] xl:-right-[190px] bottom-[140px] z-10 hidden xl:block select-none"
         aria-hidden="true"
       >
         <div className="relative">
@@ -217,7 +216,7 @@ export default function ProductsSectionContent({
       </div>
 
       {/* Main Content Container */}
-      <Container className="relative z-20">
+      <Container className="relative z-10">
         <div className="flex items-end justify-between gap-[25px] max-[900px]:flex-col max-[900px]:items-start">
           <SectionHeader
             eyebrow="OUR PRODUCTS"

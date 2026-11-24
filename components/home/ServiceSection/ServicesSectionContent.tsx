@@ -235,9 +235,9 @@ export default function ServicesSectionContent({
         aria-hidden="true"
       />
 
-      {/* Background Paint Roller & Brush Illustrations (Scroll-driven one-by-one reveal) */}
+      {/* Background Paint Roller & Brush Illustrations (Desktop only - hidden on mobile/tablet to protect readability) */}
       <div
-        className="pointer-events-none absolute inset-0 z-0 overflow-hidden select-none"
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden select-none hidden lg:block"
         aria-hidden="true"
       >
         {/* 1. Upper-Left: Green Paint Swatch Base Coat */}

@@ -327,7 +327,7 @@ export default function WorkProcessSection() {
                   left: reduce ? "100%" : rollerX,
                   opacity: reduce ? 0 : rollerOpacity,
                 }}
-                className="pointer-events-none absolute -top-8 z-20 w-[120px] -translate-x-1/2 drop-shadow-[0_12px_24px_rgba(0,51,78,0.25)] will-change-transform"
+                className="pointer-events-none absolute -top-8 z-10 w-[120px] -translate-x-1/2 drop-shadow-[0_12px_24px_rgba(0,51,78,0.25)] will-change-transform"
                 aria-hidden="true"
               >
                 <Image
