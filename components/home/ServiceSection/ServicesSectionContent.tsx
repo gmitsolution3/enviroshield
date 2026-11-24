@@ -7,6 +7,8 @@ import {
   AnimatePresence,
   motion,
   useReducedMotion,
+  useScroll,
+  useTransform,
 } from "motion/react";
 import {
   ArrowUpRight,
@@ -379,8 +381,41 @@ function getServiceIcon(serviceName: string, serviceSlug: string) {
 export default function ServicesSectionContent({
   services,
 }: ServicesSectionContentProps) {
+  const sectionRef = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
   const tabsTrackRef = useRef<HTMLDivElement>(null);
+
+  // Scroll-controlled one-by-one paint roller reveal
+  // Each roller is mapped to a distinct segment of the scroll journey through the section
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start 85%", "end 60%"],
+  });
+
+  // 1. Upper-Left Swatch Base Coat (scroll: 0.00 -> 0.22)
+  const x1 = useTransform(scrollYProgress, [0.0, 0.22], ["-140%", "0%"]);
+  const rot1 = useTransform(scrollYProgress, [0.0, 0.22], [-18, 0]);
+  const op1 = useTransform(scrollYProgress, [0.0, 0.15], [0, 0.85]);
+
+  // 2. Upper-Right Navy Roller (scroll: 0.10 -> 0.32)
+  const x2 = useTransform(scrollYProgress, [0.1, 0.32], ["140%", "0%"]);
+  const rot2 = useTransform(scrollYProgress, [0.1, 0.32], [14, 0]);
+  const op2 = useTransform(scrollYProgress, [0.1, 0.25], [0, 1]);
+
+  // 3. Upper-Left Green Roller (scroll: 0.20 -> 0.42)
+  const x3 = useTransform(scrollYProgress, [0.2, 0.42], ["-140%", "0%"]);
+  const rot3 = useTransform(scrollYProgress, [0.2, 0.42], [-14, 0]);
+  const op3 = useTransform(scrollYProgress, [0.2, 0.35], [0, 1]);
+
+  // 4. Mid-Left Navy Roller Accent (scroll: 0.35 -> 0.60)
+  const x4 = useTransform(scrollYProgress, [0.35, 0.6], ["-140%", "0%"]);
+  const rot4 = useTransform(scrollYProgress, [0.35, 0.6], [20, 0]);
+  const op4 = useTransform(scrollYProgress, [0.35, 0.5], [0, 0.9]);
+
+  // 5. Lower-Right Green Roller Accent (scroll: 0.55 -> 0.80)
+  const x5 = useTransform(scrollYProgress, [0.55, 0.8], ["140%", "0%"]);
+  const rot5 = useTransform(scrollYProgress, [0.55, 0.8], [-16, 0]);
+  const op5 = useTransform(scrollYProgress, [0.55, 0.7], [0, 0.85]);
 
   // Build full 8-item array: use API services first, fill remainder with authentic default services
   const displayItems: ServiceDisplayItem[] = useMemo(() => {
@@ -560,6 +595,7 @@ export default function ServicesSectionContent({
 
   return (
     <section
+      ref={sectionRef}
       aria-labelledby="services-heading"
       className="relative overflow-hidden bg-[#f8fafc] py-[88px] lg:py-[112px]"
     >
@@ -568,6 +604,107 @@ export default function ServicesSectionContent({
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(#00334e_0.75px,transparent_0.75px)] opacity-[0.06] [background-size:24px_24px]"
         aria-hidden="true"
       />
+
+      {/* Background Paint Roller & Brush Illustrations (Scroll-driven one-by-one reveal) */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden select-none"
+        aria-hidden="true"
+      >
+        {/* 1. Upper-Left: Green Paint Swatch Base Coat (scroll: 0.00 -> 0.22) */}
+        <motion.div
+          style={{
+            x: reduce ? 0 : x1,
+            rotate: reduce ? 0 : rot1,
+            opacity: reduce ? 0.85 : op1,
+          }}
+          className="absolute -left-16 top-[110px] w-[200px] drop-shadow-[0_12px_24px_rgba(26,47,110,0.12)] max-sm:opacity-15 sm:-left-12 sm:top-[140px] sm:w-[260px] lg:-left-10 lg:top-[170px] lg:w-[320px] will-change-transform"
+        >
+          <Image
+            src="/images/roller-paint-swatch.png"
+            alt=""
+            width={500}
+            height={500}
+            className="h-auto w-full object-contain"
+            priority={false}
+          />
+        </motion.div>
+
+        {/* 2. Upper-Right: Navy Paint Roller (scroll: 0.10 -> 0.32) */}
+        <motion.div
+          style={{
+            x: reduce ? 0 : x2,
+            rotate: reduce ? 0 : rot2,
+            opacity: reduce ? 1 : op2,
+          }}
+          className="absolute -right-14 top-[130px] w-[230px] drop-shadow-[0_18px_32px_rgba(26,47,110,0.18)] max-sm:opacity-20 sm:-right-10 sm:top-[170px] sm:w-[290px] lg:-right-8 lg:top-[200px] lg:w-[370px] will-change-transform"
+        >
+          <Image
+            src="/images/roller-paint-navy.png"
+            alt=""
+            width={500}
+            height={500}
+            className="h-auto w-full object-contain"
+            priority={false}
+          />
+        </motion.div>
+
+        {/* 3. Upper-Left: Green Paint Roller (scroll: 0.20 -> 0.42) */}
+        <motion.div
+          style={{
+            x: reduce ? 0 : x3,
+            rotate: reduce ? 0 : rot3,
+            opacity: reduce ? 1 : op3,
+          }}
+          className="absolute -left-12 top-[170px] z-10 w-[210px] drop-shadow-[0_18px_32px_rgba(26,47,110,0.18)] max-sm:opacity-20 sm:-left-8 sm:top-[210px] sm:w-[270px] lg:-left-6 lg:top-[250px] lg:w-[350px] will-change-transform"
+        >
+          <Image
+            src="/images/roller-paint-green.png"
+            alt=""
+            width={500}
+            height={500}
+            className="h-auto w-full object-contain"
+            priority={false}
+          />
+        </motion.div>
+
+        {/* 4. Mid/Lower-Left: Navy Paint Roller Accent (scroll: 0.35 -> 0.60) */}
+        <motion.div
+          style={{
+            x: reduce ? 0 : x4,
+            rotate: reduce ? 0 : rot4,
+            opacity: reduce ? 0.9 : op4,
+          }}
+          className="absolute -left-16 top-[540px] w-[220px] -scale-x-100 drop-shadow-[0_16px_28px_rgba(26,47,110,0.14)] max-sm:hidden sm:-left-12 sm:top-[600px] sm:w-[280px] lg:-left-10 lg:top-[680px] lg:w-[340px] will-change-transform"
+        >
+          <Image
+            src="/images/roller-paint-navy.png"
+            alt=""
+            width={500}
+            height={500}
+            className="h-auto w-full object-contain"
+            priority={false}
+          />
+        </motion.div>
+
+        {/* 5. Lower-Right: Green Paint Roller Accent (scroll: 0.55 -> 0.80) */}
+        <motion.div
+          style={{
+            x: reduce ? 0 : x5,
+            rotate: reduce ? 0 : rot5,
+            opacity: reduce ? 0.85 : op5,
+          }}
+          className="absolute -right-16 bottom-[100px] w-[220px] -scale-x-100 drop-shadow-[0_16px_28px_rgba(26,47,110,0.14)] max-sm:hidden sm:-right-12 sm:bottom-[140px] sm:w-[270px] lg:-right-10 lg:bottom-[180px] lg:w-[330px] will-change-transform"
+        >
+          <Image
+            src="/images/roller-paint-green.png"
+            alt=""
+            width={500}
+            height={500}
+            className="h-auto w-full object-contain"
+            priority={false}
+          />
+        </motion.div>
+      </div>
 
       <Container className="relative z-10">
         {/* Section Header */}
