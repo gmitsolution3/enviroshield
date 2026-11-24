@@ -5,6 +5,7 @@ export interface ISlideMagnifier {
   badge?: string;
   title: string;
   spec: string;
+  productSlug?: string;
   beamDirection?: "left-to-right" | "right-to-left";
 }
 

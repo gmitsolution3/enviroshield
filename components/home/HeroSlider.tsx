@@ -31,9 +31,10 @@ const slides: ISlide[] = [
     },
     magnifier: {
       targetPoint: { x: 74, y: 58 },
-      zoomImage: "/images/home/rooftop-coating-surface-treatment.jpg",
-      title: "GumShield™ Elastic Membrane",
-      spec: "300% Elastic Elongation • Micro-Crack Bridging",
+      zoomImage: "https://res.cloudinary.com/dknitablq/image/upload/v1794639188/enviroshield/jlry2ofqvywykhfiezjz.png",
+      title: "Gum Shield",
+      spec: "Liquid Elastomeric Waterproofing",
+      productSlug: "gum-shield",
       beamDirection: "left-to-right",
     },
   },
@@ -53,9 +54,10 @@ const slides: ISlide[] = [
     },
     magnifier: {
       targetPoint: { x: 26, y: 68 },
-      zoomImage: "/images/home/terrace-waterproofing-protective-floor.png",
-      title: "Heavy-Duty Industrial Epoxy",
-      spec: "High Impact Resistance • Monolithic & Dust-Free",
+      zoomImage: "https://res.cloudinary.com/dknitablq/image/upload/v1794644805/enviroshield/u0pbhn2dlfhxgwy5aieo.png",
+      title: "Epoxy Flooring Kit",
+      spec: "High-Build Self-Leveling Resinous System",
+      productSlug: "epoxy-flooring-kit",
       beamDirection: "right-to-left",
     },
   },
@@ -75,9 +77,10 @@ const slides: ISlide[] = [
     },
     magnifier: {
       targetPoint: { x: 72, y: 46 },
-      zoomImage: "/images/home/completed-waterproof-rooftop-coating.jpg",
-      title: "PU AquaShield UV Barrier",
-      spec: "Solar Reflective • Walkable Anti-Slip Surface",
+      zoomImage: "https://res.cloudinary.com/dknitablq/image/upload/v1794484148/enviroshield/rvrxtc4ccyb4hkrhjmie.png",
+      title: "PU Aqua Shield",
+      spec: "Polyurethane UV Cool Roof Barrier",
+      productSlug: "pu-aqua-shield",
       beamDirection: "left-to-right",
     },
   },
@@ -242,27 +245,57 @@ export default function HeroSlider() {
                         style={{ transformOrigin: "right center" }}
                         className="relative z-20 shrink-0"
                       >
-                        <div className="relative size-[250px] sm:size-[280px] md:size-[310px] lg:size-[330px] xl:size-[360px]">
-                          <div className="pointer-events-none absolute -inset-3 sm:-inset-4 rounded-full border border-paste/40 shadow-[0_0_30px_rgba(155,207,255,0.3)]" />
+                        <Link
+                          href={slide.magnifier.productSlug ? `/products/${slide.magnifier.productSlug}` : slide.href}
+                          aria-label={`View ${slide.magnifier.title}`}
+                          className="group/lens block relative size-[250px] sm:size-[280px] md:size-[310px] lg:size-[330px] xl:size-[360px] cursor-pointer"
+                        >
+                          <div className="pointer-events-none absolute -inset-3 sm:-inset-4 rounded-full border border-paste/40 shadow-[0_0_30px_rgba(155,207,255,0.3)] transition-all duration-300 group-hover/lens:border-paste group-hover/lens:shadow-[0_0_45px_rgba(155,207,255,0.55)]" />
                           <div className="pointer-events-none absolute -inset-6 sm:-inset-7 rounded-full border border-blue/20" />
 
-                          <div className="relative size-full overflow-hidden rounded-full border-[2.5px] border-paste/80 shadow-[0_30px_80px_rgba(0,0,0,0.7)]">
+                          <div className="relative size-full overflow-hidden rounded-full border-[2.5px] border-paste/80 bg-gradient-to-b from-[#002238] via-[#001726] to-[#000d18] shadow-[0_30px_80px_rgba(0,0,0,0.75)]">
+                            {/* Radial Spotlight Backdrop */}
+                            <div
+                              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(1,110,220,0.38)_0%,transparent_70%)]"
+                              aria-hidden="true"
+                            />
+
+                            {/* Clean Studio Product Packshot */}
                             <Image
                               src={slide.magnifier.zoomImage}
                               alt={slide.magnifier.title}
                               fill
-                              className="object-cover scale-110 transition-transform duration-700 hover:scale-120"
+                              sizes="(max-width: 640px) 250px, (max-width: 1024px) 330px, 360px"
+                              priority
+                              className="object-contain p-7 sm:p-9 md:p-10 transition-transform duration-700 ease-out group-hover/lens:scale-110 drop-shadow-[0_16px_28px_rgba(0,0,0,0.75)]"
                             />
+
+                            {/* Lighting and Sheen */}
                             <div
-                              className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/15 to-transparent"
+                              className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent"
                               aria-hidden="true"
                             />
                             <div
-                              className="pointer-events-none absolute inset-0 rounded-full shadow-inner ring-1 ring-inset ring-white/20"
+                              className="pointer-events-none absolute inset-0 rounded-full shadow-inner ring-1 ring-inset ring-white/25"
                               aria-hidden="true"
                             />
+
+                            {/* Floating Product Badge & CTA */}
+                            <div className="pointer-events-none absolute inset-x-3 bottom-3.5 sm:bottom-4 z-30 flex flex-col items-center justify-center">
+                              <div className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-navy/85 px-3 py-1 shadow-lg backdrop-blur-md transition-all duration-300 group-hover/lens:bg-blue group-hover/lens:border-white/50">
+                                <span className="text-[11px] font-extrabold tracking-wide text-white">
+                                  {slide.magnifier.title}
+                                </span>
+                                <ArrowUpRight size={13} className="text-paste transition-colors group-hover/lens:text-white" />
+                              </div>
+                              {slide.magnifier.spec && (
+                                <span className="mt-1 max-w-[85%] truncate text-center text-[9px] font-bold uppercase tracking-wider text-paste/90 drop-shadow">
+                                  {slide.magnifier.spec}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
+                        </Link>
                       </motion.div>
 
                       {/* 2. Expanding Light Cone / Projection Beam pointing Left towards Lens */}
@@ -433,27 +466,57 @@ export default function HeroSlider() {
                         style={{ transformOrigin: "left center" }}
                         className="relative z-20 shrink-0"
                       >
-                        <div className="relative size-[250px] sm:size-[280px] md:size-[310px] lg:size-[330px] xl:size-[360px]">
-                          <div className="pointer-events-none absolute -inset-3 sm:-inset-4 rounded-full border border-paste/40 shadow-[0_0_30px_rgba(155,207,255,0.3)]" />
+                        <Link
+                          href={slide.magnifier.productSlug ? `/products/${slide.magnifier.productSlug}` : slide.href}
+                          aria-label={`View ${slide.magnifier.title}`}
+                          className="group/lens block relative size-[250px] sm:size-[280px] md:size-[310px] lg:size-[330px] xl:size-[360px] cursor-pointer"
+                        >
+                          <div className="pointer-events-none absolute -inset-3 sm:-inset-4 rounded-full border border-paste/40 shadow-[0_0_30px_rgba(155,207,255,0.3)] transition-all duration-300 group-hover/lens:border-paste group-hover/lens:shadow-[0_0_45px_rgba(155,207,255,0.55)]" />
                           <div className="pointer-events-none absolute -inset-6 sm:-inset-7 rounded-full border border-blue/20" />
 
-                          <div className="relative size-full overflow-hidden rounded-full border-[2.5px] border-paste/80 shadow-[0_30px_80px_rgba(0,0,0,0.7)]">
+                          <div className="relative size-full overflow-hidden rounded-full border-[2.5px] border-paste/80 bg-gradient-to-b from-[#002238] via-[#001726] to-[#000d18] shadow-[0_30px_80px_rgba(0,0,0,0.75)]">
+                            {/* Radial Spotlight Backdrop */}
+                            <div
+                              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(1,110,220,0.38)_0%,transparent_70%)]"
+                              aria-hidden="true"
+                            />
+
+                            {/* Clean Studio Product Packshot */}
                             <Image
                               src={slide.magnifier.zoomImage}
                               alt={slide.magnifier.title}
                               fill
-                              className="object-cover scale-110 transition-transform duration-700 hover:scale-120"
+                              sizes="(max-width: 640px) 250px, (max-width: 1024px) 330px, 360px"
+                              priority
+                              className="object-contain p-7 sm:p-9 md:p-10 transition-transform duration-700 ease-out group-hover/lens:scale-110 drop-shadow-[0_16px_28px_rgba(0,0,0,0.75)]"
                             />
+
+                            {/* Lighting and Sheen */}
                             <div
-                              className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/15 to-transparent"
+                              className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent"
                               aria-hidden="true"
                             />
                             <div
-                              className="pointer-events-none absolute inset-0 rounded-full shadow-inner ring-1 ring-inset ring-white/20"
+                              className="pointer-events-none absolute inset-0 rounded-full shadow-inner ring-1 ring-inset ring-white/25"
                               aria-hidden="true"
                             />
+
+                            {/* Floating Product Badge & CTA */}
+                            <div className="pointer-events-none absolute inset-x-3 bottom-3.5 sm:bottom-4 z-30 flex flex-col items-center justify-center">
+                              <div className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-navy/85 px-3 py-1 shadow-lg backdrop-blur-md transition-all duration-300 group-hover/lens:bg-blue group-hover/lens:border-white/50">
+                                <span className="text-[11px] font-extrabold tracking-wide text-white">
+                                  {slide.magnifier.title}
+                                </span>
+                                <ArrowUpRight size={13} className="text-paste transition-colors group-hover/lens:text-white" />
+                              </div>
+                              {slide.magnifier.spec && (
+                                <span className="mt-1 max-w-[85%] truncate text-center text-[9px] font-bold uppercase tracking-wider text-paste/90 drop-shadow">
+                                  {slide.magnifier.spec}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
+                        </Link>
                       </motion.div>
                     </>
                   )}
