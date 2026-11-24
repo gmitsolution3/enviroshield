@@ -58,14 +58,14 @@ export async function getPublishedServices({
   return result;
 }
 
-export async function getFeaturedServices(): Promise<IService[]> {
+export async function getFeaturedServices(limit: number = 8): Promise<IService[]> {
   if (!API_BASE_URL) {
     throw new Error("API base URL is not configured.");
   }
 
   const baseUrl = API_BASE_URL.replace(/\/$/, "");
 
-  const response = await fetch(`${baseUrl}/service/featured`, {
+  const response = await fetch(`${baseUrl}/service/featured?limit=${limit}`, {
     next: {
       revalidate: 60,
       tags: ["featured-services"],
@@ -91,7 +91,7 @@ export async function getFeaturedServices(): Promise<IService[]> {
     );
   }
 
-  return result.data ?? [];
+  return (result.data ?? []).slice(0, limit);
 }
 
 export async function getPublishedServiceBySlug(

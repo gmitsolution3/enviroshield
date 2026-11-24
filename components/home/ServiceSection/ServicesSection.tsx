@@ -6,7 +6,7 @@ export default async function ServicesSection() {
   let services: IService[] = [];
 
   try {
-    services = await getFeaturedServices();
+    services = await getFeaturedServices(8);
   } catch {
     services = [];
   }
