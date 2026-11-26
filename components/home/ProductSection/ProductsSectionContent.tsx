@@ -10,12 +10,12 @@ import {
 } from "motion/react";
 import Image from "next/image";
 import { ShieldCheck, Sparkles } from "lucide-react";
-import { StaggerContainer, StaggerItem } from "../animations/reveal";
-import { Button } from "../Button";
-import Container from "../Container";
-import { ProductCard } from "../ProductCard";
-import { Reveal } from "../Reveal";
-import { SectionHeader } from "../SectionHeader";
+import { StaggerContainer, StaggerItem } from "@/components/animations/reveal";
+import { Button } from "@/components/Button";
+import Container from "@/components/Container";
+import { ProductCard } from "@/components/ProductCard";
+import { Reveal } from "@/components/Reveal";
+import { SectionHeader } from "@/components/SectionHeader";
 import type { IPublishedProduct } from "@/types";
 
 interface ProductsSectionContentProps {

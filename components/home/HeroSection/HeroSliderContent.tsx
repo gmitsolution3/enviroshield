@@ -1,90 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { Button } from "@/components/Button";
+import Container from "@/components/Container";
+import { EASE } from "@/components/animations/variants";
+import { ISlide } from "@/types";
+import {
+  ArrowUpRight,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import {
   AnimatePresence,
   motion,
   useReducedMotion,
 } from "motion/react";
-import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
-import Container from "@/components/Container";
-import { Button } from "@/components/Button";
-import { EASE } from "@/components/animations/variants";
-import { ISlide } from "@/types";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
-const slides: ISlide[] = [
-  {
-    id: 1,
-    bg: "/images/slide-hero-1.png",
-    alt: "Commercial building roof waterproofing application",
-    eyebrow: "AUSTRALIAN FORMULATION • BANGLADESH EXCELLENCE",
-    heading: "An *Australian Brand*\nin Bangladesh Since 2009",
-    text: "Engineered waterproofing systems protecting commercial landmarks and industrial infrastructure across Bangladesh with advanced elastomeric polymers and monolithic membranes.",
-    cta: "Talk to Our Engineers",
-    href: "/contact",
-    layout: "text-left",
-    secondaryCta: {
-      text: "Explore 7-Layer Method",
-      href: "/#process-heading",
-    },
-    magnifier: {
-      targetPoint: { x: 74, y: 58 },
-      zoomImage: "https://res.cloudinary.com/dknitablq/image/upload/v1794639188/enviroshield/jlry2ofqvywykhfiezjz.png",
-      title: "Gum Shield",
-      spec: "Liquid Elastomeric Waterproofing",
-      productSlug: "gum-shield",
-      beamDirection: "left-to-right",
-    },
-  },
-  {
-    id: 2,
-    bg: "/images/slide-hero-2.png",
-    alt: "Industrial epoxy and polyurethane flooring application",
-    eyebrow: "INDUSTRIAL PERFORMANCE • SEAMLESS RESIN SYSTEMS",
-    heading: "Built to protect.\n*Engineered to last.*",
-    text: "From heavy-duty pharmaceutical cleanrooms to garment production floors, we deliver seamless resinous flooring designed for high mechanical and chemical resistance.",
-    cta: "Request System Specs",
-    href: "/contact",
-    layout: "text-right",
-    secondaryCta: {
-      text: "View Completed Projects",
-      href: "/projects",
-    },
-    magnifier: {
-      targetPoint: { x: 26, y: 68 },
-      zoomImage: "https://res.cloudinary.com/dknitablq/image/upload/v1794644805/enviroshield/u0pbhn2dlfhxgwy5aieo.png",
-      title: "Epoxy Flooring Kit",
-      spec: "High-Build Self-Leveling Resinous System",
-      productSlug: "epoxy-flooring-kit",
-      beamDirection: "right-to-left",
-    },
-  },
-  {
-    id: 3,
-    bg: "/images/slide-hero-3.png",
-    alt: "Rooftop terrace protective waterproofing membrane",
-    eyebrow: "MONSOON RESILIENCE • MONOLITHIC COATINGS",
-    heading: "Stronger protection.\n*Smarter solutions.*",
-    text: "Proven polymer chemistry engineered specifically for high-humidity climates, ponding rainwater, and severe thermal slab expansion across Bangladesh.",
-    cta: "Start Your Project",
-    href: "/contact",
-    layout: "text-left",
-    secondaryCta: {
-      text: "Download Product TDS",
-      href: "/products",
-    },
-    magnifier: {
-      targetPoint: { x: 72, y: 46 },
-      zoomImage: "https://res.cloudinary.com/dknitablq/image/upload/v1794484148/enviroshield/rvrxtc4ccyb4hkrhjmie.png",
-      title: "PU Aqua Shield",
-      spec: "Polyurethane UV Cool Roof Barrier",
-      productSlug: "pu-aqua-shield",
-      beamDirection: "left-to-right",
-    },
-  },
-];
+interface HeroSliderContentProps {
+  initialSlides: ISlide[];
+}
 
 function renderHeadingLine(line: string) {
   return line.split(/(\*[^*]+\*)/g).map((part, i) =>
@@ -98,41 +34,90 @@ function renderHeadingLine(line: string) {
   );
 }
 
-export default function HeroSlider() {
+export default function HeroSliderContent({
+  initialSlides,
+}: HeroSliderContentProps) {
+  const [slides] = useState<ISlide[]>(initialSlides);
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
   const reduce = useReducedMotion();
-  const slide = slides[index];
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setDirection(1);
-      setIndex((prev) => (prev + 1) % slides.length);
-    }, 5000);
-
-    return () => clearInterval(timer);
-  }, [index]);
+  const slide = slides[index] || slides[0];
 
   const go = (dir: number) => {
     setDirection(dir);
     setIndex((prev) => (prev + dir + slides.length) % slides.length);
   };
 
+  // Autoplay timer with pause on hover / interaction
+  useEffect(() => {
+    if (isPaused) return;
+
+    const timer = setInterval(() => {
+      setDirection(1);
+      setIndex((prev) => (prev + 1) % slides.length);
+    }, 5500);
+
+    return () => clearInterval(timer);
+  }, [index, isPaused, slides.length]);
+
+  // Keyboard navigation (ArrowLeft / ArrowRight)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        go(-1);
+      } else if (e.key === "ArrowRight") {
+        go(1);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [slides.length]);
+
+  // Touch swipe handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+
+    if (Math.abs(deltaX) > 45) {
+      if (deltaX < 0) {
+        go(1); // Swipe left -> Next
+      } else {
+        go(-1); // Swipe right -> Prev
+      }
+    }
+  };
+
   const headingLines = slide.heading.split("\n");
   const isTextRight = slide.layout === "text-right";
-  const isBeamRtl = slide.magnifier?.beamDirection === "right-to-left";
+  const isBeamRtl =
+    slide.magnifier?.beamDirection === "right-to-left";
 
   return (
     <section
       className="relative flex min-h-[500px] sm:min-h-[580px] md:min-h-[700px] lg:min-h-[820px] items-end lg:items-center overflow-hidden bg-[#001726]"
       aria-label="EnviroShield Architectural Showcase"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Cinematic Full-Bleed Background Photography */}
       <AnimatePresence custom={direction}>
         <motion.div
           key={slide.id}
           className="absolute inset-0"
-          initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 1.05 }}
+          initial={
+            reduce ? { opacity: 0 } : { opacity: 0, scale: 1.05 }
+          }
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
           transition={{
@@ -150,8 +135,8 @@ export default function HeroSlider() {
               slide.id === 1
                 ? "object-[78%_center] lg:object-center"
                 : slide.id === 2
-                ? "object-[18%_center] lg:object-center"
-                : "object-[85%_center] lg:object-center"
+                  ? "object-[18%_center] lg:object-center"
+                  : "object-[85%_center] lg:object-center"
             }`}
           />
         </motion.div>
@@ -176,7 +161,11 @@ export default function HeroSlider() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={slide.id}
-                initial={reduce ? { opacity: 0 } : { opacity: 0, x: isTextRight ? 24 : -24 }}
+                initial={
+                  reduce
+                    ? { opacity: 0 }
+                    : { opacity: 0, x: isTextRight ? 24 : -24 }
+                }
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: isTextRight ? -24 : 24 }}
                 transition={{ duration: 0.45, ease: EASE }}
@@ -189,7 +178,7 @@ export default function HeroSlider() {
                   {slide.eyebrow}
                 </div>
 
-                {/* Previous Heading Font Style */}
+                {/* Heading */}
                 <h1 className="mb-2.5 sm:mb-5 text-[clamp(26px,6.8vw,58px)] font-extrabold leading-[1.14] sm:leading-[1.06] tracking-[-0.03em] text-white drop-shadow-md">
                   {headingLines.map((line, i) => (
                     <span key={i}>
@@ -199,12 +188,12 @@ export default function HeroSlider() {
                   ))}
                 </h1>
 
-                {/* Subtitle / Description (Concise 2 lines on mobile, full on tablet/desktop) */}
+                {/* Subtitle / Description */}
                 <p className="mb-4 sm:mb-[30px] max-w-[540px] text-[13px] sm:text-[16px] leading-[1.6] text-white/90 line-clamp-2 sm:line-clamp-none drop-shadow">
                   {slide.text}
                 </p>
 
-                {/* CTA Action (Single comfortable button on mobile, primary + secondary on desktop) */}
+                {/* CTA Actions */}
                 <div className="flex items-center gap-5">
                   <Button
                     href={slide.href}
@@ -215,9 +204,10 @@ export default function HeroSlider() {
 
                   <Link
                     className="hidden sm:inline-flex items-center gap-[7px] text-[13px] font-extrabold text-white transition-[gap,color] duration-200 hover:gap-[11px] hover:text-blue"
-                    href="/services"
+                    href={slide.secondaryCta?.href || "/services"}
                   >
-                    Explore our services
+                    {slide.secondaryCta?.text ||
+                      "Explore our services"}
                     <ArrowUpRight size={16} aria-hidden="true" />
                   </Link>
                 </div>
@@ -242,29 +232,23 @@ export default function HeroSlider() {
                   {isBeamRtl ? (
                     /* Right-To-Left Layout (Slide 2): Lens on Left, Beam in Center, Dot on Right */
                     <>
-                      {/* 1. Large Circular Lens (Scales & blooms outward directly from the Dot on the Right) */}
+                      {/* 1. Large Circular Lens */}
                       <motion.div
                         initial={{ scale: 0, opacity: 0, x: 180 }}
                         animate={{ scale: 1, opacity: 1, x: 0 }}
                         exit={{ scale: 0, opacity: 0, x: 100 }}
                         transition={{
-                          duration: 0.75,
-                          delay: 0.2,
+                          duration: 0.65,
                           ease: [0.16, 1, 0.3, 1],
                         }}
-                        style={{ transformOrigin: "right center" }}
-                        className="relative z-20 shrink-0"
+                        className="group/lens relative z-20 shrink-0"
                       >
                         <Link
-                          href={slide.magnifier.productSlug ? `/products/${slide.magnifier.productSlug}` : slide.href}
-                          aria-label={`View ${slide.magnifier.title}`}
-                          className="group/lens block relative size-[250px] sm:size-[280px] md:size-[310px] lg:size-[330px] xl:size-[360px] cursor-pointer"
+                          href={`/products/${slide.magnifier.productSlug || ""}`}
+                          className="relative block"
+                          aria-label={`View ${slide.magnifier.title} product details`}
                         >
-                          <div className="pointer-events-none absolute -inset-3 sm:-inset-4 rounded-full border border-paste/40 shadow-[0_0_30px_rgba(155,207,255,0.3)] transition-all duration-300 group-hover/lens:border-paste group-hover/lens:shadow-[0_0_45px_rgba(155,207,255,0.55)]" />
-                          <div className="pointer-events-none absolute -inset-6 sm:-inset-7 rounded-full border border-blue/20" />
-
-                          <div className="relative size-full overflow-hidden rounded-full border-[2.5px] border-paste/80 bg-gradient-to-b from-[#002238] via-[#001726] to-[#000d18] shadow-[0_30px_80px_rgba(0,0,0,0.75)]">
-                            {/* Radial Spotlight Backdrop */}
+                          <div className="relative size-[250px] sm:size-[290px] md:size-[330px] lg:size-[360px] overflow-hidden rounded-full border-[7px] border-white/80 bg-gradient-to-br from-navy via-[#001726] to-[#041d33] shadow-[0_24px_60px_rgba(0,18,34,0.9),0_0_40px_rgba(1,110,220,0.45)] backdrop-blur-xl transition-all duration-500 group-hover/lens:border-paste group-hover/lens:shadow-[0_30px_70px_rgba(0,18,34,0.95),0_0_60px_rgba(1,110,220,0.7)]">
                             <div
                               className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(1,110,220,0.38)_0%,transparent_70%)]"
                               aria-hidden="true"
@@ -296,7 +280,10 @@ export default function HeroSlider() {
                                 <span className="text-[11px] font-extrabold tracking-wide text-white">
                                   {slide.magnifier.title}
                                 </span>
-                                <ArrowUpRight size={13} className="text-paste transition-colors group-hover/lens:text-white" />
+                                <ArrowUpRight
+                                  size={13}
+                                  className="text-paste transition-colors group-hover/lens:text-white"
+                                />
                               </div>
                               {slide.magnifier.spec && (
                                 <span className="mt-1 max-w-[85%] truncate text-center text-[9px] font-bold uppercase tracking-wider text-paste/90 drop-shadow">
@@ -308,12 +295,16 @@ export default function HeroSlider() {
                         </Link>
                       </motion.div>
 
-                      {/* 2. Expanding Light Cone / Projection Beam pointing Left towards Lens */}
+                      {/* 2. Expanding Light Cone from Right to Left */}
                       <motion.div
                         initial={{ scaleX: 0, opacity: 0 }}
                         animate={{ scaleX: 1, opacity: 1 }}
                         exit={{ scaleX: 0, opacity: 0 }}
-                        transition={{ duration: 0.65, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                        transition={{
+                          duration: 0.65,
+                          delay: 0.15,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
                         style={{ transformOrigin: "right center" }}
                         className="relative z-10 -mr-2 -ml-3 pointer-events-none shrink-0"
                       >
@@ -324,58 +315,76 @@ export default function HeroSlider() {
                           fill="none"
                         >
                           <defs>
-                            <linearGradient id="beamGradientRTL" x1="100%" y1="50%" x2="0%" y2="50%">
-                              <stop offset="0%" stopColor="#016edc" stopOpacity="0.8" />
-                              <stop offset="30%" stopColor="#016edc" stopOpacity="0.45" />
-                              <stop offset="70%" stopColor="#9bcfff" stopOpacity="0.2" />
-                              <stop offset="100%" stopColor="#9bcfff" stopOpacity="0.08" />
+                            <linearGradient
+                              id="beamGradientRTL"
+                              x1="100%"
+                              y1="50%"
+                              x2="0%"
+                              y2="50%"
+                            >
+                              <stop
+                                offset="0%"
+                                stopColor="#016edc"
+                                stopOpacity="0.8"
+                              />
+                              <stop
+                                offset="30%"
+                                stopColor="#016edc"
+                                stopOpacity="0.45"
+                              />
+                              <stop
+                                offset="70%"
+                                stopColor="#9bcfff"
+                                stopOpacity="0.2"
+                              />
+                              <stop
+                                offset="100%"
+                                stopColor="#9bcfff"
+                                stopOpacity="0.08"
+                              />
                             </linearGradient>
                           </defs>
 
-                          {/* Projection Cone Fill */}
-                          <path
-                            d="M 240,120 L 0,15 A 190,190 0 0,1 0,225 Z"
+                          <polygon
+                            points="240,120 0,20 0,220"
                             fill="url(#beamGradientRTL)"
                           />
 
-                          {/* Outer Border Boundary Rays */}
-                          <line x1="240" y1="120" x2="0" y2="15" stroke="#9bcfff" strokeWidth="1.2" strokeOpacity="0.85" />
-                          <line x1="240" y1="120" x2="0" y2="225" stroke="#9bcfff" strokeWidth="1.2" strokeOpacity="0.85" />
-
-                          {/* Concentric Wave / Radar Ripple Arcs (matching reference screenshot) */}
-                          <path
-                            d="M 55,39 A 180,180 0 0,1 55,201"
+                          <line
+                            x1="240"
+                            y1="120"
+                            x2="0"
+                            y2="20"
                             stroke="#9bcfff"
-                            strokeWidth="1.2"
-                            strokeOpacity="0.65"
+                            strokeWidth="1.5"
+                            strokeOpacity="0.95"
                           />
-                          <path
-                            d="M 100,58 A 150,150 0 0,1 100,182"
+                          <line
+                            x1="240"
+                            y1="120"
+                            x2="0"
+                            y2="220"
                             stroke="#9bcfff"
-                            strokeWidth="1"
-                            strokeOpacity="0.45"
-                          />
-                          <path
-                            d="M 145,78 A 120,120 0 0,1 145,162"
-                            stroke="#9bcfff"
-                            strokeWidth="1"
-                            strokeOpacity="0.3"
+                            strokeWidth="1.5"
+                            strokeOpacity="0.95"
                           />
                         </svg>
                       </motion.div>
 
-                      {/* 3. Target Dot on the Right (with Concentric Outer Halo Ring) */}
+                      {/* 3. Target Dot on the Right */}
                       <motion.div
                         initial={{ scale: 0, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0, opacity: 0 }}
-                        transition={{ duration: 0.35, delay: 0.05, ease: "easeOut" }}
+                        transition={{
+                          duration: 0.35,
+                          delay: 0.05,
+                          ease: "easeOut",
+                        }}
                         className="relative z-30 flex items-center justify-center shrink-0"
                       >
-                        {/* Outer soft stationary halo ring matching reference */}
                         <div className="pointer-events-none absolute size-[52px] rounded-full border border-paste/30 bg-blue/10 shadow-[0_0_16px_rgba(1,110,220,0.3)]" />
 
-                        {/* Crosshairs Reticle */}
                         <div className="relative flex size-9 items-center justify-center rounded-full border border-paste bg-navy/90 shadow-[0_0_22px_rgba(1,110,220,0.85)] backdrop-blur-md">
                           <span className="absolute h-full w-[1.5px] bg-paste" />
                           <span className="absolute w-full h-[1.5px] bg-paste" />
@@ -387,18 +396,20 @@ export default function HeroSlider() {
                   ) : (
                     /* Left-To-Right Layout (Slide 1 & 3): Dot on Left, Beam in Center, Lens on Right */
                     <>
-                      {/* 1. Target Sample Point on Left (with Concentric Outer Halo Ring) */}
+                      {/* 1. Target Sample Point on Left */}
                       <motion.div
                         initial={{ scale: 0, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0, opacity: 0 }}
-                        transition={{ duration: 0.35, delay: 0.05, ease: "easeOut" }}
+                        transition={{
+                          duration: 0.35,
+                          delay: 0.05,
+                          ease: "easeOut",
+                        }}
                         className="relative z-30 flex items-center justify-center shrink-0"
                       >
-                        {/* Outer soft stationary halo ring matching reference */}
                         <div className="pointer-events-none absolute size-[52px] rounded-full border border-paste/30 bg-blue/10 shadow-[0_0_16px_rgba(1,110,220,0.3)]" />
 
-                        {/* Crosshairs Reticle */}
                         <div className="relative flex size-9 items-center justify-center rounded-full border border-paste bg-navy/90 shadow-[0_0_22px_rgba(1,110,220,0.85)] backdrop-blur-md">
                           <span className="absolute h-full w-[1.5px] bg-paste" />
                           <span className="absolute w-full h-[1.5px] bg-paste" />
@@ -407,12 +418,16 @@ export default function HeroSlider() {
                         </div>
                       </motion.div>
 
-                      {/* 2. Expanding Light Cone / Projection Beam from Dot */}
+                      {/* 2. Expanding Light Cone from Dot to Lens */}
                       <motion.div
                         initial={{ scaleX: 0, opacity: 0 }}
                         animate={{ scaleX: 1, opacity: 1 }}
                         exit={{ scaleX: 0, opacity: 0 }}
-                        transition={{ duration: 0.65, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                        transition={{
+                          duration: 0.65,
+                          delay: 0.15,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
                         style={{ transformOrigin: "left center" }}
                         className="relative z-10 -ml-2 -mr-3 pointer-events-none shrink-0"
                       >
@@ -423,69 +438,79 @@ export default function HeroSlider() {
                           fill="none"
                         >
                           <defs>
-                            <linearGradient id="beamGradientLTR" x1="0%" y1="50%" x2="100%" y2="50%">
-                              <stop offset="0%" stopColor="#016edc" stopOpacity="0.8" />
-                              <stop offset="30%" stopColor="#016edc" stopOpacity="0.45" />
-                              <stop offset="70%" stopColor="#9bcfff" stopOpacity="0.2" />
-                              <stop offset="100%" stopColor="#9bcfff" stopOpacity="0.08" />
+                            <linearGradient
+                              id="beamGradientLTR"
+                              x1="0%"
+                              y1="50%"
+                              x2="100%"
+                              y2="50%"
+                            >
+                              <stop
+                                offset="0%"
+                                stopColor="#016edc"
+                                stopOpacity="0.8"
+                              />
+                              <stop
+                                offset="30%"
+                                stopColor="#016edc"
+                                stopOpacity="0.45"
+                              />
+                              <stop
+                                offset="70%"
+                                stopColor="#9bcfff"
+                                stopOpacity="0.2"
+                              />
+                              <stop
+                                offset="100%"
+                                stopColor="#9bcfff"
+                                stopOpacity="0.08"
+                              />
                             </linearGradient>
                           </defs>
 
-                          {/* Projection Cone Fill */}
-                          <path
-                            d="M 0,120 L 240,15 A 190,190 0 0,0 240,225 Z"
+                          <polygon
+                            points="0,120 240,20 240,220"
                             fill="url(#beamGradientLTR)"
                           />
 
-                          {/* Outer Border Boundary Rays */}
-                          <line x1="0" y1="120" x2="240" y2="15" stroke="#9bcfff" strokeWidth="1.2" strokeOpacity="0.85" />
-                          <line x1="0" y1="120" x2="240" y2="225" stroke="#9bcfff" strokeWidth="1.2" strokeOpacity="0.85" />
-
-                          {/* Concentric Wave / Radar Ripple Arcs (matching reference screenshot) */}
-                          <path
-                            d="M 185,39 A 180,180 0 0,0 185,201"
+                          <line
+                            x1="0"
+                            y1="120"
+                            x2="240"
+                            y2="20"
                             stroke="#9bcfff"
-                            strokeWidth="1.2"
-                            strokeOpacity="0.65"
+                            strokeWidth="1.5"
+                            strokeOpacity="0.95"
                           />
-                          <path
-                            d="M 140,58 A 150,150 0 0,0 140,182"
+                          <line
+                            x1="0"
+                            y1="120"
+                            x2="240"
+                            y2="220"
                             stroke="#9bcfff"
-                            strokeWidth="1"
-                            strokeOpacity="0.45"
-                          />
-                          <path
-                            d="M 95,78 A 120,120 0 0,0 95,162"
-                            stroke="#9bcfff"
-                            strokeWidth="1"
-                            strokeOpacity="0.3"
+                            strokeWidth="1.5"
+                            strokeOpacity="0.95"
                           />
                         </svg>
                       </motion.div>
 
-                      {/* 3. Circular Magnifier Lens (Scales & blooms outward directly from the Dot on the Left) */}
+                      {/* 3. Large Circular Lens */}
                       <motion.div
                         initial={{ scale: 0, opacity: 0, x: -180 }}
                         animate={{ scale: 1, opacity: 1, x: 0 }}
                         exit={{ scale: 0, opacity: 0, x: -100 }}
                         transition={{
-                          duration: 0.75,
-                          delay: 0.2,
+                          duration: 0.65,
                           ease: [0.16, 1, 0.3, 1],
                         }}
-                        style={{ transformOrigin: "left center" }}
-                        className="relative z-20 shrink-0"
+                        className="group/lens relative z-20 shrink-0"
                       >
                         <Link
-                          href={slide.magnifier.productSlug ? `/products/${slide.magnifier.productSlug}` : slide.href}
-                          aria-label={`View ${slide.magnifier.title}`}
-                          className="group/lens block relative size-[250px] sm:size-[280px] md:size-[310px] lg:size-[330px] xl:size-[360px] cursor-pointer"
+                          href={`/products/${slide.magnifier.productSlug || ""}`}
+                          className="relative block"
+                          aria-label={`View ${slide.magnifier.title} product details`}
                         >
-                          <div className="pointer-events-none absolute -inset-3 sm:-inset-4 rounded-full border border-paste/40 shadow-[0_0_30px_rgba(155,207,255,0.3)] transition-all duration-300 group-hover/lens:border-paste group-hover/lens:shadow-[0_0_45px_rgba(155,207,255,0.55)]" />
-                          <div className="pointer-events-none absolute -inset-6 sm:-inset-7 rounded-full border border-blue/20" />
-
-                          <div className="relative size-full overflow-hidden rounded-full border-[2.5px] border-paste/80 bg-gradient-to-b from-[#002238] via-[#001726] to-[#000d18] shadow-[0_30px_80px_rgba(0,0,0,0.75)]">
-                            {/* Radial Spotlight Backdrop */}
+                          <div className="relative size-[250px] sm:size-[290px] md:size-[330px] lg:size-[360px] overflow-hidden rounded-full border-[7px] border-white/80 bg-gradient-to-br from-navy via-[#001726] to-[#041d33] shadow-[0_24px_60px_rgba(0,18,34,0.9),0_0_40px_rgba(1,110,220,0.45)] backdrop-blur-xl transition-all duration-500 group-hover/lens:border-paste group-hover/lens:shadow-[0_30px_70px_rgba(0,18,34,0.95),0_0_60px_rgba(1,110,220,0.7)]">
                             <div
                               className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(1,110,220,0.38)_0%,transparent_70%)]"
                               aria-hidden="true"
@@ -517,7 +542,10 @@ export default function HeroSlider() {
                                 <span className="text-[11px] font-extrabold tracking-wide text-white">
                                   {slide.magnifier.title}
                                 </span>
-                                <ArrowUpRight size={13} className="text-paste transition-colors group-hover/lens:text-white" />
+                                <ArrowUpRight
+                                  size={13}
+                                  className="text-paste transition-colors group-hover/lens:text-white"
+                                />
                               </div>
                               {slide.magnifier.spec && (
                                 <span className="mt-1 max-w-[85%] truncate text-center text-[9px] font-bold uppercase tracking-wider text-paste/90 drop-shadow">
@@ -566,7 +594,11 @@ export default function HeroSlider() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <ChevronLeft size={18} className="lg:size-5" aria-hidden="true" />
+          <ChevronLeft
+            size={18}
+            className="lg:size-5"
+            aria-hidden="true"
+          />
         </motion.button>
 
         <motion.button
@@ -576,13 +608,20 @@ export default function HeroSlider() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <ChevronRight size={18} className="lg:size-5" aria-hidden="true" />
+          <ChevronRight
+            size={18}
+            className="lg:size-5"
+            aria-hidden="true"
+          />
         </motion.button>
       </div>
 
       {/* Slide Counter */}
       <div className="absolute z-[2] text-[12px] text-white right-24 sm:right-28 lg:right-[125px] bottom-4 sm:bottom-6 lg:bottom-10">
-        <strong className="text-[20px] sm:text-[22px] lg:text-[24px]">0{index + 1}</strong> / 0{slides.length}
+        <strong className="text-[20px] sm:text-[22px] lg:text-[24px]">
+          0{index + 1}
+        </strong>{" "}
+        / 0{slides.length}
       </div>
     </section>
   );
