@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Award, Eye, EyeOff, Layers, ShieldCheck } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -134,6 +135,10 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
                   },
                 }}
               >
+                <div className="mb-8">
+                  <Logo light />
+                </div>
+
                 <motion.div
                   className="mb-4 flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste"
                   variants={fieldVariants}
@@ -157,8 +162,47 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
                 </motion.p>
               </motion.div>
 
+              {/* Trust highlights to balance vertical spacing */}
+              <div className="my-6 hidden flex-col gap-4 border-y border-white/10 py-5 sm:flex">
+                <div className="flex items-start gap-3">
+                  <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-white/10 text-paste">
+                    <ShieldCheck size={16} aria-hidden="true" />
+                  </span>
+                  <div>
+                    <h2 className="text-[13px] font-bold text-white">Australian Formulations</h2>
+                    <p className="text-[12px] leading-snug text-white/70">
+                      Engineered to strict Australian waterproofing &amp; coating standards.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-white/10 text-paste">
+                    <Layers size={16} aria-hidden="true" />
+                  </span>
+                  <div>
+                    <h2 className="text-[13px] font-bold text-white">7-Layer Protection Systems</h2>
+                    <p className="text-[12px] leading-snug text-white/70">
+                      In-house chemical manufacturing and specialized execution.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-white/10 text-paste">
+                    <Award size={16} aria-hidden="true" />
+                  </span>
+                  <div>
+                    <h2 className="text-[13px] font-bold text-white">3M+ SFT Completed</h2>
+                    <p className="text-[12px] leading-snug text-white/70">
+                      Trusted across premier commercial and industrial landmarks.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <motion.div
-                className="mt-8"
+                className="mt-6"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
@@ -169,9 +213,10 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
               >
                 <Link
                   href="/"
-                  className="text-[13px] font-bold text-paste transition-colors hover:text-white"
+                  className="inline-flex items-center gap-2 text-[13px] font-bold text-paste transition-colors hover:text-white"
                 >
-                  ← Back to Enviroshield
+                  <ArrowLeft size={16} aria-hidden="true" />
+                  Back to Enviroshield
                 </Link>
               </motion.div>
             </div>

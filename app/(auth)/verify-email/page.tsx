@@ -1,3 +1,5 @@
+import Logo from "@/components/Logo";
+import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -51,29 +53,34 @@ export default async function VerifyEmailPage({
 
             <div className="relative z-10 flex h-full flex-col justify-between">
               <div>
-                <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
+                <div className="mb-8">
+                  <Logo light />
+                </div>
+
+                <div className="mb-[18px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
                   ALMOST THERE
                 </div>
 
                 <h1
                   id="verify-email-heading"
-                  className="max-w-[440px] text-[clamp(38px,4.5vw,58px)] font-extrabold leading-[1.03] tracking-[-0.05em]"
+                  className="max-w-[440px] text-[clamp(28px,3vw,42px)] font-extrabold leading-[1.1] tracking-[-0.04em]"
                 >
                   One small step before you get started.
                 </h1>
 
-                <p className="mt-6 max-w-[400px] text-[15px] leading-[1.8] text-white/75">
+                <p className="mt-4 max-w-[400px] text-[14px] leading-[1.7] text-white/75">
                   Verify your email address to activate your
                   Enviroshield account and continue.
                 </p>
               </div>
 
-              <div className="mt-12 hidden max-[900px]:block">
+              <div className="mt-8">
                 <Link
                   href="/"
-                  className="text-[13px] font-bold text-paste transition-colors hover:text-white"
+                  className="inline-flex items-center gap-2 text-[13px] font-bold text-paste transition-colors hover:text-white"
                 >
-                  ← Back to Enviroshield
+                  <ArrowLeft size={16} aria-hidden="true" />
+                  Back to Enviroshield
                 </Link>
               </div>
             </div>
