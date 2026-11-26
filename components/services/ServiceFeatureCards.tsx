@@ -87,10 +87,6 @@ export default function ServiceFeatureCards({
         <Reveal dir="up">
           <div className="mb-14 max-w-[720px] max-[900px]:mb-10">
             <div className="mb-[18px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
-              <span
-                aria-hidden="true"
-                className="h-[2px] w-7 bg-current"
-              />
               THE ENVIROSHIELD DIFFERENCE
             </div>
 

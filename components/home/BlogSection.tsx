@@ -43,7 +43,7 @@ export default async function BlogSection() {
         </div>
 
         {blogs.length > 0 ? (
-          <StaggerContainer className="grid grid-cols-3 gap-[25px] max-[600px]:grid-cols-1 max-[600px]:gap-10">
+          <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[25px]">
             {blogs.map((post, index) => (
               <StaggerItem key={post._id}>
                 <BlogCard post={post} index={index} />

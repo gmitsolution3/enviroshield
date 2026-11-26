@@ -163,7 +163,7 @@ export default function HeroSlider() {
         aria-hidden="true"
       />
 
-      <Container className="relative z-10 w-full pt-16 pb-16 sm:py-[60px] lg:py-[80px] lg:pb-[90px] text-white">
+      <Container className="relative z-10 w-full pt-16 pb-20 sm:pt-20 sm:pb-24 lg:py-[80px] lg:pb-[90px] text-white">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
           {/* Text Column: Positioned on bottom-left with no dark box on mobile, glass card on desktop */}
           <div
@@ -180,13 +180,12 @@ export default function HeroSlider() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: isTextRight ? -24 : 24 }}
                 transition={{ duration: 0.45, ease: EASE }}
-                className={`w-full max-w-[640px] text-left rounded-2xl border-0 lg:border border-white/10 bg-transparent lg:bg-navy/25 p-0 lg:p-6 shadow-none lg:shadow-xl backdrop-blur-none lg:backdrop-blur-md sm:p-8 md:p-10 ${
+                className={`w-full max-w-[640px] text-left rounded-2xl border-0 lg:border border-white/10 bg-transparent lg:bg-navy/25 p-0 lg:p-6 lg:sm:p-8 lg:md:p-10 shadow-none lg:shadow-xl backdrop-blur-none lg:backdrop-blur-md ${
                   isTextRight ? "lg:ml-auto" : "lg:mr-auto"
                 }`}
               >
                 {/* Eyebrow Label (Hidden on mobile) */}
                 <div className="hidden sm:flex mb-2 sm:mb-[20px] items-center gap-[10px] text-[11px] sm:text-[12px] font-extrabold uppercase tracking-[0.14em] text-paste drop-shadow-sm">
-                  <span className="inline-block h-[2px] w-6 bg-current" aria-hidden="true" />
                   {slide.eyebrow}
                 </div>
 
@@ -538,12 +537,12 @@ export default function HeroSlider() {
         </div>
       </Container>
 
-      {/* Previous Style Bottom Controls */}
-      <div className="absolute bottom-[44px] left-1/2 z-[2] flex -translate-x-1/2 gap-[9px] max-sm:left-4 max-sm:bottom-4 max-sm:translate-x-0">
+      {/* Slide Indicator Bars */}
+      <div className="absolute z-[2] flex gap-[9px] left-4 sm:left-6 lg:left-1/2 bottom-4 sm:bottom-6 lg:bottom-[44px] -translate-x-0 lg:-translate-x-1/2">
         {slides.map((_, i) => (
           <button
             key={i}
-            className={`h-[4px] w-[34px] max-sm:w-[22px] rounded-[3px] transition-all duration-300 ${
+            className={`h-[4px] w-[22px] sm:w-[28px] lg:w-[34px] rounded-[3px] transition-all duration-300 ${
               i === index
                 ? "!bg-white"
                 : "!bg-[rgba(255,255,255,0.36)]"
@@ -558,30 +557,32 @@ export default function HeroSlider() {
         ))}
       </div>
 
-      <div className="absolute right-5 bottom-10 z-[2] flex gap-2 max-sm:bottom-3 max-sm:right-4">
+      {/* Navigation Arrows */}
+      <div className="absolute z-[2] flex gap-2 right-4 sm:right-6 lg:right-5 bottom-3.5 sm:bottom-5 lg:bottom-10">
         <motion.button
-          className="grid size-[42px] max-sm:size-[34px] place-items-center rounded-full !border !border-white/[0.3] !text-white transition-[border-color,background] duration-200 hover:border-white"
+          className="grid size-[36px] sm:size-[40px] lg:size-[42px] place-items-center rounded-full !border !border-white/[0.3] !text-white transition-[border-color,background] duration-200 hover:border-white"
           aria-label="Previous slide"
           onClick={() => go(-1)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <ChevronLeft size={20} className="max-sm:size-4" aria-hidden="true" />
+          <ChevronLeft size={18} className="lg:size-5" aria-hidden="true" />
         </motion.button>
 
         <motion.button
-          className="grid size-[42px] max-sm:size-[34px] place-items-center rounded-full !border !border-white/[0.3] !text-white transition-[border-color,background] duration-200 !hover:border-white"
+          className="grid size-[36px] sm:size-[40px] lg:size-[42px] place-items-center rounded-full !border !border-white/[0.3] !text-white transition-[border-color,background] duration-200 !hover:border-white"
           aria-label="Next slide"
           onClick={() => go(1)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <ChevronRight size={20} className="max-sm:size-4" aria-hidden="true" />
+          <ChevronRight size={18} className="lg:size-5" aria-hidden="true" />
         </motion.button>
       </div>
 
-      <div className="absolute right-[125px] bottom-10 z-[2] text-[12px] text-white max-sm:right-24 max-sm:bottom-3.5">
-        <strong className="text-[24px] max-sm:text-[18px]">0{index + 1}</strong> / 0{slides.length}
+      {/* Slide Counter */}
+      <div className="absolute z-[2] text-[12px] text-white right-24 sm:right-28 lg:right-[125px] bottom-4 sm:bottom-6 lg:bottom-10">
+        <strong className="text-[20px] sm:text-[22px] lg:text-[24px]">0{index + 1}</strong> / 0{slides.length}
       </div>
     </section>
   );

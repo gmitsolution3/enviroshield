@@ -52,7 +52,6 @@ export function SectionHeader({
           eyebrowClassName,
         )}
       >
-        <span className="h-[2px] w-7 bg-current" aria-hidden="true" />
         {eyebrow}
       </div>
 

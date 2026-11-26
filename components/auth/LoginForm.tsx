@@ -138,10 +138,6 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
                   className="mb-4 flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste"
                   variants={fieldVariants}
                 >
-                  <span
-                    className="h-[2px] w-7 bg-current"
-                    aria-hidden="true"
-                  />
                   WELCOME BACK
                 </motion.div>
 

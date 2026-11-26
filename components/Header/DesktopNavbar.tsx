@@ -29,7 +29,7 @@ export default function DesktopNavbar({
   return (
     <nav
       aria-label="Primary navigation"
-      className="hidden items-center gap-3 text-[15px] font-bold text-[#315366] min-[901px]:flex min-[1150px]:gap-4 min-[1350px]:gap-6 xl:text-[16px]"
+      className="hidden items-center gap-2 min-[960px]:gap-2.5 min-[1080px]:gap-3 text-[13px] min-[960px]:text-[14px] min-[1080px]:text-[15px] font-bold text-[#315366] min-[901px]:flex min-[1150px]:gap-4 min-[1350px]:gap-6 xl:text-[16px]"
     >
       {links.map((link, i) => {
         const isActive =
@@ -103,7 +103,7 @@ export default function DesktopNavbar({
           ease: EASE,
         }}
       >
-        <Button href="/contact" className="whitespace-nowrap">Talk to an Expert</Button>
+        <Button href="/contact" className="whitespace-nowrap max-[1040px]:px-3.5 max-[1040px]:text-xs">Talk to an Expert</Button>
       </motion.div>
     </nav>
   );

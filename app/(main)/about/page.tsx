@@ -356,7 +356,6 @@ export default function AboutPage() {
           <Reveal dir="up" delay={0.15}>
             <div>
               <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
-                <span className="h-[2px] w-7 bg-current" aria-hidden="true" />
                 WHO WE ARE
               </div>
 
@@ -788,7 +787,6 @@ export default function AboutPage() {
           <Reveal dir="up">
             <div>
               <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
-                <span className="h-[2px] w-7 bg-current" aria-hidden="true" />
                 OUR COMMITMENT
               </div>
 

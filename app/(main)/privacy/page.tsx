@@ -22,7 +22,6 @@ export default function PrivacyPolicyPage() {
         <Container>
           <div className="max-w-3xl">
             <div className="mb-4 inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-paste">
-              <span className="h-0.5 w-6 bg-paste" aria-hidden="true" />
               PRIVACY & DATA PROTECTION
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">

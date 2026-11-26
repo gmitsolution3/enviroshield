@@ -28,10 +28,6 @@ export default function ContactSection({
             viewport={viewportOnce}
           >
             <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
-              <span
-                className="h-[2px] w-7 bg-current"
-                aria-hidden="true"
-              />
               CONTACT US
             </div>
           </motion.div>

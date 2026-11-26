@@ -59,19 +59,19 @@ export default function TopHeaderBar({
   }
 
   return (
-    <div className="hidden h-[42px] border-b border-white/15 bg-blue text-[15px] text-white min-[901px]:block">
+    <div className="hidden h-[42px] border-b border-white/15 bg-blue text-[13px] min-[1150px]:text-[14px] 2xl:text-[15px] text-white min-[901px]:block">
       <Container className="flex h-full items-center justify-between">
         {/* Contact Information */}
-        <span className="flex items-center gap-[7px] font-normal text-white/90">
-          <MapPin size={15} className="text-white/80" aria-hidden="true" />
-          House #13~15, Road # 22, Block # B, Bauniabad R/A, Mirpur-11, Dhaka-1216
+        <span className="flex items-center gap-[7px] font-normal text-white/90 truncate max-w-[280px] min-[1150px]:max-w-[420px] 2xl:max-w-none">
+          <MapPin size={15} className="shrink-0 text-white/80" aria-hidden="true" />
+          <span className="truncate">House #13~15, Road # 22, Block # B, Bauniabad R/A, Mirpur-11, Dhaka-1216</span>
         </span>
 
-        <div className="flex h-full items-center gap-5">
-          <span className="flex items-center gap-6">
+        <div className="flex h-full items-center gap-3 min-[1150px]:gap-5">
+          <span className="flex items-center gap-3 min-[1150px]:gap-6">
             <a
               href="mailto:enviroshield.bd@gmail.com"
-              className="flex items-center gap-[7px] text-white/90 transition-colors hover:text-white"
+              className="hidden lg:flex items-center gap-[7px] text-white/90 transition-colors hover:text-white"
             >
               <Mail size={15} className="text-white/80" aria-hidden="true" />
               enviroshield.bd@gmail.com
@@ -79,7 +79,7 @@ export default function TopHeaderBar({
 
             <a
               href="tel:+8801613220101"
-              className="flex items-center gap-[7px] text-white/90 transition-colors hover:text-white"
+              className="flex items-center gap-[7px] text-white/90 transition-colors hover:text-white whitespace-nowrap"
             >
               <Phone size={15} className="text-white/80" aria-hidden="true" />
               +880 1613-220101

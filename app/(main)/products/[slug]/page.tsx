@@ -558,7 +558,6 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               <Reveal dir="up">
                 <div className="min-w-0">
                   <p className="mb-4 flex items-center gap-3 text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
-                    <span aria-hidden="true" className="h-[2px] w-7 bg-blue" />
                     Product details
                   </p>
 
@@ -681,10 +680,6 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                 <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
                   <div>
                     <p className="mb-4 flex items-center gap-3 text-[11px] font-extrabold uppercase tracking-[0.15em] text-blue">
-                      <span
-                        aria-hidden="true"
-                        className="h-[2px] w-7 bg-blue"
-                      />
                       You may also like
                     </p>
 

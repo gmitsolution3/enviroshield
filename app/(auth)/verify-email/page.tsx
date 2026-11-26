@@ -52,10 +52,6 @@ export default async function VerifyEmailPage({
             <div className="relative z-10 flex h-full flex-col justify-between">
               <div>
                 <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
-                  <span
-                    className="h-[2px] w-7 bg-current"
-                    aria-hidden="true"
-                  />
                   ALMOST THERE
                 </div>
 

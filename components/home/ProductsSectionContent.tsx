@@ -232,7 +232,7 @@ export default function ProductsSectionContent({
         </div>
 
         {products.length > 0 ? (
-          <StaggerContainer className="mt-12 grid grid-cols-4 gap-[25px] max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
+          <StaggerContainer className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[25px]">
             {products.map((product) => (
               <StaggerItem
                 key={product._id}

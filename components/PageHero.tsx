@@ -61,10 +61,6 @@ export default function PageHero({
             transition={{ duration: 0.65, ease: EASE, delay: 0.1 }}
           >
             <div className="mb-[22px] flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
-              <span
-                className="h-[2px] w-7 bg-paste"
-                aria-hidden="true"
-              />
               {eyebrow}
             </div>
           </motion.div>

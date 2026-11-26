@@ -46,10 +46,6 @@ export default function FeaturedProjectCard({
 
         <div className="flex flex-col justify-center p-12 max-[900px]:p-8 max-[600px]:p-6">
           <div className="mb-5 flex items-center gap-[10px] text-[11px] font-extrabold uppercase tracking-[0.15em] text-paste">
-            <span
-              className="h-[2px] w-7 bg-current"
-              aria-hidden="true"
-            />
             FEATURED PROJECT
           </div>
 
