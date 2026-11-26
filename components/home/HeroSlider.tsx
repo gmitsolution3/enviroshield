@@ -124,7 +124,7 @@ export default function HeroSlider() {
 
   return (
     <section
-      className="relative flex min-h-[500px] sm:min-h-[600px] md:min-h-[700px] lg:min-h-[820px] items-center overflow-hidden bg-[#001726]"
+      className="relative flex min-h-[500px] sm:min-h-[580px] md:min-h-[700px] lg:min-h-[820px] items-end lg:items-center overflow-hidden bg-[#001726]"
       aria-label="EnviroShield Architectural Showcase"
     >
       {/* Cinematic Full-Bleed Background Photography */}
@@ -146,24 +146,30 @@ export default function HeroSlider() {
             fill
             priority={index === 0}
             sizes="100vw"
-            className="object-cover object-center"
+            className={`object-cover ${
+              slide.id === 1
+                ? "object-[78%_center] lg:object-center"
+                : slide.id === 2
+                ? "object-[18%_center] lg:object-center"
+                : "object-[85%_center] lg:object-center"
+            }`}
           />
         </motion.div>
       </AnimatePresence>
 
-      {/* Subtle soft dark overlay on top of hero image */}
+      {/* Subtle soft dark overlay on desktop, smooth bottom gradient on mobile for bottom-left text readability */}
       <div
-        className="pointer-events-none absolute inset-0 bg-navy/25"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#001726]/95 via-[#001726]/45 to-transparent lg:bg-navy/25"
         aria-hidden="true"
       />
 
-      <Container className="relative z-10 py-[80px] pb-[90px] text-white max-[900px]:py-[60px] max-[600px]:py-[36px] max-[600px]:pb-[50px]">
+      <Container className="relative z-10 w-full pt-16 pb-16 sm:py-[60px] lg:py-[80px] lg:pb-[90px] text-white">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
-          {/* Rotatable Text Column (Left for slide 1/3, Right for slide 2) */}
+          {/* Text Column: Positioned on bottom-left with no dark box on mobile, glass card on desktop */}
           <div
             className={`transition-all duration-500 lg:col-span-6 xl:col-span-6 ${
               isTextRight
-                ? "lg:order-2 flex justify-end"
+                ? "lg:order-2 flex justify-start lg:justify-end"
                 : "lg:order-1 flex justify-start"
             }`}
           >
@@ -174,18 +180,18 @@ export default function HeroSlider() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: isTextRight ? -24 : 24 }}
                 transition={{ duration: 0.45, ease: EASE }}
-                className={`w-full max-w-[640px] rounded-2xl border border-white/10 bg-navy/25 p-6 shadow-xl backdrop-blur-md max-[600px]:p-5 sm:p-8 md:p-10 ${
-                  isTextRight ? "ml-auto" : "mr-auto"
+                className={`w-full max-w-[640px] text-left rounded-2xl border-0 lg:border border-white/10 bg-transparent lg:bg-navy/25 p-0 lg:p-6 shadow-none lg:shadow-xl backdrop-blur-none lg:backdrop-blur-md sm:p-8 md:p-10 ${
+                  isTextRight ? "lg:ml-auto" : "lg:mr-auto"
                 }`}
               >
-                {/* Previous Eyebrow Font Style */}
-                <div className="mb-2.5 sm:mb-[20px] flex items-center gap-[10px] text-[11px] sm:text-[12px] font-extrabold uppercase tracking-[0.14em] text-paste">
+                {/* Eyebrow Label (Hidden on mobile) */}
+                <div className="hidden sm:flex mb-2 sm:mb-[20px] items-center gap-[10px] text-[11px] sm:text-[12px] font-extrabold uppercase tracking-[0.14em] text-paste drop-shadow-sm">
                   <span className="inline-block h-[2px] w-6 bg-current" aria-hidden="true" />
                   {slide.eyebrow}
                 </div>
 
                 {/* Previous Heading Font Style */}
-                <h1 className="mb-3 sm:mb-5 text-[clamp(28px,7vw,58px)] font-extrabold leading-[1.12] sm:leading-[1.06] tracking-[-0.03em] text-white">
+                <h1 className="mb-2.5 sm:mb-5 text-[clamp(26px,6.8vw,58px)] font-extrabold leading-[1.14] sm:leading-[1.06] tracking-[-0.03em] text-white drop-shadow-md">
                   {headingLines.map((line, i) => (
                     <span key={i}>
                       {renderHeadingLine(line)}
@@ -195,7 +201,7 @@ export default function HeroSlider() {
                 </h1>
 
                 {/* Subtitle / Description (Concise 2 lines on mobile, full on tablet/desktop) */}
-                <p className="mb-5 sm:mb-[30px] max-w-[540px] text-[14px] sm:text-[16px] leading-[1.6] text-white/90 line-clamp-2 sm:line-clamp-none">
+                <p className="mb-4 sm:mb-[30px] max-w-[540px] text-[13px] sm:text-[16px] leading-[1.6] text-white/90 line-clamp-2 sm:line-clamp-none drop-shadow">
                   {slide.text}
                 </p>
 
@@ -203,7 +209,7 @@ export default function HeroSlider() {
                 <div className="flex items-center gap-5">
                   <Button
                     href={slide.href}
-                    className="max-[600px]:min-h-11 max-[600px]:px-5 max-[600px]:text-[13px]"
+                    className="max-[600px]:min-h-10 max-[600px]:px-5 max-[600px]:text-[13px] shadow-lg"
                   >
                     {slide.cta}
                   </Button>
@@ -533,11 +539,11 @@ export default function HeroSlider() {
       </Container>
 
       {/* Previous Style Bottom Controls */}
-      <div className="absolute bottom-[44px] left-1/2 z-[2] flex -translate-x-1/2 gap-[9px]">
+      <div className="absolute bottom-[44px] left-1/2 z-[2] flex -translate-x-1/2 gap-[9px] max-sm:left-4 max-sm:bottom-4 max-sm:translate-x-0">
         {slides.map((_, i) => (
           <button
             key={i}
-            className={`h-[4px] w-[34px] rounded-[3px] transition-all duration-300 ${
+            className={`h-[4px] w-[34px] max-sm:w-[22px] rounded-[3px] transition-all duration-300 ${
               i === index
                 ? "!bg-white"
                 : "!bg-[rgba(255,255,255,0.36)]"
@@ -552,30 +558,30 @@ export default function HeroSlider() {
         ))}
       </div>
 
-      <div className="absolute right-5 bottom-10 z-[2] flex gap-2">
+      <div className="absolute right-5 bottom-10 z-[2] flex gap-2 max-sm:bottom-3 max-sm:right-4">
         <motion.button
-          className="grid size-[42px] place-items-center rounded-full !border !border-white/[0.3] !text-white transition-[border-color,background] duration-200 hover:border-white"
+          className="grid size-[42px] max-sm:size-[34px] place-items-center rounded-full !border !border-white/[0.3] !text-white transition-[border-color,background] duration-200 hover:border-white"
           aria-label="Previous slide"
           onClick={() => go(-1)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <ChevronLeft size={20} aria-hidden="true" />
+          <ChevronLeft size={20} className="max-sm:size-4" aria-hidden="true" />
         </motion.button>
 
         <motion.button
-          className="grid size-[42px] place-items-center rounded-full !border !border-white/[0.3] !text-white transition-[border-color,background] duration-200 !hover:border-white"
+          className="grid size-[42px] max-sm:size-[34px] place-items-center rounded-full !border !border-white/[0.3] !text-white transition-[border-color,background] duration-200 !hover:border-white"
           aria-label="Next slide"
           onClick={() => go(1)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <ChevronRight size={20} aria-hidden="true" />
+          <ChevronRight size={20} className="max-sm:size-4" aria-hidden="true" />
         </motion.button>
       </div>
 
-      <div className="absolute right-[125px] bottom-10 z-[2] text-[12px] text-white">
-        <strong className="text-[24px]">0{index + 1}</strong> / 0{slides.length}
+      <div className="absolute right-[125px] bottom-10 z-[2] text-[12px] text-white max-sm:right-24 max-sm:bottom-3.5">
+        <strong className="text-[24px] max-sm:text-[18px]">0{index + 1}</strong> / 0{slides.length}
       </div>
     </section>
   );
